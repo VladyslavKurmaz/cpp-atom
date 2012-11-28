@@ -1,18 +1,16 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/gateway/test/gateway_02.cpp                               |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.08.27                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:		                                                                  |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 #include <iostream>
@@ -21,7 +19,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/noncopyable.hpp>
 //
-#include <z3d/gateway.hpp>
+#include <atom/node/gateway.hpp>
 
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
@@ -53,13 +51,13 @@ namespace {
 	///
 	typedef void ( base::* base_update_t )( int const );
 	///
-	class manager : public z3d::gateway< manager&, LOKI_TYPELIST_1( base_update_t ) >,
+	class manager : public atom::gateway< manager&, LOKI_TYPELIST_1( base_update_t ) >,
 		protected std::stack< boost::reference_wrapper< base > >,
 		public boost::noncopyable
 	{
 	public:
 		///
-		manager() : z3d::gateway< manager&, LOKI_TYPELIST_1( base_update_t ) >( boost::ref( *this ), INITLIST_1( &base::update ) )
+		manager() : atom::gateway< manager&, LOKI_TYPELIST_1( base_update_t ) >( boost::ref( *this ), INITLIST_1( &base::update ) )
 		{}
 		///
 		base& operator()()
@@ -75,7 +73,7 @@ namespace {
 
 BOOST_AUTO_TEST_CASE( gateway_01 )
 {
-	std::cout << std::endl << "z3d::utests::gateway_ut02::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::gateway_ut02::test()" << std::endl;
 	//
 	A a1;
 	A a2;

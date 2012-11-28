@@ -1,10 +1,9 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/node.hpp                                                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2009.08.28                                                     |
@@ -23,19 +22,18 @@
 |              2010.07.07 - extract narray1 & scope functionality             |
 |              2012.03.15 - gcc fix for t-> template attach< TT >( u )        |
 |              2012.03.23 - gcc fix for boost::mpl::_int                      |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:	        + выбрать способ включения блокировки через наследование или  |
 |              как член класса [ блокировка убрана как свойство ]             |
 |               - use boost::mpl::vector, boost::tuple                        |
 |               - move from gateway init template & get/set wrappers to node  |
 |               - add attach/detach functions by type                         |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_NODE_HPP
-#define Z3D_NODE_HPP
+#ifndef ATOM_NODE_NODE_HPP
+#define ATOM_NODE_NODE_HPP
 
 //
 #include <boost/smart_ptr.hpp>
@@ -46,15 +44,15 @@
 //
 #include <loki/Typelist.h>
 //
-#include <z3d/ptr.hpp>
-#include <z3d/nset.hpp>
-#include <z3d/nvector.hpp>
-#include <z3d/nlist.hpp>
-#include <z3d/narray1.hpp>
-#include <z3d/slot.hpp>
-#include <z3d/scope.hpp>
+#include <atom/node/simple_ptr.hpp>
+#include <atom/node/nset.hpp>
+#include <atom/node/nvector.hpp>
+#include <atom/node/nlist.hpp>
+#include <atom/node/narray1.hpp>
+#include <atom/node/slot.hpp>
+#include <atom/node/scope.hpp>
 //
-namespace z3d {
+namespace atom {
 	//-------------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------------
@@ -166,4 +164,4 @@ namespace z3d {
 	void unmount( T t, U u )
 		{ unmount< TT >( t, u ); u-> template detach< UT >( t ); }
 }
-#endif//Z3D_NODE_HPP
+#endif//ATOM_NODE_NODE_HPP

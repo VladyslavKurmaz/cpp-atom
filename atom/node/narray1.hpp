@@ -1,26 +1,24 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/narray1.hpp                                                |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2010.07.07 - move class from node.hpp                          |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_NARRAY1_HPP
-#define Z3D_NARRAY1_HPP
+#ifndef ATOM_NODE_NARRAY1_HPP
+#define ATOM_NODE_NARRAY1_HPP
 
 #include <boost/array.hpp>
 
-namespace z3d {
+namespace atom {
 	//-------------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------------
@@ -58,4 +56,4 @@ namespace z3d {
 		}
 	};
 }
-#endif//Z3D_NARRAY1_HPP
+#endif//ATOM_NODE_NARRAY1_HPP

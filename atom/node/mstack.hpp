@@ -1,29 +1,27 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/mstack.hpp                                                 |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2010.06.23 - prototype design                                  |
 |              2010.07.02 - first push/pop logic variant                      |
 |              2012.06.10 - LOKI_TYPELIST_0 -> LOKI_TYPELIST_0() hotfix       |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
-| TODO:		   - add state streams, mstack2                                   |
+| TODO:		   - add state streams, mstack2                                     |
 |              - добавить состояние вызова, как копию списка состояний        |
 |              - разнести функциональность на несколько классов, с целью      |
 |              уменьшения количества параметров шаблонов                      |
 |              - несколько потоков состояний, взаимодействие, блокировка      |
 |              пересмотреть дизайн, расширить концепцию                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_MSTACK_HPP
-#define Z3D_MSTACK_HPP
+#ifndef ATOM_NODE_MSTACK_HPP
+#define ATOM_NODE_MSTACK_HPP
 
 #include <stack>
 //
@@ -36,11 +34,11 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/remove_cv.hpp>
 //
-#include <z3d/lock.hpp>
-#include <z3d/node.hpp>
-#include <z3d/gateway.hpp>
+#include <atom/node/lock.hpp>
+#include <atom/node/node.hpp>
+#include <atom/node/gateway.hpp>
 
-namespace z3d {
+namespace atom {
 	//-----------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------
@@ -49,7 +47,7 @@ namespace z3d {
 		typename R,
 		typename PU = boost::function< void( T const&, T const& ) >,
 		typename PO = boost::function< void( T const&, T const&, R& ) >,
-		class M = z3d::no_lock,
+		class M = atom::no_lock,
 		bool A = false,
 		class L = LOKI_TYPELIST_0(),
 		size_t I = 0 >
@@ -174,7 +172,7 @@ namespace z3d {
 			lock_t lock( this->mutex );
 			if ( i < states.size() )//???????? use at instead [] for vector size check
 				return ( states[ states.size() - i ].value );
-			throw std::range_error( "z3d::mstack::top invalid state index" );
+			throw std::range_error( "atom::mstack::top invalid state index" );
 			// generate exception
 			return( value_type() );
 		}
@@ -189,4 +187,4 @@ namespace z3d {
 			{ return ( states.size() ); }
 	};
 }
-#endif//Z3D_MSTACK_HPP
+#endif//ATOM_NODE_MSTACK_HPP

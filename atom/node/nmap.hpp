@@ -1,28 +1,26 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/nmap.hpp                                                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2010.08.23 - move code from node.hpp                           |
 |              2010.10.19 - added map key compare parameter                   |
 |              2012.03.23 - gcc fix for missing typename(s)                   |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_NMAP_HPP
-#define Z3D_NMAP_HPP
+#ifndef ATOM_NODE_NMAP_HPP
+#define ATOM_NODE_NMAP_HPP
 
 #include <map>
 
-namespace z3d {
+namespace atom {
 	//-----------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------
@@ -63,4 +61,4 @@ namespace z3d {
 		}
 	};
 }
-#endif//Z3D_NMAP_HPP
+#endif//ATOM_NODE_NMAP_HPP

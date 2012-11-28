@@ -1,26 +1,22 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/lock.hpp                                                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2009.09.16 - Created                                           |
 |              2010.04.16 - lowcase, constructor vars initializzation         |
 |-----------------------------------------------------------------------------|
 | TODO:		                                                                  |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_LOCK_HPP
-#define Z3D_LOCK_HPP
+#ifndef ATOM_NODE_LOCK_HPP
+#define ATOM_NODE_LOCK_HPP
 
-namespace z3d
-{
+namespace atom {
 	//-----------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------
@@ -89,4 +85,4 @@ namespace z3d
 	};
 
 }
-#endif//Z3D_LOCK_HPP
+#endif//ATOM_NODE_LOCK_HPP

@@ -1,24 +1,22 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/chain_of_resp/test/chain_of_rest_01.cpp                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.08.26                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 #include <boost/test/included/unit_test.hpp>
 #include <boost/function.hpp>
 //
-#include <z3d/chain_of_resp.hpp>
+#include <atom/node/chain_of_resp.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -49,7 +47,7 @@ namespace {
 }
 BOOST_AUTO_TEST_CASE( chain_of_resp_01 )
 {
-	std::cout << std::endl << "z3d::utests::chain_of_resp_ut01::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::chain_of_resp_ut01::test()" << std::endl;
 	//
 	A a1;
 	A a2;
@@ -57,7 +55,7 @@ BOOST_AUTO_TEST_CASE( chain_of_resp_01 )
 	DEFLIST_3( f1_t, ::Loki::NullType, Af_t ) 
 		il1( INITLIST_3( f1, ::Loki::NullType(), boost::bind( &A::f, &a1, _1, _2 ) ) );
 
-	z3d::chain_of_resp< LOKI_TYPELIST_3( f1_t, Af_t, Af_t ) > 
+	atom::chain_of_resp< LOKI_TYPELIST_3( f1_t, Af_t, Af_t ) > 
 		chain1( il1 );
 	//
 	chain1.call<f1_t>()( 5 );

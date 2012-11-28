@@ -1,18 +1,16 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/slot/test/slot_01.cpp                                     |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2012.02.24                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
@@ -20,7 +18,7 @@
 //
 #include <boost/test/included/unit_test.hpp>
 //
-#include <z3d/slot.hpp>
+#include <atom/node/slot.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {

@@ -1,30 +1,26 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/ptr.hpp                                                    |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2009.09.30 - Created                                           |
 |              2010.03.23 - Move to new namepace, devide for diff files       |
 |              2012.03.26 gcc(cygwin) build                                   |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:        add shared_variant_ptr from z3d::util::msxml                   |
 |              find new name for simple_ptr                                   |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
-#ifndef Z3D_PTR_HPP
-#define Z3D_PTR_HPP
+#ifndef ATOM_NODE_SIMPLE_PTR_HPP
+#define ATOM_NODE_SIMPLE_PTR_HPP
 
 #include <boost/smart_ptr.hpp>
-#include <z3d/platform.hpp>
 
-namespace z3d
-{
+namespace atom {
 	//-------------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------------
@@ -36,7 +32,7 @@ namespace z3d
 		T*
 			px;
 		///
-		typedef z3d::simple_ptr<T>
+		typedef atom::simple_ptr<T>
 			this_type;
 
 	protected:
@@ -116,145 +112,6 @@ namespace z3d
 		return p.get();
 	}
 
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	template< typename T >
-	class basic_shared_mod_ptr : protected boost::shared_ptr< void >
-	{
-		typedef typename T::module_t
-			module_t;
-		///
-		module_t
-			module;
-		///
-		static void unload( module_t h )
-			{ if ( h != 0 ) T::unload_lib( h ); }
-
-	public:
-		///
-		basic_shared_mod_ptr() : shared_ptr(), module( 0 )
-			{}
-		///
-		explicit basic_shared_mod_ptr( module_t h ) : shared_ptr(), module( h )
-			{}
-		///
-		template< typename charT >
-		explicit basic_shared_mod_ptr( std::basic_string< charT > const& name ) : 
-			shared_ptr( T::load_lib( T::build_lib_name( name ) ), unload ), module( 0 )
-			{}
-		///
-		module_t get()
-		{	if ( this->module )
-				return ( this->module );
-			return ( reinterpret_cast< module_t >( boost::shared_ptr< void >::get() ) ); }
-	};
-
-
-#ifdef Z3D_WINDOWS
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	template< class T >
-	class shared_com_ptr : public boost::shared_ptr< T >
-	{
-	public:
-		///
-		shared_com_ptr() : boost::shared_ptr< T >() {}
-		///
-		shared_com_ptr( T* t ) : boost::shared_ptr< T >( t, ReleaseCOM ) {}
-		///
-		bool valid() const
-		{ return ( boost::shared_ptr< T >::get() != NULL ); }
-		///
-		static void ReleaseCOM( IUnknown* d ) 
-		{
-			if ( d != 0 )
-				d->Release();
-		}
-	};
-
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	class shared_dc_ptr : public boost::shared_ptr< void >
-	{
-	public:
-		///
-		shared_dc_ptr() : shared_ptr() {}
-		///
-		shared_dc_ptr( HWND hWnd ) : shared_ptr( GetWindowDC( hWnd ), ReleaseHDC ) {}
-		///
-		shared_dc_ptr( HWND hWnd, int ) : shared_ptr( GetDC( hWnd ), ReleaseHDC ) {}
-		///
-		static void ReleaseHDC( HDC dc )
-		{
-			if ( dc != 0 ) ReleaseDC( WindowFromDC( dc ), dc );
-		}
-	};
-
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	class shared_handle_ptr : public boost::shared_ptr< void >
-	{
-	public:
-		///
-		shared_handle_ptr() : shared_ptr() {}
-		///
-		shared_handle_ptr( HANDLE handle ) : shared_ptr( handle, ReleaseHandle ) {}
-		///
-		static void ReleaseHandle( HANDLE handle )
-		{
-			if ( handle != 0 ) CloseHandle( handle );
-		}
-	};
-
-
-
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	class shared_gdiobj_ptr : public boost::shared_ptr< void >
-	{
-	public:
-		///
-		shared_gdiobj_ptr() : shared_ptr() {}
-		///
-		shared_gdiobj_ptr( HANDLE handle ) : shared_ptr( handle, ReleaseGDI ) {}
-		///
-		static void ReleaseGDI( HANDLE handle )
-		{
-			if ( handle != 0 ) DeleteObject( reinterpret_cast< HGDIOBJ >( handle ) );
-		}
-	};
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	class shared_sysstring_ptr : public boost::shared_ptr< void >
-	{
-	public:
-		///
-		shared_sysstring_ptr() : shared_ptr() {}
-		///
-		shared_sysstring_ptr( BSTR handle ) : shared_ptr( handle, ReleaseSysString ) {}
-		///
-		operator BSTR() { return reinterpret_cast<BSTR>( this->get() ); }
-		static void ReleaseSysString( BSTR s )
-		{
-			if ( s != 0 ) SysFreeString( s );
-		}
-	};
-
-	class shared_variant_ptr : public boost::shared_ptr< VARIANT >
-	{
-	public:
-		///
-		shared_variant_ptr() : shared_ptr() {}
-		///
-		shared_variant_ptr( VARIANT* v ) : shared_ptr( v, VariantClear ) { VariantInit( v ); }
-	};
-#endif
 }
 
-#endif//Z3D_PTR_HPP
+#endif//ATOM_NODE_SIMPLE_PTR_HPP

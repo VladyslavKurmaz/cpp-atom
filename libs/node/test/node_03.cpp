@@ -1,24 +1,22 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/node/test/node_03.cpp                                     |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.07.29                                                     |
 |              2012.03.15 - move to boost::test                               |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
 #include <boost/test/included/unit_test.hpp>
 //
-#include <z3d/node.hpp>
+#include <atom/node/node.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -84,7 +82,7 @@ void intrusive_ptr_release( refc< T > * p )
 class A;
 class B;
 //
-typedef z3d::nstorage< A, boost::intrusive_ptr, z3d::narray1 > b_item_a;
+typedef atom::nstorage< A, boost::intrusive_ptr, atom::narray1 > b_item_a;
 //
 class A : public refc< A >
 {
@@ -97,7 +95,7 @@ public:
 
 BOOST_AUTO_TEST_CASE( node_03 )
 {
-	std::cout << std::endl << "z3d::utests::node_ut03::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::node_ut03::test()" << std::endl;
 	//
 	A::smart_ptr a1( new A( "a1" ) );
 	std::cout << a1 << std::endl;

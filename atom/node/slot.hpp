@@ -1,24 +1,22 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/slot.hpp                                                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2010.06.17 - z3d::node generalization                          |
 |              2010.06.28 - added boost::add_references, simplify namespace   |
 |              2010.07.26 - added some typedef                                |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_SLOT_HPP
-#define Z3D_SLOT_HPP
+#ifndef ATOM_NODE_SLOT_HPP
+#define ATOM_NODE_SLOT_HPP
 
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/identity.hpp>
@@ -28,10 +26,10 @@
 //
 #include <loki/Typelist.h>
 //
-#include <z3d/tldefs.hpp>
+#include <atom/node/tldefs.hpp>
 //
 
-namespace z3d {
+namespace atom {
 	//-----------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------
@@ -131,4 +129,4 @@ namespace z3d {
 	};
 }
 
-#endif//Z3D_SLOT_HPP
+#endif//ATOM_NODE_SLOT_HPP

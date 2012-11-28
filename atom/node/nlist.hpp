@@ -1,26 +1,24 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        z3d/nlist.hpp                                                  |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2010.06.22 - move code from node.hpp                           |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef Z3D_NLIST_HPP
-#define Z3D_NLIST_HPP
+#ifndef ATOM_NODE_NLIST_HPP
+#define ATOM_NODE_NLIST_HPP
 
 #include <list>
 
-namespace z3d {
+namespace atom {
 	//-----------------------------------------------------------------------------
 	//
 	//-----------------------------------------------------------------------------
@@ -55,4 +53,4 @@ namespace z3d {
 		}
 	};
 }
-#endif//Z3D_NLIST_HPP
+#endif//ATOM_NODE_NLIST_HPP

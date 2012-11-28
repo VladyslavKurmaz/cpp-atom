@@ -1,18 +1,16 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/chain_of_resp/test/chain_of_rest_02.cpp                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.08.26                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{ SDK                                                                 } |
 \-----------------------------------------------------------------------------/
 */
 #include <memory.h>
@@ -20,7 +18,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/function.hpp>
 //
-#include <z3d/chain_of_resp.hpp>
+#include <atom/node/chain_of_resp.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -38,12 +36,12 @@ namespace {
 	//
 	template < class T >
 	class basic_layer :
-		protected z3d::chain_of_resp< LOKI_TYPELIST_2( layer_read_t, layer_write_t ) >,
+		protected atom::chain_of_resp< LOKI_TYPELIST_2( layer_read_t, layer_write_t ) >,
 		public boost::enable_shared_from_this< T >,
 		public boost::noncopyable
 	{
 		///
-		typedef z3d::chain_of_resp< LOKI_TYPELIST_2( layer_read_t, layer_write_t ) >
+		typedef atom::chain_of_resp< LOKI_TYPELIST_2( layer_read_t, layer_write_t ) >
 			base_t;
 	protected:
 		///
@@ -124,7 +122,7 @@ namespace {
 
 BOOST_AUTO_TEST_CASE( chainof_resp_01 )
 {
-	std::cout << std::endl << "z3d::utests::chain_of_resp_ut02::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::chain_of_resp_ut02::test()" << std::endl;
 	//
 	layer1::layer_ptr_t l1 = layer1::create< layer1 >();
 	layer2::layer_ptr_t l2 = layer2::create< layer2 >();

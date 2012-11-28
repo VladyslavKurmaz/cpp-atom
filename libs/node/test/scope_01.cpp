@@ -1,18 +1,16 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/scope/test/scope_01.cpp                                   |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.07.12                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
@@ -20,7 +18,7 @@
 //
 #include <boost/test/included/unit_test.hpp>
 //
-#include <z3d/scope.hpp>
+#include <atom/node/scope.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -61,7 +59,7 @@ namespace {
 
 BOOST_AUTO_TEST_CASE( scope_01 )
 {
-	std::cout << std::endl << "z3d::utests::scope_ut01::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::scope_ut01::test()" << std::endl;
 	//
 	DEFLIST_4( Loki::NullType, Loki::NullType, func3_t, func4_t ) 
 		il1( INITLIST_4( Loki::NullType(), Loki::NullType(), f3, f4 ) );
@@ -69,7 +67,7 @@ BOOST_AUTO_TEST_CASE( scope_01 )
 	DEFLIST_4( func1_t, func2_t, Loki::NullType, Loki::NullType ) 
 		il2( INITLIST_4( f1, f2, Loki::NullType(), Loki::NullType() ) );
 	//
-	z3d::scope< LOKI_TYPELIST_4( func1_t, func2_t, func3_t, func4_t ) > 
+	atom::scope< LOKI_TYPELIST_4( func1_t, func2_t, func3_t, func4_t ) > 
 		g( il1 );
 	//
 	g.assign( il2 );

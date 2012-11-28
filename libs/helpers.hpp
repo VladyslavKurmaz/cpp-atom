@@ -1,17 +1,16 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladislav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-|                                                                             |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
 | FILE:        libs/helpers.hpp                                               |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
 | HISTORY:     2010.06.24                                                     |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:		                                                                    |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
@@ -24,7 +23,7 @@
 #pragma warning ( pop )
 #endif
 
-namespace z3d {
+namespace atom {
 
 	template < class T >
 	class R : public boost::enable_shared_from_this< T >

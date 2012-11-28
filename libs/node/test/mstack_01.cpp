@@ -1,18 +1,16 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/mstack/test/mstack_01.cpp                                 |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.06.24                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 #include <boost/bind.hpp>
@@ -20,7 +18,7 @@
 #include <boost/any.hpp>
 #include <boost/test/included/unit_test.hpp>
 //
-#include <z3d/mstack.hpp>
+#include <atom/node/mstack.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -50,9 +48,9 @@ namespace {
 #define CALLP( o, a, i, arg ) ( o.a.*( o.get_value( boost::mpl::int_<i>() ) ) )( arg )
 #define CALL( o, a, i ) ( o.a.*( o.get_value( boost::mpl::int_<i>() ) ) )()
 
-	struct B : public z3d::slot< LOKI_TYPELIST_3( func1_t, func2_t, func3_t ), 0 >
+	struct B : public atom::slot< LOKI_TYPELIST_3( func1_t, func2_t, func3_t ), 0 >
 	{
-		typedef z3d::slot< LOKI_TYPELIST_3( func1_t, func2_t, func3_t ), 0 >
+		typedef atom::slot< LOKI_TYPELIST_3( func1_t, func2_t, func3_t ), 0 >
 			slot_base_t;
 		A a1;
 		A a2;
@@ -115,7 +113,7 @@ BOOST_AUTO_TEST_CASE( mstack_01 )
 	//
 
 	//
-	z3d::mstack< int, bool > ms;
+	atom::mstack< int, bool > ms;
 	struct _
 	{
 		static void push( int const& s1, int const& s2 )

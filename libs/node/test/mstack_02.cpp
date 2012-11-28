@@ -1,27 +1,25 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/mstack/test/mstack_01.cpp                                 |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.07.06                                                     |
 |              2012.03.16 move to boost::test                                 |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
 #include <boost/smart_ptr.hpp>
 #include <boost/test/included/unit_test.hpp>
 //
-#include <z3d/node.hpp>
-#include <z3d/mstack.hpp>
-#include <z3d/gateway.hpp>
+#include <atom/node/node.hpp>
+#include <atom/node/mstack.hpp>
+#include <atom/node/gateway.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -33,11 +31,11 @@ namespace {
 	class manager;
 	class state;
 	//
-	typedef z3d::nstorage< manager, boost::shared_ptr, z3d::narray1 > manager_t;
+	typedef atom::nstorage< manager, boost::shared_ptr, atom::narray1 > manager_t;
 	typedef boost::shared_ptr< state > state_ptr_t;
 	typedef boost::shared_ptr< manager > manager_ptr_t;
 	//
-	class state :	public z3d::node< LOKI_TYPELIST_1( manager_t ) >,
+	class state :	public atom::node< LOKI_TYPELIST_1( manager_t ) >,
 		public boost::enable_shared_from_this< state >,
 		public boost::noncopyable
 	{
@@ -50,7 +48,7 @@ namespace {
 		///
 		manager_ptr_t get_manager_ptr()
 		{
-			manager_t const& ma = z3d::node< LOKI_TYPELIST_1( manager_t ) >::get_slot< 0 >();
+			manager_t const& ma = atom::node< LOKI_TYPELIST_1( manager_t ) >::get_slot< 0 >();
 			manager_ptr_t m = ma.item();
 			return ( m );
 		}
@@ -97,20 +95,20 @@ namespace {
 		friend state;
 	};
 	//
-	class manager : protected z3d::mstack< state_ptr_t, bool >,
+	class manager : protected atom::mstack< state_ptr_t, bool >,
 		public boost::enable_shared_from_this< manager >
 	{
 	public:
 		///
-		using z3d::mstack< state_ptr_t, bool >::pop;
-		using z3d::mstack< state_ptr_t, bool >::pop_all;
+		using atom::mstack< state_ptr_t, bool >::pop;
+		using atom::mstack< state_ptr_t, bool >::pop_all;
 
 		friend state;
 	};
 }
 BOOST_AUTO_TEST_CASE( mstack_01 )
 {
-	std::cout << std::endl << "z3d::utests::mstack_ut02::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::mstack_ut02::test()" << std::endl;
 	manager_ptr_t m = manager_ptr_t( new manager() );
 	state::create< boot_state >( m );
 	state::create< game_state >( m );

@@ -1,25 +1,23 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2012 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
-| vladyslav.kurmaz@rozoom-group.com                                           |
+| vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
-| FILE:        libs/node/test/node_04.cpp                                     |
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.07.30                                                     |
 |              2012.03.15 - move to boost::test                               |
+|              2012.11.28 - lib has been moved to github, new namespace: atom |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
-|-----------------------------------------------------------------------------|
-| TAGS{                                                                     } |
 \-----------------------------------------------------------------------------/
 */
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread/mutex.hpp>
 //
-#include <z3d/node.hpp>
+#include <atom/node/node.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -128,13 +126,13 @@ namespace {
 	};
 
 	//----------------------------------------------------------------------------
-	typedef z3d::nstorage< graph, boost::shared_ptr, z3d::narray1 >
+	typedef atom::nstorage< graph, boost::shared_ptr, atom::narray1 >
 		n2g_t;
-	typedef z3d::nstorage< gnode, z3d::simple_ptr, gnode_id_map >
+	typedef atom::nstorage< gnode, atom::simple_ptr, gnode_id_map >
 		n2n_t;
-	typedef z3d::nstorage< gnode, boost::shared_ptr, gnode_id_map >
+	typedef atom::nstorage< gnode, boost::shared_ptr, gnode_id_map >
 		g2n_t;
-	typedef z3d::nstorage< gnode, gnode_pair, gnode_rel_map >
+	typedef atom::nstorage< gnode, gnode_pair, gnode_rel_map >
 		g2r_t;
 	//----------------------------------------------------------------------------
 	enum
@@ -146,7 +144,7 @@ namespace {
 	};
 	//----------------------------------------------------------------------------
 
-	class gnode :	public z3d::node< LOKI_TYPELIST_2( n2g_t, n2n_t ) >,
+	class gnode :	public atom::node< LOKI_TYPELIST_2( n2g_t, n2n_t ) >,
 		public boost::enable_shared_from_this< gnode >,
 		public boost::noncopyable
 	{
@@ -170,7 +168,7 @@ namespace {
 		friend class graph;
 	};
 
-	class graph :	public z3d::node< LOKI_TYPELIST_2( g2n_t, g2r_t ) >,
+	class graph :	public atom::node< LOKI_TYPELIST_2( g2n_t, g2r_t ) >,
 		public boost::enable_shared_from_this< graph >,
 		public boost::noncopyable
 	{
@@ -204,7 +202,7 @@ namespace {
 			lock_t lock( mutex );
 			//
 			gnode::smart_ptr gn( gnode::smart_ptr( new gnode( ++gnode_id ) ) );
-			z3d::mount< N2G, G2N >( gn, shared_from_this() );
+			atom::mount< N2G, G2N >( gn, shared_from_this() );
 			return ( gn );
 		}
 		//
@@ -222,7 +220,7 @@ namespace {
 }
 BOOST_AUTO_TEST_CASE( node_04 )
 {
-	std::cout << std::endl << "z3d::utests::node_ut04::test()" << std::endl;
+	std::cout << std::endl << "atom::utests::node_ut04::test()" << std::endl;
 	//
 	gnode::smart_ptr gn;
 	{
