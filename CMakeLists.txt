@@ -13,8 +13,8 @@ set(Boost_USE_MULTI_THREADED ON)
 # Inc/Lib
 include_directories( "./" )
 
-include_directories( "$ENV{DPM_BOOST_1_49_0_INC}" )
-link_directories( "$ENV{DPM_BOOST_1_49_0_LIB}" )
+include_directories( "$ENV{DPM_BOOST_1_51_0_INC}" )
+link_directories( "$ENV{DPM_BOOST_1_51_0_LIB}" )
 
 include_directories( "$ENV{DPM_LOKI_0_1_7_INC}" )
 
