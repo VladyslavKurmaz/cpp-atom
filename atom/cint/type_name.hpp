@@ -53,9 +53,9 @@
 //
 #include <loki/Typelist.h>
 //
-#include <z3d/tldefs.hpp>
+#include <atom/node/tldefs.hpp>
 
-namespace z3d { namespace type_name {
+namespace atom { namespace cint {
 
 	#ifndef Z3D_TYPE_NAME_PARAMS
 	#	define Z3D_TYPE_NAME_PARAMS 15
@@ -324,19 +324,19 @@ namespace z3d { namespace type_name {
 
 } }
 
-#define Z3D_TYPE_NAME_DEF_TERM_USER( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TERM( t ) } }
+#define Z3D_TYPE_NAME_DEF_TERM_USER( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TERM( t ) } }
 
 // add auto generation
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER1( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 1, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER2( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 2, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER3( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 3, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER4( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 4, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER5( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 5, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER6( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 6, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER7( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 7, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER8( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 8, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER9( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 9, t ) } }
-#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER10( t )	namespace z3d { namespace type_name { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 10, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER1( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 1, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER2( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 2, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER3( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 3, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER4( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 4, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER5( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 5, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER6( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 6, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER7( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 7, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER8( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 8, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER9( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 9, t ) } }
+#define Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER10( t )	namespace atom { namespace cint { Z3D_TYPE_NAME_DEF_TEMPLATE_TERM( 1, 10, t ) } }
 
 
 Z3D_TYPE_NAME_DEF_TEMPLATE_TERM_USER1( std::less );

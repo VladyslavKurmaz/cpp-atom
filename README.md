@@ -3,6 +3,11 @@ cpp-atom
 
 Set of headers-only libraries for cross-ref smart pointers and integration with CInt
 
+portability
+========
+mcvs9 | msvc10 | msvc 11
+x32 | x64
+
 external dependencies
 ========
 * boost 	http://boost.org
