@@ -24,7 +24,7 @@
 //
 #include<boost/test/included/unit_test.hpp>
 //
-#include <z3d/type_name.hpp>
+#include <atom/cint/type_name.hpp>
 
 boost::unit_test::test_suite * init_unit_test_suite(int,char * * const)
 {
@@ -49,7 +49,7 @@ void print_type( char const* name )
 	std::cout
 		<< "(" << ++i << ")\t" << name << std::endl
 		<< "\t\ttypeid : " << typeid( T ).name() << std::endl
-		<< "\t\ttype_  : " << z3d::type_name::type_< T >::name() << std::endl << std::endl;
+		<< "\t\ttype_  : " << atom::cint::type_< T >::name() << std::endl << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE( type_name_02 )

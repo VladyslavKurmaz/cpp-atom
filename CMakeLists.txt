@@ -7,8 +7,6 @@ add_definitions(-D__USE_W32_SOCKETS)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTI_THREADED ON)
-#find_package( Boost 1.51.0 REQUIRED )
-
 
 # Inc/Lib
 include_directories( "./" )
