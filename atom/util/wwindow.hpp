@@ -19,6 +19,7 @@
 //
 #include <windows.h>
 #include <windowsx.h>
+#include <tchar.h>
 //
 #include <sstream>
 #include <vector>
@@ -68,7 +69,7 @@ namespace atom {
 	public:
 		///
 		subclass() : 
-		  wnd( 0 )
+				wnd( 0 )
 			  ,	proc( NULL )
 		  {
 		  }
@@ -77,7 +78,7 @@ namespace atom {
 		  {
 		  }
 		  ///
-		  WNDPROC subclass( HWND w, WNDPROC p )
+		  WNDPROC sub( HWND w, WNDPROC p )
 		  {
 			  WNDPROC result = NULL;
 			  if ( is_valid( w, p ) )
@@ -104,7 +105,7 @@ namespace atom {
 		  {
 			  if ( this->proc != NULL )
 			  {
-				  return ( CallWindowProc( this->old_wnd_proc, hWnd, uMsg, wParam, lParam ) );
+				  return ( CallWindowProc( this->proc, hWnd, uMsg, wParam, lParam ) );
 			  }
 			  return ::DefWindowProc( hWnd, uMsg, wParam, lParam );
 		  }
@@ -113,10 +114,10 @@ namespace atom {
 	//------------------------------------------------------------------------
 	//
 	//------------------------------------------------------------------------
-	class window :	public boost::noncopyable
+	class wwindow :	public boost::noncopyable
 	{
-		typedef charT
-			TCHAR;
+		typedef TCHAR
+			char_t;
 		typedef std::basic_string< char_t >
 			string_t;
 		typedef std::basic_stringstream< char_t >
@@ -136,7 +137,7 @@ namespace atom {
 		CREATESTRUCT
 			cs;
 		///
-		subclass<HWND>
+		subclass
 			subcl;
 		///
 		bool
@@ -144,7 +145,7 @@ namespace atom {
 
 	public:
 		///
-		window() :
+		wwindow() :
 				class_atom( 0 )
 			  ,	wnd( 0 )
 			  ,	wcex()
@@ -156,12 +157,12 @@ namespace atom {
 			  memset( &cs, 0, sizeof( cs ) );
 		  }
 		  ///
-		  ~window()
+		  ~wwindow()
 		  {
 			  deinit();
 		  }
 		  ///
-		  window& show( bool const _show ) const
+		  wwindow const& show( bool const _show ) const
 		  {
 			  ShowWindow( this->wnd, ( ( _show )?( SW_SHOW ):( SW_HIDE ) ) );
 			  return ( *this );
@@ -189,7 +190,7 @@ namespace atom {
 				  this->wcex.hIconSm		= 0;
 				  //
 				  this->cs.lpCreateParams	= 0;
-				  this->cs.hInstance		= this->wcex.hInstances;
+				  this->cs.hInstance		= this->wcex.hInstance;
 				  this->cs.hMenu			= 0;
 				  this->cs.hwndParent		= 0;
 				  this->cs.cy				= 0;
@@ -203,7 +204,6 @@ namespace atom {
 				  //
 				  if ( configure( this->wcex, this->cs ) )
 				  {
-					  calc_size( this->cs.cx, this->cs.cy );
 					  this->wnd = CreateWindowEx(
 						  this->cs.dwExStyle,
 						  reinterpret_cast< LPCTSTR >( this->class_atom = RegisterClassEx( &this->wcex ) ),
@@ -238,7 +238,8 @@ namespace atom {
 			  {
 				  if ( w != 0 )
 				  {
-					  if ( get_window_object( w ) == 0 )
+					  wwindow* win = NULL;
+					  if ( get_window_object( w, win ) == 0 )
 					  {
 						  subcl.sub( ( this->wnd = w ), proc );
 						  SetProp( this->wnd, ATOM_UTIL_WWINDOW_PROP, this );
@@ -318,15 +319,15 @@ namespace atom {
 			  }
 		  }
 		///
-		bool process_dlg_msgs( HWND hDlg, MSG& msg )
+		static bool process_dlg_msgs( HWND hDlg, MSG& msg )
 		{ return ( hDlg && IsDialogMessage( hDlg, &msg ) ); }
 		///
-		static bool get_window_object( HWND w, window*& win )
+		static bool get_window_object( HWND w, wwindow*& win )
 		{
-			return ( ( win = reinterpret_cast< window* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL );
+			return ( ( win = reinterpret_cast< wwindow* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL );
 		}
 		///
-		static LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		{
 			//switch( uMsg )
 			//{
@@ -348,7 +349,7 @@ namespace atom {
 			//		break;
 			//	}
 			//}
-			window* win = NULL;
+			wwindow* win = NULL;
 			if ( get_window_object( hWnd, win ) )
 				return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
 			return DefWindowProc( hWnd, uMsg, wParam, lParam );
