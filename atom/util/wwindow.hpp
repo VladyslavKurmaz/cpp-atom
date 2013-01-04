@@ -19,7 +19,343 @@
 //
 #include <windows.h>
 #include <windowsx.h>
+//
+#include <sstream>
+#include <vector>
+//
+#include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
 
+#define	ATOM_UTIL_WWINDOW_PROP	_T("wwindow")
+namespace atom {
+
+	class subclass
+	{
+	private:
+		///
+		HWND
+			wnd;
+		///
+		WNDPROC
+			proc;
+
+	protected:
+		///
+		bool is_valid( HWND w, WNDPROC p ) const
+		{
+			return ( ( w != 0 ) && ( p != 0 ) );
+		}
+		///
+		WNDPROC swap( HWND w, WNDPROC p )
+		{
+			WNDPROC result = reinterpret_cast< WNDPROC >( GetWindowLong( w,
+#ifndef Z3D_OS_X64
+				GWL_WNDPROC
+#else
+				GWLP_WNDPROC
+#endif
+				) );
+			SetClassLong( w,
+#ifndef Z3D_OS_X64
+				GWL_WNDPROC
+#else
+				GWLP_WNDPROC
+#endif
+				, reinterpret_cast< LONG >( p ) );
+			return result;
+		}
+
+	public:
+		///
+		subclass() : 
+		  wnd( 0 )
+			  ,	proc( NULL )
+		  {
+		  }
+		  ///
+		  ~subclass()
+		  {
+		  }
+		  ///
+		  WNDPROC subclass( HWND w, WNDPROC p )
+		  {
+			  WNDPROC result = NULL;
+			  if ( is_valid( w, p ) )
+			  {
+				  result = unsub();
+				  this->proc = swap( ( this->wnd = w ), p );
+			  }
+			  return result;
+		  }
+		  ///
+		  WNDPROC unsub()
+		  {
+			  WNDPROC result = NULL;
+			  if ( is_valid( this->wnd, this->proc ) )
+			  {
+				  result = swap( this->wnd, this->proc );
+				  this->wnd		= 0;
+				  this->proc	= NULL;
+			  }
+			  return result;
+		  }
+		  ///
+		  LRESULT call( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+		  {
+			  if ( this->proc != NULL )
+			  {
+				  return ( CallWindowProc( this->old_wnd_proc, hWnd, uMsg, wParam, lParam ) );
+			  }
+			  return ::DefWindowProc( hWnd, uMsg, wParam, lParam );
+		  }
+	};
+
+	//------------------------------------------------------------------------
+	//
+	//------------------------------------------------------------------------
+	class window :	public boost::noncopyable
+	{
+		typedef charT
+			TCHAR;
+		typedef std::basic_string< char_t >
+			string_t;
+		typedef std::basic_stringstream< char_t >
+			stringstream_t;
+		
+	private:
+		///
+		ATOM
+			class_atom;
+		///
+		HWND
+			wnd;
+		///
+		WNDCLASSEX
+			wcex;
+		///
+		CREATESTRUCT
+			cs;
+		///
+		subclass<HWND>
+			subcl;
+		///
+		bool
+			auto_destroy;
+
+	public:
+		///
+		window() :
+				class_atom( 0 )
+			  ,	wnd( 0 )
+			  ,	wcex()
+			  ,	cs()
+			  ,	subcl()
+			  ,	auto_destroy( false )
+		  {
+			  memset( &wcex, 0, sizeof( wcex ) );
+			  memset( &cs, 0, sizeof( cs ) );
+		  }
+		  ///
+		  ~window()
+		  {
+			  deinit();
+		  }
+		  ///
+		  window& show( bool const _show ) const
+		  {
+			  ShowWindow( this->wnd, ( ( _show )?( SW_SHOW ):( SW_HIDE ) ) );
+			  return ( *this );
+		  }
+		  ///
+		  bool init( boost::function< bool ( WNDCLASSEX&, CREATESTRUCT& )> configure, bool const ad )
+		  {
+			  deinit();
+			  {
+				  stringstream_t ss;
+				  ss << _T("CLASS") << rand() << rand();
+				  string_t className( ss.str() );
+				  //
+				  this->wcex.cbSize			= sizeof( this->wcex );
+				  this->wcex.style			= 0;
+				  this->wcex.lpfnWndProc	= proc;
+				  this->wcex.cbClsExtra		= 0;
+				  this->wcex.cbWndExtra		= 0;
+				  this->wcex.hInstance		= GetModuleHandle( NULL );
+				  this->wcex.hIcon			= 0;
+				  this->wcex.hCursor		= 0;
+				  this->wcex.hbrBackground	= reinterpret_cast< HBRUSH >( 0 );
+				  this->wcex.lpszMenuName	= NULL;
+				  this->wcex.lpszClassName	= className.c_str();
+				  this->wcex.hIconSm		= 0;
+				  //
+				  this->cs.lpCreateParams	= 0;
+				  this->cs.hInstance		= this->wcex.hInstances;
+				  this->cs.hMenu			= 0;
+				  this->cs.hwndParent		= 0;
+				  this->cs.cy				= 0;
+				  this->cs.cx				= 0;
+				  this->cs.y				= 0;
+				  this->cs.x				= 0;
+				  this->cs.style			= 0;
+				  this->cs.lpszName			= 0;
+				  this->cs.lpszClass		= 0;
+				  this->cs.dwExStyle		= 0;
+				  //
+				  if ( configure( this->wcex, this->cs ) )
+				  {
+					  calc_size( this->cs.cx, this->cs.cy );
+					  this->wnd = CreateWindowEx(
+						  this->cs.dwExStyle,
+						  reinterpret_cast< LPCTSTR >( this->class_atom = RegisterClassEx( &this->wcex ) ),
+						  this->cs.lpszName,
+						  this->cs.style,
+						  this->cs.x,
+						  this->cs.y,
+						  this->cs.cx,
+						  this->cs.cy,
+						  this->cs.hwndParent,
+						  this->cs.hMenu,
+						  this->wcex.hInstance,
+						  this->cs.lpCreateParams );
+					  if ( this->wnd != 0 )
+					  {
+						  if ( this->wcex.lpfnWndProc != proc )
+						  {
+							  this->subcl.sub( this->wnd, proc );
+						  }
+						  SetProp( this->wnd, ATOM_UTIL_WWINDOW_PROP, this );
+						  this->auto_destroy = ad;
+						  return true;
+					  }
+				  }
+			  }
+			  return false;
+		  }
+		  ///
+		  bool init( HWND w, bool const ad )
+		  {
+			  deinit();
+			  {
+				  if ( w != 0 )
+				  {
+					  if ( get_window_object( w ) == 0 )
+					  {
+						  subcl.sub( ( this->wnd = w ), proc );
+						  SetProp( this->wnd, ATOM_UTIL_WWINDOW_PROP, this );
+						  this->auto_destroy = ad;
+						  return true;
+					  }
+				  }
+			  }
+			  return false;
+		  }
+		  ///
+		  static void run( boost::function< bool() > tick )
+		  {
+			  MSG msg = { 0 };
+			  bool cont = true;
+			  do
+			  {
+				  while ( cont && PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
+				  {
+					  if ( ( cont = ( msg.message != WM_QUIT ) ) == true )
+					  {
+						  if ( !process_dlg_msgs( msg.hwnd, msg ) )
+						  {
+							  TranslateMessage( &msg );
+							  DispatchMessage( &msg );
+						  }
+					  }
+				  }
+			  }
+			  while( cont && tick() );
+		  }
+		  ///
+		  static void run( HWND hDlg )
+		  {
+			  MSG msg;
+			  BOOL bRet;
+			  while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 )
+			  {
+				  if ( bRet == -1 )
+				  {
+				  }
+				  else
+				  {
+					  if ( !process_dlg_msgs( hDlg, msg ) )
+					  {
+						  TranslateMessage(&msg); 
+						  DispatchMessage(&msg); 
+					  }
+				  }
+			  }
+		  }
+		  ///
+		  static void exit()
+		  {
+			  PostQuitMessage( 0 );
+		  }
+
+	protected:
+		  ///
+		  void deinit()
+		  {
+			  if ( this->wnd != 0 )
+			  {
+				  RemoveProp( this->wnd, ATOM_UTIL_WWINDOW_PROP );
+				  this->subcl.unsub();
+				  if ( this->auto_destroy )
+				  {
+					  DestroyWindow( this->wnd );
+				  }
+				  if ( this->class_atom != 0 )
+				  {
+					  UnregisterClass( reinterpret_cast< LPCTSTR >( this->class_atom ), this->wcex.hInstance );
+				  }
+				  this->class_atom	= 0;
+				  this->wnd			= 0;
+				  this->auto_destroy= false;
+			  }
+		  }
+		///
+		bool process_dlg_msgs( HWND hDlg, MSG& msg )
+		{ return ( hDlg && IsDialogMessage( hDlg, &msg ) ); }
+		///
+		static bool get_window_object( HWND w, window*& win )
+		{
+			return ( ( win = reinterpret_cast< window* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL );
+		}
+		///
+		static LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+		{
+			//switch( uMsg )
+			//{
+			//	// window
+			//	HANDLE_MSG(	hWnd,	WM_GETMINMAXINFO,	OnGetMinMaxInfo );
+			//	HANDLE_MSG(	hWnd,	WM_CLOSE,			OnClose );
+			//	HANDLE_MSG(	hWnd,	WM_DESTROY,			OnDestroy );
+			//	HANDLE_MSG(	hWnd,	WM_PAINT,			OnPaint );
+			//	HANDLE_MSG(	hWnd,	WM_MOVE,			OnMove );
+			//	// keyboard
+			//	HANDLE_MSG(	hWnd,	WM_CHAR,			OnChar );
+			//	// mouse
+			//	HANDLE_MSG(	hWnd,	WM_LBUTTONDOWN,		OnLButtonDown );
+			//	HANDLE_MSG(	hWnd,	WM_LBUTTONUP,		OnLButtonUp );
+			//	HANDLE_MSG(	hWnd,	WM_MOUSEMOVE,		OnMouseMove );
+			//	HANDLE_MSG(	hWnd,	WM_CAPTURECHANGED,	OnReleaseCapture );
+			//case WM_SETTINGCHANGE:
+			//	{
+			//		break;
+			//	}
+			//}
+			window* win = NULL;
+			if ( get_window_object( hWnd, win ) )
+				return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
+			return DefWindowProc( hWnd, uMsg, wParam, lParam );
+		}
+
+	};
+}
 
 
 #endif
