@@ -162,9 +162,9 @@ namespace atom {
 			  deinit();
 		  }
 		  ///
-		  wwindow const& show( bool const _show ) const
+		  wwindow const& show( bool const s ) const
 		  {
-			  ShowWindow( this->wnd, ( ( _show )?( SW_SHOW ):( SW_HIDE ) ) );
+			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) );
 			  return ( *this );
 		  }
 		  ///
@@ -173,7 +173,7 @@ namespace atom {
 			  deinit();
 			  {
 				  stringstream_t ss;
-				  ss << _T("CLASS") << rand() << rand();
+				  ss << ATOM_UTIL_WWINDOW_PROP << rand() << rand();
 				  string_t className( ss.str() );
 				  //
 				  this->wcex.cbSize			= sizeof( this->wcex );
@@ -183,7 +183,7 @@ namespace atom {
 				  this->wcex.cbWndExtra		= 0;
 				  this->wcex.hInstance		= GetModuleHandle( NULL );
 				  this->wcex.hIcon			= 0;
-				  this->wcex.hCursor		= 0;
+				  this->wcex.hCursor		= LoadCursor( NULL, MAKEINTRESOURCE( IDC_ARROW ) );
 				  this->wcex.hbrBackground	= reinterpret_cast< HBRUSH >( 0 );
 				  this->wcex.lpszMenuName	= NULL;
 				  this->wcex.lpszClassName	= className.c_str();
@@ -272,7 +272,7 @@ namespace atom {
 			  while( cont && tick() );
 		  }
 		  ///
-		  static void run( HWND hDlg )
+		  static void run()
 		  {
 			  MSG msg;
 			  BOOL bRet;
@@ -283,13 +283,25 @@ namespace atom {
 				  }
 				  else
 				  {
-					  if ( !process_dlg_msgs( hDlg, msg ) )
+					  if ( !process_dlg_msgs( msg.hwnd, msg ) )
 					  {
 						  TranslateMessage(&msg); 
 						  DispatchMessage(&msg); 
 					  }
 				  }
 			  }
+		  }
+		  ///
+		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const center )
+		  {
+			  AdjustWindowRectEx( &rect, style, (menu)?(TRUE):(FALSE), ex_style );
+			  if ( center )
+				  OffsetRect( 
+				  &rect, 
+				  ( GetSystemMetrics( SM_CXFULLSCREEN ) - ( rect.right - rect.left ) ) / 2,
+				  ( GetSystemMetrics( SM_CYFULLSCREEN ) - ( rect.bottom - rect.left ) ) /2 );
+			  else
+				  OffsetRect( &rect, -rect.left, -rect.top );
 		  }
 		  ///
 		  static void exit()
@@ -327,13 +339,18 @@ namespace atom {
 			return ( ( win = reinterpret_cast< wwindow* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL );
 		}
 		///
+		static void on_close( HWND /*hWnd*/ )
+		{
+			PostQuitMessage( 0 );
+		}
+		//
 		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		{
-			//switch( uMsg )
-			//{
+			switch( uMsg )
+			{
 			//	// window
 			//	HANDLE_MSG(	hWnd,	WM_GETMINMAXINFO,	OnGetMinMaxInfo );
-			//	HANDLE_MSG(	hWnd,	WM_CLOSE,			OnClose );
+				HANDLE_MSG(	hWnd,	WM_CLOSE,			on_close );
 			//	HANDLE_MSG(	hWnd,	WM_DESTROY,			OnDestroy );
 			//	HANDLE_MSG(	hWnd,	WM_PAINT,			OnPaint );
 			//	HANDLE_MSG(	hWnd,	WM_MOVE,			OnMove );
@@ -348,7 +365,7 @@ namespace atom {
 			//	{
 			//		break;
 			//	}
-			//}
+			}
 			wwindow* win = NULL;
 			if ( get_window_object( hWnd, win ) )
 				return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
