@@ -7,7 +7,7 @@
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.02.24 - Created                                           |
-|              2012.01.03 - has been moved to github::atom::util              |
+|              2012.01.03 - has been moved to github/atom/util                |
 |-----------------------------------------------------------------------------|
 | TODO:		                                                                  |
 \-----------------------------------------------------------------------------/
