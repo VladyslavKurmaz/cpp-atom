@@ -69,7 +69,7 @@ namespace atom {
 	public:
 		///
 		subclass() : 
-				wnd( 0 )
+		  wnd( 0 )
 			  ,	proc( NULL )
 		  {
 		  }
@@ -122,7 +122,7 @@ namespace atom {
 			string_t;
 		typedef std::basic_stringstream< char_t >
 			stringstream_t;
-		
+
 	private:
 		///
 		ATOM
@@ -146,12 +146,15 @@ namespace atom {
 	public:
 		///
 		wwindow() :
-				class_atom( 0 )
+		  class_atom( 0 )
 			  ,	wnd( 0 )
 			  ,	wcex()
 			  ,	cs()
 			  ,	subcl()
 			  ,	auto_destroy( false )
+			  , mouse_dx( 0 )
+			  ,	mouse_dy( 0 )
+
 		  {
 			  memset( &wcex, 0, sizeof( wcex ) );
 			  memset( &cs, 0, sizeof( cs ) );
@@ -162,11 +165,11 @@ namespace atom {
 			  deinit();
 		  }
 		  ///
-		  wwindow const& show( bool const s ) const
-		  {
-			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) );
-			  return ( *this );
-		  }
+		  void show( bool const s ) const
+			{ ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); }
+		  ///
+		  HWND	get_hwnd() const
+			{ return ( this->wnd ); }
 		  ///
 		  bool init( boost::function< bool ( WNDCLASSEX&, CREATESTRUCT& )> configure, bool const ad )
 		  {
@@ -310,26 +313,26 @@ namespace atom {
 		  }
 
 	protected:
-		  ///
-		  void deinit()
-		  {
-			  if ( this->wnd != 0 )
-			  {
-				  RemoveProp( this->wnd, ATOM_UTIL_WWINDOW_PROP );
-				  this->subcl.unsub();
-				  if ( this->auto_destroy )
-				  {
-					  DestroyWindow( this->wnd );
-				  }
-				  if ( this->class_atom != 0 )
-				  {
-					  UnregisterClass( reinterpret_cast< LPCTSTR >( this->class_atom ), this->wcex.hInstance );
-				  }
-				  this->class_atom	= 0;
-				  this->wnd			= 0;
-				  this->auto_destroy= false;
-			  }
-		  }
+		///
+		void deinit()
+		{
+			if ( this->wnd != 0 )
+			{
+				RemoveProp( this->wnd, ATOM_UTIL_WWINDOW_PROP );
+				this->subcl.unsub();
+				if ( this->auto_destroy )
+				{
+					DestroyWindow( this->wnd );
+				}
+				if ( this->class_atom != 0 )
+				{
+					UnregisterClass( reinterpret_cast< LPCTSTR >( this->class_atom ), this->wcex.hInstance );
+				}
+				this->class_atom	= 0;
+				this->wnd			= 0;
+				this->auto_destroy= false;
+			}
+		}
 		///
 		static bool process_dlg_msgs( HWND hDlg, MSG& msg )
 		{ return ( hDlg && IsDialogMessage( hDlg, &msg ) ); }
@@ -344,27 +347,103 @@ namespace atom {
 			PostQuitMessage( 0 );
 		}
 		//
+		int		mouse_dx;
+		int		mouse_dy;
+
+		static void get_center_pos( HWND hWnd, POINT& pt )
+		{
+			RECT rect;
+			GetClientRect( hWnd, &rect );
+			//
+			pt.x = rect.right / 2;
+			pt.y = rect.bottom /2;
+			//
+			MapWindowPoints( hWnd, NULL, &pt, 1 );
+		}
+
+		static void on_lbuttondown( HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags )
+		{
+			SetCapture( hWnd );
+			wwindow* win = NULL;
+			if ( get_window_object( hWnd, win ) )
+			{
+				POINT pt;
+				GetCursorPos( &pt );
+				//
+				POINT c_pt;
+				get_center_pos( hWnd, c_pt );
+				//
+				win->mouse_dx = 0;
+				win->mouse_dy = 0;
+				//
+				SetCursorPos( c_pt.x, c_pt.y );
+			}
+		}
+
+		static void on_lbuttonup( HWND hWnd, int x, int y, UINT keyFlags )
+		{
+			if ( GetCapture() == hWnd )
+				ReleaseCapture();
+			//
+			wwindow* win = NULL;
+			if ( get_window_object( hWnd, win ) )
+			{
+			}
+		}
+
+		static void on_mousemove( HWND hWnd, int x, int y, UINT keyFlags )
+		{
+			if ( GetCapture() == hWnd )
+			{
+				wwindow* win = NULL;
+				if ( get_window_object( hWnd, win ) )
+				{
+					POINT c_pt;
+					get_center_pos( hWnd, c_pt );
+					//
+					POINT pt;
+					pt.x = x;
+					pt.y = y;
+					MapWindowPoints( hWnd, NULL, &pt, 1 );
+					//
+					win->mouse_dx += ( pt.x - c_pt.x );
+					win->mouse_dy += ( pt.y - c_pt.y );
+					//
+					if ( ( c_pt.x != pt.x ) || ( c_pt.y != pt.y ) )
+						SetCursorPos( c_pt.x, c_pt.y );
+				}
+			}
+		}
+
+		//static void on_releasecapture( HWND hWnd, WPARAM wParam, HWND hWndGaining )
+		//{
+		//	wwindow* win = NULL;
+		//	if ( get_window_object( hWnd, win ) )
+		//	{
+		//	}
+		//}
+
 		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		{
 			switch( uMsg )
 			{
-			//	// window
-			//	HANDLE_MSG(	hWnd,	WM_GETMINMAXINFO,	OnGetMinMaxInfo );
+				//	// window
+				//	HANDLE_MSG(	hWnd,	WM_GETMINMAXINFO,	OnGetMinMaxInfo );
 				HANDLE_MSG(	hWnd,	WM_CLOSE,			on_close );
-			//	HANDLE_MSG(	hWnd,	WM_DESTROY,			OnDestroy );
-			//	HANDLE_MSG(	hWnd,	WM_PAINT,			OnPaint );
-			//	HANDLE_MSG(	hWnd,	WM_MOVE,			OnMove );
-			//	// keyboard
-			//	HANDLE_MSG(	hWnd,	WM_CHAR,			OnChar );
-			//	// mouse
-			//	HANDLE_MSG(	hWnd,	WM_LBUTTONDOWN,		OnLButtonDown );
-			//	HANDLE_MSG(	hWnd,	WM_LBUTTONUP,		OnLButtonUp );
-			//	HANDLE_MSG(	hWnd,	WM_MOUSEMOVE,		OnMouseMove );
-			//	HANDLE_MSG(	hWnd,	WM_CAPTURECHANGED,	OnReleaseCapture );
-			//case WM_SETTINGCHANGE:
-			//	{
-			//		break;
-			//	}
+				//	HANDLE_MSG(	hWnd,	WM_DESTROY,			OnDestroy );
+				//	HANDLE_MSG(	hWnd,	WM_PAINT,			OnPaint );
+				//	HANDLE_MSG(	hWnd,	WM_MOVE,			OnMove );
+				//	// keyboard
+				//	HANDLE_MSG(	hWnd,	WM_CHAR,			OnChar );
+				//	// mouse
+				HANDLE_MSG(	hWnd,	WM_LBUTTONDOWN,		on_lbuttondown );
+				HANDLE_MSG(	hWnd,	WM_LBUTTONUP,		on_lbuttonup );
+				HANDLE_MSG(	hWnd,	WM_MOUSEMOVE,		on_mousemove );
+				//HANDLE_MSG(	hWnd,	WM_CAPTURECHANGED,	on_releasecapture );
+				//case WM_SETTINGCHANGE:
+				//	{
+				//		break;
+				//	}
 			}
 			wwindow* win = NULL;
 			if ( get_window_object( hWnd, win ) )
