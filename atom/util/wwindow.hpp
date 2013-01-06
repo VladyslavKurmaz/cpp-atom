@@ -411,6 +411,7 @@ namespace atom {
 					//
 					if ( ( c_pt.x != pt.x ) || ( c_pt.y != pt.y ) )
 						SetCursorPos( c_pt.x, c_pt.y );
+					SetCursor( NULL );
 				}
 			}
 		}
