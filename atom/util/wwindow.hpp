@@ -165,8 +165,9 @@ namespace atom {
 			  deinit();
 		  }
 		  ///
-		  void show( bool const s ) const
-			{ ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); }
+		  wwindow const& show( bool const s ) const {
+			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); return (*this);
+		  }
 		  ///
 		  HWND	get_hwnd() const
 			{ return ( this->wnd ); }
