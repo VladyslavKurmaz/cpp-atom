@@ -2,12 +2,6 @@
 cmake_minimum_required( VERSION 2.6 )
 project( cpp-atom )
 
-add_definitions(-D_WIN32_WINNT=0x0501)
-add_definitions(-D__USE_W32_SOCKETS)
-
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTI_THREADED ON)
-
 # Inc/Lib
 include_directories( "./" )
 
@@ -17,4 +11,5 @@ link_directories( "$ENV{DPM_BOOST_1_51_0_LIB}" )
 include_directories( "$ENV{DPM_LOKI_0_1_7_INC}" )
 
 # Real stuff
-add_subdirectory ( "./libs" )
+#add_subdirectory ( "./libs" )
+add_subdirectory ( "./atom/cons" )
