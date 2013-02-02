@@ -47,23 +47,8 @@ namespace atom {
 			return ( ( w != 0 ) && ( p != 0 ) );
 		}
 		///
-		WNDPROC swap( HWND w, WNDPROC p )
-		{
-			WNDPROC result = reinterpret_cast< WNDPROC >( GetWindowLong( w,
-#ifndef Z3D_OS_X64
-				GWL_WNDPROC
-#else
-				GWLP_WNDPROC
-#endif
-				) );
-			SetClassLong( w,
-#ifndef Z3D_OS_X64
-				GWL_WNDPROC
-#else
-				GWLP_WNDPROC
-#endif
-				, reinterpret_cast< LONG >( p ) );
-			return result;
+		WNDPROC swap( HWND w, WNDPROC p ) {
+			return reinterpret_cast< WNDPROC >( SetWindowLongPtr( w, GWLP_WNDPROC, reinterpret_cast< ULONG >( p ) ) );
 		}
 
 	public:
