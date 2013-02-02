@@ -1,26 +1,29 @@
 #include "./pch.hpp"
 #include "./pref.hpp"
 #include "./appl.hpp"
-#include <atom/util/log.hpp>
+#include "./log.hpp"
 
 // http://support.microsoft.com/default.aspx?scid=kb;EN-US;q190351&wa=wsignin1.0
 
 int main( int argc, char *argv[] )
 {
-	atom::log l;
-	l.add_std_cout() << "hi there" << std::endl;
+	ATOM_DBG_MARK_BEGIN( p1, -1 );
+	{
+		logger::shared_ptr l = logger::create();
+		l->add_std_cout() << "hi there" << std::endl;
 
-#if 0
-	STARTUPINFOEX 		siex = { 0 };
-	STARTUPINFO 		si = { 0 };
-	PROCESS_INFORMATION pi = { 0 };
+		pref::shared_ptr p = pref::create( l );
+#if 1
+		STARTUPINFOEX 		siex = { 0 };
+		STARTUPINFO 		si = { 0 };
+		PROCESS_INFORMATION pi = { 0 };
 
-	siex.StartupInfo.cb = sizeof( siex );
-	si.cb = sizeof( si );
+		siex.StartupInfo.cb = sizeof( siex );
+		si.cb = sizeof( si );
 
-	std::cout << "start" << std::endl;
-	try {
-		if ( CreateProcess(
+		std::cout << "start" << std::endl;
+		try {
+			if ( CreateProcess(
 				NULL,
 				"C:\\Windows\\System32\\cmd.exe",
 				NULL,
@@ -31,48 +34,50 @@ int main( int argc, char *argv[] )
 				NULL,
 				&si,
 				&pi
-			 ) ) {
-			std::cout << "ok" << std::endl;
-			WaitForSingleObject( pi.hProcess, INFINITE );
-			CloseHandle( pi.hThread );
-			CloseHandle( pi.hProcess );
+				) ) {
+					std::cout << "ok" << std::endl;
+					WaitForSingleObject( pi.hProcess, INFINITE );
+					CloseHandle( pi.hThread );
+					CloseHandle( pi.hProcess );
+			}
+		} catch ( std::exception & e ) {
+			std::cout << e.what() << std::endl;
 		}
-	} catch ( std::exception & e ) {
-		std::cout << e.what() << std::endl;
-	}
 
 #else
-	pref p( std::cout );
-	if ( p.init( argc, argv ) ) {
-		appl app( std::cout, p );
-		if ( app.init() ) {
-			app.run();
+		pref p( std::cout );
+		if ( p.init( argc, argv ) ) {
+			appl app( std::cout, p );
+			if ( app.init() ) {
+				app.run();
+			}
 		}
-	}
 #endif
+	}
+	ATOM_DBG_MARK_END( p1, p2, p1p2diff );
 	return 0;
 
-/*
- if (RegisterHotKey(
-        NULL,
-        1,
-        MOD_WIN | MOD_NOREPEAT,
-        VK_OEM_3 ))  // is '~'VK_OEM_3
-    {
-        std::cout << "Hotkey registered, using MOD_NOREPEAT flag" << std::endl;
-    } else {
-        std::cout << "Hotkey register error" << std::endl;
-		}
- 
-    MSG msg = {0};
-    while (GetMessage(&msg, NULL, 0, 0) != 0)
-    {
-        if (msg.message == WM_HOTKEY)
-        {
-	        std::cout << "WM_HOTKEY received" << std::endl;
-        }
-    } 	return 0;
-*/
+	/*
+	if (RegisterHotKey(
+	NULL,
+	1,
+	MOD_WIN | MOD_NOREPEAT,
+	VK_OEM_3 ))  // is '~'VK_OEM_3
+	{
+	std::cout << "Hotkey registered, using MOD_NOREPEAT flag" << std::endl;
+	} else {
+	std::cout << "Hotkey register error" << std::endl;
+	}
+
+	MSG msg = {0};
+	while (GetMessage(&msg, NULL, 0, 0) != 0)
+	{
+	if (msg.message == WM_HOTKEY)
+	{
+	std::cout << "WM_HOTKEY received" << std::endl;
+	}
+	} 	return 0;
+	*/
 }
 
 
@@ -85,23 +90,23 @@ int main( int argc, char *argv[] )
 #include <tchar.h>
 
 #ifndef ERROR_ELEVATION_REQUIRED
-	#define ERROR_ELEVATION_REQUIRED   740
+#define ERROR_ELEVATION_REQUIRED   740
 #endif
 
 #ifndef INHERIT_PARENT_AFFINITY
-	#define INHERIT_PARENT_AFFINITY    0x00010000L
+#define INHERIT_PARENT_AFFINITY    0x00010000L
 #endif
 
 #ifndef STARTF_TITLEISLINKNAME
-	#define STARTF_TITLEISLINKNAME     0x00000800L
+#define STARTF_TITLEISLINKNAME     0x00000800L
 #endif
 
 #ifndef STARTF_TITLEISAPPID
-	#define STARTF_TITLEISAPPID        0x00001000L
+#define STARTF_TITLEISAPPID        0x00001000L
 #endif
 
 #ifndef STARTF_PREVENTPINNING
-	#define STARTF_PREVENTPINNING      0x00002000L
+#define STARTF_PREVENTPINNING      0x00002000L
 #endif
 
 void DumpSyntax(TCHAR *currfile)

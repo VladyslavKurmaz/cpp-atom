@@ -1,12 +1,19 @@
 #pragma once
-
 #include <atom/util/po.hpp>
+#include "./log.hpp"
 
-class pref
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
+
+class pref : public atom::node< LOKI_TYPELIST_1( pref2logger ) >
 {
 public:
 	///
-	pref( std::ostream& l );
+	typedef boost::shared_ptr< pref >
+		shared_ptr;
+	///
+	static shared_ptr create( logger::shared_ptr l ) {
+		return shared_ptr( new pref( l ) );
+	}
 	///
 	~pref();
 	///
@@ -15,13 +22,16 @@ public:
 
 protected:
 	//
+	logger& get_logger() {
+		return ( *( get_value( boost::mpl::identity< pref2logger >() ).item() ) );
+	}
+	//
 	static const
 		atom::po::id_t	po_help					=	0;
 
 private:
 	///
-	std::ostream&
-		log;
+	pref( logger::shared_ptr l );
 	///
 	atom::po
 		po;
