@@ -19,5 +19,6 @@ public:
 private:
 	///
 	logger() : atom::log() {
+		*this << "create log" << std::endl;
 	}
 };

@@ -20,6 +20,7 @@ pref::pref( logger::shared_ptr l ) : po() {
 																														boost::program_options::value<unsigned int>()->default_value(600),					"GUI window height", desc ).
 																														add_option( po_move,					"move",											"Move object", desc )*/;
 
+	this->get_logger() << "create pref" << std::endl;
 	std::stringstream ss;
 	desc.print( ss );
 	this->get_logger() << ss.str() << std::endl;

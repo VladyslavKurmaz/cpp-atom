@@ -7,12 +7,17 @@
 
 int main( int argc, char *argv[] )
 {
-	ATOM_DBG_MARK_BEGIN( p1, -1 );
-	{
+	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		logger::shared_ptr l = logger::create();
 		l->add_std_cout() << "hi there" << std::endl;
-
+		//
 		pref::shared_ptr p = pref::create( l );
+		if( p->init( argc, argv ) ) {
+			appl::shared_ptr a = appl::create( l, p );
+			if ( a->init() ) {
+				a->run();
+			}
+		}
 #if 1
 		STARTUPINFOEX 		siex = { 0 };
 		STARTUPINFO 		si = { 0 };
