@@ -4,9 +4,22 @@
 
 #include "./window.hpp"
 
-window::window( std::ostream& l, pref& p ) :
-		log( l )
-	,	prefs( p ) {
+window::window( logger::shared_ptr l, pref::shared_ptr p ) {
+	atom::mount<window2logger>( this, l );
+	atom::mount<window2pref>( this, p );
+
+	atom::mount<window2frame>( this, frame::create( l, p ) );
+	atom::mount<window2frame>( this, frame::create( l, p ) );
+	atom::mount<window2frame>( this, frame::create( l, p ) );
+	atom::mount<window2frame>( this, frame::create( l, p ) );
+	atom::mount<window2frame>( this, frame::create( l, p ) );
+	
+
+	this->get_logger() << "create window" << std::endl;
+}
+
+window::~window() {
+	this->get_logger() << "free window" << std::endl;
 }
 
 bool window::init() {

@@ -2,7 +2,7 @@
 #include "./pref.hpp"
 
 
-pref::pref( logger::shared_ptr l ) : po() {
+pref::pref( logger::shared_ptr l ) : base_t(), po() {
 	atom::mount<pref2logger>( this, l );
 	atom::po::options_description_t& desc = this->po.add_desc( 0, "program options" );
 	//

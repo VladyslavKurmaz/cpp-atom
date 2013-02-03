@@ -7,6 +7,8 @@ typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
 class pref : public atom::node< LOKI_TYPELIST_1( pref2logger ) >
 {
 public:
+	typedef atom::node< LOKI_TYPELIST_1( pref2logger ) >
+		base_t;
 	///
 	typedef boost::shared_ptr< pref >
 		shared_ptr;

@@ -18,7 +18,7 @@ int main( int argc, char *argv[] )
 				a->run();
 			}
 		}
-#if 1
+#if 0
 		STARTUPINFOEX 		siex = { 0 };
 		STARTUPINFO 		si = { 0 };
 		PROCESS_INFORMATION pi = { 0 };
@@ -49,14 +49,6 @@ int main( int argc, char *argv[] )
 			std::cout << e.what() << std::endl;
 		}
 
-#else
-		pref p( std::cout );
-		if ( p.init( argc, argv ) ) {
-			appl app( std::cout, p );
-			if ( app.init() ) {
-				app.run();
-			}
-		}
 #endif
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff );

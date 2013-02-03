@@ -9,9 +9,9 @@
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > appl2pref;
+typedef atom::nstorage< window, boost::shared_ptr, atom::narray1 > appl2window;
 
-class appl : public atom::node< LOKI_TYPELIST_2( appl2logger, appl2pref ) >
-{
+class appl : public atom::node< LOKI_TYPELIST_3( appl2logger, appl2pref, appl2window ) > {
 public:
 	///
 	typedef boost::shared_ptr< appl >
@@ -32,13 +32,14 @@ public:
 protected:
 	//
 	logger& get_logger() {
-		return ( *( get_value( boost::mpl::identity< pref2logger >() ).item() ) );
+		return ( *( get_value( boost::mpl::identity< appl2logger >() ).item() ) );
+	}
+	//
+	window& get_window() {
+		return ( *( get_value( boost::mpl::identity< appl2window >() ).item() ) );
 	}
 
 private:
 	///
 	appl( logger::shared_ptr l, pref::shared_ptr p );
-	///
-	//window 
-	//	wnd;
 };
