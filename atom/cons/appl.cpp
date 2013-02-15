@@ -18,7 +18,7 @@ bool appl::init() {
 }
 
 void appl::run() {
-	this->get_window().show( true ).run();
+	this->get_window().show( true ).activate().run();
 }
 
 

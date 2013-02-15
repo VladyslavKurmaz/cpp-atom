@@ -154,6 +154,10 @@ namespace atom {
 			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); return (*this);
 		  }
 		  ///
+		  wwindow const& activate() const {
+			SetForegroundWindow( this->wnd ); return (*this);
+		  }
+		  ///
 		  HWND	get_hwnd() const
 			{ return ( this->wnd ); }
 		  ///
@@ -1099,8 +1103,7 @@ namespace z3d { namespace util {
 
 		static LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		{
-			switch( uMsg )
-			{
+			switch( uMsg ) {
 				// window
 				HANDLE_MSG(	hWnd,	WM_GETMINMAXINFO,	OnGetMinMaxInfo );
 				HANDLE_MSG(	hWnd,	WM_CLOSE,			OnClose );
@@ -1114,8 +1117,7 @@ namespace z3d { namespace util {
 				HANDLE_MSG(	hWnd,	WM_LBUTTONUP,		OnLButtonUp );
 				HANDLE_MSG(	hWnd,	WM_MOUSEMOVE,		OnMouseMove );
 				HANDLE_MSG(	hWnd,	WM_CAPTURECHANGED,	OnReleaseCapture );
-			case WM_SETTINGCHANGE:
-				{
+			case WM_SETTINGCHANGE: {
 					break;
 				}
 			}
@@ -1129,7 +1131,5 @@ namespace z3d { namespace util {
 } }
 #endif
 #endif//Z3D_UTIL_WND_HPP
-
-
 
 #endif

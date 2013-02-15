@@ -36,7 +36,7 @@ bool window::init() {
 			wcex.hInstance;
 			wcex.hIcon;
 			wcex.hCursor;
-			wcex.hbrBackground	=	(HBRUSH)GetStockObject( DKGRAY_BRUSH/*BLACK_BRUSH*/ );
+			wcex.hbrBackground	=	(HBRUSH)GetStockObject( DKGRAY_BRUSH /*BLACK_BRUSH*/ );
 			wcex.lpszMenuName;
 			wcex.lpszClassName;
 			wcex.hIconSm;
@@ -63,10 +63,10 @@ bool window::init() {
 	//window::calc_rect( rect, style, ex_style, false, true );
 	if ( atom::wwindow::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) ) {
 		SetWindowLong( this->get_hwnd(), GWL_STYLE, WS_OVERLAPPED );
-		SetWindowLong( this->get_hwnd(), GWL_EXSTYLE, WS_EX_TOPMOST | WS_EX_LAYERED );
+		SetWindowLong( this->get_hwnd(), GWL_EXSTYLE, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED );
 
 		SetWindowPos( this->get_hwnd(), 0/*HWND_NOTOPMOST*/, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED );
-		SetLayeredWindowAttributes( this->get_hwnd(), RGB( 0, 0, 0 ), 224, LWA_ALPHA );
+		SetLayeredWindowAttributes( this->get_hwnd(), RGB( 0, 0, 0 ), 240, LWA_ALPHA );
 		return true;
 	}
 	return false;
