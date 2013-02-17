@@ -4,7 +4,7 @@
 
 #include "./window.hpp"
 
-window::window( logger::shared_ptr l, pref::shared_ptr p ) {
+window::window( logger::shared_ptr l, pref::shared_ptr p ) : wwindow( *this, INITLIST_4( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose ) ) {
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
 
@@ -13,7 +13,6 @@ window::window( logger::shared_ptr l, pref::shared_ptr p ) {
 	atom::mount<window2frame>( this, frame::create( l, p ) );
 	atom::mount<window2frame>( this, frame::create( l, p ) );
 	atom::mount<window2frame>( this, frame::create( l, p ) );
-	
 
 	this->get_logger() << "create window" << std::endl;
 }
@@ -61,19 +60,51 @@ bool window::init() {
 	rect.right = rect.left + ( rect.right - rect.left ) / 2;
 	SetRect( &rect, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) / 2 );
 	//window::calc_rect( rect, style, ex_style, false, true );
-	if ( atom::wwindow::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) ) {
-		SetWindowLong( this->get_hwnd(), GWL_STYLE, WS_OVERLAPPED );
-		SetWindowLong( this->get_hwnd(), GWL_EXSTYLE, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED );
+	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) ) {
+		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( 240 );
 
-		SetWindowPos( this->get_hwnd(), 0/*HWND_NOTOPMOST*/, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED );
-		SetLayeredWindowAttributes( this->get_hwnd(), RGB( 0, 0, 0 ), 240, LWA_ALPHA );
+
+
+		if ( RegisterHotKey( this->get_hwnd(), 1, MOD_WIN | MOD_NOREPEAT, VK_OEM_3 )) {
+			this->get_logger() << "Hotkey registered, using MOD_NOREPEAT flag" << std::endl;
+		} else {
+			this->get_logger() << "Hotkey register error" << std::endl;
+		}
 		return true;
 	}
 	return false;
 }
   
 void window::run() {
-	atom::wwindow::run();
+	base_window_t::run();
+}
+std::basic_string< TCHAR > str;
+void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
+	str += ch;
+	InvalidateRect( hWnd, NULL, TRUE );
+	//this->get_logger() << ch << ":" << (unsigned int)(unsigned char)ch << " ";
+}
+
+void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
+	this->show( !this->is_visible() );
+	if ( this->is_visible() ) {
+		this->activate();
+	}
+}
+
+void window::onpaint( HWND hWnd ) {
+	PAINTSTRUCT ps; 
+	RECT rt;
+	HDC hdc = BeginPaint( hWnd, &ps ); 
+	GetClientRect( hWnd, &rt );
+	InflateRect( &rt, -1, -1 );
+	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+	TextOut( hdc, 10, 10, str.c_str(), str.length() );
+	EndPaint( hWnd, &ps ); 
+}
+
+void window::onclose( HWND ) {
+	PostQuitMessage( 0 );
 }
 
 

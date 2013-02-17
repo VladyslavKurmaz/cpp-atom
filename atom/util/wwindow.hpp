@@ -8,6 +8,7 @@
 | AUTHOR:      Vladyslav Kurmaz                                               |
 | HISTORY:     2010.02.24 - Created                                           |
 |              2012.01.03 - has been moved to github/atom/util                |
+|              2012.02.16 - mpl like message handler                          |
 |-----------------------------------------------------------------------------|
 | TODO:		                                                                  |
 \-----------------------------------------------------------------------------/
@@ -26,6 +27,14 @@
 //
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/mpl/identity.hpp>
+#include <boost/mpl/pair.hpp>
+//
+#include <loki/Typelist.h>
+//
+#include <atom/node/tldefs.hpp>
+//
 
 #define	ATOM_UTIL_WWINDOW_PROP	_T("wwindow")
 namespace atom {
@@ -96,9 +105,59 @@ namespace atom {
 		  }
 	};
 
+
 	//------------------------------------------------------------------------
 	//
 	//------------------------------------------------------------------------
+	template < UINT, typename, typename >
+	struct handle_msg;
+
+	template < typename T, typename U >
+	struct handle_msg< WM_CREATE, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (LPCREATESTRUCT)(lParam)) ? 0L : (LRESULT)-1L);
+		}
+	};
+
+	template < typename T, typename U >
+	struct handle_msg< WM_CHAR, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (TCHAR)(wParam), (int)(short)LOWORD(lParam)), 0L);
+		}
+	};
+
+	template < typename T, typename U >
+	struct handle_msg< WM_HOTKEY, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (int)(wParam), (UINT)LOWORD(lParam), (UINT)HIWORD(lParam)), 0L);
+		}
+	};
+	
+	template < typename T, typename U >
+	struct handle_msg< WM_PAINT, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)(hWnd), 0L);
+		}
+	};
+
+	template < typename T, typename U >
+	struct handle_msg< WM_CLOSE, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)(hWnd), 0L);
+		}
+	};
+
+	template < typename T, typename U >
+	struct handle_msg< WM_DESTROY, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)(hWnd), 0L);
+		}
+	};
+
+	//------------------------------------------------------------------------
+	//
+	//------------------------------------------------------------------------
+	template < typename B, typename T >
 	class wwindow :	public boost::noncopyable
 	{
 		typedef TCHAR
@@ -108,62 +167,51 @@ namespace atom {
 		typedef std::basic_stringstream< char_t >
 			stringstream_t;
 
-	private:
-		///
-		ATOM
-			class_atom;
-		///
-		HWND
-			wnd;
-		///
-		WNDCLASSEX
-			wcex;
-		///
-		CREATESTRUCT
-			cs;
-		///
-		subclass
-			subcl;
-		///
-		bool
-			auto_destroy;
-
 	public:
 		///
-		wwindow() :
-		  class_atom( 0 )
-			  ,	wnd( 0 )
-			  ,	wcex()
-			  ,	cs()
-			  ,	subcl()
-			  ,	auto_destroy( false )
-			  , mouse_dx( 0 )
-			  ,	mouse_dy( 0 )
+		template < typename P >
+		wwindow( B& b, P const& p ) :
+				  base( b )
+				, class_atom( 0 )
+				, wnd( 0 )
+				, wcex()
+				, cs()
+				, subcl()
+				, auto_destroy( false )
+				, msg( p )
 
 		  {
 			  memset( &wcex, 0, sizeof( wcex ) );
 			  memset( &cs, 0, sizeof( cs ) );
 		  }
 		  ///
-		  ~wwindow()
-		  {
-			  deinit();
-		  }
+		  ~wwindow() {
+			  deinit(); }
 		  ///
 		  wwindow const& show( bool const s ) const {
-			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); return (*this);
-		  }
+			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); return (*this); }
+		  ///
+		  bool is_visible() const {
+			  return ((IsWindowVisible(this->wnd))?(true):(false)); }
 		  ///
 		  wwindow const& activate() const {
-			SetForegroundWindow( this->wnd ); return (*this);
-		  }
+			SetForegroundWindow( this->wnd ); return (*this); }
 		  ///
-		  HWND	get_hwnd() const
-			{ return ( this->wnd ); }
+		  wwindow const& set_styles( DWORD const style, DWORD const style_ex ) const {
+			  SetWindowLong( this->get_hwnd(), GWL_STYLE, style );
+			  SetWindowLong( this->get_hwnd(), GWL_EXSTYLE, style_ex );
+			  SetWindowPos( this->get_hwnd(), 0, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED );
+			  return (*this); }
 		  ///
-		  bool init( boost::function< bool ( WNDCLASSEX&, CREATESTRUCT& )> configure, bool const ad )
-		  {
-			  deinit();
+		  wwindow const& set_alpha( BYTE const alpha ) const {
+			  SetLayeredWindowAttributes( this->get_hwnd(), RGB( 0, 0, 0 ), alpha, LWA_ALPHA );
+			  return (*this); }
+		  ///
+		  HWND	get_hwnd() const {
+			  return ( this->wnd ); }
+		  ///
+		  bool init( boost::function< bool ( WNDCLASSEX&, CREATESTRUCT& )> configure, bool const ad ) {
+			  deinit(); 
 			  {
 				  stringstream_t ss;
 				  ss << ATOM_UTIL_WWINDOW_PROP << rand() << rand();
@@ -195,8 +243,7 @@ namespace atom {
 				  this->cs.lpszClass		= 0;
 				  this->cs.dwExStyle		= 0;
 				  //
-				  if ( configure( this->wcex, this->cs ) )
-				  {
+				  if ( configure( this->wcex, this->cs ) ) {
 					  this->wnd = CreateWindowEx(
 						  this->cs.dwExStyle,
 						  reinterpret_cast< LPCTSTR >( this->class_atom = RegisterClassEx( &this->wcex ) ),
@@ -210,10 +257,8 @@ namespace atom {
 						  this->cs.hMenu,
 						  this->wcex.hInstance,
 						  this->cs.lpCreateParams );
-					  if ( this->wnd != 0 )
-					  {
-						  if ( this->wcex.lpfnWndProc != proc )
-						  {
+					  if ( this->wnd != 0 ) {
+						  if ( this->wcex.lpfnWndProc != proc ) {
 							  this->subcl.sub( this->wnd, proc );
 						  }
 						  SetProp( this->wnd, ATOM_UTIL_WWINDOW_PROP, this );
@@ -225,15 +270,12 @@ namespace atom {
 			  return false;
 		  }
 		  ///
-		  bool init( HWND w, bool const ad )
-		  {
+		  bool init( HWND w, bool const ad ) {
 			  deinit();
 			  {
-				  if ( w != 0 )
-				  {
+				  if ( w != 0 ) {
 					  wwindow* win = NULL;
-					  if ( get_window_object( w, win ) == 0 )
-					  {
+					  if ( get_window_object( w, win ) == 0 ) {
 						  subcl.sub( ( this->wnd = w ), proc );
 						  SetProp( this->wnd, ATOM_UTIL_WWINDOW_PROP, this );
 						  this->auto_destroy = ad;
@@ -244,40 +286,28 @@ namespace atom {
 			  return false;
 		  }
 		  ///
-		  static void run( boost::function< bool() > tick )
-		  {
+		  static void run( boost::function< bool() > tick ) {
 			  MSG msg = { 0 };
 			  bool cont = true;
-			  do
-			  {
-				  while ( cont && PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
-				  {
-					  if ( ( cont = ( msg.message != WM_QUIT ) ) == true )
-					  {
-						  if ( !process_dlg_msgs( msg.hwnd, msg ) )
-						  {
+			  do {
+				  while ( cont && PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) ) {
+					  if ( ( cont = ( msg.message != WM_QUIT ) ) == true ) {
+						  /*if ( !process_dlg_msgs( msg.hwnd, msg ) )*/ {
 							  TranslateMessage( &msg );
 							  DispatchMessage( &msg );
 						  }
 					  }
 				  }
-			  }
-			  while( cont && tick() );
+			  } while( cont && tick() );
 		  }
 		  ///
-		  static void run()
-		  {
+		  static void run() {
 			  MSG msg;
 			  BOOL bRet;
-			  while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 )
-			  {
-				  if ( bRet == -1 )
-				  {
-				  }
-				  else
-				  {
-					  if ( !process_dlg_msgs( msg.hwnd, msg ) )
-					  {
+			  while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 ) {
+				  if ( bRet == -1 ) {
+				  } else {
+					  /*if ( !process_dlg_msgs( msg.hwnd, msg ) )*/ {
 						  TranslateMessage(&msg); 
 						  DispatchMessage(&msg); 
 					  }
@@ -285,37 +315,58 @@ namespace atom {
 			  }
 		  }
 		  ///
-		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const center )
-		  {
+		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const center ) {
 			  AdjustWindowRectEx( &rect, style, (menu)?(TRUE):(FALSE), ex_style );
-			  if ( center )
+			  if ( center ) {
 				  OffsetRect( 
 				  &rect, 
 				  ( GetSystemMetrics( SM_CXFULLSCREEN ) - ( rect.right - rect.left ) ) / 2,
 				  ( GetSystemMetrics( SM_CYFULLSCREEN ) - ( rect.bottom - rect.left ) ) /2 );
-			  else
+			  } else {
 				  OffsetRect( &rect, -rect.left, -rect.top );
-		  }
-		  ///
-		  static void exit()
-		  {
-			  PostQuitMessage( 0 );
+			  }
 		  }
 
 	protected:
+
+		template < typename >
+		struct message;
+
+		template <>
+		struct message< Loki::NullType > {
+			explicit message< Loki::NullType >( Loki::NullType const & p )
+			{}
+
+			static LRESULT process( B& b, HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+				return DefWindowProc( hWnd, uMsg, wParam, lParam );
+			}
+		};
+
+		template < UINT I, typename T, typename U >
+		struct message< Loki::Typelist< boost::mpl::pair< boost::mpl::int_< I >, T >, U > > : public message< U > {
+			T
+				value;
+			template< class P >
+			explicit message< Loki::Typelist< boost::mpl::pair< boost::mpl::int_< I >, T >, U > >( std::pair< T, P > const& p ) : message< U >( p.second ), value( p.first )
+			{}
+
+			LRESULT process( B& b, HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+				if ( uMsg == I ) {
+					return handle_msg< I, B, T >::call( b, this->value, hWnd, wParam, lParam );
+				}
+				return message< U >::process( b, hWnd, uMsg, wParam, lParam );
+			}
+		};
+
 		///
-		void deinit()
-		{
-			if ( this->wnd != 0 )
-			{
+		void deinit() {
+			if ( this->wnd != 0 ) {
 				RemoveProp( this->wnd, ATOM_UTIL_WWINDOW_PROP );
 				this->subcl.unsub();
-				if ( this->auto_destroy )
-				{
+				if ( this->auto_destroy ) {
 					DestroyWindow( this->wnd );
 				}
-				if ( this->class_atom != 0 )
-				{
+				if ( this->class_atom != 0 ) {
 					UnregisterClass( reinterpret_cast< LPCTSTR >( this->class_atom ), this->wcex.hInstance );
 				}
 				this->class_atom	= 0;
@@ -324,124 +375,47 @@ namespace atom {
 			}
 		}
 		///
-		static bool process_dlg_msgs( HWND hDlg, MSG& msg )
-		{ return ( hDlg && IsDialogMessage( hDlg, &msg ) ); }
+		static bool process_dlg_msgs( HWND hDlg, MSG& msg ) {
+			return ( hDlg && IsDialogMessage( hDlg, &msg ) ); }
 		///
-		static bool get_window_object( HWND w, wwindow*& win )
-		{
-			return ( ( win = reinterpret_cast< wwindow* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL );
-		}
+		static bool get_window_object( HWND w, wwindow*& win ) {
+			return ( ( win = reinterpret_cast< wwindow* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL ); }
 		///
-		static void on_close( HWND /*hWnd*/ )
-		{
-			PostQuitMessage( 0 );
-		}
-		//
-		int		mouse_dx;
-		int		mouse_dy;
-
-		static void get_center_pos( HWND hWnd, POINT& pt )
-		{
-			RECT rect;
-			GetClientRect( hWnd, &rect );
-			//
-			pt.x = rect.right / 2;
-			pt.y = rect.bottom /2;
-			//
-			MapWindowPoints( hWnd, NULL, &pt, 1 );
-		}
-
-		static void on_lbuttondown( HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags )
-		{
-			SetCapture( hWnd );
+		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+			if ( uMsg == WM_SETFOCUS ) { return 0L; }
 			wwindow* win = NULL;
+
 			if ( get_window_object( hWnd, win ) )
-			{
-				POINT pt;
-				GetCursorPos( &pt );
-				//
-				POINT c_pt;
-				get_center_pos( hWnd, c_pt );
-				//
-				win->mouse_dx = 0;
-				win->mouse_dy = 0;
-				//
-				SetCursorPos( c_pt.x, c_pt.y );
-			}
-		}
-
-		static void on_lbuttonup( HWND hWnd, int x, int y, UINT keyFlags )
-		{
-			if ( GetCapture() == hWnd )
-				ReleaseCapture();
-			//
-			wwindow* win = NULL;
-			if ( get_window_object( hWnd, win ) )
-			{
-			}
-		}
-
-		static void on_mousemove( HWND hWnd, int x, int y, UINT keyFlags )
-		{
-			if ( GetCapture() == hWnd )
-			{
-				wwindow* win = NULL;
-				if ( get_window_object( hWnd, win ) )
-				{
-					POINT c_pt;
-					get_center_pos( hWnd, c_pt );
-					//
-					POINT pt;
-					pt.x = x;
-					pt.y = y;
-					MapWindowPoints( hWnd, NULL, &pt, 1 );
-					//
-					win->mouse_dx += ( pt.x - c_pt.x );
-					win->mouse_dy += ( pt.y - c_pt.y );
-					//
-					if ( ( c_pt.x != pt.x ) || ( c_pt.y != pt.y ) )
-						SetCursorPos( c_pt.x, c_pt.y );
-					SetCursor( NULL );
-				}
-			}
-		}
-
-		//static void on_releasecapture( HWND hWnd, WPARAM wParam, HWND hWndGaining )
-		//{
-		//	wwindow* win = NULL;
-		//	if ( get_window_object( hWnd, win ) )
-		//	{
-		//	}
-		//}
-
-		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
-		{
-			switch( uMsg )
-			{
-				//	// window
-				//	HANDLE_MSG(	hWnd,	WM_GETMINMAXINFO,	OnGetMinMaxInfo );
-				HANDLE_MSG(	hWnd,	WM_CLOSE,			on_close );
-				//	HANDLE_MSG(	hWnd,	WM_DESTROY,			OnDestroy );
-				//	HANDLE_MSG(	hWnd,	WM_PAINT,			OnPaint );
-				//	HANDLE_MSG(	hWnd,	WM_MOVE,			OnMove );
-				//	// keyboard
-				//	HANDLE_MSG(	hWnd,	WM_CHAR,			OnChar );
-				//	// mouse
-				HANDLE_MSG(	hWnd,	WM_LBUTTONDOWN,		on_lbuttondown );
-				HANDLE_MSG(	hWnd,	WM_LBUTTONUP,		on_lbuttonup );
-				HANDLE_MSG(	hWnd,	WM_MOUSEMOVE,		on_mousemove );
-				//HANDLE_MSG(	hWnd,	WM_CAPTURECHANGED,	on_releasecapture );
-				//case WM_SETTINGCHANGE:
-				//	{
-				//		break;
-				//	}
-			}
-			wwindow* win = NULL;
-			if ( get_window_object( hWnd, win ) )
-				return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
+				return ( win->msg.process( win->base, hWnd, uMsg, wParam, lParam ) );
+				//return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
 			return DefWindowProc( hWnd, uMsg, wParam, lParam );
 		}
 
+	private:
+		///
+		B&
+			base;
+		///
+		ATOM
+			class_atom;
+		///
+		HWND
+			wnd;
+		///
+		WNDCLASSEX
+			wcex;
+		///
+		CREATESTRUCT
+			cs;
+		///
+		subclass
+			subcl;
+		///
+		bool
+			auto_destroy;
+		///
+		message< T >
+			msg;
 	};
 }
 

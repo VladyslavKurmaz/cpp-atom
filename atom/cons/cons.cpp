@@ -9,83 +9,14 @@
 
 struct handler {
 
-	BOOL oncreate( HWND, LPCREATESTRUCT ) {
-		std::cout << "process: WM_CREATE" << std::endl;
-		return TRUE;
-	}
-	void onclose( HWND ) {
-		std::cout << "process: WM_CLOSE" << std::endl;
-	}
-	void ondestroy( HWND ) {
-		std::cout << "process: WM_DESTROY" << std::endl;
-	}
 };
 
 handler h;
 
-typedef BOOL(handler::* oncreate_t)( HWND, LPCREATESTRUCT );
-typedef void(handler::* onclose_t)( HWND );
-typedef void(handler::* ondestroy_t)( HWND );
 
 template < typename T >
 class router {
 
-	template < UINT, typename, typename >
-	struct handle;
-
-	template < typename T, typename U >
-	struct handle< WM_CREATE, T, U > {
-		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
-			return ((t.*u)((hWnd), (LPCREATESTRUCT)(lParam)) ? 0L : (LRESULT)-1L);
-		}
-	};
-
-	template < typename T, typename U >
-	struct handle< WM_CLOSE, T, U > {
-		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
-			return ((t.*u)(hWnd), 0L);
-		}
-	};
-
-	template < typename T, typename U >
-	struct handle< WM_DESTROY, T, U > {
-		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
-			return ((t.*u)(hWnd), 0L);
-		}
-	};
-
-
-	template < typename >
-	struct message;
-
-	template <>
-	struct message< Loki::NullType > {
-		explicit message< Loki::NullType >( Loki::NullType const & p )
-		{}
-
-		static LRESULT process( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
-			std::cout << "def :" << uMsg << std::endl;
-			return DefWindowProc( hWnd, uMsg, wParam, lParam );
-		}
-	};
-
-	template < UINT I, typename T, typename U >
-	struct message< Loki::Typelist< boost::mpl::pair< boost::mpl::int_< I >, T >, U > > : public message< U > {
-		T
-			value;
-		template< class P >
-		explicit message< Loki::Typelist< boost::mpl::pair< boost::mpl::int_< I >, T >, U > >( std::pair< T, P > const& p ) : message< U >( p.second ), value( p.first )
-		{}
-
-		LRESULT process( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
-			switch( uMsg ) {
-				case I: {
-					return handle< I, handler, T >::call( h, this->value, hWnd, wParam, lParam );
-				}
-			}
-			return message< U >::process( hWnd, uMsg, wParam, lParam );
-		}
-	};
 
 public:
 	static LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
@@ -94,38 +25,8 @@ public:
 	}
 };
 
-
-
 int main( int argc, char *argv[] )
 {
-	typedef boost::mpl::pair< boost::mpl::int_< WM_CREATE >::type, oncreate_t >::type
-		oncreate_pair_type_t;
-	typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
-		onclose_pair_type_t;
-	typedef boost::mpl::pair< boost::mpl::int_< WM_DESTROY >::type, ondestroy_t >::type
-		ondestroy_pair_type_t;
-
-	router< LOKI_TYPELIST_3( oncreate_pair_type_t, onclose_pair_type_t, ondestroy_pair_type_t ) > r;
-	std::cout << "send WM_CREATE:" << WM_CREATE << std::endl;
-	r.WindowProc( 0, WM_CREATE, 0, 0 );
-
-	std::cout << "send WM_NCCREATE:" << WM_NCCREATE << std::endl;
-	r.WindowProc( 0, WM_NCCREATE, 0, 0 );
-
-/*
-LOKI_TYPELIST_7( 
-		window_onpaint_t,
-		window_onlbuttondown_t,
-		window_onlbuttonup_t,
-		window_onmousemove_t,
-		window_onreleasecapture_t,
-		window_onmove_t,
-		window_onchar_t )
-
-*/
-
-
-	
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		logger::shared_ptr l = logger::create();
 		l->add_std_cout() << "hi there" << std::endl;
@@ -173,27 +74,6 @@ LOKI_TYPELIST_7(
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff );
 	return 0;
 
-	/*
-	if (RegisterHotKey(
-	NULL,
-	1,
-	MOD_WIN | MOD_NOREPEAT,
-	VK_OEM_3 ))  // is '~'VK_OEM_3
-	{
-	std::cout << "Hotkey registered, using MOD_NOREPEAT flag" << std::endl;
-	} else {
-	std::cout << "Hotkey register error" << std::endl;
-	}
-
-	MSG msg = {0};
-	while (GetMessage(&msg, NULL, 0, 0) != 0)
-	{
-	if (msg.message == WM_HOTKEY)
-	{
-	std::cout << "WM_HOTKEY received" << std::endl;
-	}
-	} 	return 0;
-	*/
 }
 
 
