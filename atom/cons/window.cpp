@@ -80,7 +80,22 @@ void window::run() {
 }
 std::basic_string< TCHAR > str;
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
-	str += ch;
+	switch( ch ) {
+	case VK_BACK: {
+			if ( str.length() ) {
+				str.pop_back(); }
+			break;
+		}
+	case VK_RETURN: {
+			str.clear();
+			break;
+		}
+	default : {
+			str += ch;
+			break;
+		}
+	}
+		
 	InvalidateRect( hWnd, NULL, TRUE );
 	//this->get_logger() << ch << ":" << (unsigned int)(unsigned char)ch << " ";
 }
@@ -92,14 +107,38 @@ void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 	}
 }
 
+void draw_frame( HDC hdc, RECT rt ){
+	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+	InflateRect( &rt, -1, -1 );
+	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( BLACK_BRUSH ) );
+	InflateRect( &rt, -1, -1 );
+	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+}
+
 void window::onpaint( HWND hWnd ) {
 	PAINTSTRUCT ps; 
 	RECT rt;
 	HDC hdc = BeginPaint( hWnd, &ps ); 
 	GetClientRect( hWnd, &rt );
-	InflateRect( &rt, -1, -1 );
-	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
-	TextOut( hdc, 10, 10, str.c_str(), str.length() );
+	rt.right /= 2;
+	draw_frame( hdc, rt );
+	OffsetRect( &rt, rt.right, 0 );
+	rt.bottom /= 2;
+	draw_frame( hdc, rt );
+	OffsetRect( &rt, 0, rt.bottom );
+	draw_frame( hdc, rt );
+
+	SetTextColor( hdc, RGB( 0, 255, 0 ) );
+	SetBkMode( hdc, TRANSPARENT );
+	InflateRect( &rt, -4, -4 );
+
+
+	HFONT hFont = CreateFont(11,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,TEXT("Lucida Console"));
+	SelectObject(hdc,hFont);
+
+	TextOut( hdc, rt.left, rt.top, str.c_str(), str.length() );
+	DeleteObject(hFont);
 	EndPaint( hWnd, &ps ); 
 }
 
