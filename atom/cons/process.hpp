@@ -18,12 +18,21 @@ public:
 	}
 	///
 	~process();
-
-protected:
+	///
+	void
+		run( std::basic_string<TCHAR> const& cmd );
+	///
+	void 
+		write( std::string const& str );
+	///
+	void 
+		close();
 	//
 	logger& get_logger() {
 		return ( *( get_value( boost::mpl::identity< process2logger >() ).item() ) );
 	}
+
+protected:
 private:
 	///
 	process( logger::shared_ptr l, frame::shared_ptr f );

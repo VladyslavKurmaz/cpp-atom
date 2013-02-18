@@ -1,10 +1,157 @@
 #include "./pch.hpp"
 #include "./process.hpp"
 
+#include <atom/util/cast.hpp>
+
+HANDLE	std_in			= NULL;
+HANDLE	child_process	= NULL;
+HANDLE	output_read		= NULL;
+HANDLE	input_write		= NULL;
+HANDLE	thread			= NULL;
+DWORD	threadid		= 0;
+bool	run_thread		= true;
+
 process::process( logger::shared_ptr l, frame::shared_ptr f ) {
 	atom::mount<process2logger>( this, l );
 	atom::mount<process2frame>( this, f );
 }
 
 process::~process() {
+}
+
+std::string get_last_error( std::string const& caption ) {
+	return std::string("error");
+}
+
+DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
+	process* self = (process*)lpvThreadParam;
+	//
+	CHAR lpBuffer[256];
+	DWORD nBytesRead;
+
+	while( run_thread ) {
+		ZeroMemory( lpBuffer, sizeof(lpBuffer) );
+		if ( !ReadFile( output_read, lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
+			if (GetLastError() == ERROR_BROKEN_PIPE)
+				break; // pipe done - normal exit path.
+			else
+				throw get_last_error( "Read frompipe" );
+		}
+		lpBuffer[nBytesRead] = L'\0';
+		std::wstring wstr( (wchar_t*)lpBuffer);
+		self->get_logger() << atom::string2string<std::string>( wstr ); 
+	}
+	return 0;
+}
+
+void process::run( std::basic_string<TCHAR> const& cmd ){
+	SECURITY_ATTRIBUTES sa;
+	HANDLE output_read_tmp, output_write;
+	HANDLE input_write_tmp, input_read;
+	HANDLE error_write;
+	//
+	sa.nLength				= sizeof(SECURITY_ATTRIBUTES);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle		= TRUE;
+	//
+	// Create the child output pipe.
+	if ( !CreatePipe( &output_read_tmp, &output_write, &sa, 0 ) ) {
+		throw get_last_error("Create output pipe" );
+	}
+	//
+	if ( !DuplicateHandle(GetCurrentProcess(), output_write, GetCurrentProcess(), &error_write, 0, TRUE, DUPLICATE_SAME_ACCESS ) ) {
+		throw get_last_error( "Duplicate handle for errors' stream" );
+	}
+	//
+	// Create the child input pipe.
+	if ( !CreatePipe( &input_read, &input_write_tmp, &sa, 0 ) ) {
+		throw get_last_error( "Create input pipe" );
+	}
+	//
+	if ( !DuplicateHandle( GetCurrentProcess(), output_read_tmp, GetCurrentProcess(), &output_read, 0, FALSE, DUPLICATE_SAME_ACCESS ) ) {
+		throw get_last_error( "Duplicate handle for output pipe read operation" );
+	}
+	//
+	if ( !DuplicateHandle( GetCurrentProcess(), input_write_tmp, GetCurrentProcess(), &input_write, 0, FALSE, DUPLICATE_SAME_ACCESS ) ) {
+		throw get_last_error( "Duplicate handle for input pipe write operation" );
+	}
+	//
+	if ( !CloseHandle( output_read_tmp ) ){
+		throw get_last_error( "Close output pipe read temp handle" );
+	}
+	//
+	if ( !CloseHandle( input_write_tmp ) ) {
+		throw get_last_error( "Close input pipe write temp handle" );
+	}
+	// Get std input handle so you can close it and force the ReadFile to
+	// fail when you want the input thread to exit.
+	if ( ( std_in = GetStdHandle( STD_INPUT_HANDLE ) ) == INVALID_HANDLE_VALUE ) {
+		throw get_last_error( "Get std input handle" );
+	}
+	//
+	PROCESS_INFORMATION pi;
+	STARTUPINFO si;
+	//
+	ZeroMemory( &si, sizeof( si ) );
+	si.cb				= sizeof(STARTUPINFO);
+	si.dwFlags			= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+	si.hStdOutput		= output_write;
+	si.hStdInput		= input_read;
+	si.hStdError		= error_write;
+	si.wShowWindow		= SW_HIDE;
+	//
+	TCHAR command[MAX_PATH] = { 0 };
+	strcpy_s( command, cmd.c_str() );
+	if ( !CreateProcess( NULL, command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi ) ) {\
+		throw get_last_error( "Get std input handle" );
+	}
+	//
+	child_process = pi.hProcess;
+	if ( !CloseHandle( pi.hThread ) ) {
+		throw get_last_error( "Close child process main thread" );
+	}
+	//
+	if ( !CloseHandle( output_write ) ) {
+		throw get_last_error( "Close output pipe write handle" );
+	}
+	if ( !CloseHandle( input_read ) ) {
+		throw get_last_error( "Close input pipe read handle" );
+	}
+	if ( !CloseHandle( error_write ) ) {
+		throw get_last_error( "Close error pipe write handle" );
+	}
+	//
+	thread = CreateThread( NULL, 0, read_from_pipe, (LPVOID)this, 0, &threadid );
+	if ( thread == NULL) {
+		throw get_last_error( "Read thread" );
+	}
+}
+
+void process::write( std::string const& str ) {
+	DWORD nBytesWrote;
+	std::wstring wstr = atom::string2string<std::wstring>( str );
+	wchar_t ws[] = L"dir";
+//	if ( !WriteFile( input_write, wstr.c_str(), wstr.length() * sizeof(wchar_t), &nBytesWrote, NULL ) )
+	if ( !WriteFile( input_write, ws, sizeof(ws), &nBytesWrote, NULL ) )
+	{
+		if ( GetLastError() == ERROR_NO_DATA )
+			get_last_error( "Write pipe was closed" );
+		else
+			get_last_error( "Write to pipe" );
+	}
+}
+
+void process::close() {
+	run_thread = false;
+	this->write( "exit" );
+	if ( WaitForSingleObject( thread, INFINITE ) == WAIT_FAILED ) {
+		throw get_last_error( "Wait for thread" );
+	}
+	//
+	if ( !CloseHandle( output_read ) ) {
+		throw get_last_error( "Close output pipe read handle" );
+	}
+	if ( !CloseHandle( input_write ) ) {
+		throw get_last_error( "Close input pipe write handle" );
+	}
 }

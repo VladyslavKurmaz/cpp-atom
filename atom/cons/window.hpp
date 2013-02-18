@@ -3,6 +3,7 @@
 #include <atom/util/wwindow.hpp>
 #include "./log.hpp"
 #include "./pref.hpp"
+#include "./process.hpp"
 #include "./frame.hpp"
 #include "./window.hpp"
 
@@ -66,5 +67,8 @@ protected:
 private:
 	///
 	window( logger::shared_ptr l, pref::shared_ptr p );
+	//
+	process::shared_ptr
+		child;
 };
 

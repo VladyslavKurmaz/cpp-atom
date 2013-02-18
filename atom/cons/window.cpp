@@ -14,6 +14,11 @@ window::window( logger::shared_ptr l, pref::shared_ptr p ) : wwindow( *this, INI
 	atom::mount<window2frame>( this, frame::create( l, p ) );
 	atom::mount<window2frame>( this, frame::create( l, p ) );
 
+	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(),
+		frame::create(	get_value( boost::mpl::identity< window2logger >() ).item(),
+						get_value( boost::mpl::identity< window2pref >() ).item() ) ); 
+	//child->run( "C:\\Windows\\System32\\cmd.exe" );
+	child->run( "powershell.exe" );
 	this->get_logger() << "create window" << std::endl;
 }
 
@@ -87,6 +92,9 @@ void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 			break;
 		}
 	case VK_RETURN: {
+			//str += VK_RETURN;
+			str += (TCHAR)0x0A;
+			child->write( str );
 			str.clear();
 			break;
 		}
@@ -133,8 +141,8 @@ void window::onpaint( HWND hWnd ) {
 	InflateRect( &rt, -4, -4 );
 
 
-	HFONT hFont = CreateFont(11,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,
-                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,TEXT("Lucida Console"));
+	HFONT hFont = CreateFont(16,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,TEXT("Consolas")); //Lucida Console
 	SelectObject(hdc,hFont);
 
 	TextOut( hdc, rt.left, rt.top, str.c_str(), str.length() );
@@ -143,6 +151,7 @@ void window::onpaint( HWND hWnd ) {
 }
 
 void window::onclose( HWND ) {
+	child->close();
 	PostQuitMessage( 0 );
 }
 
