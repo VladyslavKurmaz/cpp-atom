@@ -3,6 +3,8 @@
 
 #include <atom/util/cast.hpp>
 
+// https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
+
 HANDLE	std_in			= NULL;
 HANDLE	child_process	= NULL;
 HANDLE	output_read		= NULL;
@@ -37,9 +39,14 @@ DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
 			else
 				throw get_last_error( "Read frompipe" );
 		}
+#if 0
 		lpBuffer[nBytesRead] = L'\0';
 		std::wstring wstr( (wchar_t*)lpBuffer);
 		self->get_logger() << atom::string2string<std::string>( wstr ); 
+#else
+		lpBuffer[nBytesRead] = '\0';
+		self->get_logger() << lpBuffer; 
+#endif
 	}
 	return 0;
 }
@@ -98,7 +105,7 @@ void process::run( std::basic_string<TCHAR> const& cmd ){
 	si.hStdOutput		= output_write;
 	si.hStdInput		= input_read;
 	si.hStdError		= error_write;
-	si.wShowWindow		= SW_HIDE;
+	si.wShowWindow		= SW_SHOW;//SW_HIDE;
 	//
 	TCHAR command[MAX_PATH] = { 0 };
 	strcpy_s( command, cmd.c_str() );
@@ -130,9 +137,8 @@ void process::run( std::basic_string<TCHAR> const& cmd ){
 void process::write( std::string const& str ) {
 	DWORD nBytesWrote;
 	std::wstring wstr = atom::string2string<std::wstring>( str );
-	wchar_t ws[] = L"dir";
+	if ( !WriteFile( input_write, str.c_str(), str.length(), &nBytesWrote, NULL ) )
 //	if ( !WriteFile( input_write, wstr.c_str(), wstr.length() * sizeof(wchar_t), &nBytesWrote, NULL ) )
-	if ( !WriteFile( input_write, ws, sizeof(ws), &nBytesWrote, NULL ) )
 	{
 		if ( GetLastError() == ERROR_NO_DATA )
 			get_last_error( "Write pipe was closed" );
@@ -143,7 +149,7 @@ void process::write( std::string const& str ) {
 
 void process::close() {
 	run_thread = false;
-	this->write( "exit" );
+	this->write( "exit\x0D\x0A" );
 	if ( WaitForSingleObject( thread, INFINITE ) == WAIT_FAILED ) {
 		throw get_last_error( "Wait for thread" );
 	}

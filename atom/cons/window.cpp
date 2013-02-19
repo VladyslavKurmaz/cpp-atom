@@ -17,8 +17,12 @@ window::window( logger::shared_ptr l, pref::shared_ptr p ) : wwindow( *this, INI
 	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(),
 		frame::create(	get_value( boost::mpl::identity< window2logger >() ).item(),
 						get_value( boost::mpl::identity< window2pref >() ).item() ) ); 
-	//child->run( "C:\\Windows\\System32\\cmd.exe" );
-	child->run( "powershell.exe" );
+	//child->run( "cmd.exe" );
+	//child->run( "D:\\work\\env\\cygwin\\bin\\bash.exe" );
+	child->run( "D:\\work\\env\\cygwin\\bin\\bash.exe --login -i" );
+	//child->run( "powershell.exe" );
+	//child->run( "cmd /c \"powershell.exe\"" );
+
 	this->get_logger() << "create window" << std::endl;
 }
 
@@ -60,15 +64,16 @@ bool window::init() {
 			return true;
 		}
 	};
+#if 1
 	SystemParametersInfo( SPI_GETWORKAREA, 0, &rect, 0 );
-	//rect.bottom = rect.top + ( rect.bottom - rect.top ) / 2;
-	rect.right = rect.left + ( rect.right - rect.left ) / 2;
-	SetRect( &rect, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) / 2 );
+	rect.bottom = rect.top + ( rect.bottom - rect.top ) / 4;
+	rect.right = rect.left + ( rect.right - rect.left ) / 4;
+#else
+	SetRect( &rect, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
+#endif
 	//window::calc_rect( rect, style, ex_style, false, true );
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( 240 );
-
-
 
 		if ( RegisterHotKey( this->get_hwnd(), 1, MOD_WIN | MOD_NOREPEAT, VK_OEM_3 )) {
 			this->get_logger() << "Hotkey registered, using MOD_NOREPEAT flag" << std::endl;
@@ -92,8 +97,7 @@ void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 			break;
 		}
 	case VK_RETURN: {
-			//str += VK_RETURN;
-			str += (TCHAR)0x0A;
+			str += "\x0A";
 			child->write( str );
 			str.clear();
 			break;
@@ -128,14 +132,14 @@ void window::onpaint( HWND hWnd ) {
 	RECT rt;
 	HDC hdc = BeginPaint( hWnd, &ps ); 
 	GetClientRect( hWnd, &rt );
-	rt.right /= 2;
+/*	rt.right /= 2;
 	draw_frame( hdc, rt );
 	OffsetRect( &rt, rt.right, 0 );
 	rt.bottom /= 2;
 	draw_frame( hdc, rt );
 	OffsetRect( &rt, 0, rt.bottom );
 	draw_frame( hdc, rt );
-
+*/
 	SetTextColor( hdc, RGB( 0, 255, 0 ) );
 	SetBkMode( hdc, TRANSPARENT );
 	InflateRect( &rt, -4, -4 );
