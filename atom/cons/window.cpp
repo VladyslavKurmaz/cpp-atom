@@ -8,18 +8,24 @@ window::window( logger::shared_ptr l, pref::shared_ptr p ) : wwindow( *this, INI
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
 
-	atom::mount<window2frame>( this, frame::create( l, p ) );
-	atom::mount<window2frame>( this, frame::create( l, p ) );
-	atom::mount<window2frame>( this, frame::create( l, p ) );
-	atom::mount<window2frame>( this, frame::create( l, p ) );
-	atom::mount<window2frame>( this, frame::create( l, p ) );
+	frame::shared_ptr f = frame::create(
+							get_value( boost::mpl::identity< window2logger >() ).item(),
+							get_value( boost::mpl::identity< window2pref >() ).item(),
+							frame::frame_coord( 0, 1, 0, 1, 2, 1 ) );
+	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(), f );
 
-	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(),
-		frame::create(	get_value( boost::mpl::identity< window2logger >() ).item(),
-						get_value( boost::mpl::identity< window2pref >() ).item() ) ); 
-	//child->run( "cmd.exe" );
-	//child->run( "D:\\work\\env\\cygwin\\bin\\bash.exe" );
-	child->run( "D:\\work\\env\\cygwin\\bin\\bash.exe --login -i" );
+	atom::mount<window2frame>( this, f );
+	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 0, 1, 2, 2 ) ) );
+	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 1, 2, 4, 4 ) ) );
+	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 3, 4, 4, 4 ) ) );
+	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 3, 4, 1, 2, 4, 2 ) ) );
+
+
+
+ 
+	child->run( "cmd.exe" );
+	//child->run( "msbuild.exe" );
+	//child->run( "c:\\work\\env\\cygwin\\bin\\bash.exe --login -i" );
 	//child->run( "powershell.exe" );
 	//child->run( "cmd /c \"powershell.exe\"" );
 
@@ -66,9 +72,9 @@ bool window::init() {
 	};
 #if 1
 	SystemParametersInfo( SPI_GETWORKAREA, 0, &rect, 0 );
-	rect.bottom = rect.top + ( rect.bottom - rect.top ) / 4;
-	rect.right = rect.left + ( rect.right - rect.left ) / 4;
-#else
+	rect.right = rect.left + ( rect.right - rect.left );
+	rect.bottom = rect.top + ( rect.bottom - rect.top ) / 2;
+#else                                                   
 	SetRect( &rect, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
 #endif
 	//window::calc_rect( rect, style, ex_style, false, true );
@@ -90,6 +96,18 @@ void window::run() {
 }
 std::basic_string< TCHAR > str;
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
+	std::string s;
+	s += ch;
+	str = s;
+#if 1
+	if ( ch == VK_RETURN ) {
+		child->write( '\x0A' );
+	} else if ( ch == VK_BACK ) {
+		child->write( "\x1B\x08" );
+	} else {
+		child->write( ch );
+	}
+#else
 	switch( ch ) {
 	case VK_BACK: {
 			if ( str.length() ) {
@@ -107,7 +125,7 @@ void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 			break;
 		}
 	}
-		
+#endif		
 	InvalidateRect( hWnd, NULL, TRUE );
 	//this->get_logger() << ch << ":" << (unsigned int)(unsigned char)ch << " ";
 }
@@ -127,19 +145,60 @@ void draw_frame( HDC hdc, RECT rt ){
 	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
 }
 
-void window::onpaint( HWND hWnd ) {
-	PAINTSTRUCT ps; 
-	RECT rt;
-	HDC hdc = BeginPaint( hWnd, &ps ); 
-	GetClientRect( hWnd, &rt );
-/*	rt.right /= 2;
+void window::onpaint( HWND hWnd ){
+	struct context {
+		HWND			wnd;
+		PAINTSTRUCT 	ps; 
+		HDC 			dc; 
+		RECT 			rect;
+		unsigned int	margin;
+		COLORREF		margin_color;
+		unsigned int	border;
+		COLORREF		border_color;
+		unsigned int	padding;
+		COLORREF		padding_color;
+
+		context( HWND w ) : wnd( w ) {
+			dc = BeginPaint( wnd, &ps ); 
+			GetClientRect( wnd, &rect );
+		}
+		~context() {
+			EndPaint( wnd, &ps );
+		}
+	} c( hWnd );
+	//
+	window2frame const & l = this->get_value( boost::mpl::identity< window2frame >() );
+	struct _{
+		static bool __( frame::shared_ptr const& f, context const& cntx ) {
+			RECT rt;
+			int const rw = cntx.rect.right - cntx.rect.left;
+			int const rh = cntx.rect.bottom - cntx.rect.top;
+			frame::frame_coord const& coord = f->get_coord();
+			rt.left 	= cntx.rect.left + coord.left_n * rw / coord.left_d;
+			rt.top 		= cntx.rect.top + coord.top_n * rh / coord.top_d;
+			rt.right	= rt.left + rw / coord.width;
+			rt.bottom	= rt.top + rh / coord.height;
+			//
+			//HBRUSH hbr = CreateSolidBrush( RGB( 0, 255, 0 ) );
+			//FrameRect( cntx.dc, &rt, hbr );
+			//DeleteObject( hbr );
+			FrameRect( cntx.dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+			return true;
+		}
+	};
+	l.for_each( boost::bind( &_::__, _1, boost::ref( c ) ) );
+	
+/*
+
+
+	rt.right /= 2;
 	draw_frame( hdc, rt );
 	OffsetRect( &rt, rt.right, 0 );
 	rt.bottom /= 2;
 	draw_frame( hdc, rt );
 	OffsetRect( &rt, 0, rt.bottom );
 	draw_frame( hdc, rt );
-*/
+
 	SetTextColor( hdc, RGB( 0, 255, 0 ) );
 	SetBkMode( hdc, TRANSPARENT );
 	InflateRect( &rt, -4, -4 );
@@ -151,14 +210,13 @@ void window::onpaint( HWND hWnd ) {
 
 	TextOut( hdc, rt.left, rt.top, str.c_str(), str.length() );
 	DeleteObject(hFont);
-	EndPaint( hWnd, &ps ); 
+*/
 }
 
 void window::onclose( HWND ) {
 	child->close();
 	PostQuitMessage( 0 );
 }
-
 
 
 

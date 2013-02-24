@@ -38,38 +38,6 @@ int main( int argc, char *argv[] )
 				a->run();
 			}
 		}
-#if 0
-		STARTUPINFOEX 		siex = { 0 };
-		STARTUPINFO 		si = { 0 };
-		PROCESS_INFORMATION pi = { 0 };
-
-		siex.StartupInfo.cb = sizeof( siex );
-		si.cb = sizeof( si );
-
-		std::cout << "start" << std::endl;
-		try {
-			if ( CreateProcess(
-				NULL,
-				"C:\\Windows\\System32\\cmd.exe",
-				NULL,
-				NULL,
-				FALSE,
-				CREATE_NEW_CONSOLE, //CREATE_NO_WINDOW EXTENDED_STARTUPINFO_PRESENT
-				NULL,
-				NULL,
-				&si,
-				&pi
-				) ) {
-					std::cout << "ok" << std::endl;
-					WaitForSingleObject( pi.hProcess, INFINITE );
-					CloseHandle( pi.hThread );
-					CloseHandle( pi.hProcess );
-			}
-		} catch ( std::exception & e ) {
-			std::cout << e.what() << std::endl;
-		}
-
-#endif
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff );
 	return 0;

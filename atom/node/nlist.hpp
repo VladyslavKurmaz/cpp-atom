@@ -17,6 +17,7 @@
 #define ATOM_NODE_NLIST_HPP
 
 #include <list>
+#include <boost/function.hpp>
 
 namespace atom {
 	//-----------------------------------------------------------------------------
@@ -35,21 +36,23 @@ namespace atom {
 	public:
 		///
 		template < class N >
-		void insert( value_type v, N const& )
-		{
-			base_type::insert( base_type::end(), v );
-		}
+		void insert( value_type v, N const& ) {
+			base_type::insert( base_type::end(), v ); }
 		///
 		template < class N >
-		void erase( value_type v, N const& )
-		{
-			base_type::erase( std::find( base_type::begin(), base_type::end(), v ) );
-		}
+		void erase( value_type v, N const& ) {
+			base_type::erase( std::find( base_type::begin(), base_type::end(), v ) ); }
 		///
 		template < class N >
-		void clear( N const& )
-		{
-			base_type::clear();
+		void clear( N const& ) {
+			base_type::clear(); }
+		///
+		void for_each( boost::function< bool( T const& ) > pred  ) const {
+			base_type::const_iterator it 	= base_type::begin();
+			base_type::const_iterator eit 	= base_type::end();
+			for( ; it != eit; ++it ) {
+				pred( (*it) );
+			}
 		}
 	};
 }

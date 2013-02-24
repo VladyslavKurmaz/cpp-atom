@@ -109,7 +109,7 @@ void process::run( std::basic_string<TCHAR> const& cmd ){
 	//
 	TCHAR command[MAX_PATH] = { 0 };
 	strcpy_s( command, cmd.c_str() );
-	if ( !CreateProcess( NULL, command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi ) ) {\
+	if ( !CreateProcess( NULL, command, NULL, NULL, TRUE, 0/*CREATE_NEW_CONSOLE*/, NULL, NULL, &si, &pi ) ) {\
 		throw get_last_error( "Get std input handle" );
 	}
 	//
@@ -136,7 +136,7 @@ void process::run( std::basic_string<TCHAR> const& cmd ){
 
 void process::write( std::string const& str ) {
 	DWORD nBytesWrote;
-	std::wstring wstr = atom::string2string<std::wstring>( str );
+//	std::wstring wstr = atom::string2string<std::wstring>( str );
 	if ( !WriteFile( input_write, str.c_str(), str.length(), &nBytesWrote, NULL ) )
 //	if ( !WriteFile( input_write, wstr.c_str(), wstr.length() * sizeof(wchar_t), &nBytesWrote, NULL ) )
 	{
@@ -145,6 +145,19 @@ void process::write( std::string const& str ) {
 		else
 			get_last_error( "Write to pipe" );
 	}
+	this->get_logger() << str << ":" << nBytesWrote << std::endl;
+}
+
+void process::write( char const ch ){ 
+	DWORD nBytesWrote = 0;
+	if ( !WriteFile( input_write, &ch, sizeof(ch), &nBytesWrote, NULL ) )
+	{
+		if ( GetLastError() == ERROR_NO_DATA )
+			get_last_error( "Write pipe was closed" );
+		else
+			get_last_error( "Write to pipe" );
+	}
+	this->get_logger() << ch << ":" << nBytesWrote << std::endl;
 }
 
 void process::close() {

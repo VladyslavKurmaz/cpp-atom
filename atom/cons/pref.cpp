@@ -54,6 +54,10 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<std::string>()->default_value("alt+W"),					"", desc ).
 		add_option( po_help,					"hk.rotate",
 		boost::program_options::value<std::string>()->default_value("alt+R"),					"", desc ).
+		add_option( po_help,					"hk.next",
+		boost::program_options::value<std::string>()->default_value("ctrl+TAB"),				"", desc ).
+		add_option( po_help,					"hk.prev",
+		boost::program_options::value<std::string>()->default_value("ctrl+shift+TAB"),			"", desc ).
 		add_option( po_help,					"hk.close",
 		boost::program_options::value<std::string>()->default_value("ctrl+F4"),					"", desc ).
 		//[ui.*]
@@ -104,7 +108,7 @@ bool pref::init( int argc, char const * const argv[] ) {
 		this->po.parse_arg( argc, argv, desc, true );
 		//
 		if ( po.count( po_help ) )
-			throw std::exception( "DPM command line parameters are:" );
+			throw std::exception( "cons command line parameters are:" );
 		// load preferences
 		// merge preferences with command line parameters
 		//

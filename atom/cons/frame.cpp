@@ -1,7 +1,7 @@
 #include "./pch.hpp"
 #include "./frame.hpp"
 
-frame::frame( logger::shared_ptr l, pref::shared_ptr p ) {
+frame::frame( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc ) : coord( fc ) {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
 

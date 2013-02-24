@@ -26,6 +26,9 @@ public:
 		write( std::string const& str );
 	///
 	void 
+		write( char const ch );
+	///
+	void 
 		close();
 	//
 	logger& get_logger() {
