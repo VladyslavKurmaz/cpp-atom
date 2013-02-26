@@ -29,8 +29,8 @@ typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
 	onclose_pair_type_t;
 
 class window :	public atom::wwindow< window, LOKI_TYPELIST_4( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t ) >,
-				public atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >
-{
+				public atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >,
+				public boost::enable_shared_from_this< window > {
 	typedef atom::wwindow< window, LOKI_TYPELIST_4( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t ) >
 		base_window_t;
 public:

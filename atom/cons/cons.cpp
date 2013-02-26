@@ -29,7 +29,9 @@ int main( int argc, char *argv[] )
 {
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		logger::shared_ptr l = logger::create();
+		std::cout << "1" << std::endl;
 		l->add_std_cout() << "hi there" << std::endl;
+		std::cout << "2" << std::endl;
 		//
 		pref::shared_ptr p = pref::create( l );
 		if( p->init( argc, argv ) ) {

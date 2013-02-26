@@ -11,7 +11,9 @@ typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > appl2pref;
 typedef atom::nstorage< window, boost::shared_ptr, atom::narray1 > appl2window;
 
-class appl : public atom::node< LOKI_TYPELIST_3( appl2logger, appl2pref, appl2window ) > {
+class appl :
+	public atom::node< LOKI_TYPELIST_3( appl2logger, appl2pref, appl2window ) >,
+	public boost::enable_shared_from_this< appl > {
 public:
 	///
 	typedef boost::shared_ptr< appl >

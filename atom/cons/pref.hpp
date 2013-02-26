@@ -4,8 +4,9 @@
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
 
-class pref : public atom::node< LOKI_TYPELIST_1( pref2logger ) >
-{
+class pref :
+	public atom::node< LOKI_TYPELIST_1( pref2logger ) >,
+	public boost::enable_shared_from_this< pref > {
 public:
 	typedef atom::node< LOKI_TYPELIST_1( pref2logger ) >
 		base_t;

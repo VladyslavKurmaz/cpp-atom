@@ -1,7 +1,7 @@
 #pragma once
 #include <atom/util/log.hpp>
 
-class logger : public atom::log
+class logger : public atom::log, public boost::enable_shared_from_this< logger >
 {
 public:
 	///
