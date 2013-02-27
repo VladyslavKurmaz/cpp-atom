@@ -11,5 +11,5 @@ link_directories( "$ENV{DPM_BOOST_1_51_0_LIB}" )
 include_directories( "$ENV{DPM_LOKI_0_1_7_INC}" )
 
 # Real stuff
-#add_subdirectory ( "./libs" )
+add_subdirectory ( "./libs" )
 add_subdirectory ( "./atom/cons" )

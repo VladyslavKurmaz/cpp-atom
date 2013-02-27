@@ -7,4 +7,4 @@ set(Boost_USE_MULTI_THREADED ON)
 
 
 add_subdirectory ( "./cint" )
-#add_subdirectory ( "./node" )
+add_subdirectory ( "./node" )
