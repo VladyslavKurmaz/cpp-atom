@@ -112,6 +112,8 @@ namespace atom {
 	template < UINT, typename, typename >
 	struct handle_msg;
 
+
+
 	template < typename T, typename U >
 	struct handle_msg< WM_CREATE, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -119,6 +121,9 @@ namespace atom {
 		}
 	};
 
+	//typedef void(_1::* onchar_t)( HWND, TCHAR, int );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type
+	//	onchar_pair_type_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_CHAR, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -126,6 +131,39 @@ namespace atom {
 		}
 	};
 
+	//typedef void(_1::* onlbuttondown_t)(HWND, BOOL, int, int, UINT);
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_LBUTTONDOWN >::type, onlbuttondown_t >::type
+	//	onlbuttondown_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_LBUTTONDOWN, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), FALSE, (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam), (UINT)(wParam)), 0L);
+		}
+	};
+
+	//typedef void(_1::* onlbuttonup_t)(HWND, int, int, UINT);
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_LBUTTONUP >::type, onlbuttonup_t >::type
+	//	onlbuttonup_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_LBUTTONUP, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam), (UINT)(wParam)), 0L);
+		}
+	};
+
+	//typedef void(_1::* onmousemove_t)( HWND, int, int, UINT);
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_MOUSEMOVE >::type, onmousemove_t >::type
+	//	onmousemove_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_MOUSEMOVE, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam), (UINT)(wParam)), 0L);
+		}
+	};
+
+	//typedef void(_1::* onhotkey_t)( HWND, int, UINT, UINT);
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_HOTKEY >::type, onhotkey_t >::type
+	//	onhotkey_pair_type_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_HOTKEY, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -133,6 +171,9 @@ namespace atom {
 		}
 	};
 	
+	//typedef void(_1::* onpaint_t)( HWND );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_PAINT >::type, onpaint_t >::type
+	//	onpaint_pair_type_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_PAINT, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -140,6 +181,9 @@ namespace atom {
 		}
 	};
 
+	//typedef void(_1::* onclose_t)( HWND );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
+	//	onclose_pair_type_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_CLOSE, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
