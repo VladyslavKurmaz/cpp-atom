@@ -1,5 +1,4 @@
 #pragma once
-#include <atom/util/po.hpp>
 #include "./log.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
@@ -21,7 +20,12 @@ public:
 	~pref();
 	///
 	bool
-		init( int argc, char const * const argv[] );
+	init( int argc, char const * const argv[] );
+	///
+	template <typename T >
+	T get( atom::po::id_t const id ) {
+		return ( this->po.as<T>( id ) );
+	}
 
 protected:
 	//
@@ -29,8 +33,6 @@ protected:
 		return ( *( get_value( boost::mpl::identity< pref2logger >() ).item() ) );
 	}
 	//
-	static const
-		atom::po::id_t	po_help					=	0;
 
 private:
 	///

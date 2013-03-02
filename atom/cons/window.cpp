@@ -1,10 +1,14 @@
 #include "./pch.hpp"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "./window.hpp"
 
-window::window( logger::shared_ptr l, pref::shared_ptr p ) : wwindow( *this, INITLIST_4( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose ) ) {
+window::window( logger::shared_ptr l, pref::shared_ptr p ) :
+	wwindow( *this, INITLIST_4( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose ) )
+	,	child()
+	,	appear_hk() {
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
 
@@ -38,7 +42,7 @@ window::~window() {
 
 bool window::init() {
 	RECT rect;
-	DWORD const style = 0;//WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME;
+	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
 	struct _ {
 		static bool __( WNDCLASSEX& wcex, CREATESTRUCT& cs, RECT const& rect, DWORD const style, DWORD const ex_style ) {
@@ -80,12 +84,9 @@ bool window::init() {
 	//window::calc_rect( rect, style, ex_style, false, true );
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( 240 );
-
-		if ( RegisterHotKey( this->get_hwnd(), 1, MOD_WIN | MOD_NOREPEAT, VK_OEM_3 )) {
-			this->get_logger() << "Hotkey registered, using MOD_NOREPEAT flag" << std::endl;
-		} else {
-			this->get_logger() << "Hotkey register error" << std::endl;
-		}
+		//
+		this->update_hotkeys();
+		//
 		return true;
 	}
 	return false;
@@ -218,6 +219,76 @@ void window::onclose( HWND ) {
 	PostQuitMessage( 0 );
 }
 
+/*
+       template<class T>
+       T& as() {
+           return boost::any_cast<T&>(v);
+       }
+
+	          template<class T>
+       const T& as() const {
+           return boost::any_cast<const T&>(v);
+       }
+
+	   */
+
+void
+window::update_hotkeys() {
+		hotkey_t new_hk;
+	std::vector<std::string> strs;
+	std::string s = get_pref().get< std::string >( po_hk_appear );
+	boost::split( strs, s, boost::is_any_of("+") );
+	//
+	size_t check_cnt = 0;
+	for ( size_t i = 0; i < strs.size(); ++i ) {
+		std::string const& s = strs[i];
+		//
+		check_cnt++;
+		if ( s == "win" ){
+			new_hk.mods |= MOD_WIN;
+		} else if ( s == "ctrl" ) {
+			new_hk.mods |= MOD_CONTROL;
+		} else if ( s == "alt" ) {
+			new_hk.mods |= MOD_ALT;
+		} else if ( s == "shift" ) {
+			new_hk.mods |= MOD_SHIFT;
+		} else {
+			try {
+				std::stringstream ss;
+				ss << s;
+				ss >> new_hk.vk;
+				if ( !new_hk.vk ) {
+					std::stringstream ss;
+					ss << s;
+					ss >> std::hex >> new_hk.vk;
+				}
+			} catch( std::exception& e ){
+				this->get_logger() << "Invalid hotkey format " << e.what()<< std::endl;
+				check_cnt--;
+			}
+		}
+	}
+	if ( check_cnt == strs.size() ) {
+		new_hk.mods |= MOD_NOREPEAT;
+		if ( !( new_hk == this->appear_hk )) {
+			new_hk.id++;
+			if ( RegisterHotKey( this->get_hwnd(), new_hk.id, new_hk.mods, new_hk.vk )) {
+				if ( this->appear_hk.id && !UnregisterHotKey( this->get_hwnd(), this->appear_hk.id ) ) {
+					this->get_logger() << "Hotkey unregister error" << std::endl;
+				}
+				this->appear_hk = new_hk; 
+			} else {
+				this->get_logger() << "Hotkey register error" << std::endl;
+			}
+		}
+	} else {
+		this->get_logger() << "Invalid hotkey format " << s << std::endl;
+	}
+}
+//
+void
+window::update_placement(){
+}
 
 
 

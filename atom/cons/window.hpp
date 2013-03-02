@@ -60,9 +60,17 @@ public:
 
 protected:
 	//
-	logger& get_logger() {
-		return ( *( get_value( boost::mpl::identity< window2logger >() ).item() ) );
-	}
+	logger&
+	get_logger() { return ( *( get_value( boost::mpl::identity< window2logger >() ).item() ) ); }
+	//
+	pref& get_pref()
+	{ return ( *( get_value( boost::mpl::identity< window2pref >() ).item() ) ); }
+	//
+	void
+	update_hotkeys();
+	//
+	void
+	update_placement();
 
 private:
 	///
@@ -70,5 +78,13 @@ private:
 	//
 	process::shared_ptr
 		child;
+	//
+	struct hotkey_t {
+		int id;
+		UINT mods;
+		UINT vk;
+		hotkey_t() : id(0), mods(), vk() {}   
+		int operator==( hotkey_t const& r ) const { return ( ( this->mods == r.mods ) && ( this->vk == r.vk ) ); }
+	} appear_hk;
 };
 

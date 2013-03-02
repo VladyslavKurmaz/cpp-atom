@@ -43,32 +43,35 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 	atom::po::options_description_t& desc = this->po.add_desc( 0, "program options" );
 	//
 	po.
-		add_option( po_help,					"help",											"Show this help", desc );
-	/*
+		add_option( po_help,					"help",											"Show this help", desc ).
 		//[hk.*]
-		add_option( po_help,					"hk.appear",
-		boost::program_options::value<std::string>()->default_value("win+`"),					"[win][ctrl][shift][alt]+[char|0xCODE]", desc ).
-		add_option( po_help,					"hk.split",
+		add_option( po_hk_appear,				"hk.appear",
+		boost::program_options::value<std::string>()->default_value("win+0xC0"),				"[win]+[ctrl]+[alt]+[shift]+[VK]", desc ).
+		add_option( po_hk_split,				"hk.split",
 		boost::program_options::value<std::string>()->default_value("alt+S"),					"", desc ).
-		add_option( po_help,					"hk.maxmin",
+		add_option( po_hk_minmax,				"hk.minmax",
 		boost::program_options::value<std::string>()->default_value("alt+W"),					"", desc ).
-		add_option( po_help,					"hk.rotate",
+		add_option( po_hk_rotate,				"hk.rotate",
 		boost::program_options::value<std::string>()->default_value("alt+R"),					"", desc ).
-		add_option( po_help,					"hk.next",
+		add_option( po_hk_next,					"hk.next",
 		boost::program_options::value<std::string>()->default_value("ctrl+TAB"),				"", desc ).
-		add_option( po_help,					"hk.prev",
+		add_option( po_hk_prev,					"hk.prev",
 		boost::program_options::value<std::string>()->default_value("ctrl+shift+TAB"),			"", desc ).
-		add_option( po_help,					"hk.close",
+		add_option( po_hk_close,				"hk.close",
 		boost::program_options::value<std::string>()->default_value("ctrl+F4"),					"", desc ).
 		//[ui.*]
-		add_option( po_help,					"ui.alignment",
-		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom]|[left|right]", desc ).
-		add_option( po_help,					"ui.width",
-		boost::program_options::value<unsigned int>()->default_value( 100 ),					"", desc ).
-		add_option( po_help,					"ui.height",
+		add_option( po_ui_timeout,				"ui.timeout",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
-		add_option( po_help,					"ui.clip",
-		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
+		add_option( po_ui_alignment,			"ui.alignment",
+		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom]|[left|right]", desc ).
+		add_option( po_ui_width,				"ui.width",
+		boost::program_options::value<unsigned int>()->default_value( 100 ),					"", desc ).
+		add_option( po_ui_height,				"ui.height",
+		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
+		add_option( po_ui_clip,					"ui.clip",
+		boost::program_options::value<bool>()->default_value( true ),							"", desc );
+
+	/*
 
 
 		//[ui.margin.*]
@@ -79,18 +82,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_help,					"ui.font.name",
 		boost::program_options::value<std::string>()->default_value("Lucida Console"),			"", desc ).
 		add_option( po_help,					"ui.font.color",
-		boost::program_options::value<std::string>()->default_value("00FF00"),					"", desc );
-																														/*add_option( po_host,					"host",
-																														boost::program_options::value<std::string>()->default_value("172.22.90.101"),		"Map service", desc ).
-																														add_option( po_wifi_scan,				"scan",
-																														boost::program_options::value<int>()->default_value(1000),							"Wifi scan timeout (<=0 disable)", desc ).
-																														add_option( po_gui,						"gui",
-																														boost::program_options::value<std::string>()->default_value(""),					"Display GUI: '' | '2d' | '3d'", desc ).
-																														add_option( po_gui_width,				"width",
-																														boost::program_options::value<unsigned int>()->default_value(800),					"GUI window width", desc ).
-																														add_option( po_gui_height,				"height",
-																														boost::program_options::value<unsigned int>()->default_value(600),					"GUI window height", desc ).
-																														add_option( po_move,					"move",											"Move object", desc )*/;
+		boost::program_options::value<std::string>()->default_value("00FF00"),					"", desc );*/
 
 	this->get_logger() << "create pref" << std::endl;
 	std::stringstream ss;
