@@ -5,9 +5,10 @@
 #include "./window.hpp"
 
 window::window( logger::shared_ptr l, pref::shared_ptr p ) :
-wwindow( *this, INITLIST_6( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer ) )
+wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	child()
 	,	appear_hk()
+	,	accel()
 	,	anchor()
 	,	in_rect()
 	,	slide_dir( 0 )
@@ -83,6 +84,7 @@ bool window::init() {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
 		//
 		this->update_hotkeys();
+		this->update_accels();
 		//
 		return true;
 	}
@@ -90,7 +92,12 @@ bool window::init() {
 }
   
 void window::run() {
-	base_window_t::run();
+	struct _ {
+		static bool __( HWND hWnd, MSG* msg, atom::accel& accel ) {
+			return accel.translate( hWnd, msg );
+		}
+	};
+	base_window_t::run( boost::bind( _::__, _1, _2, boost::ref( this->accel ) ) );
 }
 
 std::basic_string< TCHAR > str;
@@ -252,6 +259,24 @@ void window::ontimer( HWND hWnd, UINT id ){
 		update_position( hWnd, in_dir, mult );
 	};
 }
+
+void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
+	switch( id ) {
+	case CMDID_SPLIT:
+		return;
+	case CMDID_MINMAX:
+		return;
+	case CMDID_ROTATE:
+		return;
+	case CMDID_NEXT:
+		return;
+	case CMDID_PREV:
+		return;
+	case CMDID_CLOSE:
+		return;
+	}
+}
+
 /*
        template<class T>
        T& as() {
@@ -429,4 +454,9 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
 
+void window::update_accels() {
+	this->accel.add_accel( CMDID_NEXT, false, true, false, true, VK_TAB );
+	this->accel.add_accel( CMDID_PREV, false, true, true, true, VK_TAB );
+	this->accel.build();
+}
 

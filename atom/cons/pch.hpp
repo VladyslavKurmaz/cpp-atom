@@ -42,3 +42,11 @@ struct alignment {
 		center	= vcenter | hcenter
 	};
 };
+
+///
+static WORD	const CMDID_SPLIT	= 100;
+static WORD	const CMDID_MINMAX	= CMDID_SPLIT + 1;
+static WORD	const CMDID_ROTATE	= CMDID_MINMAX + 1;
+static WORD	const CMDID_NEXT	= CMDID_ROTATE + 1;
+static WORD	const CMDID_PREV	= CMDID_NEXT + 1;
+static WORD	const CMDID_CLOSE	= CMDID_PREV + 1;

@@ -199,6 +199,16 @@ namespace atom {
 		}
 	};
 
+	//typedef void(_1::* oncommand_t)( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, oncommand_t >::type
+	//	oncommand_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_COMMAND, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (int)(LOWORD(wParam)), (HWND)(lParam), (UINT)HIWORD(wParam)), 0L);
+		}
+	};
+
 	//typedef void(_1::* onclose_t)( HWND );
 	//typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
 	//	onclose_pair_type_t;
@@ -348,7 +358,7 @@ namespace atom {
 			  return false;
 		  }
 		  ///
-		  static void run( boost::function< bool() > tick ) {
+		  static void runl( boost::function< bool() > tick ) {
 			  MSG msg = { 0 };
 			  bool cont = true;
 			  do {
@@ -364,14 +374,23 @@ namespace atom {
 		  }
 		  ///
 		  static void run() {
+			  struct _ {
+				  static bool __( HWND, MSG* ) {
+					  return false;
+				  }
+			  };
+			  run( boost::bind( _::__, _1, _2 ) );
+		  }
+		  ///
+		  static void run( boost::function< bool( HWND, MSG* ) > pred ) {
 			  MSG msg;
 			  BOOL bRet;
 			  while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 ) {
 				  if ( bRet == -1 ) {
 				  } else {
-					  /*if ( !process_dlg_msgs( msg.hwnd, msg ) )*/ {
-						  TranslateMessage(&msg); 
-						  DispatchMessage(&msg); 
+					  if ( !pred( msg.hwnd, &msg ) ){
+						  TranslateMessage( &msg ); 
+						  DispatchMessage( &msg ); 
 					  }
 				  }
 			  }
@@ -445,9 +464,13 @@ namespace atom {
 		///
 		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 			wwindow* win = NULL;
-			if ( get_window_object( hWnd, win ) )
+			//if ( uMsg == WM_COMMAND ){
+			//	return 0;
+			//}
+			if ( get_window_object( hWnd, win ) ) {
 				return ( win->msg.process( win->base, hWnd, uMsg, wParam, lParam ) );
 				//return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
+			}
 			return DefWindowProc( hWnd, uMsg, wParam, lParam );
 		}
 
