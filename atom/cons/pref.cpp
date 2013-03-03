@@ -71,8 +71,14 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_ui_clip,					"ui.clip",
 		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
 		add_option( po_ui_alpha,				"ui.alpha",
-		boost::program_options::value<unsigned int>()->default_value( 240 ),					"", desc );
-
+		boost::program_options::value<unsigned int>()->default_value( 0xF0 ),					"", desc ).
+		//[ui.font.*]
+		add_option( po_ui_font_name,			"ui.font.name",
+		boost::program_options::value<std::string>()->default_value("Courier New"),					"", desc ).
+		add_option( po_ui_font_height,			"ui.font.height",
+		boost::program_options::value< unsigned int >()->default_value( 16 ),					"", desc ).
+		add_option( po_ui_font_color,			"ui.font.color",
+		boost::program_options::value< unsigned int >()->default_value( 0x00FF00 ),				"", desc );
 
 	
 
@@ -81,13 +87,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 
 		//[ui.margin.*]
 		//[ui.border.*]
-		//[ui.padding.*]
-
-		//[ui.font.*]
-		add_option( po_help,					"ui.font.name",
-		boost::program_options::value<std::string>()->default_value("Lucida Console"),			"", desc ).
-		add_option( po_help,					"ui.font.color",
-		boost::program_options::value<std::string>()->default_value("00FF00"),					"", desc );*/
+		//[ui.padding.*]*/
 
 	this->get_logger() << "create pref" << std::endl;
 	std::stringstream ss;

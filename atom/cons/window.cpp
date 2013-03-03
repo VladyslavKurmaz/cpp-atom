@@ -13,7 +13,8 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	,	in_rect()
 	,	slide_dir( 0 )
 	,	slide_start_time()
-	,	slide_timer_id( 1 ) {
+	,	slide_timer_id( 1 )
+	,	font( NULL ) {
 	//
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
@@ -43,6 +44,7 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 }
 
 window::~window() {
+	delete_font();
 	this->get_logger() << "free window" << std::endl;
 }
 
@@ -85,6 +87,7 @@ bool window::init() {
 		//
 		this->update_hotkeys();
 		this->update_accels();
+		this->update_font();
 		//
 		return true;
 	}
@@ -170,15 +173,20 @@ void window::onpaint( HWND hWnd ){
 		COLORREF		border_color;
 		unsigned int	padding;
 		COLORREF		padding_color;
+		HFONT			font;
+		COLORREF		font_color;
 
-		context( HWND w ) : wnd( w ) {
+		context( HWND w, window& pw ) : wnd( w ) {
 			dc = BeginPaint( wnd, &ps ); 
 			GetClientRect( wnd, &rect );
+			//
+			font		= pw.font;
+			font_color	= pw.get_pref().get< unsigned int >( po_ui_font_color );
 		}
 		~context() {
 			EndPaint( wnd, &ps );
 		}
-	} c( hWnd );
+	} c( hWnd, *this );
 	//
 	window2frame const & l = this->get_value( boost::mpl::identity< window2frame >() );
 	struct _{
@@ -196,6 +204,15 @@ void window::onpaint( HWND hWnd ){
 			//FrameRect( cntx.dc, &rt, hbr );
 			//DeleteObject( hbr );
 			FrameRect( cntx.dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+			//
+			SelectObject( cntx.dc, cntx.font );
+			
+			//SelectObject( cntx.dc, (HFONT)GetStockObject( SYSTEM_FIXED_FONT/*OEM_FIXED_FONT*//*ANSI_FIXED_FONT*/ ) );
+
+			SetTextColor( cntx.dc, cntx.font_color );
+			SetBkMode( cntx.dc, TRANSPARENT );
+			InflateRect( &rt, -1, -1 );
+			DrawText( cntx.dc, "ABCDEFGH\nabcdefgh", -1, &rt, DT_LEFT | DT_TOP );
 			return true;
 		}
 	};
@@ -212,14 +229,9 @@ void window::onpaint( HWND hWnd ){
 	OffsetRect( &rt, 0, rt.bottom );
 	draw_frame( hdc, rt );
 
-	SetTextColor( hdc, RGB( 0, 255, 0 ) );
-	SetBkMode( hdc, TRANSPARENT );
 	InflateRect( &rt, -4, -4 );
 
 
-	HFONT hFont = CreateFont(16,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,
-                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,TEXT("Consolas")); //Lucida Console
-	SelectObject(hdc,hFont);
 
 	TextOut( hdc, rt.left, rt.top, str.c_str(), str.length() );
 	DeleteObject(hFont);
@@ -460,3 +472,33 @@ void window::update_accels() {
 	this->accel.build();
 }
 
+void window::delete_font(){
+	if ( this->font != NULL ) {
+		DeleteObject( font );
+	}
+	font = NULL;
+}
+
+void window::update_font() {
+	HFONT nfont = CreateFont(
+						-get_pref().get< unsigned int >( po_ui_font_height ),
+						0,
+						0,
+						0,
+						FW_NORMAL,
+						FALSE,
+						FALSE,
+						FALSE,
+						DEFAULT_CHARSET,
+						OUT_OUTLINE_PRECIS,
+						CLIP_DEFAULT_PRECIS,
+						DEFAULT_QUALITY,
+						FIXED_PITCH | FF_MODERN,
+						get_pref().get< std::string >( po_ui_font_name ).c_str()
+						);
+	if ( nfont != NULL ) {
+	} else {
+		this->get_logger() << "Font creation error" << std::endl;
+	}
+	//Consolas
+}

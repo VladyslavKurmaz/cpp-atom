@@ -97,6 +97,11 @@ protected:
 	//
 	void
 	update_accels();
+	//
+	void
+	update_font();
+	void
+	delete_font();
 
 private:
 	///
@@ -127,5 +132,8 @@ private:
 		slide_start_time;
 	UINT_PTR
 		slide_timer_id;
+	//
+	HFONT
+		font;
 };
 
