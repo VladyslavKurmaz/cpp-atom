@@ -26,3 +26,4 @@ static atom::po::id_t const po_ui_alignment			=	po_ui_timeout + 1;
 static atom::po::id_t const po_ui_width				=	po_ui_alignment + 1;
 static atom::po::id_t const po_ui_height			=	po_ui_width + 1;
 static atom::po::id_t const po_ui_clip				=	po_ui_height + 1;
+static atom::po::id_t const po_ui_alpha				=	po_ui_clip + 1;

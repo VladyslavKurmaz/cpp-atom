@@ -112,7 +112,25 @@ namespace atom {
 	template < UINT, typename, typename >
 	struct handle_msg;
 
+	//typedef void(_1::* onsettingchange_t)( HWND, UINT, LPCTSTR );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_SETTINGCHANGE >::type, onsettingchange_t >::type
+	//	onsettingchange_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_SETTINGCHANGE, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (UINT)(wParam), (LPCTSTR)(lParam) ), 0L);
+		}
+	};
 
+	//typedef void(_1::* ontimer_t)( HWND, UINT );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_TIMER >::type, ontimer_t >::type
+	//	ontimer_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_TIMER, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (UINT)(wParam)), 0L);
+		}
+	};
 
 	template < typename T, typename U >
 	struct handle_msg< WM_CREATE, T, U > {
@@ -426,9 +444,7 @@ namespace atom {
 			return ( ( win = reinterpret_cast< wwindow* >( GetProp( w, ATOM_UTIL_WWINDOW_PROP ) ) ) != NULL ); }
 		///
 		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
-			if ( uMsg == WM_SETFOCUS ) { return 0L; }
 			wwindow* win = NULL;
-
 			if ( get_window_object( hWnd, win ) )
 				return ( win->msg.process( win->base, hWnd, uMsg, wParam, lParam ) );
 				//return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );

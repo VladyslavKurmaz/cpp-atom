@@ -46,7 +46,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_help,					"help",											"Show this help", desc ).
 		//[hk.*]
 		add_option( po_hk_appear,				"hk.appear",
-		boost::program_options::value<std::string>()->default_value("win+0xC0"),				"[win]+[ctrl]+[alt]+[shift]+[VK]", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win]+[ctrl]+[alt]+[shift]+[VK]", desc ).
 		add_option( po_hk_split,				"hk.split",
 		boost::program_options::value<std::string>()->default_value("alt+S"),					"", desc ).
 		add_option( po_hk_minmax,				"hk.minmax",
@@ -61,15 +61,20 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<std::string>()->default_value("ctrl+F4"),					"", desc ).
 		//[ui.*]
 		add_option( po_ui_timeout,				"ui.timeout",
-		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
+		boost::program_options::value<unsigned int>()->default_value( 250 ),					"", desc ).
 		add_option( po_ui_alignment,			"ui.alignment",
-		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom]|[left|right]", desc ).
+		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom]+[left|right]", desc ).
 		add_option( po_ui_width,				"ui.width",
-		boost::program_options::value<unsigned int>()->default_value( 100 ),					"", desc ).
+		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_height,				"ui.height",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_clip,					"ui.clip",
-		boost::program_options::value<bool>()->default_value( true ),							"", desc );
+		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
+		add_option( po_ui_alpha,				"ui.alpha",
+		boost::program_options::value<unsigned int>()->default_value( 240 ),					"", desc );
+
+
+	
 
 	/*
 

@@ -2,13 +2,18 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
-
 #include "./window.hpp"
 
 window::window( logger::shared_ptr l, pref::shared_ptr p ) :
-	wwindow( *this, INITLIST_4( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose ) )
+wwindow( *this, INITLIST_6( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer ) )
 	,	child()
-	,	appear_hk() {
+	,	appear_hk()
+	,	anchor()
+	,	in_rect()
+	,	slide_dir( 0 )
+	,	slide_start_time()
+	,	slide_timer_id( 1 ) {
+	//
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
 
@@ -41,7 +46,6 @@ window::~window() {
 }
 
 bool window::init() {
-	RECT rect;
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
 	struct _ {
@@ -74,16 +78,9 @@ bool window::init() {
 			return true;
 		}
 	};
-#if 1
-	SystemParametersInfo( SPI_GETWORKAREA, 0, &rect, 0 );
-	rect.right = rect.left + ( rect.right - rect.left );
-	rect.bottom = rect.top + ( rect.bottom - rect.top ) / 2;
-#else                                                   
-	SetRect( &rect, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
-#endif
-	//window::calc_rect( rect, style, ex_style, false, true );
-	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) ) {
-		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( 240 );
+	this->update_placement();
+	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
+		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
 		//
 		this->update_hotkeys();
 		//
@@ -95,6 +92,7 @@ bool window::init() {
 void window::run() {
 	base_window_t::run();
 }
+
 std::basic_string< TCHAR > str;
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 	std::string s;
@@ -132,9 +130,16 @@ void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 }
 
 void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
-	this->show( !this->is_visible() );
-	if ( this->is_visible() ) {
-		this->activate();
+	if ( idHotKey == this->appear_hk.id ) {
+		if ( slide_dir ) {
+			slide_dir *= -1;
+			slide_start_time += 2 * ( timeGetTime() - slide_start_time ) - get_pref().get< unsigned int >( po_ui_timeout );
+		} else {
+			slide_dir = ((this->is_visible())?(-1):(1));
+			slide_start_time = timeGetTime();
+			SetTimer( hWnd, slide_timer_id, USER_TIMER_MINIMUM, NULL );
+			this->show( true ).activate();
+		}
 	}
 }
 
@@ -219,6 +224,36 @@ void window::onclose( HWND ) {
 	PostQuitMessage( 0 );
 }
 
+void window::onsettingchange( HWND, UINT uiAction, LPCTSTR lpName ) {
+	switch( uiAction ) {
+	case SPI_SETWORKAREA:
+	case SPI_ICONVERTICALSPACING:
+		update_placement();
+		break;
+	}
+}
+
+void window::ontimer( HWND hWnd, UINT id ){
+	if ( id == slide_timer_id ) {
+		DWORD const dt = timeGetTime() - slide_start_time;
+		DWORD const total = get_pref().get< unsigned int >( po_ui_timeout );
+		bool const in_dir = ( slide_dir > 0 );
+		float mult = 1.f;
+		if ( dt > total ) {
+			this->show( in_dir );
+			slide_dir = 0;
+			KillTimer( hWnd, id );
+		} else {
+			mult = (float)dt / (float)total;
+		}
+		if ( in_dir ) {
+			mult = 1.f - mult;
+		};
+		int x = in_rect.left + (int)( (float)( this->anchor.x - in_rect.left ) * mult );
+		int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
+		MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
+	};
+}
 /*
        template<class T>
        T& as() {
@@ -234,7 +269,7 @@ void window::onclose( HWND ) {
 
 void
 window::update_hotkeys() {
-		hotkey_t new_hk;
+	hotkey_t new_hk;
 	std::vector<std::string> strs;
 	std::string s = get_pref().get< std::string >( po_hk_appear );
 	boost::split( strs, s, boost::is_any_of("+") );
@@ -288,6 +323,22 @@ window::update_hotkeys() {
 //
 void
 window::update_placement(){
+	std::string const alignment = get_pref().get< std::string >( po_ui_alignment );
+	unsigned int const width	= get_pref().get< unsigned int >( po_ui_width );
+	unsigned int const height	= get_pref().get< unsigned int >( po_ui_height );
+	bool const clip				= get_pref().get< bool >( po_ui_clip );
+	//
+	RECT rt;
+	//
+	SetRect( &rt, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
+	if ( clip ) {
+		SystemParametersInfo( SPI_GETWORKAREA, 0, &rt, 0 );
+	}
+	rt.bottom = rt.top + ( rt.bottom - rt.top ) * height / 100;
+
+	this->in_rect = rt;
+	this->anchor.x = rt.left;
+	this->anchor.y = rt.top - ( rt.bottom - rt.top );
 }
 
 

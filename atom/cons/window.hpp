@@ -5,33 +5,42 @@
 #include "./pref.hpp"
 #include "./process.hpp"
 #include "./frame.hpp"
-#include "./window.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > window2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > window2pref;
 typedef atom::nstorage< frame, boost::shared_ptr, atom::nlist > window2frame;
 //
 class window;
+
 typedef void(window::* onchar_t)( HWND, TCHAR, int );
-typedef void(window::* onhotkey_t)( HWND, int, UINT, UINT);
-typedef void(window::* onpaint_t)( HWND );
-typedef void(window::* onclose_t)( HWND );
-
-
-
 typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type
 	onchar_pair_type_t;
+
+typedef void(window::* onhotkey_t)( HWND, int, UINT, UINT);
 typedef boost::mpl::pair< boost::mpl::int_< WM_HOTKEY >::type, onhotkey_t >::type
 	onhotkey_pair_type_t;
+
+typedef void(window::* onpaint_t)( HWND );
 typedef boost::mpl::pair< boost::mpl::int_< WM_PAINT >::type, onpaint_t >::type
 	onpaint_pair_type_t;
+
+typedef void(window::* onclose_t)( HWND );
 typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
 	onclose_pair_type_t;
 
-class window :	public atom::wwindow< window, LOKI_TYPELIST_4( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t ) >,
+typedef void(window::* onsettingchange_t)( HWND, UINT, LPCTSTR );
+typedef boost::mpl::pair< boost::mpl::int_< WM_SETTINGCHANGE >::type, onsettingchange_t >::type
+	onsettingchange_pair_type_t;
+
+typedef void(window::* ontimer_t)( HWND, UINT );
+typedef boost::mpl::pair< boost::mpl::int_< WM_TIMER >::type, ontimer_t >::type
+	ontimer_pair_type_t;
+
+
+class window :	public atom::wwindow< window, LOKI_TYPELIST_6( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t ) >,
 				public atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >,
 				public boost::enable_shared_from_this< window > {
-	typedef atom::wwindow< window, LOKI_TYPELIST_4( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t ) >
+	typedef atom::wwindow< window, LOKI_TYPELIST_6( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t ) >
 		base_window_t;
 public:
 	///
@@ -57,6 +66,10 @@ public:
 	void onpaint( HWND hWnd );
 	///
 	void onclose( HWND );
+	///
+	void onsettingchange( HWND, UINT uiAction, LPCTSTR lpName );
+	///
+	void ontimer( HWND hWnd, UINT id );
 
 protected:
 	//
@@ -86,5 +99,17 @@ private:
 		hotkey_t() : id(0), mods(), vk() {}   
 		int operator==( hotkey_t const& r ) const { return ( ( this->mods == r.mods ) && ( this->vk == r.vk ) ); }
 	} appear_hk;
+	///
+	POINT
+		anchor;
+	RECT
+		in_rect;
+	///
+	int
+		slide_dir;
+	DWORD
+		slide_start_time;
+	UINT_PTR
+		slide_timer_id;
 };
 
