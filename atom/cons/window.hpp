@@ -67,7 +67,7 @@ public:
 	///
 	void onclose( HWND );
 	///
-	void onsettingchange( HWND, UINT uiAction, LPCTSTR lpName );
+	void onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName );
 	///
 	void ontimer( HWND hWnd, UINT id );
 
@@ -84,6 +84,9 @@ protected:
 	//
 	void
 	update_placement();
+	//
+	void
+	update_position( HWND hWnd, bool dir, float mult );
 
 private:
 	///

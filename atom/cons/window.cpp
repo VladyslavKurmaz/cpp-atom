@@ -224,11 +224,14 @@ void window::onclose( HWND ) {
 	PostQuitMessage( 0 );
 }
 
-void window::onsettingchange( HWND, UINT uiAction, LPCTSTR lpName ) {
+void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
 	switch( uiAction ) {
 	case SPI_SETWORKAREA:
 	case SPI_ICONVERTICALSPACING:
 		update_placement();
+		if ( !slide_dir ) {
+			update_position( hWnd, this->is_visible(), 1.f );
+		}
 		break;
 	}
 }
@@ -246,12 +249,7 @@ void window::ontimer( HWND hWnd, UINT id ){
 		} else {
 			mult = (float)dt / (float)total;
 		}
-		if ( in_dir ) {
-			mult = 1.f - mult;
-		};
-		int x = in_rect.left + (int)( (float)( this->anchor.x - in_rect.left ) * mult );
-		int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
-		MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
+		update_position( hWnd, in_dir, mult );
 	};
 }
 /*
@@ -271,8 +269,8 @@ void
 window::update_hotkeys() {
 	hotkey_t new_hk;
 	std::vector<std::string> strs;
-	std::string s = get_pref().get< std::string >( po_hk_appear );
-	boost::split( strs, s, boost::is_any_of("+") );
+	std::string appear_hk = get_pref().get< std::string >( po_hk_appear );
+	boost::split( strs, appear_hk, boost::is_any_of("+") );
 	//
 	size_t check_cnt = 0;
 	for ( size_t i = 0; i < strs.size(); ++i ) {
@@ -317,29 +315,118 @@ window::update_hotkeys() {
 			}
 		}
 	} else {
-		this->get_logger() << "Invalid hotkey format " << s << std::endl;
+		this->get_logger() << "Invalid hotkey format " << appear_hk << std::endl;
 	}
 }
 //
-void
-window::update_placement(){
-	std::string const alignment = get_pref().get< std::string >( po_ui_alignment );
+void window::update_placement(){
+	std::string const alig_str	= get_pref().get< std::string >( po_ui_alignment );
 	unsigned int const width	= get_pref().get< unsigned int >( po_ui_width );
 	unsigned int const height	= get_pref().get< unsigned int >( po_ui_height );
 	bool const clip				= get_pref().get< bool >( po_ui_clip );
 	//
+	alignment::type align = alignment::client;
+	std::vector<std::string> strs;
+	boost::split( strs, alig_str, boost::is_any_of("+") );
+	//
+	size_t check_cnt = 0;
+	for ( size_t i = 0; i < strs.size(); ++i ) {
+		std::string const& s = strs[i];
+		//
+		check_cnt++;
+		if ( s == "client" ){
+			align |= alignment::client;
+		} else if ( s == "top" ){
+			align |= alignment::top;
+		} else if ( s == "bottom" ) {
+			align |= alignment::bottom;
+		} else if ( s == "vcenter" ) {
+			align |= alignment::vcenter;
+		} else if ( s == "left" ) {
+			align |= alignment::left;
+		} else if ( s == "right" ) {
+			align |= alignment::right;
+		} else if ( s == "hcenter" ) {
+			align |= alignment::hcenter;
+		} else if ( s == "center" ) {
+			align |= alignment::center;
+		} else {
+			check_cnt--;
+		}
+	}
+	//
+	if ( check_cnt == strs.size() ) {
+	} else {
+		this->get_logger() << "Invalid alignment format " << alig_str << std::endl;
+		align = alignment::top | alignment::vcenter;
+	}
+	//
 	RECT rt;
+	RECT wnd_rt;
 	//
 	SetRect( &rt, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
 	if ( clip ) {
 		SystemParametersInfo( SPI_GETWORKAREA, 0, &rt, 0 );
 	}
-	rt.bottom = rt.top + ( rt.bottom - rt.top ) * height / 100;
-
-	this->in_rect = rt;
-	this->anchor.x = rt.left;
-	this->anchor.y = rt.top - ( rt.bottom - rt.top );
+	//
+	alignment::type const h_align = align & alignment::hcenter;
+	alignment::type const v_align = align & alignment::vcenter;
+	//
+	int const rt_w = rt.right - rt.left;
+	int const rt_h = rt.bottom - rt.top;
+	int const wnd_rt_w = ((h_align)?(rt_w * width / 100):(rt_w));
+	int const wnd_rt_h = ((v_align)?(rt_h * height / 100):(rt_h));
+	SetRect( &wnd_rt, rt.left, rt.top, rt.left + wnd_rt_w, rt.top + wnd_rt_h );
+	//
+	int offs_dx = 0;
+	int offs_dy = 0;
+	if ( h_align == alignment::hcenter ) {
+		offs_dx = ( rt_w - wnd_rt_w ) / 2;
+	} else if ( h_align == alignment::right ) {
+		offs_dx = ( rt_w - wnd_rt_w );
+	}
+	if ( v_align == alignment::vcenter ) {
+		offs_dy = ( rt_h - wnd_rt_h ) / 2;
+	} else if ( v_align == alignment::bottom ) {
+		offs_dy = ( rt_h - wnd_rt_h );
+	}
+	OffsetRect( &wnd_rt, offs_dx, offs_dy );
+	//
+	this->in_rect = wnd_rt;
+	//
+	int anchor_dx = 0;
+	int anchor_dy = 0;
+	this->anchor.x = wnd_rt.left;
+	this->anchor.y = wnd_rt.top;
+	//
+	if ( h_align ) {
+		if ( ( h_align & alignment::left ) == h_align ) {
+			anchor_dx = -wnd_rt_w;
+		} else if ( ( h_align & alignment::right ) == h_align ) {
+			anchor_dx = wnd_rt_w;
+		}
+	}
+	if ( v_align ) {
+		if ( ( v_align & alignment::top ) == v_align ) {
+			anchor_dy = -wnd_rt_h;
+		} else if ( ( v_align & alignment::bottom ) == v_align ) {
+			anchor_dy = wnd_rt_h;
+		}
+	}
+	//
+	this->anchor.x += anchor_dx;
+	this->anchor.y += anchor_dy;
 }
 
+void window::update_position( HWND hWnd, bool dir, float mult ) {
+	if ( dir ) {
+		mult = 1.f - mult;
+	};
+	int x = in_rect.left + (int)( (float)( this->anchor.x - in_rect.left ) * mult );
+	int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
+	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
+	//
+	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
+}
 
 

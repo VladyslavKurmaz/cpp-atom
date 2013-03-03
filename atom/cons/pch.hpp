@@ -27,3 +27,18 @@ static atom::po::id_t const po_ui_width				=	po_ui_alignment + 1;
 static atom::po::id_t const po_ui_height			=	po_ui_width + 1;
 static atom::po::id_t const po_ui_clip				=	po_ui_height + 1;
 static atom::po::id_t const po_ui_alpha				=	po_ui_clip + 1;
+///
+struct alignment {
+	typedef int
+		type;
+	enum {
+		client	= 0x00,
+		left	= 0x01,
+		right	= 0x02,
+		hcenter	= left | right,
+		top		= 0x04,
+		bottom	= 0x08,
+		vcenter	= top | bottom,  
+		center	= vcenter | hcenter
+	};
+};
