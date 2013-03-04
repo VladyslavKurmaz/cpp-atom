@@ -107,6 +107,12 @@ private:
 	///
 	window( logger::shared_ptr l, pref::shared_ptr p );
 	//
+	frame::shared_ptr
+		current_frame;
+	//
+	bool
+		expand_mode;
+	//
 	process::shared_ptr
 		child;
 	//

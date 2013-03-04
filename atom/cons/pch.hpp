@@ -15,8 +15,8 @@ static atom::po::id_t const po_help					=	0;
 //[hk.*]
 static atom::po::id_t const po_hk_appear			=	po_help + 1;
 static atom::po::id_t const po_hk_split				=	po_hk_appear + 1;
-static atom::po::id_t const po_hk_minmax			=	po_hk_split + 1;
-static atom::po::id_t const po_hk_rotate			=	po_hk_minmax + 1;
+static atom::po::id_t const po_hk_expand			=	po_hk_split + 1;
+static atom::po::id_t const po_hk_rotate			=	po_hk_expand + 1;
 static atom::po::id_t const po_hk_next				=	po_hk_rotate + 1;
 static atom::po::id_t const po_hk_prev				=	po_hk_next + 1;
 static atom::po::id_t const po_hk_close				=	po_hk_prev + 1;
@@ -49,8 +49,8 @@ struct alignment {
 
 ///
 static WORD	const CMDID_SPLIT	= 100;
-static WORD	const CMDID_MINMAX	= CMDID_SPLIT + 1;
-static WORD	const CMDID_ROTATE	= CMDID_MINMAX + 1;
+static WORD	const CMDID_EXPAND	= CMDID_SPLIT + 1;
+static WORD	const CMDID_ROTATE	= CMDID_EXPAND + 1;
 static WORD	const CMDID_NEXT	= CMDID_ROTATE + 1;
 static WORD	const CMDID_PREV	= CMDID_NEXT + 1;
 static WORD	const CMDID_CLOSE	= CMDID_PREV + 1;

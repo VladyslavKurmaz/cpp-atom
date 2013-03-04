@@ -49,7 +49,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win]+[ctrl]+[alt]+[shift]+[VK]", desc ).
 		add_option( po_hk_split,				"hk.split",
 		boost::program_options::value<std::string>()->default_value("alt+S"),					"", desc ).
-		add_option( po_hk_minmax,				"hk.minmax",
+		add_option( po_hk_expand,				"hk.expand",
 		boost::program_options::value<std::string>()->default_value("alt+W"),					"", desc ).
 		add_option( po_hk_rotate,				"hk.rotate",
 		boost::program_options::value<std::string>()->default_value("alt+R"),					"", desc ).
@@ -74,7 +74,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<unsigned int>()->default_value( 0xF0 ),					"", desc ).
 		//[ui.font.*]
 		add_option( po_ui_font_name,			"ui.font.name",
-		boost::program_options::value<std::string>()->default_value("Consolas"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value( "Consolas" ),				"", desc ).
 		add_option( po_ui_font_height,			"ui.font.height",
 		boost::program_options::value< unsigned int >()->default_value( 16 ),					"", desc ).
 		add_option( po_ui_font_color,			"ui.font.color",

@@ -6,6 +6,8 @@
 
 window::window( logger::shared_ptr l, pref::shared_ptr p ) :
 wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
+	,	current_frame()
+	,	expand_mode( false )
 	,	child()
 	,	appear_hk()
 	,	accel()
@@ -19,10 +21,7 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
 
-	frame::shared_ptr f = frame::create(
-							get_value( boost::mpl::identity< window2logger >() ).item(),
-							get_value( boost::mpl::identity< window2pref >() ).item(),
-							frame::frame_coord( 0, 1, 0, 1, 2, 1 ) );
+	frame::shared_ptr f = current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 2, 1 ) );
 	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(), f );
 
 	atom::mount<window2frame>( this, f );
@@ -30,9 +29,6 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 1, 2, 4, 4 ) ) );
 	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 3, 4, 4, 4 ) ) );
 	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 3, 4, 1, 2, 4, 2 ) ) );
-
-
-
  
 	child->run( "cmd.exe" );
 	//child->run( "msbuild.exe" );
@@ -276,7 +272,8 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
 		return;
-	case CMDID_MINMAX:
+	case CMDID_EXPAND:
+		this->expand_mode = !this->expand_mode;
 		return;
 	case CMDID_ROTATE:
 		return;
@@ -467,8 +464,13 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 }
 
 void window::update_accels() {
-	this->accel.add_accel( CMDID_NEXT, false, true, false, true, VK_TAB );
-	this->accel.add_accel( CMDID_PREV, false, true, true, true, VK_TAB );
+
+	this->accel.add_accel( CMDID_SPLIT,		true, false, false, false, 's' );
+	this->accel.add_accel( CMDID_EXPAND,	true, false, false, false, 'w' );
+	this->accel.add_accel( CMDID_ROTATE,	true, false, false, false, 'r' );
+	this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
+	this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
+	this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
 	this->accel.build();
 }
 
@@ -480,7 +482,6 @@ void window::delete_font(){
 }
 
 void window::update_font() {
-#if 1
 	HFONT nfont = CreateFont(
 						get_pref().get< unsigned int >( po_ui_font_height ),
 						0,
@@ -497,20 +498,10 @@ void window::update_font() {
 						FIXED_PITCH,
 						get_pref().get< std::string >( po_ui_font_name ).c_str()
 						);
-	LOGFONT lf;
-	GetObject(nfont, sizeof(LOGFONT), &lf);
-#else
-	LOGFONT lf;
-	GetObject(GetStockObject(SYSTEM_FIXED_FONT), sizeof(LOGFONT), &lf);
-	//lf.lfPitchAndFamily = (lf.lfPitchAndFamily & ~3) | FIXED_PITCH;
-	lf.lfHeight *= 2;
-	HFONT nfont = CreateFontIndirect(&lf);
-#endif
 	if ( nfont != NULL ) {
 		delete_font();
 		this->font = nfont; 
 	} else {
-		this->get_logger() << "Font creation error" << std::endl;
+		this->get_logger() << "Font creation error: " << get_pref().get< std::string >( po_ui_font_name ) << std::endl;
 	}
-	//Consolas
 }
