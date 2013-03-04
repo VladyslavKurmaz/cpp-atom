@@ -74,7 +74,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<unsigned int>()->default_value( 0xF0 ),					"", desc ).
 		//[ui.font.*]
 		add_option( po_ui_font_name,			"ui.font.name",
-		boost::program_options::value<std::string>()->default_value("Courier New"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value("Consolas"),					"", desc ).
 		add_option( po_ui_font_height,			"ui.font.height",
 		boost::program_options::value< unsigned int >()->default_value( 16 ),					"", desc ).
 		add_option( po_ui_font_color,			"ui.font.color",

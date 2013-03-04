@@ -212,7 +212,7 @@ void window::onpaint( HWND hWnd ){
 			SetTextColor( cntx.dc, cntx.font_color );
 			SetBkMode( cntx.dc, TRANSPARENT );
 			InflateRect( &rt, -1, -1 );
-			DrawText( cntx.dc, "ABCDEFGH\nabcdefgh", -1, &rt, DT_LEFT | DT_TOP );
+			DrawText( cntx.dc, "ABCDEFGH abcdefgh\nabcdefgh", -1, &rt, DT_LEFT | DT_TOP );
 			return true;
 		}
 	};
@@ -474,14 +474,15 @@ void window::update_accels() {
 
 void window::delete_font(){
 	if ( this->font != NULL ) {
-		DeleteObject( font );
+		DeleteObject( this->font );
 	}
-	font = NULL;
+	this->font = NULL;
 }
 
 void window::update_font() {
+#if 1
 	HFONT nfont = CreateFont(
-						-get_pref().get< unsigned int >( po_ui_font_height ),
+						get_pref().get< unsigned int >( po_ui_font_height ),
 						0,
 						0,
 						0,
@@ -493,10 +494,21 @@ void window::update_font() {
 						OUT_OUTLINE_PRECIS,
 						CLIP_DEFAULT_PRECIS,
 						DEFAULT_QUALITY,
-						FIXED_PITCH | FF_MODERN,
+						FIXED_PITCH,
 						get_pref().get< std::string >( po_ui_font_name ).c_str()
 						);
+	LOGFONT lf;
+	GetObject(nfont, sizeof(LOGFONT), &lf);
+#else
+	LOGFONT lf;
+	GetObject(GetStockObject(SYSTEM_FIXED_FONT), sizeof(LOGFONT), &lf);
+	//lf.lfPitchAndFamily = (lf.lfPitchAndFamily & ~3) | FIXED_PITCH;
+	lf.lfHeight *= 2;
+	HFONT nfont = CreateFontIndirect(&lf);
+#endif
 	if ( nfont != NULL ) {
+		delete_font();
+		this->font = nfont; 
 	} else {
 		this->get_logger() << "Font creation error" << std::endl;
 	}
