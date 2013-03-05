@@ -269,6 +269,9 @@ namespace atom {
 		  wwindow const& activate() const {
 			SetForegroundWindow( this->wnd ); return (*this); }
 		  ///
+		  wwindow const& invalidate() const {
+			InvalidateRect( this->wnd, NULL, TRUE ); return (*this); }
+		  ///
 		  wwindow const& set_styles( DWORD const style, DWORD const style_ex ) const {
 			  SetWindowLong( this->get_hwnd(), GWL_STYLE, style );
 			  SetWindowLong( this->get_hwnd(), GWL_EXSTYLE, style_ex );

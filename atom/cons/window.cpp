@@ -186,11 +186,11 @@ void window::onpaint( HWND hWnd ){
 	//
 	window2frame const & l = this->get_value( boost::mpl::identity< window2frame >() );
 	struct _{
-		static bool __( frame::shared_ptr const& f, context const& cntx ) {
+		static bool __( frame::shared_ptr const& f, context const& cntx, bool const expand ) {
 			RECT rt;
 			int const rw = cntx.rect.right - cntx.rect.left;
 			int const rh = cntx.rect.bottom - cntx.rect.top;
-			frame::frame_coord const& coord = f->get_coord();
+			frame::frame_coord const& coord = ((expand)?(frame::frame_coord( 0, 1, 0, 1, 1, 1 )):(f->get_coord()));
 			rt.left 	= cntx.rect.left + coord.left_n * rw / coord.left_d;
 			rt.top 		= cntx.rect.top + coord.top_n * rh / coord.top_d;
 			rt.right	= rt.left + rw / coord.width;
@@ -208,12 +208,17 @@ void window::onpaint( HWND hWnd ){
 			SetTextColor( cntx.dc, cntx.font_color );
 			SetBkMode( cntx.dc, TRANSPARENT );
 			InflateRect( &rt, -1, -1 );
-			DrawText( cntx.dc, "ABCDEFGH abcdefgh\nabcdefgh", -1, &rt, DT_LEFT | DT_TOP );
+			std::stringstream ss;
+			ss << f.get();
+			DrawText( cntx.dc, ss.str().c_str(), -1, &rt, DT_LEFT | DT_TOP );
 			return true;
 		}
 	};
-	l.for_each( boost::bind( &_::__, _1, boost::ref( c ) ) );
-	
+	if ( this->expand_mode ) {
+		_::__( this->current_frame, c, true );
+	} else {
+		l.for_each( boost::bind( &_::__, _1, boost::ref( c ), false ) );
+	}
 /*
 
 
@@ -271,19 +276,22 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
-		return;
+		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
-		return;
+		break;
 	case CMDID_ROTATE:
-		return;
+		break;
 	case CMDID_NEXT:
-		return;
+		break;
 	case CMDID_PREV:
-		return;
+		break;
 	case CMDID_CLOSE:
+		break;
+	default:
 		return;
 	}
+	this->invalidate();
 }
 
 /*
