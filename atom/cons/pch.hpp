@@ -20,8 +20,14 @@ static atom::po::id_t const po_hk_rotate			=	po_hk_expand + 1;
 static atom::po::id_t const po_hk_next				=	po_hk_rotate + 1;
 static atom::po::id_t const po_hk_prev				=	po_hk_next + 1;
 static atom::po::id_t const po_hk_close				=	po_hk_prev + 1;
+static atom::po::id_t const po_hk_tty1				=	po_hk_close + 1;
+static atom::po::id_t const po_hk_tty2				=	po_hk_tty1 + 1;
+static atom::po::id_t const po_hk_tty3				=	po_hk_tty2 + 1;
+static atom::po::id_t const po_hk_tty4				=	po_hk_tty3 + 1;
+static atom::po::id_t const po_hk_tty5				=	po_hk_tty4 + 1;
+static atom::po::id_t const po_hk_tty6				=	po_hk_tty5 + 1;
 //[ui.*]
-static atom::po::id_t const po_ui_timeout			=	po_hk_close + 1;
+static atom::po::id_t const po_ui_timeout			=	po_hk_tty6 + 1;
 static atom::po::id_t const po_ui_alignment			=	po_ui_timeout + 1;
 static atom::po::id_t const po_ui_width				=	po_ui_alignment + 1;
 static atom::po::id_t const po_ui_height			=	po_ui_width + 1;

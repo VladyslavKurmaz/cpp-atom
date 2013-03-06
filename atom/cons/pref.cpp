@@ -59,6 +59,18 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<std::string>()->default_value("ctrl+shift+TAB"),			"", desc ).
 		add_option( po_hk_close,				"hk.close",
 		boost::program_options::value<std::string>()->default_value("ctrl+F4"),					"", desc ).
+		add_option( po_hk_tty1,					"hk.tty1",
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+F1"),				"", desc ).
+		add_option( po_hk_tty2,					"hk.tty2",
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+F2"),				"", desc ).
+		add_option( po_hk_tty3,					"hk.tty3",
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+F3"),				"", desc ).
+		add_option( po_hk_tty4,					"hk.tty4",
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+F4"),				"", desc ).
+		add_option( po_hk_tty5,					"hk.tty5",
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+F5"),				"", desc ).
+		add_option( po_hk_tty6,					"hk.tty6",
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+F6"),				"", desc ).
 		//[ui.*]
 		add_option( po_ui_timeout,				"ui.timeout",
 		boost::program_options::value<unsigned int>()->default_value( 250 ),					"", desc ).

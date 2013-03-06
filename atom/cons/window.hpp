@@ -47,6 +47,8 @@ class window :	public atom::wwindow< window, LOKI_TYPELIST_7( onchar_pair_type_t
 				public boost::enable_shared_from_this< window > {
 	typedef atom::wwindow< window, LOKI_TYPELIST_7( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >
 		base_window_t;
+	typedef atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >
+		base_node_t;
 public:
 	///
 	typedef boost::shared_ptr< window >
@@ -63,6 +65,9 @@ public:
 	///
 	void
 		run();
+	///
+	void
+		clear();
 	///
 	void onchar( HWND hWnd, TCHAR ch, int cRepeat );
 	///
@@ -109,6 +114,9 @@ private:
 	//
 	frame::shared_ptr
 		current_frame;
+	//
+	frame::shared_ptr
+		head_frame;
 	//
 	bool
 		expand_mode;

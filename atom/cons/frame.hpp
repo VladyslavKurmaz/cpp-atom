@@ -10,6 +10,8 @@ typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > frame2pref;
 class frame :
 	public atom::node< LOKI_TYPELIST_2( frame2logger, frame2pref ) >,
 	public boost::enable_shared_from_this< frame > {
+	typedef atom::node< LOKI_TYPELIST_2( frame2logger, frame2pref ) >
+		base_node_t;
 public:
 	///
 	typedef boost::shared_ptr< frame >
@@ -27,13 +29,26 @@ public:
 	};
 	///
 	static shared_ptr create( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc ) {
-		return shared_ptr( new frame( l, p, fc ) );
+		shared_ptr f = shared_ptr( new frame( l, p, fc ) );
+		f->prev = f;
+		f->next = f;
+		return ( f );
 	}
 	///
 	frame_coord const & get_coord() const {
 		return ( this->coord ); }
 	///
+	shared_ptr get_prev() const {
+		return ( this->prev ); }
+	///
+	shared_ptr get_next() const {
+		return ( this->next ); }
+	///
 	~frame();
+	///
+	shared_ptr split();
+	///
+	void clear();
 
 protected:
 	//
@@ -43,6 +58,12 @@ protected:
 private:
 	frame_coord
 		coord;
+	///
+	shared_ptr
+		next;
+	///
+	shared_ptr
+		prev;
 	///
 	frame( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc );
 };

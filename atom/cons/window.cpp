@@ -21,14 +21,15 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
 
-	frame::shared_ptr f = current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 2, 1 ) );
-	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(), f );
+	this->head_frame = 
+	this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 2, 1 ) );
+	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(), this->head_frame );
 
-	atom::mount<window2frame>( this, f );
-	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 0, 1, 2, 2 ) ) );
-	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 1, 2, 4, 4 ) ) );
-	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 3, 4, 4, 4 ) ) );
-	atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 3, 4, 1, 2, 4, 2 ) ) );
+	atom::mount<window2frame>( this, this->head_frame );
+	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 0, 1, 2, 2 ) ) );
+	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 1, 2, 4, 4 ) ) );
+	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 3, 4, 4, 4 ) ) );
+	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 3, 4, 1, 2, 4, 2 ) ) );
  
 	child->run( "cmd.exe" );
 	//child->run( "msbuild.exe" );
@@ -98,6 +99,12 @@ void window::run() {
 	};
 	base_window_t::run( boost::bind( _::__, _1, _2, boost::ref( this->accel ) ) );
 }
+
+void window::clear() {
+	// ???? enum frames
+	base_node_t::clear();
+}
+
 
 std::basic_string< TCHAR > str;
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
