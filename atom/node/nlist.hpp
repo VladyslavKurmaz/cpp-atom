@@ -54,6 +54,14 @@ namespace atom {
 				pred( (*it) );
 			}
 		}
+		///
+		void for_each( boost::function< bool( T& ) > pred  ) {
+			base_type::iterator it 	= base_type::begin();
+			base_type::iterator eit = base_type::end();
+			for( ; it != eit; ++it ) {
+				pred( (*it) );
+			}
+		}
 	};
 }
 #endif//ATOM_NODE_NLIST_HPP

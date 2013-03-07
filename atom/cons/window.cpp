@@ -22,14 +22,9 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	atom::mount<window2pref>( this, p );
 
 	this->head_frame = 
-	this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 2, 1 ) );
+	this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 1, 1 ) );
 	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(), this->head_frame );
-
 	atom::mount<window2frame>( this, this->head_frame );
-	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 0, 1, 2, 2 ) ) );
-	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 1, 2, 4, 4 ) ) );
-	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 1, 2, 3, 4, 4, 4 ) ) );
-	//atom::mount<window2frame>( this, frame::create( l, p, frame::frame_coord( 3, 4, 1, 2, 4, 2 ) ) );
  
 	child->run( "cmd.exe" );
 	//child->run( "msbuild.exe" );
@@ -101,7 +96,14 @@ void window::run() {
 }
 
 void window::clear() {
-	// ???? enum frames
+	window2frame& l = this->get_value( boost::mpl::identity< window2frame >() );
+	struct _{
+		static bool __( frame::shared_ptr& f ) {
+			f->clear();
+			return true;
+		}
+	};
+	l.for_each( boost::bind( &_::__, _1 ) );
 	base_node_t::clear();
 }
 
@@ -283,6 +285,8 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
+		this->current_frame = this->current_frame->split();
+		atom::mount<window2frame>( this, this->current_frame );
 		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
