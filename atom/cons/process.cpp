@@ -13,7 +13,8 @@ HANDLE	thread			= NULL;
 DWORD	threadid		= 0;
 bool	run_thread		= true;
 
-process::process( logger::shared_ptr l ) {
+process::process( logger::shared_ptr l ) :
+		buffer(){
 	atom::mount<process2logger>( this, l );
 }
 
@@ -44,6 +45,7 @@ DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
 		self->get_logger() << atom::string2string<std::string>( wstr ); 
 #else
 		lpBuffer[nBytesRead] = '\0';
+		self->append( lpBuffer );
 		self->get_logger() << lpBuffer; 
 #endif
 	}

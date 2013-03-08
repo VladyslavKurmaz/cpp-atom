@@ -175,9 +175,10 @@ void window::onpaint( HWND hWnd ){
 			InflateRect( &rt, -1, -1 );
 			//
 			if ( f == cntx.current ) {
-				std::stringstream ss;
-				ss << f.get();
-				DrawText( cntx.dc, ss.str().c_str(), -1, &rt, DT_LEFT | DT_TOP );
+				TCHAR const * txt = f->get_buffer();
+				RECT rect = rt;
+				rect.top = rect.bottom - DrawText( cntx.dc, txt, -1, &rt, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_CALCRECT );
+				DrawText( cntx.dc, txt, -1, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK );
 			}
 			return true;
 		}

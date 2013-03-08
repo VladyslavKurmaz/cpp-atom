@@ -68,6 +68,9 @@ public:
 	shared_ptr get_prev() const {
 		return ( this->prev ); }
 	///
+	TCHAR const* get_buffer() const {
+		return ( this->process->get_buffer() ); }
+	///
 	shared_ptr get_next() const {
 		return ( this->next ); }
 	///

@@ -27,6 +27,16 @@ public:
 	void 
 		write( char const ch );
 	///
+	TCHAR const* 
+	get_buffer() {
+		return ( this->buffer.c_str() );
+	}
+	///
+	void 
+	append( CHAR* s ) {
+		this->buffer += s;
+	}
+	///
 	void 
 		close();
 	//
@@ -36,6 +46,8 @@ public:
 
 protected:
 private:
+	std::basic_string<TCHAR>
+		buffer;
 	///
 	process( logger::shared_ptr l );
 };
