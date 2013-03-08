@@ -13,9 +13,8 @@ HANDLE	thread			= NULL;
 DWORD	threadid		= 0;
 bool	run_thread		= true;
 
-process::process( logger::shared_ptr l, frame::shared_ptr f ) {
+process::process( logger::shared_ptr l ) {
 	atom::mount<process2logger>( this, l );
-	atom::mount<process2frame>( this, f );
 }
 
 process::~process() {

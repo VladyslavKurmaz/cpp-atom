@@ -5,6 +5,7 @@
 
 #include "./log.hpp"
 #include "./pref.hpp"
+#include "./process.hpp"
 #include "./window.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;

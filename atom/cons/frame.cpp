@@ -1,10 +1,12 @@
 #include "./pch.hpp"
+#include "./process.hpp"
 #include "./frame.hpp"
 
 frame::frame( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc ) :
 		coord( fc )
 	,	next()
-	,	prev() {
+	,	prev()
+	,	process() {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
 }
@@ -41,7 +43,28 @@ frame::shared_ptr frame::split( bool const pref_h ){
 	return f;
 }
 
+void frame::run( std::basic_string<TCHAR> const& cmd ) {
+	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item() );
+	this->process->run( cmd );
+	//child->run( "cmd.exe" );
+	//child->run( "msbuild.exe" );
+	//child->run( "c:\\work\\env\\cygwin\\bin\\bash.exe --login -i" );
+	//child->run( "powershell.exe" );
+	//child->run( "cmd /c \"powershell.exe\"" );
+}
+
+void  frame::onchar( TCHAR ch ) {
+	if ( ch == VK_RETURN ) {
+		process->write( "\x0D\x0A" );
+	} else {
+		process->write( ch );
+	}
+}
+
 void frame::clear() {
+	if ( this->process ) {
+		process->close();
+	}
 	this->next = this->prev = frame::shared_ptr();
 }
 

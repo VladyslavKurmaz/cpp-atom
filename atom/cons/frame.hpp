@@ -2,8 +2,7 @@
 
 #include "./log.hpp"
 #include "./pref.hpp"
-
-
+#include "./process.hpp"
 
 class fraction {
 public:
@@ -76,6 +75,10 @@ public:
 	///
 	shared_ptr split( bool const pref_h );
 	///
+	void run( std::basic_string<TCHAR> const& cmd );
+	///
+	void onchar( TCHAR ch );
+	///
 	void clear();
 
 protected:
@@ -92,6 +95,9 @@ private:
 	///
 	shared_ptr
 		prev;
+	//
+	process::shared_ptr
+		process;
 	///
 	frame( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc );
 };

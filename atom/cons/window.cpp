@@ -11,7 +11,6 @@ window::window( logger::shared_ptr l, pref::shared_ptr p ) :
 wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	current_frame()
 	,	expand_mode( false )
-	,	child()
 	,	appear_hk()
 	,	accel()
 	,	anchor()
@@ -23,18 +22,10 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	//
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
-
-	this->head_frame = 
-	this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 1, 1 ) );
-	child = process::create( l, this->head_frame );
-	atom::mount<window2frame>( this, this->head_frame );
- 
-	child->run( "cmd.exe" );
-	//child->run( "msbuild.exe" );
-	//child->run( "c:\\work\\env\\cygwin\\bin\\bash.exe --login -i" );
-	//child->run( "powershell.exe" );
-	//child->run( "cmd /c \"powershell.exe\"" );
-
+	//
+	atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
+	this->current_frame->run( "cmd" );
+	// 
 	this->get_logger() << "create window" << std::endl;
 }
 
@@ -110,11 +101,7 @@ void window::clear() {
 }
 
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
-	if ( ch == VK_RETURN ) {
-		child->write( "\x0D\x0A" );
-	} else {
-		child->write( ch );
-	}
+	this->current_frame->onchar( ch );
 	InvalidateRect( hWnd, NULL, TRUE );
 }
 
@@ -203,7 +190,6 @@ void window::onpaint( HWND hWnd ){
 }
 
 void window::onclose( HWND ) {
-	child->close();
 	PostQuitMessage( 0 );
 }
 

@@ -4,7 +4,6 @@
 #include <atom/util/waccel.hpp>
 #include "./log.hpp"
 #include "./pref.hpp"
-#include "./process.hpp"
 #include "./frame.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > window2logger;
@@ -120,9 +119,6 @@ private:
 	//
 	bool
 		expand_mode;
-	//
-	process::shared_ptr
-		child;
 	//
 	struct hotkey_t {
 		int id;

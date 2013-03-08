@@ -1,22 +1,19 @@
 #pragma once
 
 #include "./log.hpp"
-#include "./frame.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > process2logger;
-typedef atom::nstorage< frame, boost::shared_ptr, atom::narray1 > process2frame;
-
 
 class process :
-	public atom::node< LOKI_TYPELIST_2( process2logger, process2frame ) >,
+	public atom::node< LOKI_TYPELIST_1( process2logger ) >,
 	public boost::enable_shared_from_this< process > {
 public:
 	///
 	typedef boost::shared_ptr< process >
 		shared_ptr;
 	///
-	static shared_ptr create( logger::shared_ptr l, frame::shared_ptr f ) {
-		return shared_ptr( new process( l, f ) );
+	static shared_ptr process::create( logger::shared_ptr l ) {
+		return shared_ptr( new process( l ) );
 	}
 	///
 	~process();
@@ -40,5 +37,5 @@ public:
 protected:
 private:
 	///
-	process( logger::shared_ptr l, frame::shared_ptr f );
+	process( logger::shared_ptr l );
 };
