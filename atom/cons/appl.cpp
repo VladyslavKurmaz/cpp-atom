@@ -14,9 +14,10 @@ bool appl::init() {
 	return ( this->get_window().init() );
 }
 
-void appl::run() {
+appl& appl::run() {
 	this->get_window().show( true ).activate();
 	this->get_window().run();
+	return (*this);
 }
 
 void appl::clear() {

@@ -5,40 +5,17 @@
 
 // http://support.microsoft.com/default.aspx?scid=kb;EN-US;q190351&wa=wsignin1.0
 
-
-
-struct handler {
-
-};
-
-handler h;
-
-
-template < typename T >
-class router {
-
-
-public:
-	static LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
-		static message< T > m( INITLIST_3( &handler::oncreate, &handler::onclose, &handler::ondestroy ) );
-		return ( m.process( hWnd, uMsg, wParam, lParam ) );
-	}
-};
-
 int main( int argc, char *argv[] )
 {
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		logger::shared_ptr l = logger::create();
-		std::cout << "1" << std::endl;
-		l->add_std_cout() << "hi there" << std::endl;
-		std::cout << "2" << std::endl;
+		l->add_std_cout();
 		//
 		pref::shared_ptr p = pref::create( l );
 		if( p->init( argc, argv ) ) {
 			appl::shared_ptr a = appl::create( l, p );
 			if ( a->init() ) {
-				a->run();
-				a->clear();
+				a->run().clear();
 			}
 		}
 	}

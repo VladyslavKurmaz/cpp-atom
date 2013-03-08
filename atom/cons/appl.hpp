@@ -28,7 +28,7 @@ public:
 	bool
 		init();
 	///
-	void
+	appl&
 		run();
 	///
 	void

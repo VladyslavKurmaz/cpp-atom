@@ -26,7 +26,7 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 
 	this->head_frame = 
 	this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 1, 1 ) );
-	child = process::create( get_value( boost::mpl::identity< window2logger >() ).item(), this->head_frame );
+	child = process::create( l, this->head_frame );
 	atom::mount<window2frame>( this, this->head_frame );
  
 	child->run( "cmd.exe" );
@@ -109,41 +109,13 @@ void window::clear() {
 	l.for_each( boost::bind( &_::__, _1 ) );
 }
 
-
-std::basic_string< TCHAR > str;
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
-	std::string s;
-	s += ch;
-	str = s;
-#if 1
 	if ( ch == VK_RETURN ) {
-		child->write( '\x0A' );
-	} else if ( ch == VK_BACK ) {
-		child->write( "\x1B\x08" );
+		child->write( "\x0D\x0A" );
 	} else {
 		child->write( ch );
 	}
-#else
-	switch( ch ) {
-	case VK_BACK: {
-			if ( str.length() ) {
-				str.pop_back(); }
-			break;
-		}
-	case VK_RETURN: {
-			str += "\x0A";
-			child->write( str );
-			str.clear();
-			break;
-		}
-	default : {
-			str += ch;
-			break;
-		}
-	}
-#endif		
 	InvalidateRect( hWnd, NULL, TRUE );
-	//this->get_logger() << ch << ":" << (unsigned int)(unsigned char)ch << " ";
 }
 
 void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
@@ -158,14 +130,6 @@ void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 			this->show( true ).activate();
 		}
 	}
-}
-
-void draw_frame( HDC hdc, RECT rt ){
-	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
-	InflateRect( &rt, -1, -1 );
-	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( BLACK_BRUSH ) );
-	InflateRect( &rt, -1, -1 );
-	FrameRect( hdc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
 }
 
 void window::onpaint( HWND hWnd ){
@@ -236,24 +200,6 @@ void window::onpaint( HWND hWnd ){
 	} else {
 		l.for_each( boost::bind( &_::__, _1, boost::ref( c ), false ) );
 	}
-/*
-
-
-	rt.right /= 2;
-	draw_frame( hdc, rt );
-	OffsetRect( &rt, rt.right, 0 );
-	rt.bottom /= 2;
-	draw_frame( hdc, rt );
-	OffsetRect( &rt, 0, rt.bottom );
-	draw_frame( hdc, rt );
-
-	InflateRect( &rt, -4, -4 );
-
-
-
-	TextOut( hdc, rt.left, rt.top, str.c_str(), str.length() );
-	DeleteObject(hFont);
-*/
 }
 
 void window::onclose( HWND ) {

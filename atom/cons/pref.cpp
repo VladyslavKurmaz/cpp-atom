@@ -23,10 +23,6 @@ ui.color.log.font
 ui.color.vertical.scroll
 ui.color.horizontal.scroll
 
-ui.margin
-ui.border
-ui.spacing
-
 ui.alignment top|left|bottom|right
 ui.full-screen true|false
 
