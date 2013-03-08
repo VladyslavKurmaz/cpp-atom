@@ -38,6 +38,7 @@ int main( int argc, char *argv[] )
 			appl::shared_ptr a = appl::create( l, p );
 			if ( a->init() ) {
 				a->run();
+				a->clear();
 			}
 		}
 	}

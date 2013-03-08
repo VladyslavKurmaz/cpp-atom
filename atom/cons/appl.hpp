@@ -30,6 +30,9 @@ public:
 	///
 	void
 		run();
+	///
+	void
+		clear();
 
 protected:
 	//

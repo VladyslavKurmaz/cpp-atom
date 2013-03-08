@@ -4,6 +4,9 @@
 #include <boost/algorithm/string.hpp>
 #include "./window.hpp"
 
+#define RECT_WIDTH( r ) ( (r).right - (r).left )
+#define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
+
 window::window( logger::shared_ptr l, pref::shared_ptr p ) :
 wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	current_frame()
@@ -104,7 +107,6 @@ void window::clear() {
 		}
 	};
 	l.for_each( boost::bind( &_::__, _1 ) );
-	base_node_t::clear();
 }
 
 
@@ -180,6 +182,8 @@ void window::onpaint( HWND hWnd ){
 		COLORREF		padding_color;
 		HFONT			font;
 		COLORREF		font_color;
+		frame::shared_ptr
+						current;
 
 		context( HWND w, window& pw ) : wnd( w ) {
 			dc = BeginPaint( wnd, &ps ); 
@@ -187,6 +191,7 @@ void window::onpaint( HWND hWnd ){
 			//
 			font		= pw.font;
 			font_color	= pw.get_pref().get< unsigned int >( po_ui_font_color );
+			current		= pw.current_frame;
 		}
 		~context() {
 			EndPaint( wnd, &ps );
@@ -200,8 +205,8 @@ void window::onpaint( HWND hWnd ){
 			int const rw = cntx.rect.right - cntx.rect.left;
 			int const rh = cntx.rect.bottom - cntx.rect.top;
 			frame::frame_coord const& coord = ((expand)?(frame::frame_coord( 0, 1, 0, 1, 1, 1 )):(f->get_coord()));
-			rt.left 	= cntx.rect.left + coord.left_n * rw / coord.left_d;
-			rt.top 		= cntx.rect.top + coord.top_n * rh / coord.top_d;
+			rt.left 	= cntx.rect.left + coord.left.get_n() * rw / coord.left.get_d();
+			rt.top 		= cntx.rect.top + coord.top.get_n() * rh / coord.top.get_d();
 			rt.right	= rt.left + rw / coord.width;
 			rt.bottom	= rt.top + rh / coord.height;
 			//
@@ -217,9 +222,12 @@ void window::onpaint( HWND hWnd ){
 			SetTextColor( cntx.dc, cntx.font_color );
 			SetBkMode( cntx.dc, TRANSPARENT );
 			InflateRect( &rt, -1, -1 );
-			std::stringstream ss;
-			ss << f.get();
-			DrawText( cntx.dc, ss.str().c_str(), -1, &rt, DT_LEFT | DT_TOP );
+			//
+			if ( f == cntx.current ) {
+				std::stringstream ss;
+				ss << f.get();
+				DrawText( cntx.dc, ss.str().c_str(), -1, &rt, DT_LEFT | DT_TOP );
+			}
 			return true;
 		}
 	};
@@ -285,8 +293,7 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
-		this->current_frame = this->current_frame->split();
-		atom::mount<window2frame>( this, this->current_frame );
+		atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
 		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
@@ -294,8 +301,10 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_ROTATE:
 		break;
 	case CMDID_NEXT:
+		this->current_frame = this->current_frame->get_next();
 		break;
 	case CMDID_PREV:
+		this->current_frame = this->current_frame->get_prev();
 		break;
 	case CMDID_CLOSE:
 		break;

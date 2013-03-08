@@ -19,4 +19,8 @@ void appl::run() {
 	this->get_window().run();
 }
 
+void appl::clear() {
+	this->get_window().clear();
+}
+
 
