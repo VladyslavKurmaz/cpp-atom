@@ -32,20 +32,49 @@ public:
 		return ( this->buffer.c_str() );
 	}
 	///
-	void 
-	append( CHAR* s ) {
+	void append( CHAR* s ) {
 		this->buffer += s;
+	}
+	///
+	bool is_running() {
+		return ( this->run_thread );
+	}
+	///
+	HANDLE get_output_read() {
+		return ( this->output_read );
 	}
 	///
 	void 
 		close();
+
+protected:
 	//
 	logger& get_logger() {
 		return ( *( get_value( boost::mpl::identity< process2logger >() ).item() ) );
 	}
-
-protected:
 private:
+	//
+	HANDLE
+		std_in;
+	//
+	HANDLE
+		child_process;
+	//
+	HANDLE
+		output_read;
+	//
+	HANDLE
+		input_write;
+	//
+	HANDLE
+		thread;
+	//
+	DWORD
+		threadid;
+	//
+	bool
+		run_thread;
+	//
 	std::basic_string<TCHAR>
 		buffer;
 	///

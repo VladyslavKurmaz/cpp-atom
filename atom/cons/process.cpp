@@ -5,16 +5,16 @@
 
 // https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
 
-HANDLE	std_in			= NULL;
-HANDLE	child_process	= NULL;
-HANDLE	output_read		= NULL;
-HANDLE	input_write		= NULL;
-HANDLE	thread			= NULL;
-DWORD	threadid		= 0;
-bool	run_thread		= true;
 
 process::process( logger::shared_ptr l ) :
-		buffer(){
+		buffer()
+	,	std_in( NULL )
+	,	child_process( NULL )
+	,	output_read( NULL )
+	,	input_write( NULL )
+	,	thread( NULL )
+	,	threadid( 0 )
+	,	run_thread( true ) {
 	atom::mount<process2logger>( this, l );
 }
 
@@ -26,14 +26,15 @@ std::string get_last_error( std::string const& caption ) {
 }
 
 DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
-	process* self = (process*)lpvThreadParam;
+	boost::scoped_ptr< process::shared_ptr > ptr( (process::shared_ptr*)lpvThreadParam );
+	process::shared_ptr self( *ptr );
 	//
 	CHAR lpBuffer[256];
 	DWORD nBytesRead;
 
-	while( run_thread ) {
+	while( self->is_running() ) {
 		ZeroMemory( lpBuffer, sizeof(lpBuffer) );
-		if ( !ReadFile( output_read, lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
+		if ( !ReadFile( self->get_output_read(), lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
 			if (GetLastError() == ERROR_BROKEN_PIPE)
 				break; // pipe done - normal exit path.
 			else
@@ -46,7 +47,6 @@ DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
 #else
 		lpBuffer[nBytesRead] = '\0';
 		self->append( lpBuffer );
-		self->get_logger() << lpBuffer; 
 #endif
 	}
 	return 0;
@@ -129,17 +129,17 @@ void process::run( std::basic_string<TCHAR> const& cmd ){
 		throw get_last_error( "Close error pipe write handle" );
 	}
 	//
-	thread = CreateThread( NULL, 0, read_from_pipe, (LPVOID)this, 0, &threadid );
+	shared_ptr* ptr = new shared_ptr( shared_from_this() );
+	thread = CreateThread( NULL, 0, read_from_pipe, (LPVOID)ptr, 0, &threadid );
 	if ( thread == NULL) {
+		delete ptr;
 		throw get_last_error( "Read thread" );
 	}
 }
 
 void process::write( std::string const& str ) {
 	DWORD nBytesWrote;
-//	std::wstring wstr = atom::string2string<std::wstring>( str );
 	if ( !WriteFile( input_write, str.c_str(), str.length(), &nBytesWrote, NULL ) )
-//	if ( !WriteFile( input_write, wstr.c_str(), wstr.length() * sizeof(wchar_t), &nBytesWrote, NULL ) )
 	{
 		if ( GetLastError() == ERROR_NO_DATA )
 			get_last_error( "Write pipe was closed" );

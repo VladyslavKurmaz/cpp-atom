@@ -86,7 +86,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_ui_font_height,			"ui.font.height",
 		boost::program_options::value< unsigned int >()->default_value( 16 ),					"", desc ).
 		add_option( po_ui_font_color,			"ui.font.color",
-		boost::program_options::value< unsigned int >()->default_value( 0x00FF00 ),				"", desc );
+		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc );
 
 	
 

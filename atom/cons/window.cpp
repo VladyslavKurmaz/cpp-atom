@@ -227,6 +227,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
 		atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
+		this->current_frame->run( "cmd" );
 		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
