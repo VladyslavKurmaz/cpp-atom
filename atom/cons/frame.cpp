@@ -43,7 +43,7 @@ frame::shared_ptr frame::split( bool const pref_h ){
 	return f;
 }
 
-void frame::run( std::basic_string<TCHAR> const& cmd ) {
+void frame::run( uni_string const& cmd ) {
 	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item() );
 	this->process->run( cmd );
 	//child->run( "cmd.exe" );

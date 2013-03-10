@@ -11,21 +11,6 @@ profile.location.global
 profile.location.user
 profile.location.local
 
-
-ui.alpha
-ui.color.bk
-ui.color.command.bk
-ui.color.command.text
-ui.color.command.font
-ui.color.log.bk
-ui.color.log.text
-ui.color.log.font
-ui.color.vertical.scroll
-ui.color.horizontal.scroll
-
-ui.alignment top|left|bottom|right
-ui.full-screen true|false
-
 hk.edit.exec VK_RETURN
 hk.edit.ml.enter VK_CONTROL + VK_RETURN
 hk.edit.ml.new-line VK_RETURN
@@ -42,7 +27,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_help,					"help",											"Show this help", desc ).
 		//[hk.*]
 		add_option( po_hk_appear,				"hk.appear",
-		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win]+[ctrl]+[alt]+[shift]+[VK]", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+][VK]", desc ).
 		add_option( po_hk_split,				"hk.split",
 		boost::program_options::value<std::string>()->default_value("alt+S"),					"", desc ).
 		add_option( po_hk_expand,				"hk.expand",
@@ -71,7 +56,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_ui_timeout,				"ui.timeout",
 		boost::program_options::value<unsigned int>()->default_value( 250 ),					"", desc ).
 		add_option( po_ui_alignment,			"ui.alignment",
-		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom]+[left|right]", desc ).
+		boost::program_options::value<std::string>()->default_value("top"),						"top|bottom|left|right|center|vcenter|client", desc ).
 		add_option( po_ui_width,				"ui.width",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_height,				"ui.height",
@@ -80,31 +65,33 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
 		add_option( po_ui_alpha,				"ui.alpha",
 		boost::program_options::value<unsigned int>()->default_value( 0xF0 ),					"", desc ).
+		add_option( po_ui_bk_color,				"ui.bk.color",
+		boost::program_options::value<unsigned int>()->default_value( 0x000000 ),				"", desc ).
+		add_option( po_ui_scroll_size,			"ui.scroll.size",
+		boost::program_options::value<unsigned int>()->default_value( 2 ),						"", desc ).
+		add_option( po_ui_scroll_color,			"ui.scroll.color",
+		boost::program_options::value<unsigned int>()->default_value( 0x00FF00 ),				"", desc ).
 		//[ui.font.*]
 		add_option( po_ui_font_name,			"ui.font.name",
 		boost::program_options::value<std::string>()->default_value( "Consolas" ),				"", desc ).
 		add_option( po_ui_font_height,			"ui.font.height",
 		boost::program_options::value< unsigned int >()->default_value( 16 ),					"", desc ).
 		add_option( po_ui_font_color,			"ui.font.color",
-		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc );
-
-	
-
-	/*
-
-
+		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
 		//[ui.margin.*]
+		add_option( po_ui_margin_size,			"ui.margin.size",
+		boost::program_options::value< unsigned int >()->default_value( 2 ),					"", desc ).
 		//[ui.border.*]
-		//[ui.padding.*]*/
-
-	this->get_logger() << "create pref" << std::endl;
-	std::stringstream ss;
-	desc.print( ss );
-	this->get_logger() << ss.str() << std::endl;
+		add_option( po_ui_border_size,			"ui.border.size",
+		boost::program_options::value< unsigned int >()->default_value( 1 ),					"", desc ).
+		add_option( po_ui_border_color,			"ui.border.color",
+		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
+		//[ui.padding.*]
+		add_option( po_ui_padding_size,			"ui.padding.size",
+		boost::program_options::value< unsigned int >()->default_value( 2 ),					"", desc );
 }
 
 pref::~pref() {
-	this->get_logger() << "free pref" << std::endl;
 }
 
 bool pref::init( int argc, char const * const argv[] ) {

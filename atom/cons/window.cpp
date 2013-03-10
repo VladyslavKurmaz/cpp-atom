@@ -18,6 +18,12 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	,	slide_dir( 0 )
 	,	slide_start_time()
 	,	slide_timer_id( 1 )
+	,	mem_dc( NULL )
+	,	mem_bitmap( NULL )
+	,	bk_brush( NULL )
+	,	border_brush( NULL )
+	,	scroll_brush( NULL )
+	,	font_brush( NULL )
 	,	font( NULL ) {
 	//
 	atom::mount<window2logger>( this, l );
@@ -26,11 +32,17 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
 	this->current_frame->run( "cmd" );
 	// 
-	this->get_logger() << "create window" << std::endl;
+	this->get_logger() << L"create window" << std::endl;
 }
 
 window::~window() {
-	delete_font();
+	DeleteDC( this->mem_dc );
+	DeleteObject( this->mem_bitmap );
+	DeleteObject( this->bk_brush );
+	DeleteObject( this->border_brush );
+	DeleteObject( this->scroll_brush );
+	DeleteObject( this->font_brush );
+	DeleteObject( this->font );
 	this->get_logger() << "free window" << std::endl;
 }
 
@@ -71,9 +83,37 @@ bool window::init() {
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
 		//
+		(*this)
+			( po_hk_appear )
+			( po_hk_split )
+			( po_hk_expand )
+			( po_hk_rotate )
+			( po_hk_next )
+			( po_hk_prev )
+			( po_hk_close )
+			( po_hk_tty1 )
+			( po_hk_tty2 )
+			( po_hk_tty3 )
+			( po_hk_tty4 )
+			( po_hk_tty5 )
+			( po_hk_tty6 )
+			( po_ui_timeout )
+			( po_ui_alignment )
+			( po_ui_width )
+			( po_ui_height )
+			( po_ui_clip )
+			( po_ui_alpha )
+			( po_ui_bk_color )
+			( po_ui_scroll_size )
+			( po_ui_scroll_color )
+			( po_ui_font_name )
+			( po_ui_font_height )
+			( po_ui_font_color )
+			( po_ui_margin_size )
+			( po_ui_border_size )
+			( po_ui_border_color )
+			( po_ui_padding_size );
 		this->update_hotkeys();
-		this->update_accels();
-		this->update_font();
 		//
 		return true;
 	}
@@ -425,45 +465,70 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
 
-void window::update_accels() {
-
-	this->accel.add_accel( CMDID_SPLIT,		true, false, false, false, 's' );
-	this->accel.add_accel( CMDID_EXPAND,	true, false, false, false, 'w' );
-	this->accel.add_accel( CMDID_ROTATE,	true, false, false, false, 'r' );
-	this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
-	this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
-	this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
-	this->accel.build();
-}
-
-void window::delete_font(){
-	if ( this->font != NULL ) {
-		DeleteObject( this->font );
+window& window::operator()( atom::po::id_t const opt ) {
+	switch( opt ) {
+	case po_hk_split:
+		this->accel.add_accel( CMDID_SPLIT,		true, false, false, false, 's' );
+		this->accel.build();
+		break;
+	case po_hk_expand:
+		this->accel.add_accel( CMDID_EXPAND,	true, false, false, false, 'w' );
+		this->accel.build();
+		break;
+	case po_hk_rotate:
+		this->accel.add_accel( CMDID_ROTATE,	true, false, false, false, 'r' );
+		this->accel.build();
+		break;
+	case po_hk_next:
+		this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
+		this->accel.build();
+		break;
+	case po_hk_prev:
+		this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
+		this->accel.build();
+		break;
+	case po_hk_close:
+		this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
+		this->accel.build();
+		break;
+	case po_hk_tty1:
+		break;
+	case po_hk_tty2:
+		break;
+	case po_hk_tty3:
+		break;
+	case po_hk_tty4:
+		break;
+	case po_hk_tty5:
+		break;
+	case po_hk_tty6:
+		break;
+	case po_ui_bk_color:
+		this->bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
+		break;
+	case po_ui_font_name:
+		HFONT nfont = CreateFont(
+			get_pref().get< unsigned int >( po_ui_font_height ),
+			0,
+			0,
+			0,
+			FW_NORMAL,
+			FALSE,
+			FALSE,
+			FALSE,
+			DEFAULT_CHARSET,
+			OUT_OUTLINE_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			DEFAULT_QUALITY,
+			FIXED_PITCH,
+			get_pref().get< std::string >( po_ui_font_name ).c_str()
+			);
+		if ( nfont != NULL ) {
+			this->font = nfont; 
+		} else {
+			this->get_logger() << "Font creation error: " << get_pref().get< std::string >( po_ui_font_name ) << std::endl;
+		}
+		break;
 	}
-	this->font = NULL;
-}
-
-void window::update_font() {
-	HFONT nfont = CreateFont(
-						get_pref().get< unsigned int >( po_ui_font_height ),
-						0,
-						0,
-						0,
-						FW_NORMAL,
-						FALSE,
-						FALSE,
-						FALSE,
-						DEFAULT_CHARSET,
-						OUT_OUTLINE_PRECIS,
-						CLIP_DEFAULT_PRECIS,
-						DEFAULT_QUALITY,
-						FIXED_PITCH,
-						get_pref().get< std::string >( po_ui_font_name ).c_str()
-						);
-	if ( nfont != NULL ) {
-		delete_font();
-		this->font = nfont; 
-	} else {
-		this->get_logger() << "Font creation error: " << get_pref().get< std::string >( po_ui_font_name ) << std::endl;
-	}
+	return (*this);
 }

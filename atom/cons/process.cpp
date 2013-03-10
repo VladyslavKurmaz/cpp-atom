@@ -52,7 +52,7 @@ DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
 	return 0;
 }
 
-void process::run( std::basic_string<TCHAR> const& cmd ){
+void process::run( uni_string const& cmd ){
 	SECURITY_ATTRIBUTES sa;
 	HANDLE output_read_tmp, output_write;
 	HANDLE input_write_tmp, input_read;

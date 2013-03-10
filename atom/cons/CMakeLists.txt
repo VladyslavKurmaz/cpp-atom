@@ -1,3 +1,7 @@
+#defs
+
+#add_definitions(-DUNICODE -D_UNICODE)
+
 # Inc/Lib
 
 # Project's structure

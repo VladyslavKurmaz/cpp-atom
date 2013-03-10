@@ -19,7 +19,7 @@ public:
 	~process();
 	///
 	void
-		run( std::basic_string<TCHAR> const& cmd );
+		run( uni_string const& cmd );
 	///
 	void 
 		write( std::string const& str );
@@ -32,7 +32,7 @@ public:
 		return ( this->buffer.c_str() );
 	}
 	///
-	void append( CHAR* s ) {
+	void append( TCHAR* s ) {
 		this->buffer += s;
 	}
 	///

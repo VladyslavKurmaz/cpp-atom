@@ -81,6 +81,8 @@ public:
 	void ontimer( HWND hWnd, UINT id );
 	///
 	void oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
+	///
+	window& operator()( atom::po::id_t const opt );
 
 protected:
 	//
@@ -98,14 +100,6 @@ protected:
 	//
 	void
 	update_position( HWND hWnd, bool dir, float mult );
-	//
-	void
-	update_accels();
-	//
-	void
-	update_font();
-	void
-	delete_font();
 
 private:
 	///
@@ -143,6 +137,18 @@ private:
 	UINT_PTR
 		slide_timer_id;
 	//
+	HDC
+		mem_dc;
+	HBITMAP
+		mem_bitmap;
+	HBRUSH
+		bk_brush;
+	HBRUSH
+		border_brush;
+	HBRUSH
+		scroll_brush;
+	HBRUSH
+		font_brush;
 	HFONT
 		font;
 };

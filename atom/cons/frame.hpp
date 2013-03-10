@@ -78,7 +78,7 @@ public:
 	///
 	shared_ptr split( bool const pref_h );
 	///
-	void run( std::basic_string<TCHAR> const& cmd );
+	void run( uni_string const& cmd );
 	///
 	void onchar( TCHAR ch );
 	///
