@@ -544,7 +544,7 @@ window& window::operator()( atom::po::id_t const opt ) {
 			FALSE,
 			FALSE,
 			FALSE,
-			DEFAULT_CHARSET,
+			EASTEUROPE_CHARSET,//DEFAULT_CHARSET,
 			OUT_OUTLINE_PRECIS,
 			CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY,
