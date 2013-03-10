@@ -59,7 +59,7 @@ bool window::init() {
 			wcex.hInstance;
 			wcex.hIcon;
 			wcex.hCursor;
-			wcex.hbrBackground	=	(HBRUSH)GetStockObject( DKGRAY_BRUSH /*BLACK_BRUSH*/ );
+			wcex.hbrBackground	=	NULL;//(HBRUSH)GetStockObject( DKGRAY_BRUSH /*BLACK_BRUSH*/ );
 			wcex.lpszMenuName;
 			wcex.lpszClassName;
 			wcex.hIconSm;
@@ -164,6 +164,7 @@ void window::onpaint( HWND hWnd ){
 		HWND			wnd;
 		PAINTSTRUCT 	ps; 
 		HDC 			dc; 
+		HDC 			mem_dc; 
 		RECT 			rect;
 		unsigned int	margin;
 		COLORREF		margin_color;
@@ -171,6 +172,7 @@ void window::onpaint( HWND hWnd ){
 		COLORREF		border_color;
 		unsigned int	padding;
 		COLORREF		padding_color;
+		HBRUSH			bk_brush;
 		HFONT			font;
 		COLORREF		font_color;
 		frame::shared_ptr
@@ -180,11 +182,22 @@ void window::onpaint( HWND hWnd ){
 			dc = BeginPaint( wnd, &ps ); 
 			GetClientRect( wnd, &rect );
 			//
+			mem_dc		= pw.mem_dc;
+			bk_brush	= pw.bk_brush;
 			font		= pw.font;
 			font_color	= pw.get_pref().get< unsigned int >( po_ui_font_color );
 			current		= pw.current_frame;
 		}
 		~context() {
+			BitBlt( dc,
+					0,
+					0,
+					rect.right,
+					rect.bottom,
+					mem_dc,
+					0,
+					0,
+					SRCCOPY );
 			EndPaint( wnd, &ps );
 		}
 	} c( hWnd, *this );
@@ -192,6 +205,7 @@ void window::onpaint( HWND hWnd ){
 	window2frame const & l = this->get_value( boost::mpl::identity< window2frame >() );
 	struct _{
 		static bool __( frame::shared_ptr const& f, context const& cntx, bool const expand ) {
+			HDC dc = cntx.mem_dc;
 			RECT rt;
 			int const rw = cntx.rect.right - cntx.rect.left;
 			int const rh = cntx.rect.bottom - cntx.rect.top;
@@ -201,24 +215,19 @@ void window::onpaint( HWND hWnd ){
 			rt.right	= rt.left + rw / coord.width;
 			rt.bottom	= rt.top + rh / coord.height;
 			//
-			//HBRUSH hbr = CreateSolidBrush( RGB( 0, 255, 0 ) );
-			//FrameRect( cntx.dc, &rt, hbr );
-			//DeleteObject( hbr );
-			FrameRect( cntx.dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+			FillRect( dc, &(cntx.rect), cntx.bk_brush );
+			FrameRect( dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
 			//
-			SelectObject( cntx.dc, cntx.font );
-			
-			//SelectObject( cntx.dc, (HFONT)GetStockObject( SYSTEM_FIXED_FONT/*OEM_FIXED_FONT*//*ANSI_FIXED_FONT*/ ) );
-
-			SetTextColor( cntx.dc, cntx.font_color );
-			SetBkMode( cntx.dc, TRANSPARENT );
+			SelectObject( dc, cntx.font );
+			SetTextColor( dc, cntx.font_color );
+			SetBkMode( dc, TRANSPARENT );
 			InflateRect( &rt, -1, -1 );
 			//
 			if ( f == cntx.current ) {
 				TCHAR const * txt = f->get_buffer();
 				RECT rect = rt;
-				rect.top = rect.bottom - DrawText( cntx.dc, txt, -1, &rt, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_CALCRECT );
-				DrawText( cntx.dc, txt, -1, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK );
+				rect.top = rect.bottom - DrawText( dc, txt, -1, &rt, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_CALCRECT );
+				DrawText( dc, txt, -1, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK );
 			}
 			return true;
 		}
@@ -452,6 +461,14 @@ void window::update_placement(){
 	//
 	this->anchor.x += anchor_dx;
 	this->anchor.y += anchor_dy;
+	//
+	HDC dc = GetDC( NULL );
+	{
+		this->mem_dc = CreateCompatibleDC( dc );
+		this->mem_bitmap = CreateCompatibleBitmap( dc, RECT_WIDTH( this->in_rect ), RECT_HEIGHT( this->in_rect ) );
+		SelectObject( this->mem_dc, this->mem_bitmap );
+	}
+	ReleaseDC( NULL, dc );
 }
 
 void window::update_position( HWND hWnd, bool dir, float mult ) {
@@ -460,7 +477,7 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	};
 	int x = in_rect.left + (int)( (float)( this->anchor.x - in_rect.left ) * mult );
 	int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
-	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
+	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, FALSE );
 	//
 	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
