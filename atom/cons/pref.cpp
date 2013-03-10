@@ -66,11 +66,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		add_option( po_ui_alpha,				"ui.alpha",
 		boost::program_options::value<unsigned int>()->default_value( 0xF0 ),					"", desc ).
 		add_option( po_ui_bk_color,				"ui.bk.color",
-		boost::program_options::value<unsigned int>()->default_value( 0x000000 ),				"", desc ).
-		add_option( po_ui_scroll_size,			"ui.scroll.size",
-		boost::program_options::value<unsigned int>()->default_value( 2 ),						"", desc ).
-		add_option( po_ui_scroll_color,			"ui.scroll.color",
-		boost::program_options::value<unsigned int>()->default_value( 0x00FF00 ),				"", desc ).
+		boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ),				"", desc ).
 		//[ui.font.*]
 		add_option( po_ui_font_name,			"ui.font.name",
 		boost::program_options::value<std::string>()->default_value( "Consolas" ),				"", desc ).
@@ -80,7 +76,7 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
 		//[ui.margin.*]
 		add_option( po_ui_margin_size,			"ui.margin.size",
-		boost::program_options::value< unsigned int >()->default_value( 2 ),					"", desc ).
+		boost::program_options::value< unsigned int >()->default_value( 0 ),					"", desc ).
 		//[ui.border.*]
 		add_option( po_ui_border_size,			"ui.border.size",
 		boost::program_options::value< unsigned int >()->default_value( 1 ),					"", desc ).
@@ -88,7 +84,12 @@ pref::pref( logger::shared_ptr l ) : base_t(), po() {
 		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
 		//[ui.padding.*]
 		add_option( po_ui_padding_size,			"ui.padding.size",
-		boost::program_options::value< unsigned int >()->default_value( 2 ),					"", desc );
+		boost::program_options::value< unsigned int >()->default_value( 1 ),					"", desc ).
+		//[ui.scroll.*]
+		add_option( po_ui_scroll_size,			"ui.scroll.size",
+		boost::program_options::value<unsigned int>()->default_value( 2 ),						"", desc ).
+		add_option( po_ui_scroll_color,			"ui.scroll.color",
+		boost::program_options::value<unsigned int>()->default_value( 0x00FF00 ),				"", desc );
 }
 
 pref::~pref() {

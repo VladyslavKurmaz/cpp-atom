@@ -42,10 +42,8 @@ static atom::po::id_t const po_ui_height			=	po_ui_width + 1;
 static atom::po::id_t const po_ui_clip				=	po_ui_height + 1;
 static atom::po::id_t const po_ui_alpha				=	po_ui_clip + 1;
 static atom::po::id_t const po_ui_bk_color			=	po_ui_alpha + 1;
-static atom::po::id_t const po_ui_scroll_size		=	po_ui_bk_color + 1;
-static atom::po::id_t const po_ui_scroll_color		=	po_ui_scroll_size + 1;
 //[ui.font.*]
-static atom::po::id_t const po_ui_font_name			=	po_ui_scroll_color + 1;
+static atom::po::id_t const po_ui_font_name			=	po_ui_bk_color + 1;
 static atom::po::id_t const po_ui_font_height		=	po_ui_font_name + 1;
 static atom::po::id_t const po_ui_font_color		=	po_ui_font_height + 1;
 //[ui.margin.*]
@@ -55,6 +53,9 @@ static atom::po::id_t const po_ui_border_size		=	po_ui_margin_size + 1;
 static atom::po::id_t const po_ui_border_color		=	po_ui_border_size + 1;
 //[ui.padding.*]
 static atom::po::id_t const po_ui_padding_size		=	po_ui_border_color + 1;
+		//[ui.scroll.*]
+static atom::po::id_t const po_ui_scroll_size		=	po_ui_padding_size + 1;
+static atom::po::id_t const po_ui_scroll_color		=	po_ui_scroll_size + 1;
 
 ///
 struct alignment {

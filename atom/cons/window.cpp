@@ -104,15 +104,15 @@ bool window::init() {
 			( po_ui_clip )
 			( po_ui_alpha )
 			( po_ui_bk_color )
-			( po_ui_scroll_size )
-			( po_ui_scroll_color )
 			( po_ui_font_name )
 			( po_ui_font_height )
 			( po_ui_font_color )
 			( po_ui_margin_size )
 			( po_ui_border_size )
 			( po_ui_border_color )
-			( po_ui_padding_size );
+			( po_ui_padding_size )
+			( po_ui_scroll_size )
+			( po_ui_scroll_color );
 		this->update_hotkeys();
 		//
 		return true;
@@ -142,7 +142,7 @@ void window::clear() {
 
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 	this->current_frame->onchar( ch );
-	InvalidateRect( hWnd, NULL, TRUE );
+	this->invalidate();
 }
 
 void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
@@ -167,26 +167,31 @@ void window::onpaint( HWND hWnd ){
 		HDC 			mem_dc; 
 		RECT 			rect;
 		unsigned int	margin;
-		COLORREF		margin_color;
 		unsigned int	border;
 		COLORREF		border_color;
+		unsigned int	scroll;
+		COLORREF		scroll_color;
 		unsigned int	padding;
-		COLORREF		padding_color;
-		HBRUSH			bk_brush;
 		HFONT			font;
 		COLORREF		font_color;
 		frame::shared_ptr
 						current;
 
 		context( HWND w, window& pw ) : wnd( w ) {
-			dc = BeginPaint( wnd, &ps ); 
-			GetClientRect( wnd, &rect );
-			//
+			dc = BeginPaint( wnd, &ps );
 			mem_dc		= pw.mem_dc;
-			bk_brush	= pw.bk_brush;
+			GetClientRect( wnd, &rect );
+			margin		= pw.get_pref().get< unsigned int >( po_ui_margin_size );
+			border		= pw.get_pref().get< unsigned int >( po_ui_border_size );
+			border_color= pw.get_pref().get< unsigned int >( po_ui_border_color );
+			scroll		= pw.get_pref().get< unsigned int >( po_ui_scroll_size );
+			scroll_color= pw.get_pref().get< unsigned int >( po_ui_scroll_color );
+			padding		= pw.get_pref().get< unsigned int >( po_ui_padding_size );
 			font		= pw.font;
 			font_color	= pw.get_pref().get< unsigned int >( po_ui_font_color );
 			current		= pw.current_frame;
+			//
+			FillRect( mem_dc, &rect, pw.bk_brush );
 		}
 		~context() {
 			BitBlt( dc,
@@ -215,8 +220,14 @@ void window::onpaint( HWND hWnd ){
 			rt.right	= rt.left + rw / coord.width;
 			rt.bottom	= rt.top + rh / coord.height;
 			//
-			FillRect( dc, &(cntx.rect), cntx.bk_brush );
-			FrameRect( dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+			InflateRect( &rt, -cntx.margin, -cntx.margin );
+			//
+			for( int i = 0; i < cntx.border; ++i ) {
+				FrameRect( dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+				InflateRect( &rt, -1, -1 );
+			}
+			//
+			InflateRect( &rt, -cntx.padding, -cntx.padding );
 			//
 			SelectObject( dc, cntx.font );
 			SetTextColor( dc, cntx.font_color );
@@ -477,7 +488,7 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	};
 	int x = in_rect.left + (int)( (float)( this->anchor.x - in_rect.left ) * mult );
 	int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
-	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, FALSE );
+	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
 	//
 	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
