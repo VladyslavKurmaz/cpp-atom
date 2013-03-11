@@ -18,7 +18,7 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	,	slide_dir( 0 )
 	,	slide_start_time()
 	,	slide_timer_id( 1 )
-	,	mem_dc( NULL )
+	,	mem_dc()
 	,	mem_bitmap( NULL )
 	,	bk_brush( NULL )
 	,	border_brush( NULL )
@@ -36,7 +36,6 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 }
 
 window::~window() {
-	DeleteDC( this->mem_dc );
 	DeleteObject( this->mem_bitmap );
 	DeleteObject( this->bk_brush );
 	DeleteObject( this->border_brush );
@@ -475,7 +474,7 @@ void window::update_placement(){
 	//
 	HDC dc = GetDC( NULL );
 	{
-		this->mem_dc = CreateCompatibleDC( dc );
+		this->mem_dc = atom::shared_dc( CreateCompatibleDC( dc ) );
 		this->mem_bitmap = CreateCompatibleBitmap( dc, RECT_WIDTH( this->in_rect ), RECT_HEIGHT( this->in_rect ) );
 		SelectObject( this->mem_dc, this->mem_bitmap );
 	}

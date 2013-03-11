@@ -2,6 +2,7 @@
 
 #include <atom/util/wwindow.hpp>
 #include <atom/util/waccel.hpp>
+#include <atom/util/ptr.hpp>
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./frame.hpp"
@@ -137,7 +138,7 @@ private:
 	UINT_PTR
 		slide_timer_id;
 	//
-	HDC
+	atom::shared_dc
 		mem_dc;
 	HBITMAP
 		mem_bitmap;
