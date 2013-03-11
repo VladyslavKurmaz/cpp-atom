@@ -19,7 +19,7 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	,	slide_start_time()
 	,	slide_timer_id( 1 )
 	,	mem_dc()
-	,	mem_bitmap( NULL )
+	,	mem_bitmap()
 	,	bk_brush( NULL )
 	,	border_brush( NULL )
 	,	scroll_brush( NULL )
@@ -31,18 +31,9 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	//
 	atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( l, p, frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
 	this->current_frame->run( "cmd" );
-	// 
-	this->get_logger() << L"create window" << std::endl;
 }
 
 window::~window() {
-	DeleteObject( this->mem_bitmap );
-	DeleteObject( this->bk_brush );
-	DeleteObject( this->border_brush );
-	DeleteObject( this->scroll_brush );
-	DeleteObject( this->font_brush );
-	DeleteObject( this->font );
-	this->get_logger() << "free window" << std::endl;
 }
 
 bool window::init() {
@@ -474,7 +465,7 @@ void window::update_placement(){
 	//
 	HDC dc = GetDC( NULL );
 	{
-		this->mem_dc = atom::shared_dc( CreateCompatibleDC( dc ) );
+		this->mem_dc = CreateCompatibleDC( dc );
 		this->mem_bitmap = CreateCompatibleBitmap( dc, RECT_WIDTH( this->in_rect ), RECT_HEIGHT( this->in_rect ) );
 		SelectObject( this->mem_dc, this->mem_bitmap );
 	}

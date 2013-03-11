@@ -49,7 +49,7 @@ namespace atom {
 		///
 		shared_gdiobj() : shared_ptr() {}
 		///
-		shared_gdiobj( T h ) : shared_ptr( handle, release_gdiobj ) {}
+		shared_gdiobj( T h ) : shared_ptr( h, release_gdiobj ) {}
 		///
 		operator T() {
 			return reinterpret_cast< T >( this->get() );

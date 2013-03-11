@@ -140,17 +140,17 @@ private:
 	//
 	atom::shared_dc
 		mem_dc;
-	HBITMAP
+	atom::shared_gdiobj< HBITMAP >
 		mem_bitmap;
-	HBRUSH
+	atom::shared_gdiobj< HBRUSH >
 		bk_brush;
-	HBRUSH
+	atom::shared_gdiobj< HBRUSH >
 		border_brush;
-	HBRUSH
+	atom::shared_gdiobj< HBRUSH >
 		scroll_brush;
-	HBRUSH
+	atom::shared_gdiobj< HBRUSH >
 		font_brush;
-	HFONT
+	atom::shared_gdiobj< HFONT >
 		font;
 };
 
