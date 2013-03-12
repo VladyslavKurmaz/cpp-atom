@@ -209,13 +209,6 @@ void window::onpaint( HWND hWnd ){
 			rt.top 		= cntx.rect.top + coord.top.get_n() * rh / coord.top.get_d();
 			rt.right	= rt.left + rw / coord.width;
 			rt.bottom	= rt.top + rh / coord.height;
-			SelectObject(dc, GetStockObject(WHITE_PEN));
-			//SetDCPenColor(dc, RGB(255,255,255));
-			MoveToEx( dc, rt.left, rt.top, NULL ); 
-			LineTo( dc, rt.right, rt.bottom );
-			MoveToEx( dc, rt.left, rt.bottom, NULL ); 
-			LineTo( dc, rt.right, rt.top );
-#if 0
 			//
 			InflateRect( &rt, -cntx.margin, -cntx.margin );
 			//
@@ -231,23 +224,15 @@ void window::onpaint( HWND hWnd ){
 			SetBkMode( dc, TRANSPARENT );
 			InflateRect( &rt, -1, -1 );
 			//
-#endif
 			atom::shared_gdiobj<HRGN> rgn = CreateRectRgn( rt.left, rt.top, rt.right, rt.bottom );
 			SelectClipRgn( dc, rgn );
-				RECT rect = rt;
-			DrawText( dc, "test", -1, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK );
-
-#if 0
 			{
 				TCHAR const * txt = f->get_buffer();
 				RECT rect = rt;
 				rect.top = rect.bottom - DrawText( dc, txt, -1, &rt, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_CALCRECT );
 				DrawText( dc, txt, -1, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK );
 			}
-#endif
 			SelectClipRgn( dc, NULL );
-#if 0
-#endif
 			return true;
 		}
 	};
@@ -256,7 +241,6 @@ void window::onpaint( HWND hWnd ){
 	} else {
 		l.for_each( boost::bind( &_::__, _1, boost::ref( c ), false ) );
 	}
-	//this->get_logger() << "paint" << std::endl;
 }
 
 void window::onclose( HWND ) {
@@ -297,6 +281,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_SPLIT:
 		atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
 		this->current_frame->run( "cmd" );
+		Sleep( 100 );
 		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
