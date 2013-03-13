@@ -1,5 +1,6 @@
 #include "./pch.hpp"
 #include "./log.hpp"
+#include "./frame.hpp"
 #include "./process.hpp"
 
 // https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
@@ -13,7 +14,6 @@ process::process( logger_ptr l, frame_ptr f ) :
 	,	thread( NULL )
 	,	threadid( 0 )
 	,	run_thread( true )
-	,	buffer()
 	,	bytes_wrote( 0 )
 	,	bytes_read( 0 ) {
 	atom::mount<process2logger>( this, l );
@@ -30,6 +30,7 @@ std::string get_last_error( std::string const& caption ) {
 DWORD WINAPI process::read_from_pipe( LPVOID lpvThreadParam ) {
 	boost::scoped_ptr< process_ptr > ptr( (process_ptr*)lpvThreadParam );
 	process_ptr self( *ptr );
+	frame_ptr f = self->get_slot<process2frame>().item();
 	//
 	CHAR lpBuffer[256];
 	DWORD nBytesRead;
@@ -40,16 +41,10 @@ DWORD WINAPI process::read_from_pipe( LPVOID lpvThreadParam ) {
 			if (GetLastError() == ERROR_BROKEN_PIPE)
 				break; // pipe done - normal exit path.
 			else
-				throw get_last_error( "Read frompipe" );
+				throw get_last_error( "Read from pipe" );
 		}
-#if 0
-		lpBuffer[nBytesRead] = L'\0';
-		std::wstring wstr( (wchar_t*)lpBuffer);
-		self->get_logger() << atom::string2string<std::string>( wstr ); 
-#else
 		lpBuffer[nBytesRead] = '\0';
-		self->buffer += lpBuffer;
-#endif
+		f->append( lpBuffer, nBytesRead );
 	}
 	return 0;
 }

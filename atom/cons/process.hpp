@@ -29,11 +29,6 @@ public:
 	void 
 	write( void const * b, DWORD const b_sz );
 	///
-	TCHAR const* 
-	get_buffer() {
-		return ( this->buffer.c_str() );
-	}
-	///
 	bool is_running() {
 		return ( this->run_thread ); }
 	///
@@ -74,9 +69,6 @@ private:
 	//
 	bool
 		run_thread;
-	//
-	uni_string
-		buffer;
 	///
 	DWORD
 		bytes_wrote;

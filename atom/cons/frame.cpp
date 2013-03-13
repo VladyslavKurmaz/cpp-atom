@@ -5,7 +5,8 @@
 #include "./frame.hpp"
 
 frame::frame( logger_ptr l, pref_ptr p, frame_coord const & fc ) :
-		coord( fc )
+		buffer()
+	,	coord( fc )
 	,	next()
 	,	prev()
 	,	process() {
@@ -71,3 +72,6 @@ void frame::clear() {
 }
 
 
+void  frame::append( void const* b, size_t const b_sz ) {
+	this->buffer += std::string( (char const*)b );
+}

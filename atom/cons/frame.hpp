@@ -56,34 +56,45 @@ public:
 		return ( f );
 	}
 	///
-	frame_coord const & get_coord() const {
-		return ( this->coord ); }
+	frame_coord const &
+	get_coord() const { return ( this->coord ); }
 	///
-	frame_ptr get_prev() const {
-		return ( this->prev ); }
+	frame_ptr
+	get_prev() const { return ( this->prev ); }
 	///
-	TCHAR const* get_buffer() const {
-		return ( this->process->get_buffer() ); }
+	TCHAR const*
+	get_buffer() const { return ( this->buffer.c_str() ); }
 	///
-	frame_ptr get_next() const {
-		return ( this->next ); }
+	frame_ptr
+	get_next() const { return ( this->next ); }
 	///
 	~frame();
 	///
-	frame_ptr split( bool const pref_h );
+	frame_ptr
+	split( bool const pref_h );
 	///
-	void run( uni_string const& cmd );
+	void
+	run( uni_string const& cmd );
 	///
-	void onchar( TCHAR ch );
+	void
+	onchar( TCHAR ch );
 	///
-	void clear();
+	void
+	clear();
+	///
+	void
+	append( void const* b, size_t const b_sz );
 
 protected:
 	//
-	logger& get_logger() {
-		return ( *( get_value( boost::mpl::identity< frame2logger >() ).item() ) );
-	}
+	logger&
+	get_logger() {
+		return ( *( get_value( boost::mpl::identity< frame2logger >() ).item() ) ); }
 private:
+	//
+	uni_string
+		buffer;
+	//
 	frame_coord
 		coord;
 	///
