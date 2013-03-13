@@ -15,39 +15,40 @@ public:
 	~process();
 	///
 	void
-		run( uni_string const& cmd );
+	run( uni_string const& cmd );
 	///
 	void 
-		write( std::string const& str );
+	write( std::string const& str );
 	///
 	void 
-		write( char const ch );
+	write( char const ch );
+	///
+	void 
+	write( void const * b, DWORD const b_sz );
 	///
 	TCHAR const* 
 	get_buffer() {
 		return ( this->buffer.c_str() );
 	}
 	///
-	void append( TCHAR* s ) {
-		this->buffer += s;
-	}
-	///
 	bool is_running() {
-		return ( this->run_thread );
-	}
+		return ( this->run_thread ); }
 	///
-	HANDLE get_output_read() {
-		return ( this->output_read );
-	}
+	process& 
+	close();
 	///
-	void 
-		close();
+	process& 
+	cleanup();
 
 protected:
 	//
-	logger& get_logger() {
-		return ( *( get_value( boost::mpl::identity< process2logger >() ).item() ) );
-	}
+	logger&
+	get_logger() {
+		return ( *( get_value( boost::mpl::identity< process2logger >() ).item() ) ); }
+	//
+	static DWORD WINAPI
+	read_from_pipe( LPVOID lpvThreadParam );
+
 private:
 	//
 	HANDLE
@@ -71,8 +72,14 @@ private:
 	bool
 		run_thread;
 	//
-	std::basic_string<TCHAR>
+	uni_string
 		buffer;
+	///
+	DWORD
+		bytes_wrote;
+	///
+	DWORD
+		bytes_read;
 	///
 	process( logger_ptr l );
 };

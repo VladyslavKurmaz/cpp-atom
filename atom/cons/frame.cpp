@@ -65,7 +65,7 @@ void  frame::onchar( TCHAR ch ) {
 
 void frame::clear() {
 	if ( this->process ) {
-		process->close();
+		process->close().clear();
 	}
 	this->next = this->prev = frame_ptr();
 }

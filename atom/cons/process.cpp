@@ -1,21 +1,21 @@
 #include "./pch.hpp"
-#include "./process.hpp"
 #include "./log.hpp"
-
-//#include <atom/util/cast.hpp>
+#include "./process.hpp"
 
 // https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
 
 
 process::process( logger_ptr l ) :
-		buffer()
-	,	std_in( NULL )
+		std_in( NULL )
 	,	child_process( NULL )
 	,	output_read( NULL )
 	,	input_write( NULL )
 	,	thread( NULL )
 	,	threadid( 0 )
-	,	run_thread( true ) {
+	,	run_thread( true )
+	,	buffer()
+	,	bytes_wrote( 0 )
+	,	bytes_read( 0 ) {
 	atom::mount<process2logger>( this, l );
 }
 
@@ -26,7 +26,7 @@ std::string get_last_error( std::string const& caption ) {
 	return std::string("error");
 }
 
-DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
+DWORD WINAPI process::read_from_pipe( LPVOID lpvThreadParam ) {
 	boost::scoped_ptr< process_ptr > ptr( (process_ptr*)lpvThreadParam );
 	process_ptr self( *ptr );
 	//
@@ -35,7 +35,7 @@ DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
 
 	while( self->is_running() ) {
 		ZeroMemory( lpBuffer, sizeof(lpBuffer) );
-		if ( !ReadFile( self->get_output_read(), lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
+		if ( !ReadFile( self->output_read, lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
 			if (GetLastError() == ERROR_BROKEN_PIPE)
 				break; // pipe done - normal exit path.
 			else
@@ -47,7 +47,7 @@ DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
 		self->get_logger() << atom::string2string<std::string>( wstr ); 
 #else
 		lpBuffer[nBytesRead] = '\0';
-		self->append( lpBuffer );
+		self->buffer += lpBuffer;
 #endif
 	}
 	return 0;
@@ -139,30 +139,26 @@ void process::run( uni_string const& cmd ){
 }
 
 void process::write( std::string const& str ) {
-	DWORD nBytesWrote;
-	if ( !WriteFile( input_write, str.c_str(), str.length(), &nBytesWrote, NULL ) )
-	{
-		if ( GetLastError() == ERROR_NO_DATA )
-			get_last_error( "Write pipe was closed" );
-		else
-			get_last_error( "Write to pipe" );
-	}
-	this->get_logger() << str << ":" << nBytesWrote << std::endl;
+	this->write( str.c_str(), str.length() );
 }
 
 void process::write( char const ch ){ 
+	this->write( &ch, sizeof( ch ) );
+}
+
+void process::write( void const * b, DWORD const b_sz ) {
 	DWORD nBytesWrote = 0;
-	if ( !WriteFile( input_write, &ch, sizeof(ch), &nBytesWrote, NULL ) )
+	if ( !WriteFile( input_write, b, b_sz, &nBytesWrote, NULL ) )
 	{
 		if ( GetLastError() == ERROR_NO_DATA )
 			get_last_error( "Write pipe was closed" );
 		else
 			get_last_error( "Write to pipe" );
 	}
-	this->get_logger() << ch << ":" << nBytesWrote << std::endl;
+	this->bytes_wrote += nBytesWrote;
 }
 
-void process::close() {
+process& process::close() {
 	run_thread = false;
 	this->write( "exit\x0D\x0A" );
 	if ( WaitForSingleObject( thread, INFINITE ) == WAIT_FAILED ) {
@@ -175,4 +171,9 @@ void process::close() {
 	if ( !CloseHandle( input_write ) ) {
 		throw get_last_error( "Close input pipe write handle" );
 	}
+	return (*this);
+}
+
+process& process::cleanup() {
+	return (*this);
 }
