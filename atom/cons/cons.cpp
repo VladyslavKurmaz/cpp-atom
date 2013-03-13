@@ -1,19 +1,22 @@
 #include "./pch.hpp"
-#include "./pref.hpp"
-#include "./appl.hpp"
 #include "./log.hpp"
+#include "./pref.hpp"
+#include "./process.hpp"
+#include "./frame.hpp"
+#include "./window.hpp"
+#include "./appl.hpp"
 
 // http://support.microsoft.com/default.aspx?scid=kb;EN-US;q190351&wa=wsignin1.0
 
 int main( int argc, char *argv[] )
 {
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
-		logger::shared_ptr l = logger::create();
+		logger_ptr l = logger::create();
 		l->add_std_cout();
 		//
-		pref::shared_ptr p = pref::create( l );
+		pref_ptr p = pref::create( l );
 		if( p->init( argc, argv ) ) {
-			appl::shared_ptr a = appl::create( l, p );
+			appl_ptr a = appl::create( l, p );
 			if ( a->init() ) {
 				a->run().clear();
 			}

@@ -1,12 +1,5 @@
 #pragma once
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
-#include <boost/smart_ptr.hpp>
-
-#include "./log.hpp"
-#include "./pref.hpp"
-#include "./process.hpp"
-#include "./window.hpp"
+#include "./classes.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > appl2pref;
@@ -17,11 +10,8 @@ class appl :
 	public boost::enable_shared_from_this< appl > {
 public:
 	///
-	typedef boost::shared_ptr< appl >
-		shared_ptr;
-	///
-	static shared_ptr create( logger::shared_ptr l, pref::shared_ptr p ) {
-		return shared_ptr( new appl( l, p ) );
+	static appl_ptr create( logger_ptr l, pref_ptr p ) {
+		return appl_ptr( new appl( l, p ) );
 	}
 	///
 	~appl();
@@ -47,5 +37,5 @@ protected:
 
 private:
 	///
-	appl( logger::shared_ptr l, pref::shared_ptr p );
+	appl( logger_ptr l, pref_ptr p );
 };

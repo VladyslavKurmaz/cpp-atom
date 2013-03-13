@@ -1,4 +1,5 @@
 #include "./pch.hpp"
+#include "./log.hpp"
 #include "./pref.hpp"
 
 #if 0
@@ -19,7 +20,7 @@ hk.edit.ml.exec VK_CONTROL + VK_RETURN
 #endif
 
 
-pref::pref( logger::shared_ptr l ) : base_t(), po() {
+pref::pref( logger_ptr l ) : base_t(), po() {
 	atom::mount<pref2logger>( this, l );
 	atom::po::options_description_t& desc = this->po.add_desc( 0, "program options" );
 	//

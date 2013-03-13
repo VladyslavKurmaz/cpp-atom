@@ -1,7 +1,12 @@
 #include "./pch.hpp"
+#include "./log.hpp"
+#include "./pref.hpp"
+#include "./process.hpp"
+#include "./frame.hpp"
+#include "./window.hpp"
 #include "./appl.hpp"
 
-appl::appl( logger::shared_ptr l, pref::shared_ptr p ) {
+appl::appl( logger_ptr l, pref_ptr p ) {
 	atom::mount<appl2logger>( this, l );
 	atom::mount<appl2pref>( this, p );
 	atom::mount<appl2window>( this, window::create( l, p ) );

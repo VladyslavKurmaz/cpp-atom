@@ -1,6 +1,5 @@
 #pragma once
-
-#include "./log.hpp"
+#include "./classes.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > process2logger;
 
@@ -9,11 +8,8 @@ class process :
 	public boost::enable_shared_from_this< process > {
 public:
 	///
-	typedef boost::shared_ptr< process >
-		shared_ptr;
-	///
-	static shared_ptr process::create( logger::shared_ptr l ) {
-		return shared_ptr( new process( l ) );
+	static process_ptr process::create( logger_ptr l ) {
+		return process_ptr( new process( l ) );
 	}
 	///
 	~process();
@@ -78,5 +74,5 @@ private:
 	std::basic_string<TCHAR>
 		buffer;
 	///
-	process( logger::shared_ptr l );
+	process( logger_ptr l );
 };

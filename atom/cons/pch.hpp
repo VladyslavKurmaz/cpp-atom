@@ -5,10 +5,14 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <atom/util/log.hpp>
 #include <atom/node/tldefs.hpp>
 #include <atom/node/node.hpp>
 #include <atom/util/dbg.hpp>
 #include <atom/util/po.hpp>
+#include <atom/util/wwindow.hpp>
+#include <atom/util/waccel.hpp>
+#include <atom/util/ptr.hpp>
 
 #ifdef UNICODE
 #define TXT( x )  L ## x

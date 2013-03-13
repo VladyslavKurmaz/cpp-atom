@@ -1,13 +1,17 @@
 #include "./pch.hpp"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+//#include <boost/function.hpp>
+//#include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
+#include "./log.hpp"
+#include "./pref.hpp"
+#include "./process.hpp"
+#include "./frame.hpp"
 #include "./window.hpp"
 
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
-window::window( logger::shared_ptr l, pref::shared_ptr p ) :
+window::window( logger_ptr l, pref_ptr p ) :
 wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	current_frame()
 	,	expand_mode( false )
@@ -122,7 +126,7 @@ void window::run() {
 void window::clear() {
 	window2frame& l = this->get_value( boost::mpl::identity< window2frame >() );
 	struct _{
-		static bool __( frame::shared_ptr& f ) {
+		static bool __( frame_ptr& f ) {
 			f->clear();
 			return true;
 		}
@@ -164,8 +168,7 @@ void window::onpaint( HWND hWnd ){
 		unsigned int	padding;
 		HFONT			font;
 		COLORREF		font_color;
-		frame::shared_ptr
-						current;
+		frame_ptr		current;
 
 		context( HWND w, window& pw ) : wnd( w ) {
 			dc = BeginPaint( wnd, &ps );
@@ -199,7 +202,7 @@ void window::onpaint( HWND hWnd ){
 	//
 	window2frame const & l = this->get_value( boost::mpl::identity< window2frame >() );
 	struct _{
-		static bool __( frame::shared_ptr const& f, context const& cntx, bool const expand ) {
+		static bool __( frame_ptr const& f, context const& cntx, bool const expand ) {
 			HDC dc = cntx.mem_dc;
 			RECT rt;
 			int const rw = cntx.rect.right - cntx.rect.left;

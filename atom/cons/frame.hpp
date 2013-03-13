@@ -1,8 +1,5 @@
 #pragma once
-
-#include "./log.hpp"
-#include "./pref.hpp"
-#include "./process.hpp"
+#include "./classes.hpp"
 
 class fraction {
 public:
@@ -43,9 +40,6 @@ class frame :
 		base_node_t;
 public:
 	///
-	typedef boost::shared_ptr< frame >
-		shared_ptr;
-	///
 	struct frame_coord {
 		fraction left;
 		fraction top;
@@ -55,8 +49,8 @@ public:
 		frame_coord( unsigned int ln, unsigned int ld, unsigned int tn, unsigned int td, unsigned int w, unsigned int h ) : left( ln, ld ), top( tn, td ), width( w ), height( h ){}
 	};
 	///
-	static shared_ptr create( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc ) {
-		shared_ptr f = shared_ptr( new frame( l, p, fc ) );
+	static frame_ptr create( logger_ptr l, pref_ptr p, frame_coord const & fc ) {
+		frame_ptr f = frame_ptr( new frame( l, p, fc ) );
 		f->prev = f;
 		f->next = f;
 		return ( f );
@@ -65,18 +59,18 @@ public:
 	frame_coord const & get_coord() const {
 		return ( this->coord ); }
 	///
-	shared_ptr get_prev() const {
+	frame_ptr get_prev() const {
 		return ( this->prev ); }
 	///
 	TCHAR const* get_buffer() const {
 		return ( this->process->get_buffer() ); }
 	///
-	shared_ptr get_next() const {
+	frame_ptr get_next() const {
 		return ( this->next ); }
 	///
 	~frame();
 	///
-	shared_ptr split( bool const pref_h );
+	frame_ptr split( bool const pref_h );
 	///
 	void run( uni_string const& cmd );
 	///
@@ -93,14 +87,14 @@ private:
 	frame_coord
 		coord;
 	///
-	shared_ptr
+	frame_ptr
 		next;
 	///
-	shared_ptr
+	frame_ptr
 		prev;
 	//
-	process::shared_ptr
+	process_ptr
 		process;
 	///
-	frame( logger::shared_ptr l, pref::shared_ptr p, frame_coord const & fc );
+	frame( logger_ptr l, pref_ptr p, frame_coord const & fc );
 };

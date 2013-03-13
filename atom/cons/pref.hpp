@@ -1,5 +1,5 @@
 #pragma once
-#include "./log.hpp"
+#include "./classes.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
 
@@ -10,11 +10,8 @@ public:
 	typedef atom::node< LOKI_TYPELIST_1( pref2logger ) >
 		base_t;
 	///
-	typedef boost::shared_ptr< pref >
-		shared_ptr;
-	///
-	static shared_ptr create( logger::shared_ptr l ) {
-		return shared_ptr( new pref( l ) );
+	static pref_ptr create( logger_ptr l ) {
+		return pref_ptr( new pref( l ) );
 	}
 	///
 	~pref();
@@ -36,7 +33,7 @@ protected:
 
 private:
 	///
-	pref( logger::shared_ptr l );
+	pref( logger_ptr l );
 	///
 	atom::po
 		po;

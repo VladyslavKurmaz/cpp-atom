@@ -1,11 +1,6 @@
 #pragma once
+#include "./classes.hpp"
 
-#include <atom/util/wwindow.hpp>
-#include <atom/util/waccel.hpp>
-#include <atom/util/ptr.hpp>
-#include "./log.hpp"
-#include "./pref.hpp"
-#include "./frame.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > window2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > window2pref;
@@ -51,11 +46,8 @@ class window :	public atom::wwindow< window, LOKI_TYPELIST_7( onchar_pair_type_t
 		base_node_t;
 public:
 	///
-	typedef boost::shared_ptr< window >
-		shared_ptr;
-	///
-	static shared_ptr create( logger::shared_ptr l, pref::shared_ptr p ) {
-		return shared_ptr( new window( l, p ) );
+	static window_ptr create( logger_ptr l, pref_ptr p ) {
+		return window_ptr( new window( l, p ) );
 	}
 	///
 	~window();
@@ -104,12 +96,12 @@ protected:
 
 private:
 	///
-	window( logger::shared_ptr l, pref::shared_ptr p );
+	window( logger_ptr l, pref_ptr p );
 	//
-	frame::shared_ptr
+	frame_ptr
 		current_frame;
 	//
-	frame::shared_ptr
+	frame_ptr
 		head_frame;
 	//
 	bool

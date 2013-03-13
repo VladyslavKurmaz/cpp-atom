@@ -1,12 +1,13 @@
 #include "./pch.hpp"
 #include "./process.hpp"
+#include "./log.hpp"
 
-#include <atom/util/cast.hpp>
+//#include <atom/util/cast.hpp>
 
 // https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
 
 
-process::process( logger::shared_ptr l ) :
+process::process( logger_ptr l ) :
 		buffer()
 	,	std_in( NULL )
 	,	child_process( NULL )
@@ -26,8 +27,8 @@ std::string get_last_error( std::string const& caption ) {
 }
 
 DWORD WINAPI read_from_pipe( LPVOID lpvThreadParam ) {
-	boost::scoped_ptr< process::shared_ptr > ptr( (process::shared_ptr*)lpvThreadParam );
-	process::shared_ptr self( *ptr );
+	boost::scoped_ptr< process_ptr > ptr( (process_ptr*)lpvThreadParam );
+	process_ptr self( *ptr );
 	//
 	CHAR lpBuffer[256];
 	DWORD nBytesRead;
@@ -129,7 +130,7 @@ void process::run( uni_string const& cmd ){
 		throw get_last_error( "Close error pipe write handle" );
 	}
 	//
-	shared_ptr* ptr = new shared_ptr( shared_from_this() );
+	process_ptr* ptr = new process_ptr( shared_from_this() );
 	thread = CreateThread( NULL, 0, read_from_pipe, (LPVOID)ptr, 0, &threadid );
 	if ( thread == NULL) {
 		delete ptr;
