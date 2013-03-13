@@ -46,7 +46,7 @@ frame_ptr frame::split( bool const pref_h ){
 }
 
 void frame::run( uni_string const& cmd ) {
-	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item() );
+	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item(), this->shared_from_this() );
 	this->process->run( cmd );
 	//child->run( "cmd.exe" );
 	//child->run( "msbuild.exe" );

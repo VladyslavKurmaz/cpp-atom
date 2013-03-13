@@ -5,7 +5,7 @@
 // https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
 
 
-process::process( logger_ptr l ) :
+process::process( logger_ptr l, frame_ptr f ) :
 		std_in( NULL )
 	,	child_process( NULL )
 	,	output_read( NULL )
@@ -17,6 +17,7 @@ process::process( logger_ptr l ) :
 	,	bytes_wrote( 0 )
 	,	bytes_read( 0 ) {
 	atom::mount<process2logger>( this, l );
+	atom::mount<process2frame>( this, f );
 }
 
 process::~process() {
@@ -174,6 +175,7 @@ process& process::close() {
 	return (*this);
 }
 
-process& process::cleanup() {
+process& process::clear() {
+	base_node_t::clear();
 	return (*this);
 }

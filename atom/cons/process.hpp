@@ -2,14 +2,17 @@
 #include "./classes.hpp"
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > process2logger;
+typedef atom::nstorage< frame, boost::shared_ptr, atom::narray1 > process2frame;
 
 class process :
-	public atom::node< LOKI_TYPELIST_1( process2logger ) >,
+	public atom::node< LOKI_TYPELIST_2( process2logger, process2frame ) >,
 	public boost::enable_shared_from_this< process > {
+		typedef atom::node< LOKI_TYPELIST_2( process2logger, process2frame ) >
+			base_node_t;
 public:
 	///
-	static process_ptr process::create( logger_ptr l ) {
-		return process_ptr( new process( l ) );
+	static process_ptr process::create( logger_ptr l, frame_ptr f ) {
+		return process_ptr( new process( l, f ) );
 	}
 	///
 	~process();
@@ -38,7 +41,7 @@ public:
 	close();
 	///
 	process& 
-	cleanup();
+	clear();
 
 protected:
 	//
@@ -81,5 +84,5 @@ private:
 	DWORD
 		bytes_read;
 	///
-	process( logger_ptr l );
+	process( logger_ptr l, frame_ptr f );
 };
