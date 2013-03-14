@@ -7,6 +7,7 @@
 
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 		buffer()
+	,	bf()
 	,	coord( fc )
 	,	next()
 	,	prev()
