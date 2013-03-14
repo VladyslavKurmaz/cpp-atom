@@ -31,12 +31,14 @@ private:
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > frame2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > frame2pref;
+typedef atom::nstorage< window, boost::shared_ptr, atom::narray1 > frame2window;
 
 
 class frame :
-	public atom::node< LOKI_TYPELIST_2( frame2logger, frame2pref ) >,
+	public atom::node< LOKI_TYPELIST_3( frame2logger, frame2pref, frame2window ) >,
 	public boost::enable_shared_from_this< frame > {
-	typedef atom::node< LOKI_TYPELIST_2( frame2logger, frame2pref ) >
+	///
+	typedef atom::node< LOKI_TYPELIST_3( frame2logger, frame2pref, frame2window ) >
 		base_node_t;
 public:
 	///
@@ -49,8 +51,8 @@ public:
 		frame_coord( unsigned int ln, unsigned int ld, unsigned int tn, unsigned int td, unsigned int w, unsigned int h ) : left( ln, ld ), top( tn, td ), width( w ), height( h ){}
 	};
 	///
-	static frame_ptr create( logger_ptr l, pref_ptr p, frame_coord const & fc ) {
-		frame_ptr f = frame_ptr( new frame( l, p, fc ) );
+	static frame_ptr create( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) {
+		frame_ptr f = frame_ptr( new frame( l, p, w, fc ) );
 		f->prev = f;
 		f->next = f;
 		return ( f );
@@ -107,5 +109,5 @@ private:
 	process_ptr
 		process;
 	///
-	frame( logger_ptr l, pref_ptr p, frame_coord const & fc );
+	frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc );
 };

@@ -2,9 +2,10 @@
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"
+#include "./window.hpp"
 #include "./frame.hpp"
 
-frame::frame( logger_ptr l, pref_ptr p, frame_coord const & fc ) :
+frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 		buffer()
 	,	coord( fc )
 	,	next()
@@ -12,6 +13,7 @@ frame::frame( logger_ptr l, pref_ptr p, frame_coord const & fc ) :
 	,	process() {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
+	atom::mount<frame2window>( this, w );
 }
 
 frame::~frame() {
@@ -34,6 +36,7 @@ frame_ptr frame::split( bool const pref_h ){
 	frame_ptr f = frame_ptr( new frame( 
 										get_value( boost::mpl::identity< frame2logger >() ).item(),
 										get_value( boost::mpl::identity< frame2pref >() ).item(),
+										get_slot<frame2window>().item(),
 										fc ) );
 	f->next = f->prev = f;
 	//
@@ -69,9 +72,11 @@ void frame::clear() {
 		process->close().clear();
 	}
 	this->next = this->prev = frame_ptr();
+	base_node_t::clear();
 }
 
 
 void  frame::append( void const* b, size_t const b_sz ) {
 	this->buffer += std::string( (char const*)b );
+	get_slot<frame2window>().item()->invalidate();
 }
