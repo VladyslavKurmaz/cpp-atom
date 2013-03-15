@@ -1,6 +1,6 @@
 #pragma once
 #include "./classes.hpp"
-#include "./cons_buffer.hpp"
+//#include "./cons_buffer.hpp"
 
 class fraction {
 public:
@@ -97,8 +97,8 @@ private:
 	//
 	uni_string
 		buffer;
-	cons_buffer<TCHAR>
-		bf;
+//	cons_buffer<TCHAR>
+//		bf;
 	//
 	frame_coord
 		coord;
