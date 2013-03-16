@@ -19,6 +19,9 @@ hk.edit.ml.exec VK_CONTROL + VK_RETURN
 
 distance between lines
 background image
+enable/bisable bell
+active/inactive bordercolor
+
 
 #endif
 

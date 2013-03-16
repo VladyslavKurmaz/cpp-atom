@@ -75,6 +75,7 @@ bool window::init() {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
 		//
 		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
+		//this->current_frame->run( "d:\\work\\env\\cygwin\\cygwin.bat" );
 		this->current_frame->run( "cmd" );
 		//
 		(*this)

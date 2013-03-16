@@ -6,7 +6,7 @@
 #include "./window.hpp"
 #include "./appl.hpp"
 
-// http://support.microsoft.com/default.aspx?scid=kb;EN-US;q190351&wa=wsignin1.0
+
 
 int main( int argc, char *argv[] )
 {

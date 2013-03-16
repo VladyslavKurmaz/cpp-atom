@@ -17,9 +17,12 @@ class cons_buffer : public boost::noncopyable {
 		void unlock() { LeaveCriticalSection( &cs ); }
 	};
 	///
+	static const elem_t BEL = '\x07';
 	static const elem_t LF = '\x0A';
 	static const elem_t FF = '\x0C';
 	static const elem_t CR = '\x0D';
+	static const elem_t ESC = '\x1B';
+
 public:
 	///
 	cons_buffer() :
@@ -27,7 +30,8 @@ public:
 		,	width( 0 )
 		,	lines_count( 0 )
 		,	buffer()
-		,	lines( 0 ) {
+		,	lines( 0 )
+		,	esc_mode( false ) {
 	}
 	///
 	~cons_buffer(){
@@ -65,7 +69,13 @@ public:
 			bool add = false;
 			lines_t::reverse_iterator lit = this->lines.rbegin();
 			//
-			if ( b[i] == LF ) {
+			if ( this->esc_mode ) {
+				if ( b[i] != '\x5d' ) {
+					this->esc_mode = !( ( '\x40' <= b[i] ) && ( b[i] <= '\x7e' ) );
+				}
+			} else if ( b[i] == BEL ) {
+				// bell
+			} else if ( b[i] == LF ) {
 				// line feed
 				nl = (*lit);
 				nl.pos = 0;
@@ -75,6 +85,8 @@ public:
 			} else if ( b[i] == CR ) {
 				// carriage return
 				(*lit).pos = 0;
+			} else if ( b[i] == ESC ) {
+				this->esc_mode = true;
 			} else {
 				if ( (*lit).pos >= this->width ) {
 					nl = (*lit);
@@ -140,4 +152,7 @@ private:
 	lines_t;
 	lines_t
 	lines;
+	//
+	bool
+	esc_mode;
 };

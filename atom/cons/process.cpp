@@ -3,7 +3,7 @@
 #include "./frame.hpp"
 #include "./process.hpp"
 
-// https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
+
 
 
 process::process( logger_ptr l, frame_ptr f ) :
