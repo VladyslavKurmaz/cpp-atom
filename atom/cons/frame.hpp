@@ -65,9 +65,6 @@ public:
 	frame_ptr
 	get_prev() const { return ( this->prev ); }
 	///
-	TCHAR const*
-	get_buffer() const { return ( this->buffer.c_str() ); }
-	///
 	frame_ptr
 	get_next() const { return ( this->next ); }
 	///
@@ -86,13 +83,15 @@ public:
 	clear();
 	///
 	void
-	append( void const* b, size_t const b_sz );
+	append( void const* b, size_t const sz );
+	///
+	void
+	draw( HDC dc, RECT const& rt );
 
 protected:
 	//
 	logger&
-	get_logger() {
-		return ( *( get_value( boost::mpl::identity< frame2logger >() ).item() ) ); }
+	get_logger() { return ( *( get_slot<frame2logger>().item() ) ); }
 private:
 	//
 	uni_string

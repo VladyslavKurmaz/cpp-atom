@@ -17,6 +17,9 @@ hk.edit.ml.enter VK_CONTROL + VK_RETURN
 hk.edit.ml.new-line VK_RETURN
 hk.edit.ml.exec VK_CONTROL + VK_RETURN
 
+distance between lines
+background image
+
 #endif
 
 
@@ -85,7 +88,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
 		//[ui.padding.*]
 		add_option( po_ui_padding_size,			"ui.padding.size",
-		boost::program_options::value< unsigned int >()->default_value( 1 ),					"", desc ).
+		boost::program_options::value< unsigned int >()->default_value( 2 ),					"", desc ).
 		//[ui.scroll.*]
 		add_option( po_ui_scroll_size,			"ui.scroll.size",
 		boost::program_options::value<unsigned int>()->default_value( 2 ),						"", desc ).

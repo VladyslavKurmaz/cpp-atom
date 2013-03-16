@@ -15,6 +15,8 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
+	//
+	bf.init( 162, 100 );
 }
 
 frame::~frame() {
@@ -76,8 +78,26 @@ void frame::clear() {
 	base_node_t::clear();
 }
 
-
-void  frame::append( void const* b, size_t const b_sz ) {
+void frame::append( void const* b, size_t const sz ) {
+	this->bf.write( static_cast< char const* >( b ), sz );
 	this->buffer += std::string( (char const*)b );
 	get_slot<frame2window>().item()->invalidate();
+}
+
+void frame::draw( HDC dc, RECT const& rt ) {
+	RECT rect = rt;
+	struct _{
+		static bool __( TCHAR const* str, size_t const count, HDC dc, RECT& rect ) {
+			RECT rt;
+			SetRectEmpty( &rt );
+			DrawText( dc, str, count, &rt, DT_LEFT | DT_TOP | DT_CALCRECT );
+			if ( ( rect.bottom -= rt.bottom ) > rect.top ) {
+				OffsetRect( &rt, rect.left, rect.bottom );
+				DrawText( dc, str, count, &rt, DT_LEFT | DT_TOP );
+				return true;
+			}
+			return false;
+		}
+	};
+	this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
 }

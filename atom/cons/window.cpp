@@ -225,15 +225,11 @@ void window::onpaint( HWND hWnd ){
 			SelectObject( dc, cntx.font );
 			SetTextColor( dc, cntx.font_color );
 			SetBkMode( dc, TRANSPARENT );
-			InflateRect( &rt, -1, -1 );
 			//
 			atom::shared_gdiobj<HRGN> rgn = CreateRectRgn( rt.left, rt.top, rt.right, rt.bottom );
 			SelectClipRgn( dc, rgn );
 			{
-				TCHAR const * txt = f->get_buffer();
-				RECT rect = rt;
-				rect.top = rect.bottom - DrawText( dc, txt, -1, &rt, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_CALCRECT );
-				DrawText( dc, txt, -1, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK );
+				f->draw( dc, rt );
 			}
 			SelectClipRgn( dc, NULL );
 			return true;
