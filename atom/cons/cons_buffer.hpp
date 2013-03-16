@@ -70,7 +70,7 @@ public:
 			lines_t::reverse_iterator lit = this->lines.rbegin();
 			//
 			if ( this->esc_mode ) {
-				if ( b[i] != '\x5d' ) {
+				if ( b[i] != '\x5d' && b[i] != '\x5b' ) {
 					this->esc_mode = !( ( '\x40' <= b[i] ) && ( b[i] <= '\x7e' ) );
 				}
 			} else if ( b[i] == BEL ) {
