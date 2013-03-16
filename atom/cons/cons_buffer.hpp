@@ -18,6 +18,7 @@ class cons_buffer : public boost::noncopyable {
 	};
 	///
 	static const elem_t LF = '\x0A';
+	static const elem_t FF = '\x0C';
 	static const elem_t CR = '\x0D';
 public:
 	///
@@ -41,11 +42,18 @@ public:
 		//
 		size_t const table_sz = this->width * this->lines_count;
 		this->buffer = boost::shared_array< elem_t >( new elem_t[ table_sz ] );
+		reset();
+		return true;
+	}
+	///
+	void
+	reset() {
+		size_t const table_sz = this->width * this->lines_count;
 		memset( this->buffer.get(), 0, sizeof( elem_t ) * table_sz );
+		this->lines.clear();
 		this->lines.rset_capacity( this->lines_count );
 		line nl = { this->buffer.get(), 0 };
 		this->lines.push_back( nl );
-		return true;
 	}
 	///
 	bool
@@ -56,10 +64,16 @@ public:
 			line nl = { 0 };
 			bool add = false;
 			lines_t::reverse_iterator lit = this->lines.rbegin();
-			///
+			//
 			if ( b[i] == LF ) {
-				 nl = (*lit);
+				// line feed
+				nl = (*lit);
+				nl.pos = 0;
+			} else if ( b[i] == FF ) {
+				// form feed
+				this->reset();
 			} else if ( b[i] == CR ) {
+				// carriage return
 				(*lit).pos = 0;
 			} else {
 				if ( (*lit).pos >= this->width ) {

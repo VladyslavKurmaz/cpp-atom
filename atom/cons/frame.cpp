@@ -16,7 +16,7 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
 	//
-	bf.init( 162, 100 );
+	bf.init( 162, 500 );
 }
 
 frame::~frame() {
@@ -91,6 +91,8 @@ void frame::draw( HDC dc, RECT const& rt ) {
 			RECT rt;
 			SetRectEmpty( &rt );
 			DrawText( dc, str, count, &rt, DT_LEFT | DT_TOP | DT_CALCRECT );
+			//SIZE sz;
+			//GetTextExtentPoint32( dc, str, count, &sz );
 			if ( ( rect.bottom -= rt.bottom ) > rect.top ) {
 				OffsetRect( &rt, rect.left, rect.bottom );
 				DrawText( dc, str, count, &rt, DT_LEFT | DT_TOP );
