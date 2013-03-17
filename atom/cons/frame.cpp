@@ -11,7 +11,8 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	,	coord( fc )
 	,	next()
 	,	prev()
-	,	process() {
+	,	process()
+	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
@@ -54,12 +55,7 @@ frame_ptr frame::split( bool const pref_h ){
 
 void frame::run( uni_string const& cmd ) {
 	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item(), this->shared_from_this() );
-	this->process->run( cmd );
-	//child->run( "cmd.exe" );
-	//child->run( "msbuild.exe" );
-	//child->run( "c:\\work\\env\\cygwin\\bin\\bash.exe --login -i" );
-	//child->run( "powershell.exe" );
-	//child->run( "cmd /c \"powershell.exe\"" );
+	this->process_caption = this->process->run( cmd );
 }
 
 void  frame::onchar( TCHAR ch ) {
@@ -103,4 +99,8 @@ void frame::draw( HDC dc, RECT const& rt ) {
 		}
 	};
 	this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
+}
+
+uni_string const&  frame::get_caption() const {
+	return this->process_caption;
 }

@@ -87,6 +87,9 @@ public:
 	///
 	void
 	draw( HDC dc, RECT const& rt );
+	///
+	uni_string const&
+	get_caption() const;
 
 protected:
 	//
@@ -110,6 +113,9 @@ private:
 	//
 	process_ptr
 		process;
+	//
+	uni_string
+		process_caption;
 	///
 	frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc );
 };

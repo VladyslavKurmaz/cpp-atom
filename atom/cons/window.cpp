@@ -69,8 +69,13 @@ bool window::init() {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
 		//
 		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
-		//this->current_frame->run( "d:\\work\\env\\cygwin\\cygwin.bat" );
-		this->current_frame->run( "cmd" );
+		uni_string s(
+			"cmd"
+			//"d:\\work\\env\\cygwin\\bin\\bash.exe --login -i"
+			//"powershell.exe"
+			//"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\msbuild.exe"
+			);
+		this->current_frame->run( s );
 		//
 		(*this)
 			( po_hk_appear )
@@ -153,11 +158,13 @@ void window::onpaint( HWND hWnd ){
 		RECT 			rect;
 		paint_param_t&	pp;
 		frame_ptr		current;
+		bool			focused;
 
 		context( HWND w, window& pw ) : pp( pw.paint_param ), wnd( w ) {
 			dc = BeginPaint( wnd, &ps );
 			GetClientRect( wnd, &rect );
 			current		= pw.current_frame;
+			focused		= ( GetFocus() == wnd );
 			//
 			FillRect( pp.mem_dc, &rect, pp.bk_brush );
 		}
@@ -190,20 +197,25 @@ void window::onpaint( HWND hWnd ){
 			//
 			InflateRect( &rt, -cntx.pp.margin_size, -cntx.pp.margin_size );
 			//
+			HBRUSH bb = (( cntx.focused && ( f == cntx.current ) )?(cntx.pp.border_brush):(cntx.pp.border_brush_inactive));
 			for( int i = 0; i < cntx.pp.border_size; ++i ) {
-				FrameRect( dc, &rt, cntx.pp.border_brush );
+				FrameRect( dc, &rt, bb );
 				InflateRect( &rt, -1, -1 );
 			}
 			//
 			InflateRect( &rt, -cntx.pp.padding_size, -cntx.pp.padding_size );
 			//
-			SelectObject( dc, cntx.pp.font_text );
-			SetTextColor( dc, cntx.pp.font_text_color );
 			SetBkMode( dc, TRANSPARENT );
 			//
 			atom::shared_gdiobj<HRGN> rgn = CreateRectRgn( rt.left, rt.top, rt.right, rt.bottom );
 			SelectClipRgn( dc, rgn );
 			{
+				SelectObject( dc, cntx.pp.font_sys );
+				SetTextColor( dc, cntx.pp.font_sys_color );
+				DrawText( dc, f->get_caption().c_str(), -1, &rt, DT_RIGHT | DT_TOP | DT_SINGLELINE );
+				//
+				SelectObject( dc, cntx.pp.font_text );
+				SetTextColor( dc, cntx.pp.font_text_color );
 				f->draw( dc, rt );
 			}
 			SelectClipRgn( dc, NULL );
@@ -255,7 +267,6 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_SPLIT:
 		atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
 		this->current_frame->run( "cmd" );
-		Sleep( 100 );
 		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
@@ -531,7 +542,7 @@ window& window::operator()( atom::po::id_t const opt ) {
 	case po_ui_font_sys:
 		{
 			HFONT sfont = CreateFont(
-				8,
+				12,
 				0,
 				0,
 				0,
@@ -563,7 +574,7 @@ window& window::operator()( atom::po::id_t const opt ) {
 		this->paint_param.border_size			= 1;
 		break;
 	case po_ui_padding:
-		this->paint_param.padding_size			= 0;
+		this->paint_param.padding_size			= 2;
 		break;
 	case po_ui_scroll:
 		this->paint_param.scroll_brush			= CreateSolidBrush( 0x00FF00 );

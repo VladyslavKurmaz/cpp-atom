@@ -3,9 +3,6 @@
 #include "./frame.hpp"
 #include "./process.hpp"
 
-
-
-
 process::process( logger_ptr l, frame_ptr f ) :
 		std_in( NULL )
 	,	child_process( NULL )
@@ -49,7 +46,7 @@ DWORD WINAPI process::read_from_pipe( LPVOID lpvThreadParam ) {
 	return 0;
 }
 
-void process::run( uni_string const& cmd ){
+uni_string process::run( uni_string const& cmd ){
 	SECURITY_ATTRIBUTES sa;
 	HANDLE output_read_tmp, output_write;
 	HANDLE input_write_tmp, input_read;
@@ -103,11 +100,11 @@ void process::run( uni_string const& cmd ){
 	si.hStdOutput		= output_write;
 	si.hStdInput		= input_read;
 	si.hStdError		= error_write;
-	si.wShowWindow		= SW_SHOW;//SW_HIDE;
+	si.wShowWindow		= SW_HIDE;
 	//
 	TCHAR command[MAX_PATH] = { 0 };
 	strcpy_s( command, cmd.c_str() );
-	if ( !CreateProcess( NULL, command, NULL, NULL, TRUE, 0/*CREATE_NEW_CONSOLE*/, NULL, NULL, &si, &pi ) ) {\
+	if ( !CreateProcess( NULL, command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi ) ) {
 		throw get_last_error( "Get std input handle" );
 	}
 	//
@@ -132,6 +129,30 @@ void process::run( uni_string const& cmd ){
 		delete ptr;
 		throw get_last_error( "Read thread" );
 	}
+	Sleep( 100 );
+	//
+	struct ep_t {
+		HWND	cons_wnd;
+		DWORD	pid;
+	} ep = { NULL, pi.dwProcessId };
+	struct _ {
+		static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
+			ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
+			DWORD pid = 0;
+			GetWindowThreadProcessId( hwnd, &pid ); 
+			if ( pid == p.pid ) {
+				p.cons_wnd = hwnd;
+				return FALSE;
+			}
+			return TRUE;
+		}
+	};
+	EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
+	TCHAR caption[ MAX_PATH ] = { 0 };
+	GetWindowText( ep.cons_wnd, caption, MAX_PATH );
+	//
+	SendMessage( ep.cons_wnd, WM_CHAR, 'A', 0 );
+	return ( uni_string( caption) );
 }
 
 void process::write( std::string const& str ) {
@@ -167,6 +188,7 @@ process& process::close() {
 	if ( !CloseHandle( input_write ) ) {
 		throw get_last_error( "Close input pipe write handle" );
 	}
+	WaitForSingleObject( child_process, INFINITE );
 	return (*this);
 }
 

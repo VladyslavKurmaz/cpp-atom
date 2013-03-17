@@ -17,7 +17,7 @@ public:
 	///
 	~process();
 	///
-	void
+	uni_string
 	run( uni_string const& cmd );
 	///
 	void 
