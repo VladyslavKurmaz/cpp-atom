@@ -130,19 +130,36 @@ private:
 	UINT_PTR
 		slide_timer_id;
 	//
-	atom::shared_dc
-		mem_dc;
-	atom::shared_gdiobj< HBITMAP >
-		mem_bitmap;
-	atom::shared_gdiobj< HBRUSH >
-		bk_brush;
-	atom::shared_gdiobj< HBRUSH >
-		border_brush;
-	atom::shared_gdiobj< HBRUSH >
-		scroll_brush;
-	atom::shared_gdiobj< HBRUSH >
-		font_brush;
-	atom::shared_gdiobj< HFONT >
-		font;
+	struct paint_param_t {
+		atom::shared_dc
+			mem_dc;
+		atom::shared_gdiobj< HBITMAP >
+			mem_bitmap;
+		atom::shared_gdiobj< HBRUSH >
+			bk_brush;
+		unsigned int
+			margin_size;
+		atom::shared_gdiobj< HBRUSH >
+			border_brush;
+		atom::shared_gdiobj< HBRUSH >
+			border_brush_inactive;
+		unsigned int
+			border_size;
+		unsigned int
+			padding_size;
+		atom::shared_gdiobj< HBRUSH >
+			scroll_brush;
+		unsigned int
+			scroll_size;
+		atom::shared_gdiobj< HFONT >
+			font_text;
+		COLORREF
+			font_text_color;
+		atom::shared_gdiobj< HFONT >
+			font_sys;
+		COLORREF
+			font_sys_color;
+	} paint_param;
+
 };
 

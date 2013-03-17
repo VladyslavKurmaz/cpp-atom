@@ -75,28 +75,22 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_ui_bk_color,				"ui.bk.color",
 		boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ),				"", desc ).
 		//[ui.font.*]
-		add_option( po_ui_font_name,			"ui.font.name",
-		boost::program_options::value<std::string>()->default_value( "Consolas" ),				"", desc ).
-		add_option( po_ui_font_height,			"ui.font.height",
-		boost::program_options::value< unsigned int >()->default_value( 16 ),					"", desc ).
-		add_option( po_ui_font_color,			"ui.font.color",
-		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
+		add_option( po_ui_font_text,			"ui.font.text",
+		boost::program_options::value<std::string>()->default_value( "name:Consolas;height:16;color:FFFFFF" ),				"", desc ).
+		add_option( po_ui_font_sys,				"ui.font.sys",
+		boost::program_options::value<std::string>()->default_value( "name:Consolas;height:8;color:008000" ),				"", desc ).
 		//[ui.margin.*]
-		add_option( po_ui_margin_size,			"ui.margin.size",
-		boost::program_options::value< unsigned int >()->default_value( 0 ),					"", desc ).
+		add_option( po_ui_margin,				"ui.margin",
+		boost::program_options::value<std::string>()->default_value( "size:0" ),				"", desc ).
 		//[ui.border.*]
-		add_option( po_ui_border_size,			"ui.border.size",
-		boost::program_options::value< unsigned int >()->default_value( 1 ),					"", desc ).
-		add_option( po_ui_border_color,			"ui.border.color",
-		boost::program_options::value< unsigned int >()->default_value( 0xFFFFFF ),				"", desc ).
+		add_option( po_ui_border,				"ui.border",
+		boost::program_options::value<std::string>()->default_value( "size:1;color:FFFFFF;inactive:808080" ),				"", desc ).
 		//[ui.padding.*]
-		add_option( po_ui_padding_size,			"ui.padding.size",
-		boost::program_options::value< unsigned int >()->default_value( 2 ),					"", desc ).
+		add_option( po_ui_padding,				"ui.padding",
+		boost::program_options::value<std::string>()->default_value( "size:1" ),				"", desc ).
 		//[ui.scroll.*]
-		add_option( po_ui_scroll_size,			"ui.scroll.size",
-		boost::program_options::value<unsigned int>()->default_value( 2 ),						"", desc ).
-		add_option( po_ui_scroll_color,			"ui.scroll.color",
-		boost::program_options::value<unsigned int>()->default_value( 0x00FF00 ),				"", desc );
+		add_option( po_ui_scroll,				"ui.scroll",
+		boost::program_options::value<std::string>()->default_value( "size:2;color:008000" ),	"", desc );
 }
 
 pref::~pref() {

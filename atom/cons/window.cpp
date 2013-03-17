@@ -22,13 +22,7 @@ wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint
 	,	slide_dir( 0 )
 	,	slide_start_time()
 	,	slide_timer_id( 1 )
-	,	mem_dc()
-	,	mem_bitmap()
-	,	bk_brush( NULL )
-	,	border_brush( NULL )
-	,	scroll_brush( NULL )
-	,	font_brush( NULL )
-	,	font( NULL ) {
+	,	paint_param() {
 	//
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
@@ -50,7 +44,7 @@ bool window::init() {
 			wcex.hInstance;
 			wcex.hIcon;
 			wcex.hCursor;
-			wcex.hbrBackground	=	NULL;//(HBRUSH)GetStockObject( DKGRAY_BRUSH /*BLACK_BRUSH*/ );
+			wcex.hbrBackground	=	NULL;
 			wcex.lpszMenuName;
 			wcex.lpszClassName;
 			wcex.hIconSm;
@@ -99,15 +93,12 @@ bool window::init() {
 			( po_ui_clip )
 			( po_ui_alpha )
 			( po_ui_bk_color )
-			( po_ui_font_name )
-			( po_ui_font_height )
-			( po_ui_font_color )
-			( po_ui_margin_size )
-			( po_ui_border_size )
-			( po_ui_border_color )
-			( po_ui_padding_size )
-			( po_ui_scroll_size )
-			( po_ui_scroll_color );
+			( po_ui_font_text )
+			( po_ui_font_sys )
+			( po_ui_margin )
+			( po_ui_border )
+			( po_ui_padding )
+			( po_ui_scroll );
 		this->update_hotkeys();
 		//
 		return true;
@@ -159,33 +150,16 @@ void window::onpaint( HWND hWnd ){
 		HWND			wnd;
 		PAINTSTRUCT 	ps; 
 		HDC 			dc; 
-		HDC 			mem_dc; 
 		RECT 			rect;
-		unsigned int	margin;
-		unsigned int	border;
-		COLORREF		border_color;
-		unsigned int	scroll;
-		COLORREF		scroll_color;
-		unsigned int	padding;
-		HFONT			font;
-		COLORREF		font_color;
+		paint_param_t&	pp;
 		frame_ptr		current;
 
-		context( HWND w, window& pw ) : wnd( w ) {
+		context( HWND w, window& pw ) : pp( pw.paint_param ), wnd( w ) {
 			dc = BeginPaint( wnd, &ps );
-			mem_dc		= pw.mem_dc;
 			GetClientRect( wnd, &rect );
-			margin		= pw.get_pref().get< unsigned int >( po_ui_margin_size );
-			border		= pw.get_pref().get< unsigned int >( po_ui_border_size );
-			border_color= pw.get_pref().get< unsigned int >( po_ui_border_color );
-			scroll		= pw.get_pref().get< unsigned int >( po_ui_scroll_size );
-			scroll_color= pw.get_pref().get< unsigned int >( po_ui_scroll_color );
-			padding		= pw.get_pref().get< unsigned int >( po_ui_padding_size );
-			font		= pw.font;
-			font_color	= pw.get_pref().get< unsigned int >( po_ui_font_color );
 			current		= pw.current_frame;
 			//
-			FillRect( mem_dc, &rect, pw.bk_brush );
+			FillRect( pp.mem_dc, &rect, pp.bk_brush );
 		}
 		~context() {
 			BitBlt( dc,
@@ -193,7 +167,7 @@ void window::onpaint( HWND hWnd ){
 					0,
 					rect.right,
 					rect.bottom,
-					mem_dc,
+					pp.mem_dc,
 					0,
 					0,
 					SRCCOPY );
@@ -201,10 +175,10 @@ void window::onpaint( HWND hWnd ){
 		}
 	} c( hWnd, *this );
 	//
-	window2frame const & l = this->get_value( boost::mpl::identity< window2frame >() );
+	window2frame const & l = this->get_slot< window2frame >();
 	struct _{
 		static bool __( frame_ptr const& f, context const& cntx, bool const expand ) {
-			HDC dc = cntx.mem_dc;
+			HDC dc = cntx.pp.mem_dc;
 			RECT rt;
 			int const rw = cntx.rect.right - cntx.rect.left;
 			int const rh = cntx.rect.bottom - cntx.rect.top;
@@ -214,17 +188,17 @@ void window::onpaint( HWND hWnd ){
 			rt.right	= rt.left + rw / coord.width;
 			rt.bottom	= rt.top + rh / coord.height;
 			//
-			InflateRect( &rt, -cntx.margin, -cntx.margin );
+			InflateRect( &rt, -cntx.pp.margin_size, -cntx.pp.margin_size );
 			//
-			for( int i = 0; i < cntx.border; ++i ) {
-				FrameRect( dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+			for( int i = 0; i < cntx.pp.border_size; ++i ) {
+				FrameRect( dc, &rt, cntx.pp.border_brush );
 				InflateRect( &rt, -1, -1 );
 			}
 			//
-			InflateRect( &rt, -cntx.padding, -cntx.padding );
+			InflateRect( &rt, -cntx.pp.padding_size, -cntx.pp.padding_size );
 			//
-			SelectObject( dc, cntx.font );
-			SetTextColor( dc, cntx.font_color );
+			SelectObject( dc, cntx.pp.font_text );
+			SetTextColor( dc, cntx.pp.font_text_color );
 			SetBkMode( dc, TRANSPARENT );
 			//
 			atom::shared_gdiobj<HRGN> rgn = CreateRectRgn( rt.left, rt.top, rt.right, rt.bottom );
@@ -469,9 +443,9 @@ void window::update_placement(){
 	//
 	HDC dc = GetDC( NULL );
 	{
-		this->mem_dc = CreateCompatibleDC( dc );
-		this->mem_bitmap = CreateCompatibleBitmap( dc, RECT_WIDTH( this->in_rect ), RECT_HEIGHT( this->in_rect ) );
-		SelectObject( this->mem_dc, this->mem_bitmap );
+		this->paint_param.mem_dc		= CreateCompatibleDC( dc );
+		this->paint_param.mem_bitmap	= CreateCompatibleBitmap( dc, RECT_WIDTH( this->in_rect ), RECT_HEIGHT( this->in_rect ) );
+		SelectObject( this->paint_param.mem_dc, this->paint_param.mem_bitmap );
 	}
 	ReleaseDC( NULL, dc );
 }
@@ -526,30 +500,74 @@ window& window::operator()( atom::po::id_t const opt ) {
 	case po_hk_tty6:
 		break;
 	case po_ui_bk_color:
-		this->bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
+		this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
 		break;
-	case po_ui_font_name:
-		HFONT nfont = CreateFont(
-			get_pref().get< unsigned int >( po_ui_font_height ),
-			0,
-			0,
-			0,
-			FW_NORMAL,
-			FALSE,
-			FALSE,
-			FALSE,
-			OEM_CHARSET,
-			OUT_OUTLINE_PRECIS,
-			CLIP_DEFAULT_PRECIS,
-			DEFAULT_QUALITY,
-			FIXED_PITCH,
-			get_pref().get< std::string >( po_ui_font_name ).c_str()
-			);
-		if ( nfont != NULL ) {
-			this->font = nfont; 
-		} else {
-			this->get_logger() << "Font creation error: " << get_pref().get< std::string >( po_ui_font_name ) << std::endl;
+	case po_ui_font_text:
+		{
+			HFONT tfont = CreateFont(
+				16,
+				0,
+				0,
+				0,
+				FW_NORMAL,
+				FALSE,
+				FALSE,
+				FALSE,
+				OEM_CHARSET,
+				OUT_OUTLINE_PRECIS,
+				CLIP_DEFAULT_PRECIS,
+				DEFAULT_QUALITY,
+				FIXED_PITCH,
+				"Consolas"
+				);
+			if ( tfont != NULL ) {
+				this->paint_param.font_text = tfont; 
+				this->paint_param.font_text_color = 0xFFFFFF;
+			} else {
+				this->get_logger() << "Text font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
+			}
+			break;
 		}
+	case po_ui_font_sys:
+		{
+			HFONT sfont = CreateFont(
+				8,
+				0,
+				0,
+				0,
+				FW_NORMAL,
+				FALSE,
+				FALSE,
+				FALSE,
+				OEM_CHARSET,
+				OUT_OUTLINE_PRECIS,
+				CLIP_DEFAULT_PRECIS,
+				DEFAULT_QUALITY,
+				FIXED_PITCH,
+				"Consolas"
+				);
+			if ( sfont != NULL ) {
+				this->paint_param.font_sys = sfont; 
+				this->paint_param.font_sys_color = 0x008000;
+			} else {
+				this->get_logger() << "Sys font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
+			}
+			break;
+		}
+	case po_ui_margin:
+		this->paint_param.margin_size			= 0;
+		break;
+	case po_ui_border:
+		this->paint_param.border_brush			= CreateSolidBrush( 0xFFFFFF );
+		this->paint_param.border_brush_inactive	= CreateSolidBrush( 0x808080 );
+		this->paint_param.border_size			= 1;
+		break;
+	case po_ui_padding:
+		this->paint_param.padding_size			= 0;
+		break;
+	case po_ui_scroll:
+		this->paint_param.scroll_brush			= CreateSolidBrush( 0x00FF00 );
+		this->paint_param.scroll_size			= 2;
 		break;
 	}
 	return (*this);
