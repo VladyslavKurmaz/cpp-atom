@@ -266,6 +266,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
 		atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
+		this->head_frame->reorder();
 		this->current_frame->run( "cmd" );
 		break;
 	case CMDID_EXPAND:
@@ -280,6 +281,14 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame = this->current_frame->get_prev();
 		break;
 	case CMDID_CLOSE:
+		break;
+	case CMDID_TTY1:
+	case CMDID_TTY2:
+	case CMDID_TTY3:
+	case CMDID_TTY4:
+	case CMDID_TTY5:
+	case CMDID_TTY6:
+		this->current_frame = this->current_frame->get_by_index( id - CMDID_TTY1 );
 		break;
 	default:
 		return;
@@ -475,15 +484,15 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 window& window::operator()( atom::po::id_t const opt ) {
 	switch( opt ) {
 	case po_hk_split:
-		this->accel.add_accel( CMDID_SPLIT,		true, false, false, false, 's' );
+		this->accel.add_accel( CMDID_SPLIT,		false, true, false, true, 'S' );
 		this->accel.build();
 		break;
 	case po_hk_expand:
-		this->accel.add_accel( CMDID_EXPAND,	true, false, false, false, 'w' );
+		this->accel.add_accel( CMDID_EXPAND,	false, true, false, true, 'Q' );
 		this->accel.build();
 		break;
 	case po_hk_rotate:
-		this->accel.add_accel( CMDID_ROTATE,	true, false, false, false, 'r' );
+		this->accel.add_accel( CMDID_ROTATE,	false, true, false, true, 'A' );
 		this->accel.build();
 		break;
 	case po_hk_next:
@@ -499,16 +508,13 @@ window& window::operator()( atom::po::id_t const opt ) {
 		this->accel.build();
 		break;
 	case po_hk_tty1:
-		break;
 	case po_hk_tty2:
-		break;
 	case po_hk_tty3:
-		break;
 	case po_hk_tty4:
-		break;
 	case po_hk_tty5:
-		break;
 	case po_hk_tty6:
+		this->accel.add_accel( CMDID_TTY1 + ( opt - po_hk_tty1 ),		true, true, false, true, VK_F1 + ( opt - po_hk_tty1 ) );
+		this->accel.build();
 		break;
 	case po_ui_bk_color:
 		this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
@@ -570,7 +576,7 @@ window& window::operator()( atom::po::id_t const opt ) {
 		break;
 	case po_ui_border:
 		this->paint_param.border_brush			= CreateSolidBrush( 0xFFFFFF );
-		this->paint_param.border_brush_inactive	= CreateSolidBrush( 0x808080 );
+		this->paint_param.border_brush_inactive	= CreateSolidBrush( 0x404040 );
 		this->paint_param.border_size			= 1;
 		break;
 	case po_ui_padding:

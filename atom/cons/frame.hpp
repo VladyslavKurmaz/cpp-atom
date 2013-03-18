@@ -73,6 +73,12 @@ public:
 	frame_ptr
 	split( bool const pref_h );
 	///
+	frame_ptr
+	get_by_index( unsigned int const i );
+	///
+	void
+	reorder();
+	///
 	void
 	run( uni_string const& cmd );
 	///
@@ -88,7 +94,7 @@ public:
 	void
 	draw( HDC dc, RECT const& rt );
 	///
-	uni_string const&
+	uni_string
 	get_caption() const;
 
 protected:
@@ -96,6 +102,9 @@ protected:
 	logger&
 	get_logger() { return ( *( get_slot<frame2logger>().item() ) ); }
 private:
+	///
+	unsigned int
+		index;
 	//
 	uni_string
 		buffer;

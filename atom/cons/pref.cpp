@@ -36,11 +36,11 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_hk_appear,				"hk.appear",
 		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+][VK]", desc ).
 		add_option( po_hk_split,				"hk.split",
-		boost::program_options::value<std::string>()->default_value("alt+S"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+S"),					"", desc ).
 		add_option( po_hk_expand,				"hk.expand",
-		boost::program_options::value<std::string>()->default_value("alt+W"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+Q"),					"", desc ).
 		add_option( po_hk_rotate,				"hk.rotate",
-		boost::program_options::value<std::string>()->default_value("alt+R"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+A"),					"", desc ).
 		add_option( po_hk_next,					"hk.next",
 		boost::program_options::value<std::string>()->default_value("ctrl+TAB"),				"", desc ).
 		add_option( po_hk_prev,					"hk.prev",
@@ -84,7 +84,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		boost::program_options::value<std::string>()->default_value( "size:0" ),				"", desc ).
 		//[ui.border.*]
 		add_option( po_ui_border,				"ui.border",
-		boost::program_options::value<std::string>()->default_value( "size:1;color:FFFFFF;inactive:808080" ),				"", desc ).
+		boost::program_options::value<std::string>()->default_value( "size:1;color:FFFFFF;inactive:404040" ),				"", desc ).
 		//[ui.padding.*]
 		add_option( po_ui_padding,				"ui.padding",
 		boost::program_options::value<std::string>()->default_value( "size:1" ),				"", desc ).

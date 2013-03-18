@@ -6,7 +6,8 @@
 #include "./frame.hpp"
 
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
-		buffer()
+		index( 0 )
+	,	buffer()
 	,	bf()
 	,	coord( fc )
 	,	next()
@@ -51,6 +52,26 @@ frame_ptr frame::split( bool const pref_h ){
 	std::swap( r->prev, f->prev );
 	//
 	return f;
+}
+
+frame_ptr frame::get_by_index( unsigned int const i ) {
+	frame_ptr f = shared_from_this();
+	do {
+		if ( f->index == i ) {
+			return ( f );
+		}
+		f = f->get_next();
+	} while( f.get() != this );
+	return ( shared_from_this() );
+}
+
+void frame::reorder() {
+	frame_ptr f = shared_from_this();
+	unsigned int i = 0;
+	do {
+		f->index = i++;
+		f = f->get_next();
+	} while( f.get() != this );
 }
 
 void frame::run( uni_string const& cmd ) {
@@ -101,6 +122,8 @@ void frame::draw( HDC dc, RECT const& rt ) {
 	this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
 }
 
-uni_string const&  frame::get_caption() const {
-	return this->process_caption;
+uni_string frame::get_caption() const {
+	std::stringstream ss;
+	ss << this->process_caption << " #" << this->index + 1;
+	return ( ss.str() );
 }
