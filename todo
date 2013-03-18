@@ -1,0 +1,12 @@
+- run/runas
+- blinking cursor
+- 4 states:
+ - cons
+ - process
+ - scroll/edit
+ - history
+- break signal
+- add version
+- parse hotkeys
+- startup banner
+-  

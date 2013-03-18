@@ -83,6 +83,8 @@ void  frame::onchar( TCHAR ch ) {
 	if ( ch == VK_RETURN ) {
 		//process->write( "\x0D\x0A" );
 		process->write( "\x0A" );
+	} else if ( ch == VK_SPACE ) {
+		process->write( "^C\x0A" );
 	} else {
 		process->write( ch );
 	}
