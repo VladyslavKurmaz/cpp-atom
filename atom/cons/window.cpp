@@ -483,39 +483,54 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 
 window& window::operator()( atom::po::id_t const opt ) {
 	switch( opt ) {
-	case po_hk_split:
-		this->accel.add_accel( CMDID_SPLIT,		false, true, false, true, 'S' );
-		this->accel.build();
-		break;
-	case po_hk_expand:
-		this->accel.add_accel( CMDID_EXPAND,	false, true, false, true, 'Q' );
-		this->accel.build();
-		break;
-	case po_hk_rotate:
-		this->accel.add_accel( CMDID_ROTATE,	false, true, false, true, 'A' );
-		this->accel.build();
-		break;
-	case po_hk_next:
-		this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
-		this->accel.build();
-		break;
-	case po_hk_prev:
-		this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
-		this->accel.build();
-		break;
-	case po_hk_close:
-		this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
-		this->accel.build();
-		break;
+	//case po_hk_split:
+	//	this->accel.add_accel( CMDID_SPLIT,		false, true, false, true, 'S' );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_expand:
+	//	this->accel.add_accel( CMDID_EXPAND,	false, true, false, true, 'Q' );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_rotate:
+	//	this->accel.add_accel( CMDID_ROTATE,	false, true, false, true, 'A' );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_next:
+	//	this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_prev:
+	//	this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_close:
+	//	this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
+	//	this->accel.build();
+	//	break;
 	case po_hk_tty1:
-	case po_hk_tty2:
-	case po_hk_tty3:
-	case po_hk_tty4:
-	case po_hk_tty5:
-	case po_hk_tty6:
-		this->accel.add_accel( CMDID_TTY1 + ( opt - po_hk_tty1 ),		true, true, false, true, VK_F1 + ( opt - po_hk_tty1 ) );
+		this->accel.add_accel( CMDID_TTY1,		true, true, false, true, VK_F1 );
 		this->accel.build();
 		break;
+	//case po_hk_tty2:
+	//	this->accel.add_accel( CMDID_TTY2,		true, true, false, true, VK_F2 );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_tty3:
+	//	this->accel.add_accel( CMDID_TTY3,		true, true, false, true, VK_F3 );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_tty4:
+	//	this->accel.add_accel( CMDID_TTY4,		true, true, false, true, VK_F4 );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_tty5:
+	//	this->accel.add_accel( CMDID_TTY5,		true, true, false, true, VK_F5 );
+	//	this->accel.build();
+	//	break;
+	//case po_hk_tty6:
+	//	this->accel.add_accel( CMDID_TTY6,		true, true, false, true, VK_F6 );
+	//	this->accel.build();
+	//	break;
 	case po_ui_bk_color:
 		this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
 		break;

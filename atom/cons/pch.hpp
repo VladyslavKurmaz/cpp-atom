@@ -75,7 +75,7 @@ struct alignment {
 };
 
 ///
-static WORD	const CMDID_SPLIT	= 100;
+static WORD	const CMDID_SPLIT	= 1000;
 static WORD	const CMDID_EXPAND	= CMDID_SPLIT + 1;
 static WORD	const CMDID_ROTATE	= CMDID_EXPAND + 1;
 static WORD	const CMDID_NEXT	= CMDID_ROTATE + 1;
