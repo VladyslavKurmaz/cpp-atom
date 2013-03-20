@@ -23,7 +23,8 @@
 typedef std::basic_string<TCHAR>
 	uni_string;
 ///
-static atom::po::id_t const po_help					=	0;
+static atom::po::id_t const po_none					=	0;
+static atom::po::id_t const po_help					=	po_none + 1;
 //[hk.*]
 static atom::po::id_t const po_hk_appear			=	po_help + 1;
 static atom::po::id_t const po_hk_split				=	po_hk_appear + 1;
@@ -71,6 +72,16 @@ struct alignment {
 		bottom	= 0x08,
 		vcenter	= top | bottom,  
 		center	= vcenter | hcenter
+	};
+};
+///
+struct preferences {
+	typedef int
+		type;
+	enum {
+		pre		= 0x01,
+		update	= 0x02,
+		post	= 0x03
 	};
 };
 

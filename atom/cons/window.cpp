@@ -78,33 +78,34 @@ bool window::init() {
 		this->current_frame->run( s );
 		//
 		(*this)
-			( po_hk_appear )
-			( po_hk_split )
-			( po_hk_expand )
-			( po_hk_rotate )
-			( po_hk_next )
-			( po_hk_prev )
-			( po_hk_close )
-			( po_hk_tty1 )
-			( po_hk_tty2 )
-			( po_hk_tty3 )
-			( po_hk_tty4 )
-			( po_hk_tty5 )
-			( po_hk_tty6 )
-			( po_ui_timeout )
-			( po_ui_alignment )
-			( po_ui_width )
-			( po_ui_height )
-			( po_ui_clip )
-			( po_ui_alpha )
-			( po_ui_bk_color )
-			( po_ui_font_text )
-			( po_ui_font_sys )
-			( po_ui_margin )
-			( po_ui_border )
-			( po_ui_padding )
-			( po_ui_scroll );
-		this->update_hotkeys();
+		( preferences::pre, po_none )
+			( preferences::update, po_hk_appear )
+			( preferences::update, po_hk_split )
+			( preferences::update, po_hk_expand )
+			( preferences::update, po_hk_rotate )
+			( preferences::update, po_hk_next )
+			( preferences::update, po_hk_prev )
+			( preferences::update, po_hk_close )
+			( preferences::update, po_hk_tty1 )
+			( preferences::update, po_hk_tty2 )
+			( preferences::update, po_hk_tty3 )
+			( preferences::update, po_hk_tty4 )
+			( preferences::update, po_hk_tty5 )
+			( preferences::update, po_hk_tty6 )
+			( preferences::update, po_ui_timeout )
+			( preferences::update, po_ui_alignment )
+			( preferences::update, po_ui_width )
+			( preferences::update, po_ui_height )
+			( preferences::update, po_ui_clip )
+			( preferences::update, po_ui_alpha )
+			( preferences::update, po_ui_bk_color )
+			( preferences::update, po_ui_font_text )
+			( preferences::update, po_ui_font_sys )
+			( preferences::update, po_ui_margin )
+			( preferences::update, po_ui_border )
+			( preferences::update, po_ui_padding )
+			( preferences::update, po_ui_scroll )
+		( preferences::post, po_none );
 		//
 		return true;
 	}
@@ -481,126 +482,120 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
 
-window& window::operator()( atom::po::id_t const opt ) {
-	switch( opt ) {
-	case po_hk_split:
-		this->accel.add_accel( CMDID_SPLIT,		false, true, false, true, 'S' );
-		this->accel.build();
-		break;
-	case po_hk_expand:
-		this->accel.add_accel( CMDID_EXPAND,	false, true, false, true, 'Q' );
-		this->accel.build();
-		break;
-	case po_hk_rotate:
-		this->accel.add_accel( CMDID_ROTATE,	false, true, false, true, 'A' );
-		this->accel.build();
-		break;
-	case po_hk_next:
-		this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
-		this->accel.build();
-		break;
-	case po_hk_prev:
-		this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
-		this->accel.build();
-		break;
-	case po_hk_close:
-		this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
-		this->accel.build();
-		break;
-	case po_hk_tty1:
-		this->accel.add_accel( CMDID_TTY1,		true, true, false, true, VK_F1 );
-		this->accel.build();
-		break;
-	case po_hk_tty2:
-		this->accel.add_accel( CMDID_TTY2,		true, true, false, true, VK_F2 );
-		this->accel.build();
-		break;
-	case po_hk_tty3:
-		this->accel.add_accel( CMDID_TTY3,		true, true, false, true, VK_F3 );
-		this->accel.build();
-		break;
-	case po_hk_tty4:
-		this->accel.add_accel( CMDID_TTY4,		true, true, false, true, VK_F4 );
-		this->accel.build();
-		break;
-	case po_hk_tty5:
-		this->accel.add_accel( CMDID_TTY5,		true, true, false, true, VK_F5 );
-		this->accel.build();
-		break;
-	case po_hk_tty6:
-		this->accel.add_accel( CMDID_TTY6,		true, true, false, true, VK_F6 );
-		this->accel.build();
-		break;
-	case po_ui_bk_color:
-		this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
-		break;
-	case po_ui_font_text:
-		{
-			HFONT tfont = CreateFont(
-				16,
-				0,
-				0,
-				0,
-				FW_NORMAL,
-				FALSE,
-				FALSE,
-				FALSE,
-				OEM_CHARSET,
-				OUT_OUTLINE_PRECIS,
-				CLIP_DEFAULT_PRECIS,
-				DEFAULT_QUALITY,
-				FIXED_PITCH,
-				"Consolas"
-				);
-			if ( tfont != NULL ) {
-				this->paint_param.font_text = tfont; 
-				this->paint_param.font_text_color = 0xFFFFFF;
-			} else {
-				this->get_logger() << "Text font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
+window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
+	if ( mode == preferences::pre ) {
+	} else if ( mode == preferences::update ) {
+		switch( opt ) {
+		case po_hk_split:
+			this->accel.add_accel( CMDID_SPLIT,		false, true, false, true, 'S' );
+			break;
+		case po_hk_expand:
+			this->accel.add_accel( CMDID_EXPAND,	false, true, false, true, 'Q' );
+			break;
+		case po_hk_rotate:
+			this->accel.add_accel( CMDID_ROTATE,	false, true, false, true, 'A' );
+			break;
+		case po_hk_next:
+			this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
+			break;
+		case po_hk_prev:
+			this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
+			break;
+		case po_hk_close:
+			this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
+			break;
+		case po_hk_tty1:
+			this->accel.add_accel( CMDID_TTY1,		true, true, false, true, VK_F1 );
+			break;
+		case po_hk_tty2:
+			this->accel.add_accel( CMDID_TTY2,		true, true, false, true, VK_F2 );
+			break;
+		case po_hk_tty3:
+			this->accel.add_accel( CMDID_TTY3,		true, true, false, true, VK_F3 );
+			break;
+		case po_hk_tty4:
+			this->accel.add_accel( CMDID_TTY4,		true, true, false, true, VK_F4 );
+			break;
+		case po_hk_tty5:
+			this->accel.add_accel( CMDID_TTY5,		true, true, false, true, VK_F5 );
+			break;
+		case po_hk_tty6:
+			this->accel.add_accel( CMDID_TTY6,		true, true, false, true, VK_F6 );
+			break;
+		case po_ui_bk_color:
+			this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
+			break;
+		case po_ui_font_text:
+			{
+				HFONT tfont = CreateFont(
+					16,
+					0,
+					0,
+					0,
+					FW_NORMAL,
+					FALSE,
+					FALSE,
+					FALSE,
+					OEM_CHARSET,
+					OUT_OUTLINE_PRECIS,
+					CLIP_DEFAULT_PRECIS,
+					DEFAULT_QUALITY,
+					FIXED_PITCH,
+					"Consolas"
+					);
+				if ( tfont != NULL ) {
+					this->paint_param.font_text = tfont; 
+					this->paint_param.font_text_color = 0xFFFFFF;
+				} else {
+					this->get_logger() << "Text font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
+				}
+				break;
 			}
+		case po_ui_font_sys:
+			{
+				HFONT sfont = CreateFont(
+					12,
+					0,
+					0,
+					0,
+					FW_NORMAL,
+					FALSE,
+					FALSE,
+					FALSE,
+					OEM_CHARSET,
+					OUT_OUTLINE_PRECIS,
+					CLIP_DEFAULT_PRECIS,
+					DEFAULT_QUALITY,
+					FIXED_PITCH,
+					"Consolas"
+					);
+				if ( sfont != NULL ) {
+					this->paint_param.font_sys = sfont; 
+					this->paint_param.font_sys_color = 0x008000;
+				} else {
+					this->get_logger() << "Sys font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
+				}
+				break;
+			}
+		case po_ui_margin:
+			this->paint_param.margin_size			= 0;
+			break;
+		case po_ui_border:
+			this->paint_param.border_brush			= CreateSolidBrush( 0xFFFFFF );
+			this->paint_param.border_brush_inactive	= CreateSolidBrush( 0x404040 );
+			this->paint_param.border_size			= 1;
+			break;
+		case po_ui_padding:
+			this->paint_param.padding_size			= 2;
+			break;
+		case po_ui_scroll:
+			this->paint_param.scroll_brush			= CreateSolidBrush( 0x00FF00 );
+			this->paint_param.scroll_size			= 2;
 			break;
 		}
-	case po_ui_font_sys:
-		{
-			HFONT sfont = CreateFont(
-				12,
-				0,
-				0,
-				0,
-				FW_NORMAL,
-				FALSE,
-				FALSE,
-				FALSE,
-				OEM_CHARSET,
-				OUT_OUTLINE_PRECIS,
-				CLIP_DEFAULT_PRECIS,
-				DEFAULT_QUALITY,
-				FIXED_PITCH,
-				"Consolas"
-				);
-			if ( sfont != NULL ) {
-				this->paint_param.font_sys = sfont; 
-				this->paint_param.font_sys_color = 0x008000;
-			} else {
-				this->get_logger() << "Sys font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
-			}
-			break;
-		}
-	case po_ui_margin:
-		this->paint_param.margin_size			= 0;
-		break;
-	case po_ui_border:
-		this->paint_param.border_brush			= CreateSolidBrush( 0xFFFFFF );
-		this->paint_param.border_brush_inactive	= CreateSolidBrush( 0x404040 );
-		this->paint_param.border_size			= 1;
-		break;
-	case po_ui_padding:
-		this->paint_param.padding_size			= 2;
-		break;
-	case po_ui_scroll:
-		this->paint_param.scroll_brush			= CreateSolidBrush( 0x00FF00 );
-		this->paint_param.scroll_size			= 2;
-		break;
+	} else if ( mode == preferences::post ) {
+		this->accel.build();
+		this->update_hotkeys();
 	}
 	return (*this);
 }
