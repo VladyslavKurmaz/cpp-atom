@@ -2,6 +2,7 @@
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"
@@ -311,69 +312,83 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	   */
 
 template < typename C, typename V >
-struct pair_tag {
+struct parse_tag {
 	C const*	name;
 	V			value;
 };
 
 template < typename C, typename V >
-size_t parse_tags( std::basic_string<C> const& input, pair_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitter, V& result, std::basic_string<C> & unparsed ) {
-	result		= V();
-	unparsed	= std::basic_string<C>();
+struct parse_result {
+	size_t		total_found;
+	V			result;
+	std::vector< std::basic_string<C > >
+				unparsed;
+	parse_result() : total_found( 0 ), result(), unparsed() {}
+};
+
+template < typename C, typename V >
+parse_result< C, V > parse_tags( std::basic_string<C> const& input, parse_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitters ) {
+	parse_result< C, V > result;
 	//
+	std::vector< std::basic_string<C> > strs;
+	boost::split( strs, input, boost::is_any_of( splitters ) );
+	result.total_found = strs.size(); 
+	BOOST_FOREACH( std::basic_string<C> const& s, strs ) {
+		bool found = false;
+		for( size_t i = 0; i < table_size; ++i ) {
+			if ( s == table[i].name ) {
+				result.result |= table[i].value;
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			result.unparsed.push_back( s );
+		}
+	}
+	return result;
 }
+
+
+parse_tag< TCHAR, UINT > hotkey_tags[] = {
+	{ "win",	MOD_WIN },
+	{ "ctrl",	MOD_CONTROL },
+	{ "alt",	MOD_ALT },
+	{ "shift",	MOD_SHIFT }
+};
+size_t hotkey_tags_count = sizeof( hotkey_tags ) / sizeof( hotkey_tags[0] );
 
 void
 window::update_hotkeys() {
-	hotkey_t new_hk;
-	std::vector<std::string> strs;
-	std::string appear_hk = get_pref().get< std::string >( po_hk_appear );
-	boost::split( strs, appear_hk, boost::is_any_of("+") );
-	//
-	size_t check_cnt = 0;
-	for ( size_t i = 0; i < strs.size(); ++i ) {
-		std::string const& s = strs[i];
-		//
-		check_cnt++;
-		if ( s == "win" ){
-			new_hk.mods |= MOD_WIN;
-		} else if ( s == "ctrl" ) {
-			new_hk.mods |= MOD_CONTROL;
-		} else if ( s == "alt" ) {
-			new_hk.mods |= MOD_ALT;
-		} else if ( s == "shift" ) {
-			new_hk.mods |= MOD_SHIFT;
-		} else {
-			try {
+	parse_result< TCHAR, UINT > result = parse_tags( get_pref().get< uni_string >( po_hk_appear ), hotkey_tags, hotkey_tags_count, uni_string( "+" ) );
+	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 1 ) ) {
+		hotkey_t new_hk;
+		new_hk.mods = MOD_NOREPEAT | result.result;
+		try {
+			std::stringstream ss;
+			ss << result.unparsed[0];
+			ss >> new_hk.vk;
+			if ( !new_hk.vk ) {
 				std::stringstream ss;
-				ss << s;
-				ss >> new_hk.vk;
-				if ( !new_hk.vk ) {
-					std::stringstream ss;
-					ss << s;
-					ss >> std::hex >> new_hk.vk;
+				ss << result.unparsed[0];
+				ss >> std::hex >> new_hk.vk;
+			}
+			//
+			if ( !( new_hk == this->appear_hk )) {
+				new_hk.id++;
+				if ( RegisterHotKey( this->get_hwnd(), new_hk.id, new_hk.mods, new_hk.vk )) {
+					if ( this->appear_hk.id && !UnregisterHotKey( this->get_hwnd(), this->appear_hk.id ) ) {
+						this->get_logger() << "Hotkey unregister error" << std::endl;
+					}
+					this->appear_hk = new_hk; 
+				} else {
+					this->get_logger() << "Hotkey register error" << std::endl;
 				}
-			} catch( std::exception& e ){
-				this->get_logger() << "Invalid hotkey format " << e.what()<< std::endl;
-				check_cnt--;
 			}
 		}
-	}
-	if ( check_cnt == strs.size() ) {
-		new_hk.mods |= MOD_NOREPEAT;
-		if ( !( new_hk == this->appear_hk )) {
-			new_hk.id++;
-			if ( RegisterHotKey( this->get_hwnd(), new_hk.id, new_hk.mods, new_hk.vk )) {
-				if ( this->appear_hk.id && !UnregisterHotKey( this->get_hwnd(), this->appear_hk.id ) ) {
-					this->get_logger() << "Hotkey unregister error" << std::endl;
-				}
-				this->appear_hk = new_hk; 
-			} else {
-				this->get_logger() << "Hotkey register error" << std::endl;
-			}
+		catch( std::exception& e ){
+			this->get_logger() << "Invalid hotkey format " << e.what()<< std::endl;
 		}
-	} else {
-		this->get_logger() << "Invalid hotkey format " << appear_hk << std::endl;
 	}
 }
 //
