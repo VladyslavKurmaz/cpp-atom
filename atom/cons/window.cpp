@@ -392,46 +392,32 @@ window::update_hotkeys() {
 	}
 }
 //
+parse_tag< TCHAR, alignment::type > alignment_tags[] = {
+	{ "client",		alignment::client },
+	{ "top",		alignment::top },
+	{ "bottom",		alignment::bottom },
+	{ "vcenter",	alignment::vcenter },
+	{ "left",		alignment::left },
+	{ "right",		alignment::right },
+	{ "hcenter",	alignment::hcenter },
+	{ "center",		alignment::center }
+};
+size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
+
 void window::update_placement(){
-	std::string const alig_str	= get_pref().get< std::string >( po_ui_alignment );
+	uni_string const alig_str	= get_pref().get< uni_string >( po_ui_alignment );
 	unsigned int const width	= get_pref().get< unsigned int >( po_ui_width );
 	unsigned int const height	= get_pref().get< unsigned int >( po_ui_height );
 	bool const clip				= get_pref().get< bool >( po_ui_clip );
 	//
 	alignment::type align = alignment::client;
-	std::vector<std::string> strs;
-	boost::split( strs, alig_str, boost::is_any_of("+") );
+	parse_result< TCHAR, alignment::type > result = parse_tags( alig_str, alignment_tags, alignment_tags_count, uni_string( "+" ) );
 	//
-	size_t check_cnt = 0;
-	for ( size_t i = 0; i < strs.size(); ++i ) {
-		std::string const& s = strs[i];
-		//
-		check_cnt++;
-		if ( s == "client" ){
-			align |= alignment::client;
-		} else if ( s == "top" ){
-			align |= alignment::top;
-		} else if ( s == "bottom" ) {
-			align |= alignment::bottom;
-		} else if ( s == "vcenter" ) {
-			align |= alignment::vcenter;
-		} else if ( s == "left" ) {
-			align |= alignment::left;
-		} else if ( s == "right" ) {
-			align |= alignment::right;
-		} else if ( s == "hcenter" ) {
-			align |= alignment::hcenter;
-		} else if ( s == "center" ) {
-			align |= alignment::center;
-		} else {
-			check_cnt--;
-		}
-	}
-	//
-	if ( check_cnt == strs.size() ) {
+	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 0 ) ) {
+		align = result.result;
 	} else {
 		this->get_logger() << "Invalid alignment format " << alig_str << std::endl;
-		align = alignment::top | alignment::vcenter;
+		align = alignment::top;
 	}
 	//
 	RECT rt;
