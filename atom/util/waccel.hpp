@@ -34,6 +34,10 @@ namespace atom {
 		}
 		//
 		void add_accel( WORD cmd, bool alt, bool ctrl, bool shift, bool virtkey, WORD key ) {
+			this->add_accel( cmd, ((alt)?(FALT):(0)) | ((ctrl)?(FCONTROL):(0)) | ((shift)?(FSHIFT):(0)) | ((virtkey)?(FVIRTKEY):(0)), key );
+		}
+		//
+		void add_accel( WORD cmd, BYTE virt, WORD key ) {
 			ACCEL a;
 			LPACCEL pa = &a;
 			for ( size_t i = 0; i < this->accels.size(); ++i ) {
@@ -43,7 +47,7 @@ namespace atom {
 				}
 			}
 			//
-			pa->fVirt	=	((alt)?(FALT):(0)) | ((ctrl)?(FCONTROL):(0)) | ((shift)?(FSHIFT):(0)) | ((virtkey)?(FVIRTKEY):(0));
+			pa->fVirt	=	virt;
 			pa->key		=	key;
 			pa->cmd		=	cmd;
 			//

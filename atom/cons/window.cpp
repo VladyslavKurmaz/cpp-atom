@@ -413,7 +413,7 @@ void window::update_placement(){
 	alignment::type align = alignment::client;
 	parse_result< TCHAR, alignment::type > result = parse_tags( alig_str, alignment_tags, alignment_tags_count, uni_string( "+" ) );
 	//
-	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 0 ) ) {
+	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
 		align = result.result;
 	} else {
 		this->get_logger() << "Invalid alignment format " << alig_str << std::endl;
