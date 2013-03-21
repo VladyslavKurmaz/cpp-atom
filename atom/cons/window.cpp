@@ -310,6 +310,19 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 
 	   */
 
+template < typename C, typename V >
+struct pair_tag {
+	C const*	name;
+	V			value;
+};
+
+template < typename C, typename V >
+size_t parse_tags( std::basic_string<C> const& input, pair_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitter, V& result, std::basic_string<C> & unparsed ) {
+	result		= V();
+	unparsed	= std::basic_string<C>();
+	//
+}
+
 void
 window::update_hotkeys() {
 	hotkey_t new_hk;
