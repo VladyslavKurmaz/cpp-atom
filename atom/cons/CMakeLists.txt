@@ -15,3 +15,8 @@ add_executable(
 	"./window.cpp"
 	"./process.cpp"
 )
+
+add_executable( 
+	consd
+	"./consd.cpp"
+)

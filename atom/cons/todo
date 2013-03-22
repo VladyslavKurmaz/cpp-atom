@@ -3,3 +3,6 @@
 - commands' history
 - CLI for cons configuration
 - states
+- self test on start - check hotkeys
+- close frame
+- rotate frame
