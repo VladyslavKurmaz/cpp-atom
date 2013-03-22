@@ -2,7 +2,6 @@
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"
@@ -311,46 +310,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 
 	   */
 
-template < typename C, typename V >
-struct parse_tag {
-	C const*	name;
-	V			value;
-};
-
-template < typename C, typename V >
-struct parse_result {
-	size_t		total_found;
-	V			result;
-	std::vector< std::basic_string<C > >
-				unparsed;
-	parse_result() : total_found( 0 ), result(), unparsed() {}
-};
-
-template < typename C, typename V >
-parse_result< C, V > parse_tags( std::basic_string<C> const& input, parse_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitters ) {
-	parse_result< C, V > result;
-	//
-	std::vector< std::basic_string<C> > strs;
-	boost::split( strs, input, boost::is_any_of( splitters ) );
-	result.total_found = strs.size(); 
-	BOOST_FOREACH( std::basic_string<C> const& s, strs ) {
-		bool found = false;
-		for( size_t i = 0; i < table_size; ++i ) {
-			if ( s == table[i].name ) {
-				result.result |= table[i].value;
-				found = true;
-				break;
-			}
-		}
-		if ( !found ) {
-			result.unparsed.push_back( s );
-		}
-	}
-	return result;
-}
-
-
-parse_tag< TCHAR, UINT > hotkey_tags[] = {
+atom::parse_tag< TCHAR, UINT > hotkey_tags[] = {
 	{ "win",	MOD_WIN },
 	{ "ctrl",	MOD_CONTROL },
 	{ "alt",	MOD_ALT },
@@ -360,7 +320,7 @@ size_t hotkey_tags_count = sizeof( hotkey_tags ) / sizeof( hotkey_tags[0] );
 
 void
 window::update_hotkeys() {
-	parse_result< TCHAR, UINT > result = parse_tags( get_pref().get< uni_string >( po_hk_appear ), hotkey_tags, hotkey_tags_count, uni_string( "+" ) );
+	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( get_pref().get< uni_string >( po_hk_appear ), hotkey_tags, hotkey_tags_count, uni_string( "+" ) );
 	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 1 ) ) {
 		hotkey_t new_hk;
 		new_hk.mods = MOD_NOREPEAT | result.result;
@@ -392,7 +352,7 @@ window::update_hotkeys() {
 	}
 }
 //
-parse_tag< TCHAR, alignment::type > alignment_tags[] = {
+atom::parse_tag< TCHAR, alignment::type > alignment_tags[] = {
 	{ "client",		alignment::client },
 	{ "top",		alignment::top },
 	{ "bottom",		alignment::bottom },
@@ -411,7 +371,7 @@ void window::update_placement(){
 	bool const clip				= get_pref().get< bool >( po_ui_clip );
 	//
 	alignment::type align = alignment::client;
-	parse_result< TCHAR, alignment::type > result = parse_tags( alig_str, alignment_tags, alignment_tags_count, uni_string( "+" ) );
+	atom::parse_result< TCHAR, alignment::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, uni_string( "+" ) );
 	//
 	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
 		align = result.result;
@@ -496,46 +456,79 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
 
+atom::parse_tag< TCHAR, BYTE > accel_tags[] = {
+	{ "alt",		FALT },
+	{ "ctrl",		FCONTROL },
+	{ "shift",		FSHIFT }
+};
+size_t accel_tags_count = sizeof( accel_tags ) / sizeof( accel_tags[0] );
+
+atom::parse_tag< TCHAR, WORD > vk_tags[] = {
+	{ "tab",		VK_TAB },
+	{ "f1",			VK_F1 },
+	{ "f2",			VK_F2 },
+	{ "f3",			VK_F3 },
+	{ "f4",			VK_F4 },
+	{ "f5",			VK_F5 },
+	{ "f6",			VK_F6 },
+	{ "f7",			VK_F7 },
+	{ "f8",			VK_F8 },
+	{ "f9",			VK_F9 },
+	{ "f10",		VK_F10 }
+};
+size_t vk_tags_count = sizeof( vk_tags ) / sizeof( vk_tags[0] );
+
+void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
+	uni_string s = get_pref().get< uni_string >( opt );
+	atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, uni_string( "+" ) );
+	//
+	if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
+		atom::parse_result< TCHAR, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
+		if ( ( vk.total_found = 1 ) && ( vk.unparsed.size() == 0 ) ) {
+		} else {
+			vk.result = (WORD)mods.unparsed[0].c_str()[0];
+		}
+		this->accel.add_accel( cmd, mods.result | FVIRTKEY, vk.result );
+
+	} else {
+		this->get_logger() << "Invalid accelerator format format " << s << std::endl;
+	}
+}
+
 window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
 	if ( mode == preferences::pre ) {
 	} else if ( mode == preferences::update ) {
 		switch( opt ) {
 		case po_hk_split:
-			this->accel.add_accel( CMDID_SPLIT,		false, true, false, true, 'S' );
-			break;
 		case po_hk_expand:
-			this->accel.add_accel( CMDID_EXPAND,	false, true, false, true, 'Q' );
-			break;
 		case po_hk_rotate:
-			this->accel.add_accel( CMDID_ROTATE,	false, true, false, true, 'A' );
-			break;
 		case po_hk_next:
-			this->accel.add_accel( CMDID_NEXT,		false, true, false, true, VK_TAB );
-			break;
 		case po_hk_prev:
-			this->accel.add_accel( CMDID_PREV,		false, true, true, true, VK_TAB );
-			break;
 		case po_hk_close:
-			this->accel.add_accel( CMDID_CLOSE,		false, true, false, true, VK_F4 );
-			break;
 		case po_hk_tty1:
-			this->accel.add_accel( CMDID_TTY1,		true, true, false, true, VK_F1 );
-			break;
 		case po_hk_tty2:
-			this->accel.add_accel( CMDID_TTY2,		true, true, false, true, VK_F2 );
-			break;
 		case po_hk_tty3:
-			this->accel.add_accel( CMDID_TTY3,		true, true, false, true, VK_F3 );
-			break;
 		case po_hk_tty4:
-			this->accel.add_accel( CMDID_TTY4,		true, true, false, true, VK_F4 );
-			break;
 		case po_hk_tty5:
-			this->accel.add_accel( CMDID_TTY5,		true, true, false, true, VK_F5 );
-			break;
 		case po_hk_tty6:
-			this->accel.add_accel( CMDID_TTY6,		true, true, false, true, VK_F6 );
-			break;
+			{
+				WORD cmds[] = { 
+					CMDID_SPLIT,
+					CMDID_EXPAND,
+					CMDID_ROTATE,
+					CMDID_NEXT,
+					CMDID_PREV,
+					CMDID_CLOSE,
+					CMDID_TTY1,
+					CMDID_TTY2,
+					CMDID_TTY3,
+					CMDID_TTY4,
+					CMDID_TTY5,
+					CMDID_TTY6
+				};
+				update_accel( cmds[ opt - po_hk_split ], opt );
+				break;
+			}
 		case po_ui_bk_color:
 			this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
 			break;

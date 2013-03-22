@@ -93,6 +93,9 @@ protected:
 	//
 	void
 	update_position( HWND hWnd, bool dir, float mult );
+	//
+	void
+	update_accel( WORD const cmd, atom::po::id_t const opt );
 
 private:
 	///

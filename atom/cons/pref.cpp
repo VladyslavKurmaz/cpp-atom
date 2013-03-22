@@ -34,7 +34,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_help,					"help",											"Show this help", desc ).
 		//[hk.*]
 		add_option( po_hk_appear,				"hk.appear",
-		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+][VK]", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+][vk]", desc ).
 		add_option( po_hk_split,				"hk.split",
 		boost::program_options::value<std::string>()->default_value("ctrl+S"),					"", desc ).
 		add_option( po_hk_expand,				"hk.expand",
@@ -42,23 +42,23 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_hk_rotate,				"hk.rotate",
 		boost::program_options::value<std::string>()->default_value("ctrl+A"),					"", desc ).
 		add_option( po_hk_next,					"hk.next",
-		boost::program_options::value<std::string>()->default_value("ctrl+TAB"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+tab"),				"", desc ).
 		add_option( po_hk_prev,					"hk.prev",
-		boost::program_options::value<std::string>()->default_value("ctrl+shift+TAB"),			"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+shift+tab"),			"", desc ).
 		add_option( po_hk_close,				"hk.close",
-		boost::program_options::value<std::string>()->default_value("ctrl+F4"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+f4"),					"", desc ).
 		add_option( po_hk_tty1,					"hk.tty1",
-		boost::program_options::value<std::string>()->default_value("alt+ctrl+F1"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+f1"),				"", desc ).
 		add_option( po_hk_tty2,					"hk.tty2",
-		boost::program_options::value<std::string>()->default_value("alt+ctrl+F2"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+f2"),				"", desc ).
 		add_option( po_hk_tty3,					"hk.tty3",
-		boost::program_options::value<std::string>()->default_value("alt+ctrl+F3"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+f3"),				"", desc ).
 		add_option( po_hk_tty4,					"hk.tty4",
-		boost::program_options::value<std::string>()->default_value("alt+ctrl+F4"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+f4"),				"", desc ).
 		add_option( po_hk_tty5,					"hk.tty5",
-		boost::program_options::value<std::string>()->default_value("alt+ctrl+F5"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+f5"),				"", desc ).
 		add_option( po_hk_tty6,					"hk.tty6",
-		boost::program_options::value<std::string>()->default_value("alt+ctrl+F6"),				"", desc ).
+		boost::program_options::value<std::string>()->default_value("alt+ctrl+f6"),				"", desc ).
 		//[ui.*]
 		add_option( po_ui_timeout,				"ui.timeout",
 		boost::program_options::value<unsigned int>()->default_value( 250 ),					"", desc ).

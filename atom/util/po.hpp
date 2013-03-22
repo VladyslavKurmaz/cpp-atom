@@ -26,6 +26,7 @@
 #	include <boost/program_options.hpp>
 #pragma warning( pop )
 #include <boost/noncopyable.hpp>
+#include <boost/foreach.hpp>
 
 namespace atom {
 	//-------------------------------------------------------------------------
@@ -186,6 +187,53 @@ namespace atom {
 			  return ( vm.count( n ) );
 		  }
 	};
+	//-------------------------------------------------------------------------
+	//
+	//-------------------------------------------------------------------------
+	template < typename C, typename V >
+	struct parse_tag {
+		C const*	name;
+		V			value;
+	};
+
+	template < typename C, typename V >
+	struct parse_result {
+		size_t		total_found;
+		V			result;
+		std::vector< std::basic_string<C > >
+			unparsed;
+		parse_result() : total_found( 0 ), result(), unparsed() {}
+	};
+
+	template < typename C, typename V >
+	parse_result< C, V > parse_tags( std::basic_string<C> const& input, parse_tag< C, V > const table[], size_t const table_size, std::vector< std::basic_string<C> > const& strs ) {
+		parse_result< C, V > result;
+		//
+		result.total_found = strs.size(); 
+		BOOST_FOREACH( std::basic_string<C> const& s, strs ) {
+			bool found = false;
+			for( size_t i = 0; i < table_size; ++i ) {
+				if ( s == table[i].name ) {
+					result.result |= table[i].value;
+					found = true;
+					break;
+				}
+			}
+			if ( !found ) {
+				result.unparsed.push_back( s );
+			}
+		}
+		return result;
+	}
+
+	template < typename C, typename V >
+	parse_result< C, V > parse_tags( std::basic_string<C> const& input, parse_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitters ) {
+		parse_result< C, V > result;
+		//
+		std::vector< std::basic_string<C> > strs;
+		boost::split( strs, input, boost::is_any_of( splitters ) );
+		return parse_tags< C, V >( input, table, table_size, strs );
+	}
 }
 
 #endif //ATOM_UTIL_PO_HPP
