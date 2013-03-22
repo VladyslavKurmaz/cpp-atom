@@ -1,1 +1,5 @@
 - hotkey definition with char (not only vk codes)
++ parse hotkey strings
+- commands' history
+- CLI for cons configuration
+- states

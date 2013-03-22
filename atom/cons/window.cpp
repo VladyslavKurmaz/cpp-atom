@@ -79,6 +79,7 @@ bool window::init() {
 		//
 		(*this)
 		( preferences::pre, po_none )
+			( preferences::update, po_autostart )
 			( preferences::update, po_hk_appear )
 			( preferences::update, po_hk_split )
 			( preferences::update, po_hk_expand )
@@ -495,10 +496,17 @@ void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
 	}
 }
 
+
 window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
 	if ( mode == preferences::pre ) {
 	} else if ( mode == preferences::update ) {
 		switch( opt ) {
+		case po_autostart:
+			//Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+			//          "MyStartUp",
+			//          @"C:\StartUpApp.exe");
+			break;
+		//
 		case po_hk_split:
 		case po_hk_expand:
 		case po_hk_rotate:

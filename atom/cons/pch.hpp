@@ -25,8 +25,9 @@ typedef std::basic_string<TCHAR>
 ///
 static atom::po::id_t const po_none					=	0;
 static atom::po::id_t const po_help					=	po_none + 1;
+static atom::po::id_t const po_autostart			=	po_help + 1;
 //[hk.*]
-static atom::po::id_t const po_hk_appear			=	po_help + 1;
+static atom::po::id_t const po_hk_appear			=	po_autostart + 1;
 static atom::po::id_t const po_hk_split				=	po_hk_appear + 1;
 static atom::po::id_t const po_hk_expand			=	po_hk_split + 1;
 static atom::po::id_t const po_hk_rotate			=	po_hk_expand + 1;
