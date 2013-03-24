@@ -3,17 +3,17 @@ cpp-atom
 
 structure
 ========
-|-/atom
-    |-/cint   integration with CInt
-    |-/cons   Windows consoles integrator
-    |-/node   headers-only libraries for cross-ref smart pointers
-    |-/util
+/atom
+  |-/cint   integration with CInt
+  |-/cons   Windows consoles integrator
+  |-/node   headers-only libraries for cross-ref smart pointers
+  |-/util
     
 portability
 ========
-* mcvc9 | msvc10 | msvc 11 | msvc12 | cygwin (gcc-4.5.3)
+* mcvc9 | msvc10 | cygwin (gcc-4.5.3)
 * x32 | x64
-* boost-1.49.0 | boost-1.50.0 | boost-1.51.0
+* boost-1.49.0 | boost-1.50.0 | boost-1.51.0 | boost-1.52.0 | boost-1.53.0
 * loki-0.1.7 
 
 external dependencies
