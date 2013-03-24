@@ -3,11 +3,11 @@ cpp-atom
 
 structure
 ========
-/atom
-  |-/cint   integration with CInt
-  |-/cons   Windows consoles integrator
-  |-/node   headers-only libraries for cross-ref smart pointers
-  |-/util
+atom
+* cint   integration with CInt
+* cons   Windows consoles integrator
+* node   headers-only libraries for cross-ref smart pointers
+* util
     
 portability
 ========
