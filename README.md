@@ -1,8 +1,14 @@
 cpp-atom
 ========
 
-Set of headers-only libraries for cross-ref smart pointers and integration with CInt
-
+structure
+========
+|-/atom
+    |-/cint   integration with CInt
+    |-/cons   Windows consoles integrator
+    |-/node   headers-only libraries for cross-ref smart pointers
+    |-/util
+    
 portability
 ========
 * mcvc9 | msvc10 | msvc 11 | msvc12 | cygwin (gcc-4.5.3)
