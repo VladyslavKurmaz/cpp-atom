@@ -20,7 +20,6 @@ hk.edit.ml.exec VK_CONTROL + VK_RETURN
 distance between lines
 background image
 enable/bisable bell
-active/inactive border color
 child process interaption hotket ctrl+c|ctrl+break
 
 #endif
@@ -65,7 +64,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_ui_timeout,				"ui.timeout",
 		boost::program_options::value<unsigned int>()->default_value( 250 ),					"", desc ).
 		add_option( po_ui_alignment,			"ui.alignment",
-		boost::program_options::value<std::string>()->default_value("top"),						"top|bottom|left|right|center|vcenter|client", desc ).
+		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom|vcenter+][left|right|center+][client]", desc ).
 		add_option( po_ui_width,				"ui.width",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_height,				"ui.height",
@@ -80,7 +79,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_ui_font_text,			"ui.font.text",
 		boost::program_options::value<std::string>()->default_value( "name:Consolas;height:16;color:FFFFFF" ),				"", desc ).
 		add_option( po_ui_font_sys,				"ui.font.sys",
-		boost::program_options::value<std::string>()->default_value( "name:Consolas;height:8;color:008000" ),				"", desc ).
+		boost::program_options::value<std::string>()->default_value( "name:Consolas;height:12;color:008000" ),				"", desc ).
 		//[ui.margin.*]
 		add_option( po_ui_margin,				"ui.margin",
 		boost::program_options::value<std::string>()->default_value( "size:0" ),				"", desc ).

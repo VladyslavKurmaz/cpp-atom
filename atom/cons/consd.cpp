@@ -1,5 +1,4 @@
 #include <windows.h>
-
 #include <iostream>
 
 //#include <boost/smart_ptr.hpp>
@@ -13,22 +12,20 @@
 //#include <atom/util/waccel.hpp>
 //#include <atom/util/ptr.hpp>
 
-
-
 int main( int argc, char *argv[] )
 {
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
 		//csbiex.cbSize = sizeof( csbiex );
 		//GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
-		CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
-		GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
-		csbi.dwSize.X = 100;
-		csbi.dwSize.Y = 1000;
-		SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), csbi.dwSize );
-		//
-		UINT in_cp = GetConsoleCP();
-		UINT out_cp = GetConsoleOutputCP();
+		//CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
+		//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+		//csbi.dwSize.X = 100;
+		//csbi.dwSize.Y = 1000;
+		//SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), csbi.dwSize );
+		////
+		//UINT in_cp = GetConsoleCP();
+		//UINT out_cp = GetConsoleOutputCP();
 		//std::string s;
 		//do {
 		//	std::cout << "c:\\work : git ";
@@ -41,22 +38,23 @@ int main( int argc, char *argv[] )
 		//
 		ZeroMemory( &si, sizeof( si ) );
 		si.cb				= sizeof(STARTUPINFO);
-		si.dwFlags			= STARTF_USESHOWWINDOW;
+		si.dwFlags			= STARTF_USESHOWWINDOW/* | STARTF_USESTDHANDLES;
+		si.hStdInput		= GetStdHandle( STD_INPUT_HANDLE );
+		si.hStdOutput		= GetStdHandle( STD_OUTPUT_HANDLE );
+		si.hStdError		= GetStdHandle( STD_ERROR_HANDLE )*/;
 		si.wShowWindow		= SW_SHOW;
 		//
 		TCHAR command[MAX_PATH] = 
+			//"c:\\work\\env\\cygwin\\cygwin.bat"
 			//"powershell.exe"
 			"cmd.exe"
 			;
 		if ( CreateProcess( NULL, command, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
-			Sleep( 5000 );
-			char ping[] = "ping 127.0.0.1\x0D\x0A";
+			char ping[] = "ping 127.0.0.1\n";
 			DWORD wr = 0;
-			WriteConsole( GetStdHandle( STD_OUTPUT_HANDLE ), ping, strlen( ping ), &wr, NULL );
-			//std::cout << ping;
+			WriteConsole( GetStdHandle( STD_INPUT_HANDLE ), ping, strlen( ping ), &wr, NULL );
 			WaitForSingleObject( pi.hProcess, INFINITE );
 		}
-
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;

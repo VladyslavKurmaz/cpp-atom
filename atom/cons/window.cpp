@@ -541,35 +541,12 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 			this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
 			break;
 		case po_ui_font_text:
-			{
-				HFONT tfont = CreateFont(
-					16,
-					0,
-					0,
-					0,
-					FW_NORMAL,
-					FALSE,
-					FALSE,
-					FALSE,
-					OEM_CHARSET,
-					OUT_OUTLINE_PRECIS,
-					CLIP_DEFAULT_PRECIS,
-					DEFAULT_QUALITY,
-					FIXED_PITCH,
-					"Consolas"
-					);
-				if ( tfont != NULL ) {
-					this->paint_param.font_text = tfont; 
-					this->paint_param.font_text_color = 0xFFFFFF;
-				} else {
-					this->get_logger() << "Text font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
-				}
-				break;
-			}
 		case po_ui_font_sys:
 			{
-				HFONT sfont = CreateFont(
-					12,
+				uni_string s = get_pref().get< uni_string >( opt );
+				atom::attributes< TCHAR > a( s, _T(";"), _T(":") );
+				HFONT f = CreateFont(
+					a.as<unsigned int>(_T("height") ),
 					0,
 					0,
 					0,
@@ -582,13 +559,26 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 					CLIP_DEFAULT_PRECIS,
 					DEFAULT_QUALITY,
 					FIXED_PITCH,
-					"Consolas"
+					a.as<uni_string>(_T("name") ).c_str()
 					);
-				if ( sfont != NULL ) {
-					this->paint_param.font_sys = sfont; 
-					this->paint_param.font_sys_color = 0x008000;
+				unsigned int color = 0;
+				std::stringstream ss;
+				ss << a.as<uni_string>(_T("color") );
+				ss >> std::hex >> color;
+				//
+				if ( f != NULL ) {
+					switch( opt ) {
+					case po_ui_font_text:
+						this->paint_param.font_text = f;
+						this->paint_param.font_text_color = color;
+						break;
+					case po_ui_font_sys:
+						this->paint_param.font_sys = f; 
+						this->paint_param.font_sys_color = color;
+						break;
+					};
 				} else {
-					this->get_logger() << "Sys font creation error: " << get_pref().get< std::string >( po_ui_font_text ) << std::endl;
+					this->get_logger() << "Text font creation error: " << s << std::endl;
 				}
 				break;
 			}
