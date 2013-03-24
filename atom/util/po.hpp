@@ -247,12 +247,22 @@ namespace atom {
 		}
 		///
 		template < typename T >
-		T as( string_t const& id ) {
+		T
+		as( string_t const& id ) {
 			attr_map_t::const_iterator it;
 			if ( ( it = this->attribs.find( id ) ) != this->attribs.end() ) {
 				return ( boost::lexical_cast< T >( (*it).second ) );
 			}
 			return ( T() );
+		}
+		///
+		unsigned int
+		as_color( string_t const& id ) {
+			unsigned int color = 0;
+			std::basic_stringstream< char_t > ss;
+			ss << this->as< string_t >( id );
+			ss >> std::hex >> color;
+			return ( color );
 		}
 	private:
 		///

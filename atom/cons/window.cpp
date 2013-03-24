@@ -500,6 +500,9 @@ void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
 window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
 	if ( mode == preferences::pre ) {
 	} else if ( mode == preferences::update ) {
+		uni_string const d1( _T( ";" ) );
+		uni_string const d2( _T( ":" ) );
+		//
 		switch( opt ) {
 		case po_autostart:
 			//Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
@@ -544,7 +547,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 		case po_ui_font_sys:
 			{
 				uni_string s = get_pref().get< uni_string >( opt );
-				atom::attributes< TCHAR > a( s, _T(";"), _T(":") );
+				atom::attributes< TCHAR > a( s, d1, d2 );
 				HFONT f = CreateFont(
 					a.as<unsigned int>(_T("height") ),
 					0,
@@ -561,10 +564,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 					FIXED_PITCH,
 					a.as<uni_string>(_T("name") ).c_str()
 					);
-				unsigned int color = 0;
-				std::stringstream ss;
-				ss << a.as<uni_string>(_T("color") );
-				ss >> std::hex >> color;
+				unsigned int color = a.as_color( _T("color") );
 				//
 				if ( f != NULL ) {
 					switch( opt ) {
@@ -586,17 +586,26 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 			this->paint_param.margin_size			= 0;
 			break;
 		case po_ui_border:
-			this->paint_param.border_brush			= CreateSolidBrush( 0xFFFFFF );
-			this->paint_param.border_brush_inactive	= CreateSolidBrush( 0x404040 );
-			this->paint_param.border_size			= 1;
-			break;
+			{
+				atom::attributes< TCHAR > a( get_pref().get< uni_string >( opt ), d1, d2 );
+				this->paint_param.border_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
+				this->paint_param.border_brush_inactive	= CreateSolidBrush( a.as_color( _T("inactive") ) );
+				this->paint_param.border_size			= a.as<unsigned int>(_T("size") );
+				break;
+			}
 		case po_ui_padding:
-			this->paint_param.padding_size			= 2;
-			break;
+			{
+				atom::attributes< TCHAR > a( get_pref().get< uni_string >( opt ), d1, d2 );
+				this->paint_param.padding_size			= a.as<unsigned int>(_T("size") );
+				break;
+			}
 		case po_ui_scroll:
-			this->paint_param.scroll_brush			= CreateSolidBrush( 0x00FF00 );
-			this->paint_param.scroll_size			= 2;
-			break;
+			{
+				atom::attributes< TCHAR > a( get_pref().get< uni_string >( opt ), d1, d2 );
+				this->paint_param.scroll_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
+				this->paint_param.scroll_size			= a.as<unsigned int>(_T("size") );
+				break;
+			}
 		}
 	} else if ( mode == preferences::post ) {
 		this->accel.build();

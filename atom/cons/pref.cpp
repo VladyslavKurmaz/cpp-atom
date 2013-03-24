@@ -32,7 +32,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 	po.
 		add_option( po_help,					"help",											"Show this help", desc ).
 		add_option( po_autostart,				"autostart",
-		boost::program_options::value<bool>()->default_value( false ),							"Start together with system", desc ).
+		boost::program_options::value<bool>()->default_value( false ),							"Start on Windows startup", desc ).
 		//[hk.*]
 		add_option( po_hk_appear,				"hk.appear",
 		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+][vk]", desc ).
