@@ -14,6 +14,63 @@
 //#include <atom/util/ptr.hpp>
 #include <boost/foreach.hpp>
 
+#include "./cmds.hpp"
+
+int main( int argc, char *argv[] )
+{
+	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
+		MSG msg;
+		BOOL bRet;
+		while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 ) {
+			if ( bRet == -1 ) {
+			} else {
+				switch( msg.message ) {
+				case WM_COPYDATA:
+					{
+						PCOPYDATASTRUCT data = reinterpret_cast< PCOPYDATASTRUCT >( msg.lParam );
+						switch( data->dwData ) {
+						case CONS_CMD_RUN:
+							{
+								break;
+							}
+						}
+
+						break;
+					}
+				}
+			}
+		}
+
+		PROCESS_INFORMATION pi;
+		STARTUPINFO si;
+		//
+		ZeroMemory( &si, sizeof( si ) );
+		si.cb				= sizeof(STARTUPINFO);
+		si.dwFlags			= STARTF_USESHOWWINDOW;
+		si.wShowWindow		= SW_SHOW;
+		//
+		TCHAR command[MAX_PATH] = 
+			//"c:\\work\\env\\cygwin\\cygwin.bat"
+			//"powershell.exe"
+			"cmd.exe"
+			;
+		if ( CreateProcess( NULL, command, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
+			//write2cons( "apa" );
+			//write2cons( "ping 127.0.0.1" );
+			//write2cons( "\n\r" );
+			//write_vk2cons( 'D' );
+			//write_vk2cons( 'I' );
+			//write_vk2cons( 'R' );
+			//write_vk2cons( VK_RETURN );
+			WaitForSingleObject( pi.hProcess, INFINITE );
+		}
+	}
+	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
+	return 0;
+
+}
+
+
 void write_vk2cons( WORD const vk ) {
 	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
 	//SHORT vk2 = VkKeyScanEx( 'A', GetKeyboardLayout( GetCurrentThreadId() ) );
@@ -91,9 +148,7 @@ void write2cons( std::string const& s ) {
 	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, 2 * s.length(), &wr );
 }
 
-int main( int argc, char *argv[] )
-{
-	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
+
 		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
 		//csbiex.cbSize = sizeof( csbiex );
 		//GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
@@ -112,49 +167,4 @@ int main( int argc, char *argv[] )
 		//	std::cout << s << std::endl;
 		//} while( s.size() );
 		//
-		PROCESS_INFORMATION pi;
-		STARTUPINFO si;
-		//
-		ZeroMemory( &si, sizeof( si ) );
-		si.cb				= sizeof(STARTUPINFO);
-		si.dwFlags			= STARTF_USESHOWWINDOW/* | STARTF_USESTDHANDLES;
-		si.hStdInput		= GetStdHandle( STD_INPUT_HANDLE );
-		si.hStdOutput		= GetStdHandle( STD_OUTPUT_HANDLE );
-		si.hStdError		= GetStdHandle( STD_ERROR_HANDLE )*/;
-		si.wShowWindow		= SW_SHOW;
-		//
-		TCHAR command[MAX_PATH] = 
-			//"c:\\work\\env\\cygwin\\cygwin.bat"
-			//"powershell.exe"
-			"cmd.exe"
-			;
-		if ( CreateProcess( NULL, command, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
-			//write2cons( "apa" );
-			//write2cons( "ping 127.0.0.1" );
-			//write2cons( "\n\r" );
-			write_vk2cons( 'D' );
-			write_vk2cons( 'I' );
-			write_vk2cons( 'R' );
-			write_vk2cons( VK_RETURN );
-			//DWORD wr = 0;
-			////WriteConsole( GetStdHandle( STD_INPUT_HANDLE ), ping, strlen( ping ), &wr, NULL );
-			//INPUT_RECORD ic = { 0 };
-			//ic.EventType = KEY_EVENT;
-			//ic.Event.KeyEvent.bKeyDown			=	TRUE;
-			//ic.Event.KeyEvent.wRepeatCount		=	1;
-			//ic.Event.KeyEvent.wVirtualKeyCode	=	'a';
-			//ic.Event.KeyEvent.wVirtualScanCode	=	'a';
-			//ic.Event.KeyEvent.uChar.UnicodeChar	=	L'a';
-			//ic.Event.KeyEvent.uChar.AsciiChar	=	'a';
-			//ic.Event.KeyEvent.dwControlKeyState	=	0;
 
-			//if ( !WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ic, 1, &wr ) ) {
-			//	Sleep( 0 );
-			//}
-			WaitForSingleObject( pi.hProcess, INFINITE );
-		}
-	}
-	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
-	return 0;
-
-}
