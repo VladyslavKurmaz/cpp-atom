@@ -42,29 +42,52 @@ int main( int argc, char *argv[] )
 		//
 		atom::pipe pipe;
 		if ( pipe.open( "PIPE TEST NAME" ) ) {
-			bool cont = true;
-			std::cout << "start listing" << std::endl;
-			while ( cont ) {
-				command c;
-				if ( pipe.read( &c, sizeof( c )  ) ) {
-					switch( c.type ) {
-					case command::cmdSize:
-						break;
-					case command::cmdRun:
-						break;
-					case command::cmdRunas:
-						break;
-					case command::cmdKbrd:
-						break;
-					case command::cmdBreak:
-						break;
-					case command::cmdExit:
-						std::cout << "exit" << std::endl;
+			//
+			PROCESS_INFORMATION pi;
+			STARTUPINFO si;
+			//
+			ZeroMemory( &si, sizeof( si ) );
+			si.cb				= sizeof(STARTUPINFO);
+			si.dwFlags			= STARTF_USESHOWWINDOW;
+			si.wShowWindow		= SW_SHOW;
+			//
+			TCHAR cmd_line[MAX_PATH] = 
+				"C:\\Program Files\\Far2\\Far.exe"
+				//"d:\\work\\env\\cygwin\\cygwin.bat"
+				//"powershell.exe"
+				//"cmd.exe"
+				;
+			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
+				bool cont = true;
+				while ( cont ) {
+					command c;
+					if ( pipe.read( &c, sizeof( c )  ) ) {
+						switch( c.type ) {
+						case command::cmdSize:
+							break;
+						case command::cmdRun:
+							break;
+						case command::cmdRunas:
+							break;
+						case command::cmdKbrd:
+							{
+								INPUT_RECORD ir;
+								ir.EventType = KEY_EVENT;
+								ir.Event.KeyEvent = c.key;
+								DWORD wr = 0;
+								WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+								break;
+							}
+						case command::cmdBreak:
+							break;
+						case command::cmdExit:
+							WaitForSingleObject( pi.hProcess, INFINITE );
+							cont = false;
+							break;
+						}
+					} else {
 						cont = false;
-						break;
 					}
-				} else {
-					cont = false;
 				}
 			}
 		}
@@ -143,7 +166,7 @@ void write_vk2cons( WORD const vk ) {
 	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
 	//SHORT vk2 = VkKeyScanEx( 'A', GetKeyboardLayout( GetCurrentThreadId() ) );
 	//
- 	INPUT_RECORD ir[2] = { 0 };
+	INPUT_RECORD ir[2] = { 0 };
 	//
 	ir[0].EventType = KEY_EVENT;
 	ir[0].Event.KeyEvent.bKeyDown			=	TRUE;
@@ -177,9 +200,9 @@ void write_vk2cons( WORD const vk ) {
 	ir[1] = ir[0];
 	ir[1].Event.KeyEvent.bKeyDown			=	FALSE;
 
-//	HKL WINAPI GetKeyboardLayout(
-//  _In_  DWORD idThread
-//);
+	//	HKL WINAPI GetKeyboardLayout(
+	//  _In_  DWORD idThread
+	//);
 
 	//
 	DWORD wr = 0;
@@ -217,22 +240,22 @@ void write2cons( std::string const& s ) {
 }
 
 
-		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
-		//csbiex.cbSize = sizeof( csbiex );
-		//GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
-		//CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
-		//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
-		//csbi.dwSize.X = 100;
-		//csbi.dwSize.Y = 1000;
-		//SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), csbi.dwSize );
-		////
-		//UINT in_cp = GetConsoleCP();
-		//UINT out_cp = GetConsoleOutputCP();
-		//std::string s;
-		//do {
-		//	std::cout << "c:\\work : git ";
-		//	std::getline( std::cin, s);
-		//	std::cout << s << std::endl;
-		//} while( s.size() );
-		//
+//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
+//csbiex.cbSize = sizeof( csbiex );
+//GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+//CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
+//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+//csbi.dwSize.X = 100;
+//csbi.dwSize.Y = 1000;
+//SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), csbi.dwSize );
+////
+//UINT in_cp = GetConsoleCP();
+//UINT out_cp = GetConsoleOutputCP();
+//std::string s;
+//do {
+//	std::cout << "c:\\work : git ";
+//	std::getline( std::cin, s);
+//	std::cout << s << std::endl;
+//} while( s.size() );
+//
 

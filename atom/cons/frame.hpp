@@ -83,6 +83,9 @@ public:
 	run( uni_string const& cmd );
 	///
 	void
+	onkey( KEY_EVENT_RECORD const& key );
+	///
+	void
 	onchar( TCHAR ch );
 	///
 	void

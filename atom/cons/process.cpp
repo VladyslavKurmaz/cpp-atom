@@ -54,6 +54,15 @@ uni_string process::run( uni_string const& cmd ){
 	return ( result );
 }
 
+process& process::kbrd( KEY_EVENT_RECORD const& key ){
+	command c;
+	c.type = command::cmdKbrd;
+	c.key = key;
+	this->pipe.write( &c, sizeof( c ) );
+	return (*this);
+}
+
+
 // node: add close timeout before terminate
 process& process::close() {
 	command c;

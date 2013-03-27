@@ -12,7 +12,7 @@
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
 window::window( logger_ptr l, pref_ptr p ) :
-wwindow( *this, INITLIST_7( &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
+wwindow( *this, INITLIST_9( &window::onkey, &window::onkey, &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	current_frame()
 	,	expand_mode( false )
 	,	appear_hk()
@@ -131,6 +131,40 @@ void window::clear() {
 		}
 	};
 	l.for_each( boost::bind( &_::__, _1 ) );
+}
+
+void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
+	KEY_EVENT_RECORD key;
+	key.bKeyDown			=	down;
+	key.wRepeatCount		=	repeat;
+	key.wVirtualKeyCode		=	vk;
+	key.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
+	BYTE kbrd[256] = { 0 };
+	WORD c = 0;
+	GetKeyboardState( kbrd );
+	ToAscii(
+		key.wVirtualKeyCode,
+		key.wVirtualScanCode,
+		kbrd,
+		&c,
+		0
+		);
+	key.uChar.UnicodeChar	=	c;
+	key.uChar.AsciiChar;
+	key.dwControlKeyState	=
+		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+		//ENHANCED_KEY
+		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
+
+	this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
+	this->current_frame->onkey( key );
+	this->invalidate();
 }
 
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {

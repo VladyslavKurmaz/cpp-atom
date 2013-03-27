@@ -20,8 +20,8 @@ public:
 	uni_string
 	run( uni_string const& cmd );
 	///
-	void 
-	kbrd( KEY_EVENT_RECORD const& kbrd );
+	process& 
+	kbrd( KEY_EVENT_RECORD const& key );
 	///
 	process& 
 	close();

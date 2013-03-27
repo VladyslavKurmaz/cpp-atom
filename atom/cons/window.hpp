@@ -8,6 +8,14 @@ typedef atom::nstorage< frame, boost::shared_ptr, atom::nlist > window2frame;
 //
 class window;
 
+typedef void(window::* onkeydown_t)( HWND, UINT, BOOL, int, UINT );
+typedef boost::mpl::pair< boost::mpl::int_< WM_KEYDOWN >::type, onkeydown_t >::type
+	onkeydown_pair_type_t;
+
+typedef void(window::* onkeyup_t)( HWND, UINT, BOOL, int, UINT );
+typedef boost::mpl::pair< boost::mpl::int_< WM_KEYUP >::type, onkeyup_t >::type
+	onkeyup_pair_type_t;
+
 typedef void(window::* onchar_t)( HWND, TCHAR, int );
 typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type
 	onchar_pair_type_t;
@@ -37,10 +45,10 @@ typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, oncommand_t >::t
 	oncommand_pair_type_t;
 
 
-class window :	public atom::wwindow< window, LOKI_TYPELIST_7( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >,
+class window :	public atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_type_t, onkeyup_pair_type_t, onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >,
 				public atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >,
 				public boost::enable_shared_from_this< window > {
-	typedef atom::wwindow< window, LOKI_TYPELIST_7( onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >
+	typedef atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_type_t, onkeyup_pair_type_t, onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >
 		base_window_t;
 	typedef atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >
 		base_node_t;
@@ -61,6 +69,8 @@ public:
 	void
 		clear();
 	///
+	void onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags );
+	//
 	void onchar( HWND hWnd, TCHAR ch, int cRepeat );
 	///
 	void onhotkey(HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk);

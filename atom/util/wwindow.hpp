@@ -139,6 +139,27 @@ namespace atom {
 		}
 	};
 
+	//typedef void(_1::* onkeydown_t)( HWND, UINT, BOOL, int, UINT );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_KEYDOWN >::type, onkeydown_t >::type
+	//	onkeydown_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_KEYDOWN, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (UINT)(wParam), TRUE, (int)(short)LOWORD(lParam), (UINT)HIWORD(lParam)), 0L);
+		}
+	};
+
+	//typedef void(_1::* onkeyup_t)( HWND, UINT, BOOL, int, UINT );
+	//typedef boost::mpl::pair< boost::mpl::int_< WM_KEYUP >::type, onkeyup_t >::type
+	//	onkeyup_pair_type_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_KEYUP, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (UINT)(wParam), FALSE, (int)(short)LOWORD(lParam), (UINT)HIWORD(lParam)), 0L);
+		}
+	};
+
+
 	//typedef void(_1::* onchar_t)( HWND, TCHAR, int );
 	//typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type
 	//	onchar_pair_type_t;
