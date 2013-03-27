@@ -75,6 +75,7 @@ void frame::reorder() {
 }
 
 void frame::run( uni_string const& cmd ) {
+	cleanup_process();
 	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item(), this->shared_from_this() );
 	this->process_caption = this->process->run( cmd );
 }
@@ -82,18 +83,16 @@ void frame::run( uni_string const& cmd ) {
 void  frame::onchar( TCHAR ch ) {
 	if ( ch == VK_RETURN ) {
 		//process->write( "\x0D\x0A" );
-		process->write( "\x0A" );
+		//process->write( "\x0A" );
 	//} else if ( ch == VK_SPACE ) {
 	//	process->write( "^C\x0A" );
 	} else {
-		process->write( ch );
+		//process->write( ch );
 	}
 }
 
 void frame::clear() {
-	if ( this->process ) {
-		process->close().clear();
-	}
+	cleanup_process();
 	this->next = this->prev = frame_ptr();
 	base_node_t::clear();
 }
@@ -128,4 +127,11 @@ uni_string frame::get_caption() const {
 	std::stringstream ss;
 	ss << this->process_caption << " #" << this->index + 1;
 	return ( ss.str() );
+}
+
+
+void frame::cleanup_process() {
+	if ( this->process ) {
+		process->close().terminate().clear();
+	}
 }

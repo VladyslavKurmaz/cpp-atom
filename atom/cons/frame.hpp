@@ -101,6 +101,10 @@ protected:
 	//
 	logger&
 	get_logger() { return ( *( get_slot<frame2logger>().item() ) ); }
+	//
+	void
+	cleanup_process();
+
 private:
 	///
 	unsigned int

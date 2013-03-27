@@ -21,19 +21,13 @@ public:
 	run( uni_string const& cmd );
 	///
 	void 
-	write( std::string const& str );
-	///
-	void 
-	write( char const ch );
-	///
-	void 
-	write( void const * b, DWORD const b_sz );
-	///
-	bool is_running() {
-		return ( this->run_thread ); }
+	kbrd( KEY_EVENT_RECORD const& kbrd );
 	///
 	process& 
 	close();
+	///
+	process& 
+	terminate();
 	///
 	process& 
 	clear();
@@ -49,32 +43,14 @@ protected:
 
 private:
 	//
-	HANDLE
-		std_in;
+	PROCESS_INFORMATION
+		pi;
 	//
-	HANDLE
-		child_process;
-	//
-	HANDLE
-		output_read;
-	//
-	HANDLE
-		input_write;
-	//
-	HANDLE
-		thread;
-	//
-	DWORD
-		threadid;
-	//
-	bool
-		run_thread;
+	STARTUPINFO
+		si;
 	///
-	DWORD
-		bytes_wrote;
-	///
-	DWORD
-		bytes_read;
+	atom::pipe
+		pipe;
 	///
 	process( logger_ptr l, frame_ptr f );
 };

@@ -13,6 +13,7 @@
 #include <atom/util/wwindow.hpp>
 #include <atom/util/waccel.hpp>
 #include <atom/util/ptr.hpp>
+#include <atom/util/pipe.hpp>
 
 #ifdef UNICODE
 #define TXT( x )  L ## x

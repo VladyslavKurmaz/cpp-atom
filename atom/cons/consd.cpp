@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <iostream>
+#include <string>
 #include <assert.h>
 
 //#include <boost/smart_ptr.hpp>
@@ -15,55 +16,122 @@
 #include <boost/foreach.hpp>
 
 #include "./cmds.hpp"
+#include <atom/util/pipe.hpp>
+
+
+void on_size( COORD const& sz ) {
+	std::cout << "size:" << sz.X << "," << sz.Y << std::endl; 
+}
+
+void on_run( LPCTSTR cmd ) {
+	std::cout << "run:" << cmd << std::endl; 
+}
+
+void on_kbrd( KEY_EVENT_RECORD const& kbrd ) {
+	std::cout << "kbrd:" << std::endl; 
+}
+
+void on_exit() {
+	PostQuitMessage( 0 ); 
+}
 
 int main( int argc, char *argv[] )
 {
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
-		MSG msg;
-		BOOL bRet;
-		while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 ) {
-			if ( bRet == -1 ) {
-			} else {
-				switch( msg.message ) {
-				case WM_COPYDATA:
-					{
-						PCOPYDATASTRUCT data = reinterpret_cast< PCOPYDATASTRUCT >( msg.lParam );
-						switch( data->dwData ) {
-						case CONS_CMD_RUN:
-							{
-								break;
-							}
-						}
-
+		std::cout << "consd stared" << std::endl;
+		//
+		atom::pipe pipe;
+		if ( pipe.open( "PIPE TEST NAME" ) ) {
+			bool cont = true;
+			std::cout << "start listing" << std::endl;
+			while ( cont ) {
+				command c;
+				if ( pipe.read( &c, sizeof( c )  ) ) {
+					switch( c.type ) {
+					case command::cmdSize:
+						break;
+					case command::cmdRun:
+						break;
+					case command::cmdRunas:
+						break;
+					case command::cmdKbrd:
+						break;
+					case command::cmdBreak:
+						break;
+					case command::cmdExit:
+						std::cout << "exit" << std::endl;
+						cont = false;
 						break;
 					}
+				} else {
+					cont = false;
 				}
 			}
 		}
+		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
+		//csbiex.cbSize = sizeof( csbiex );
 
-		PROCESS_INFORMATION pi;
-		STARTUPINFO si;
+		//GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+		//csbiex.dwSize.X = 100;
+		//csbiex.dwSize.Y = 40;
+		//csbiex.dwMaximumWindowSize.X = 100;
+		//csbiex.dwMaximumWindowSize.Y = 40;
+		//csbiex.srWindow.Right = 97;
+		//csbiex.srWindow.Bottom = 33;
+
+
+		//if ( SetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex ) ) {
+		//	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+		//	SMALL_RECT crt;
+		//	crt.Left = 0;
+		//	crt.Top = 0;
+		//	crt.Right	= 99;
+		//	crt.Bottom	= 39;
+		//	SetConsoleWindowInfo( GetStdHandle( STD_OUTPUT_HANDLE ), FALSE, &crt );
+		//	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+		//}
+
+		//CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
+		//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+		//csbi.dwSize.X = 100;
+		//csbi.dwSize.Y = 40;
+		//SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), csbi.dwSize );
+		//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+
+		//SMALL_RECT crt;
+		//crt.Left	= csbi.srWindow.Left;
+		//crt.Top		= csbi.srWindow.Top;
+		//crt.Right	= csbi.dwSize.X - 1;
+		//crt.Bottom	= csbi.dwSize.Y - 1;
+		//SetConsoleWindowInfo( GetStdHandle( STD_OUTPUT_HANDLE ), FALSE, &crt );
 		//
-		ZeroMemory( &si, sizeof( si ) );
-		si.cb				= sizeof(STARTUPINFO);
-		si.dwFlags			= STARTF_USESHOWWINDOW;
-		si.wShowWindow		= SW_SHOW;
+		//std::string s;
+		//std::getline( std::cin, s);
 		//
-		TCHAR command[MAX_PATH] = 
-			//"c:\\work\\env\\cygwin\\cygwin.bat"
-			//"powershell.exe"
-			"cmd.exe"
-			;
-		if ( CreateProcess( NULL, command, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
-			//write2cons( "apa" );
-			//write2cons( "ping 127.0.0.1" );
-			//write2cons( "\n\r" );
-			//write_vk2cons( 'D' );
-			//write_vk2cons( 'I' );
-			//write_vk2cons( 'R' );
-			//write_vk2cons( VK_RETURN );
-			WaitForSingleObject( pi.hProcess, INFINITE );
-		}
+		//PROCESS_INFORMATION pi;
+		//STARTUPINFO si;
+		////
+		//ZeroMemory( &si, sizeof( si ) );
+		//si.cb				= sizeof(STARTUPINFO);
+		//si.dwFlags			= STARTF_USESHOWWINDOW;
+		//si.wShowWindow		= SW_SHOW;
+		////
+		//TCHAR command[MAX_PATH] = 
+		//	//"C:\\Program Files\\Far2\\Far.exe"
+		//	//"c:\\work\\env\\cygwin\\cygwin.bat"
+		//	//"powershell.exe"
+		//	"cmd.exe"
+		//	;
+		//if ( CreateProcess( NULL, command, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
+		//	//write2cons( "apa" );
+		//	//write2cons( "ping 127.0.0.1" );
+		//	//write2cons( "\n\r" );
+		//	//write_vk2cons( 'D' );
+		//	//write_vk2cons( 'I' );
+		//	//write_vk2cons( 'R' );
+		//	//write_vk2cons( VK_RETURN );
+		//	WaitForSingleObject( pi.hProcess, INFINITE );
+		//}
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;

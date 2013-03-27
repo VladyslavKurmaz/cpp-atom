@@ -1,51 +1,77 @@
 #include "./pch.hpp"
+#include "./cmds.hpp"
 #include "./log.hpp"
 #include "./frame.hpp"
 #include "./process.hpp"
 
 process::process( logger_ptr l, frame_ptr f ) :
-		std_in( NULL )
-	,	child_process( NULL )
-	,	output_read( NULL )
-	,	input_write( NULL )
-	,	thread( NULL )
-	,	threadid( 0 )
-	,	run_thread( true )
-	,	bytes_wrote( 0 )
-	,	bytes_read( 0 ) {
+		pi()
+	,	si()
+	,	pipe() {
 	atom::mount<process2logger>( this, l );
 	atom::mount<process2frame>( this, f );
+	this->pipe.create();
 }
 
 process::~process() {
 }
 
-std::string get_last_error( std::string const& caption ) {
-	return std::string("error");
-}
-
-DWORD WINAPI process::read_from_pipe( LPVOID lpvThreadParam ) {
-	boost::scoped_ptr< process_ptr > ptr( (process_ptr*)lpvThreadParam );
-	process_ptr self( *ptr );
-	frame_ptr f = self->get_slot<process2frame>().item();
+uni_string process::run( uni_string const& cmd ){
+	uni_string result;
 	//
-	CHAR lpBuffer[256];
-	DWORD nBytesRead;
-
-	while( self->is_running() ) {
-		ZeroMemory( lpBuffer, sizeof(lpBuffer) );
-		if ( !ReadFile( self->output_read, lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
-			if (GetLastError() == ERROR_BROKEN_PIPE)
-				break; // pipe done - normal exit path.
-			else
-				throw get_last_error( "Read from pipe" );
-		}
-		lpBuffer[nBytesRead] = '\0';
-		f->append( lpBuffer, nBytesRead );
+	this->si.cb				= sizeof( this->si );
+	this->si.dwFlags		= STARTF_USESHOWWINDOW;
+	this->si.wShowWindow	= SW_SHOW;
+	//
+	TCHAR command[MAX_PATH] = _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe" ) 
+	//{ 0 }
+	;
+	//strcpy_s( command, cmd.c_str() );
+	if ( CreateProcess( NULL, command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi ) ) {
+		this->pipe.connect();
+		//
+		struct ep_t {
+			HWND	cons_wnd;
+			DWORD	pid;
+		} ep = { NULL, this->pi.dwProcessId };
+		struct _ {
+			static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
+				ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
+				DWORD pid = 0;
+				GetWindowThreadProcessId( hwnd, &pid ); 
+				if ( pid == p.pid ) {
+					p.cons_wnd = hwnd;
+					return FALSE;
+				}
+				return TRUE;
+			}
+		};
+		EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
+		TCHAR caption[ MAX_PATH ] = { 0 };
+		GetWindowText( ep.cons_wnd, caption, MAX_PATH );
+		result = uni_string( caption );
 	}
-	return 0;
+	return ( result );
 }
 
+// node: add close timeout before terminate
+process& process::close() {
+	command c;
+	c.type = command::cmdExit;
+	this->pipe.write( &c, sizeof( c ) );
+	return (*this);
+}
+
+process& process::terminate() {
+	return (*this);
+}
+
+process& process::clear() {
+	base_node_t::clear();
+	return (*this);
+}
+
+#if 0
 uni_string process::run( uni_string const& cmd ){
 	SECURITY_ATTRIBUTES sa;
 	HANDLE output_read_tmp, output_write;
@@ -155,44 +181,26 @@ uni_string process::run( uni_string const& cmd ){
 	return ( uni_string( caption) );
 }
 
-void process::write( std::string const& str ) {
-	this->write( str.c_str(), str.length() );
-}
-
-void process::write( char const ch ){ 
-	this->write( &ch, sizeof( ch ) );
-}
-
-void process::write( void const * b, DWORD const b_sz ) {
-	DWORD nBytesWrote = 0;
-	if ( !WriteFile( input_write, b, b_sz, &nBytesWrote, NULL ) )
-	{
-		if ( GetLastError() == ERROR_NO_DATA )
-			get_last_error( "Write pipe was closed" );
-		else
-			get_last_error( "Write to pipe" );
-	}
-	this->bytes_wrote += nBytesWrote;
-}
-
-process& process::close() {
-	run_thread = false;
-	this->write( "exit\x0D\x0A" );
-	if ( WaitForSingleObject( thread, INFINITE ) == WAIT_FAILED ) {
-		throw get_last_error( "Wait for thread" );
-	}
+DWORD WINAPI process::read_from_pipe( LPVOID lpvThreadParam ) {
+	boost::scoped_ptr< process_ptr > ptr( (process_ptr*)lpvThreadParam );
+	process_ptr self( *ptr );
+	frame_ptr f = self->get_slot<process2frame>().item();
 	//
-	if ( !CloseHandle( output_read ) ) {
-		throw get_last_error( "Close output pipe read handle" );
+	CHAR lpBuffer[256];
+	DWORD nBytesRead;
+
+	while( self->is_running() ) {
+		ZeroMemory( lpBuffer, sizeof(lpBuffer) );
+		if ( !ReadFile( self->output_read, lpBuffer, sizeof( lpBuffer ) - 1, &nBytesRead, NULL) || !nBytesRead ) {
+			if (GetLastError() == ERROR_BROKEN_PIPE)
+				break; // pipe done - normal exit path.
+			else
+				throw get_last_error( "Read from pipe" );
+		}
+		lpBuffer[nBytesRead] = '\0';
+		f->append( lpBuffer, nBytesRead );
 	}
-	if ( !CloseHandle( input_write ) ) {
-		throw get_last_error( "Close input pipe write handle" );
-	}
-	WaitForSingleObject( child_process, INFINITE );
-	return (*this);
+	return 0;
 }
 
-process& process::clear() {
-	base_node_t::clear();
-	return (*this);
-}
+#endif
