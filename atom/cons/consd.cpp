@@ -19,20 +19,51 @@
 #include <atom/util/pipe.hpp>
 
 
-void on_size( COORD const& sz ) {
-	std::cout << "size:" << sz.X << "," << sz.Y << std::endl; 
-}
+void write_vk2cons( WORD const vk ) {
+	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
+	//SHORT vk2 = VkKeyScanEx( 'A', GetKeyboardLayout( GetCurrentThreadId() ) );
+	//
+	INPUT_RECORD ir[2] = { 0 };
+	//
+	ir[0].EventType = KEY_EVENT;
+	ir[0].Event.KeyEvent.bKeyDown			=	TRUE;
+	ir[0].Event.KeyEvent.wRepeatCount		=	1;
+	ir[0].Event.KeyEvent.wVirtualKeyCode	=	vk;
+	ir[0].Event.KeyEvent.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
+	BYTE kbrd[256] = { 0 };
+	WORD c = 0;
+	GetKeyboardState( kbrd );
+	ToAscii(
+		ir[0].Event.KeyEvent.wVirtualKeyCode,
+		ir[0].Event.KeyEvent.wVirtualScanCode,
+		kbrd,
+		&c,
+		0
+		);
+	ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
+	//ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
+	ir[0].Event.KeyEvent.dwControlKeyState	=
+		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+		//ENHANCED_KEY
+		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
-void on_run( LPCTSTR cmd ) {
-	std::cout << "run:" << cmd << std::endl; 
-}
+	//
+	ir[1] = ir[0];
+	ir[1].Event.KeyEvent.bKeyDown			=	FALSE;
 
-void on_kbrd( KEY_EVENT_RECORD const& kbrd ) {
-	std::cout << "kbrd:" << std::endl; 
-}
+	//	HKL WINAPI GetKeyboardLayout(
+	//  _In_  DWORD idThread
+	//);
 
-void on_exit() {
-	PostQuitMessage( 0 ); 
+	//
+	DWORD wr = 0;
+	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, sizeof( ir ) / sizeof( ir[0] ), &wr );
 }
 
 int main( int argc, char *argv[] )
@@ -51,45 +82,49 @@ int main( int argc, char *argv[] )
 			si.dwFlags			= STARTF_USESHOWWINDOW;
 			si.wShowWindow		= SW_SHOW;
 			//
-			TCHAR cmd_line[MAX_PATH] = 
-				"C:\\Program Files\\Far2\\Far.exe"
-				//"d:\\work\\env\\cygwin\\cygwin.bat"
-				//"powershell.exe"
-				//"cmd.exe"
-				;
-			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
-				bool cont = true;
-				while ( cont ) {
-					command c;
-					if ( pipe.read( &c, sizeof( c )  ) ) {
-						switch( c.type ) {
-						case command::cmdSize:
-							break;
-						case command::cmdRun:
-							break;
-						case command::cmdRunas:
-							break;
-						case command::cmdKbrd:
-							{
-								INPUT_RECORD ir;
-								ir.EventType = KEY_EVENT;
-								ir.Event.KeyEvent = c.key;
-								DWORD wr = 0;
-								WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
-								break;
+			bool cont = true;
+			while ( cont ) {
+				command c;
+				if ( pipe.read( &c, sizeof( c )  ) ) {
+					switch( c.type ) {
+					case command::cmdSize:
+						break;
+					case command::cmdRun:
+						{
+							if ( CreateProcess( NULL, c.process.cmd_line, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
+							} else {
 							}
-						case command::cmdBreak:
-							break;
-						case command::cmdExit:
-							WaitForSingleObject( pi.hProcess, INFINITE );
-							cont = false;
 							break;
 						}
-					} else {
+					case command::cmdRunas:
+						break;
+					case command::cmdKbrd:
+						{
+							INPUT_RECORD ir;
+							ir.EventType = KEY_EVENT;
+							ir.Event.KeyEvent = c.key;
+							DWORD wr = 0;
+							WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+							break;
+						}
+					case command::cmdBreak:
+						GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, GetCurrentProcessId() );
+						break;
+					case command::cmdExit:
+						write_vk2cons( 'E' );
+						write_vk2cons( 'X' );
+						write_vk2cons( 'I' );
+						write_vk2cons( 'T' );
+						write_vk2cons( VK_RETURN );
+						WaitForSingleObject( pi.hProcess, INFINITE );
 						cont = false;
+						break;
 					}
+				} else {
+					cont = false;
 				}
 			}
+			// close all child processes
 		}
 		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
 		//csbiex.cbSize = sizeof( csbiex );
@@ -159,54 +194,6 @@ int main( int argc, char *argv[] )
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;
 
-}
-
-
-void write_vk2cons( WORD const vk ) {
-	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
-	//SHORT vk2 = VkKeyScanEx( 'A', GetKeyboardLayout( GetCurrentThreadId() ) );
-	//
-	INPUT_RECORD ir[2] = { 0 };
-	//
-	ir[0].EventType = KEY_EVENT;
-	ir[0].Event.KeyEvent.bKeyDown			=	TRUE;
-	ir[0].Event.KeyEvent.wRepeatCount		=	1;
-	ir[0].Event.KeyEvent.wVirtualKeyCode	=	vk;
-	ir[0].Event.KeyEvent.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
-	BYTE kbrd[256] = { 0 };
-	WORD c = 0;
-	GetKeyboardState( kbrd );
-	ToAscii(
-		ir[0].Event.KeyEvent.wVirtualKeyCode,
-		ir[0].Event.KeyEvent.wVirtualScanCode,
-		kbrd,
-		&c,
-		0
-		);
-	ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
-	//ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
-	ir[0].Event.KeyEvent.dwControlKeyState	=
-		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
-		//ENHANCED_KEY
-		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
-
-	//
-	ir[1] = ir[0];
-	ir[1].Event.KeyEvent.bKeyDown			=	FALSE;
-
-	//	HKL WINAPI GetKeyboardLayout(
-	//  _In_  DWORD idThread
-	//);
-
-	//
-	DWORD wr = 0;
-	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, sizeof( ir ) / sizeof( ir[0] ), &wr );
 }
 
 void write2cons( std::string const& s ) {

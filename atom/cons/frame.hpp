@@ -89,6 +89,9 @@ public:
 	onchar( TCHAR ch );
 	///
 	void
+	ctrl_break();
+	///
+	void
 	clear();
 	///
 	void

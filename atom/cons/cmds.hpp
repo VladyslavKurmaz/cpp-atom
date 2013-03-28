@@ -12,10 +12,10 @@ struct command {
 	union {
 		KEY_EVENT_RECORD	key;
 		struct {
-			TCHAR				path[MAX_PATH];
 			TCHAR				domain[MAX_PATH];
 			TCHAR				user[MAX_PATH];
 			TCHAR				password[MAX_PATH];
+			TCHAR				cmd_line[MAX_PATH];
 		} process;
 	};
 };

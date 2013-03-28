@@ -23,11 +23,11 @@ uni_string process::run( uni_string const& cmd ){
 	this->si.dwFlags		= STARTF_USESHOWWINDOW;
 	this->si.wShowWindow	= SW_SHOW;
 	//
-	TCHAR command[MAX_PATH] = _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe" ) 
+	TCHAR consd[MAX_PATH] = _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe" ) 
 	//{ 0 }
 	;
 	//strcpy_s( command, cmd.c_str() );
-	if ( CreateProcess( NULL, command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi ) ) {
+	if ( CreateProcess( NULL, consd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
 		this->pipe.connect();
 		//
 		struct ep_t {
@@ -50,6 +50,12 @@ uni_string process::run( uni_string const& cmd ){
 		TCHAR caption[ MAX_PATH ] = { 0 };
 		GetWindowText( ep.cons_wnd, caption, MAX_PATH );
 		result = uni_string( caption );
+		//
+		command c;
+		c.type = command::cmdRun;
+		strcpy_s( c.process.cmd_line, _T( "cmd.exe" ) );
+		this->pipe.write( &c, sizeof( c ) );
+
 	}
 	return ( result );
 }
@@ -67,6 +73,13 @@ process& process::kbrd( KEY_EVENT_RECORD const& key ){
 process& process::close() {
 	command c;
 	c.type = command::cmdExit;
+	this->pipe.write( &c, sizeof( c ) );
+	return (*this);
+}
+
+process& process::ctrl_break() { 
+	command c;
+	c.type = command::cmdBreak;
 	this->pipe.write( &c, sizeof( c ) );
 	return (*this);
 }

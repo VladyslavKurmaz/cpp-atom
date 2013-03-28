@@ -27,6 +27,9 @@ public:
 	close();
 	///
 	process& 
+	ctrl_break();
+	///
+	process& 
 	terminate();
 	///
 	process& 

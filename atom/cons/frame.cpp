@@ -95,6 +95,10 @@ void frame::onchar( TCHAR ch ) {
 	}
 }
 
+void frame::ctrl_break() {
+	this->process->ctrl_break();
+}
+
 void frame::clear() {
 	cleanup_process();
 	this->next = this->prev = frame_ptr();

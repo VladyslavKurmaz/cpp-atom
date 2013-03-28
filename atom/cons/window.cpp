@@ -86,6 +86,8 @@ bool window::init() {
 			( preferences::update, po_hk_rotate )
 			( preferences::update, po_hk_next )
 			( preferences::update, po_hk_prev )
+			( preferences::update, po_hk_ctrl_break )
+			( preferences::update, po_hk_ctrl_c )
 			( preferences::update, po_hk_close )
 			( preferences::update, po_hk_tty1 )
 			( preferences::update, po_hk_tty2 )
@@ -316,6 +318,11 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_PREV:
 		this->current_frame = this->current_frame->get_prev();
 		break;
+	case CMDID_CTRL_BREAK:
+		this->current_frame->ctrl_break();
+		break;
+	case CMDID_CTRL_C:
+		break;
 	case CMDID_CLOSE:
 		break;
 	case CMDID_TTY1:
@@ -500,6 +507,7 @@ size_t accel_tags_count = sizeof( accel_tags ) / sizeof( accel_tags[0] );
 
 atom::parse_tag< TCHAR, WORD > vk_tags[] = {
 	{ "tab",		VK_TAB },
+	{ "break",		VK_CANCEL },
 	{ "f1",			VK_F1 },
 	{ "f2",			VK_F2 },
 	{ "f3",			VK_F3 },
@@ -549,6 +557,8 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 		case po_hk_rotate:
 		case po_hk_next:
 		case po_hk_prev:
+		case po_hk_ctrl_break:
+		case po_hk_ctrl_c:
 		case po_hk_close:
 		case po_hk_tty1:
 		case po_hk_tty2:
@@ -563,6 +573,8 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 					CMDID_ROTATE,
 					CMDID_NEXT,
 					CMDID_PREV,
+					CMDID_CTRL_BREAK,
+					CMDID_CTRL_C,
 					CMDID_CLOSE,
 					CMDID_TTY1,
 					CMDID_TTY2,
