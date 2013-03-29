@@ -1,4 +1,5 @@
 #include "./pch.hpp"
+#include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"
@@ -8,17 +9,18 @@
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 		index( 0 )
 	,	buffer()
-	,	bf()
 	,	coord( fc )
 	,	next()
 	,	prev()
-	,	process()
+	,	pi()
+	,	si()
+	,	pipe()
 	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
 	//
-	bf.init( 162, 500 );
+	this->pipe.create();
 }
 
 frame::~frame() {
@@ -75,40 +77,71 @@ void frame::reorder() {
 }
 
 void frame::run( uni_string const& cmd ) {
-	cleanup_process();
-	this->process = process::create( get_value( boost::mpl::identity< frame2logger >() ).item(), this->shared_from_this() );
-	this->process_caption = this->process->run( cmd );
-}
+	uni_string result;
+	//
+	this->si.cb				= sizeof( this->si );
+	this->si.dwFlags		= STARTF_USESHOWWINDOW;
+	this->si.wShowWindow	= SW_SHOW;
+	//
+	TCHAR consd[MAX_PATH] = _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe" ) 
+		//{ 0 }
+		;
+	//strcpy_s( command, cmd.c_str() );
+	if ( CreateProcess( NULL, consd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
+		this->pipe.connect();
+		//
+		struct ep_t {
+			HWND	cons_wnd;
+			DWORD	pid;
+		} ep = { NULL, this->pi.dwProcessId };
+		struct _ {
+			static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
+				ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
+				DWORD pid = 0;
+				GetWindowThreadProcessId( hwnd, &pid ); 
+				if ( pid == p.pid ) {
+					p.cons_wnd = hwnd;
+					return FALSE;
+				}
+				return TRUE;
+			}
+		};
+		EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
+		TCHAR caption[ MAX_PATH ] = { 0 };
+		GetWindowText( ep.cons_wnd, caption, MAX_PATH );
+		this->process_caption = uni_string( caption );
+		//
+		command c;
+		c.type = command::cmdRun;
+		strcpy_s( c.process.cmd_line, _T( "cmd.exe" ) );
+		this->pipe.write( &c, sizeof( c ) );
 
-void frame::onkey( KEY_EVENT_RECORD const& key ) {
-	this->process->kbrd( key );
-}
-
-void frame::onchar( TCHAR ch ) {
-	if ( ch == VK_RETURN ) {
-		//process->write( "\x0D\x0A" );
-		//process->write( "\x0A" );
-	//} else if ( ch == VK_SPACE ) {
-	//	process->write( "^C\x0A" );
-	} else {
-		//process->write( ch );
 	}
 }
 
+void frame::onkey( KEY_EVENT_RECORD const& key ) {
+	command c;
+	c.type = command::cmdKbrd;
+	c.key = key;
+	this->pipe.write( &c, sizeof( c ) );
+}
+
+void frame::onchar( TCHAR ch ) {
+}
+
 void frame::ctrl_break() {
-	this->process->ctrl_break();
+	command c;
+	c.type = command::cmdBreak;
+	this->pipe.write( &c, sizeof( c ) );
 }
 
 void frame::clear() {
-	cleanup_process();
+	command c;
+	c.type = command::cmdExit;
+	this->pipe.write( &c, sizeof( c ) );
+	//
 	this->next = this->prev = frame_ptr();
 	base_node_t::clear();
-}
-
-void frame::append( void const* b, size_t const sz ) {
-	this->bf.write( static_cast< char const* >( b ), sz );
-	this->buffer += std::string( (char const*)b );
-	get_slot<frame2window>().item()->invalidate();
 }
 
 void frame::draw( HDC dc, RECT const& rt ) {
@@ -128,18 +161,11 @@ void frame::draw( HDC dc, RECT const& rt ) {
 			return false;
 		}
 	};
-	this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
+	//this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
 }
 
 uni_string frame::get_caption() const {
 	std::stringstream ss;
 	ss << this->process_caption << " #" << this->index + 1;
 	return ( ss.str() );
-}
-
-
-void frame::cleanup_process() {
-	if ( this->process ) {
-		process->close().terminate().clear();
-	}
 }

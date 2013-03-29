@@ -1,86 +1,34 @@
 #include "./pch.hpp"
 #include "./cmds.hpp"
 #include "./log.hpp"
-#include "./frame.hpp"
 #include "./process.hpp"
 
+#if 0
 process::process( logger_ptr l, frame_ptr f ) :
 		pi()
 	,	si()
 	,	pipe() {
 	atom::mount<process2logger>( this, l );
 	atom::mount<process2frame>( this, f );
-	this->pipe.create();
 }
 
 process::~process() {
 }
 
 uni_string process::run( uni_string const& cmd ){
-	uni_string result;
-	//
-	this->si.cb				= sizeof( this->si );
-	this->si.dwFlags		= STARTF_USESHOWWINDOW;
-	this->si.wShowWindow	= SW_SHOW;
-	//
-	TCHAR consd[MAX_PATH] = _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe" ) 
-	//{ 0 }
-	;
-	//strcpy_s( command, cmd.c_str() );
-	if ( CreateProcess( NULL, consd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
-		this->pipe.connect();
-		//
-		struct ep_t {
-			HWND	cons_wnd;
-			DWORD	pid;
-		} ep = { NULL, this->pi.dwProcessId };
-		struct _ {
-			static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
-				ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
-				DWORD pid = 0;
-				GetWindowThreadProcessId( hwnd, &pid ); 
-				if ( pid == p.pid ) {
-					p.cons_wnd = hwnd;
-					return FALSE;
-				}
-				return TRUE;
-			}
-		};
-		EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
-		TCHAR caption[ MAX_PATH ] = { 0 };
-		GetWindowText( ep.cons_wnd, caption, MAX_PATH );
-		result = uni_string( caption );
-		//
-		command c;
-		c.type = command::cmdRun;
-		strcpy_s( c.process.cmd_line, _T( "cmd.exe" ) );
-		this->pipe.write( &c, sizeof( c ) );
-
-	}
-	return ( result );
 }
 
 process& process::kbrd( KEY_EVENT_RECORD const& key ){
-	command c;
-	c.type = command::cmdKbrd;
-	c.key = key;
-	this->pipe.write( &c, sizeof( c ) );
 	return (*this);
 }
 
 
 // node: add close timeout before terminate
 process& process::close() {
-	command c;
-	c.type = command::cmdExit;
-	this->pipe.write( &c, sizeof( c ) );
 	return (*this);
 }
 
 process& process::ctrl_break() { 
-	command c;
-	c.type = command::cmdBreak;
-	this->pipe.write( &c, sizeof( c ) );
 	return (*this);
 }
 
@@ -92,6 +40,7 @@ process& process::clear() {
 	base_node_t::clear();
 	return (*this);
 }
+#endif
 
 #if 0
 uni_string process::run( uni_string const& cmd ){

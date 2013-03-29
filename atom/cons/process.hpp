@@ -1,6 +1,7 @@
 #pragma once
 #include "./classes.hpp"
 
+#if 0
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > process2logger;
 typedef atom::nstorage< frame, boost::shared_ptr, atom::narray1 > process2frame;
 
@@ -45,15 +46,7 @@ protected:
 	read_from_pipe( LPVOID lpvThreadParam );
 
 private:
-	//
-	PROCESS_INFORMATION
-		pi;
-	//
-	STARTUPINFO
-		si;
-	///
-	atom::pipe
-		pipe;
 	///
 	process( logger_ptr l, frame_ptr f );
 };
+#endif

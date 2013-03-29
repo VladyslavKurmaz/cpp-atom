@@ -1,6 +1,5 @@
 #pragma once
 #include "./classes.hpp"
-#include "./cons_buffer.hpp"
 
 class fraction {
 public:
@@ -95,9 +94,6 @@ public:
 	clear();
 	///
 	void
-	append( void const* b, size_t const sz );
-	///
-	void
 	draw( HDC dc, RECT const& rt );
 	///
 	uni_string
@@ -107,9 +103,6 @@ protected:
 	//
 	logger&
 	get_logger() { return ( *( get_slot<frame2logger>().item() ) ); }
-	//
-	void
-	cleanup_process();
 
 private:
 	///
@@ -118,8 +111,6 @@ private:
 	//
 	uni_string
 		buffer;
-	cons_buffer<TCHAR>
-		bf;
 	//
 	frame_coord
 		coord;
@@ -129,10 +120,16 @@ private:
 	///
 	frame_ptr
 		prev;
-	//
-	process_ptr
-		process;
-	//
+	///
+	PROCESS_INFORMATION
+		pi;
+	///
+	STARTUPINFO
+		si;
+	///
+	atom::pipe
+		pipe;
+	///
 	uni_string
 		process_caption;
 	///

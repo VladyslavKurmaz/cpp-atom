@@ -11,10 +11,6 @@ class pref;
 typedef boost::shared_ptr< pref >
 	pref_ptr;
 //
-class process;
-typedef boost::shared_ptr< process >
-	process_ptr;
-//
 class frame;
 typedef boost::shared_ptr< frame >
 	frame_ptr;
