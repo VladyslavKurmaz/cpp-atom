@@ -29,7 +29,7 @@ namespace atom {
 		///
 		pipe() : 
 				p( INVALID_HANDLE_VALUE )
-			,	name("PIPE TEST NAME") {
+			,	name() {
 		}
 		///
 		~pipe() {
@@ -39,8 +39,9 @@ namespace atom {
 		std::string get_name() const {
 			return ( this->name ); }
 		///
-		bool create() {
+		bool create( std::string const & name ) {
 			if ( !this->is_valid() ) {
+				this->name = name;
 				std::stringstream ss;
 				ss << "\\\\.\\pipe\\" << this->name;
 				this->p = CreateNamedPipe( 
@@ -67,6 +68,7 @@ namespace atom {
 		///
 		bool open( std::string const & name ) {
 			if ( !this->is_valid() ) {
+				this->name = name;
 				std::stringstream ss;
 				ss << "\\\\.\\pipe\\" << this->name;
 				this->p = CreateFile( 

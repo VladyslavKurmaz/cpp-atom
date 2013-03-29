@@ -20,7 +20,47 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
 	//
-	this->pipe.create();
+	GUID guid;
+	CoCreateGuid( &guid );
+	std::stringstream gss;
+	gss << guid;
+	this->pipe.create( gss.str() );
+	//
+	// start child console process
+	this->si.cb				= sizeof( this->si );
+	this->si.dwFlags		= STARTF_USESHOWWINDOW;
+	this->si.wShowWindow	= SW_SHOW;
+	//
+	std::stringstream ss;
+	ss << _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe " ) /*<< "--pipe="*/ << this->pipe.get_name();
+	this->get_logger() << pipe.get_name();
+	TCHAR cmd_line[MAX_PATH] = { 0 };
+	strcpy_s( cmd_line, ss.str().c_str() );
+	if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, CREATE_NEW_CONSOLE/* | CREATE_NEW_PROCESS_GROUP*/, NULL, NULL, &si, &pi ) ) {
+		// ????? check if process finished immediately
+		this->pipe.connect();
+		//
+		struct ep_t {
+			HWND	cons_wnd;
+			DWORD	pid;
+		} ep = { NULL, this->pi.dwProcessId };
+		struct _ {
+			static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
+				ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
+				DWORD pid = 0;
+				GetWindowThreadProcessId( hwnd, &pid ); 
+				if ( pid == p.pid ) {
+					p.cons_wnd = hwnd;
+					return FALSE;
+				}
+				return TRUE;
+			}
+		};
+		EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
+		TCHAR caption[ MAX_PATH ] = { 0 };
+		GetWindowText( ep.cons_wnd, caption, MAX_PATH );
+		this->process_caption = uni_string( caption );
+	}
 }
 
 frame::~frame() {
@@ -77,62 +117,26 @@ void frame::reorder() {
 }
 
 void frame::run( uni_string const& cmd ) {
-	uni_string result;
-	//
-	this->si.cb				= sizeof( this->si );
-	this->si.dwFlags		= STARTF_USESHOWWINDOW;
-	this->si.wShowWindow	= SW_SHOW;
-	//
-	TCHAR consd[MAX_PATH] = _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe" ) 
-		//{ 0 }
-		;
-	//strcpy_s( command, cmd.c_str() );
-	if ( CreateProcess( NULL, consd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
-		this->pipe.connect();
-		//
-		struct ep_t {
-			HWND	cons_wnd;
-			DWORD	pid;
-		} ep = { NULL, this->pi.dwProcessId };
-		struct _ {
-			static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
-				ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
-				DWORD pid = 0;
-				GetWindowThreadProcessId( hwnd, &pid ); 
-				if ( pid == p.pid ) {
-					p.cons_wnd = hwnd;
-					return FALSE;
-				}
-				return TRUE;
-			}
-		};
-		EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
-		TCHAR caption[ MAX_PATH ] = { 0 };
-		GetWindowText( ep.cons_wnd, caption, MAX_PATH );
-		this->process_caption = uni_string( caption );
-		//
-		command c;
-		c.type = command::cmdRun;
-		strcpy_s( c.process.cmd_line, _T( "cmd.exe" ) );
-		this->pipe.write( &c, sizeof( c ) );
-
-	}
+	command c;
+	c.type = command::cmdRun;
+	strcpy_s( c.process.cmd_line, cmd.c_str() );
+	this->pipe.write( &c, sizeof( c ) );
 }
 
 void frame::onkey( KEY_EVENT_RECORD const& key ) {
-	command c;
-	c.type = command::cmdKbrd;
-	c.key = key;
-	this->pipe.write( &c, sizeof( c ) );
+	//command c;
+	//c.type = command::cmdKbrd;
+	//c.key = key;
+	//this->pipe.write( &c, sizeof( c ) );
 }
 
 void frame::onchar( TCHAR ch ) {
 }
 
 void frame::ctrl_break() {
-	command c;
-	c.type = command::cmdBreak;
-	this->pipe.write( &c, sizeof( c ) );
+	//command c;
+	//c.type = command::cmdBreak;
+	//this->pipe.write( &c, sizeof( c ) );
 }
 
 void frame::clear() {

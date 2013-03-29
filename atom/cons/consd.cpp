@@ -9,7 +9,7 @@
 //#include <atom/node/tldefs.hpp>
 //#include <atom/node/node.hpp>
 #include <atom/util/dbg.hpp>
-//#include <atom/util/po.hpp>
+#include <atom/util/po.hpp>
 //#include <atom/util/wwindow.hpp>
 //#include <atom/util/waccel.hpp>
 //#include <atom/util/ptr.hpp>
@@ -40,18 +40,18 @@ void write_vk2cons( WORD const vk ) {
 		&c,
 		0
 		);
-	ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
-	//ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
-	ir[0].Event.KeyEvent.dwControlKeyState	=
-		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
-		//ENHANCED_KEY
-		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
+	//ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
+	ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
+	//ir[0].Event.KeyEvent.dwControlKeyState	=
+	//	( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+	//	//ENHANCED_KEY
+	//	( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+	//	( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+	//	( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+	//	( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+	//	( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+	//	( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+	//	( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 	//
 	ir[1] = ir[0];
@@ -63,24 +63,51 @@ void write_vk2cons( WORD const vk ) {
 
 	//
 	DWORD wr = 0;
-	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, sizeof( ir ) / sizeof( ir[0] ), &wr );
+	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, 2/*sizeof( ir ) / sizeof( ir[0] )*/, &wr );
+}
+
+void wait_please() {
+	std::string s;
+	std::getline( std::cin, s );
 }
 
 int main( int argc, char *argv[] )
 {
+	//std::cout << "consd stared" << std::endl;
+	//for ( int i = 0; i < argc; ++i ) {
+	//	std::cout << "[" << i << "]:" << argv[i] << std::endl;
+	//}
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
-		std::cout << "consd stared" << std::endl;
+		//atom::po po;
+		//atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
+		////
+		//po.
+		//add_option( 1, "pipe", boost::program_options::value<std::string>(), "pipe name", desc );
+		//try {
+		//	po.parse_arg( argc, argv, desc, true );
+		//	//
+		//	if ( !po.count( 1 ) )
+		//		throw std::exception( "[ERROR] Pipe's name wasn't defined" );
+		//	//
+		//} catch( std::exception& excpt ) {
+		//	std::stringstream ss;
+		//	desc.print( ss );
+		//	std::cout << excpt.what() << std::endl;
+		//	std::cout << ss.str() << std::endl;
+		//	wait_please();
+		//	return -1;
+		//}
 		//
 		atom::pipe pipe;
-		if ( pipe.open( "PIPE TEST NAME" ) ) {
+		if ( pipe.open( argv[1]/*po.as<std::string>( 1 )*/ ) ) {
 			//
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
 			//
 			ZeroMemory( &si, sizeof( si ) );
 			si.cb				= sizeof(STARTUPINFO);
-			si.dwFlags			= STARTF_USESHOWWINDOW;
-			si.wShowWindow		= SW_SHOW;
+			//si.dwFlags			= STARTF_USESHOWWINDOW;
+			//si.wShowWindow		= SW_SHOW;
 			//
 			bool cont = true;
 			while ( cont ) {
@@ -92,6 +119,34 @@ int main( int argc, char *argv[] )
 					case command::cmdRun:
 						{
 							if ( CreateProcess( NULL, c.process.cmd_line, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi ) ) {
+								//Sleep( 1000 );
+								//write_vk2cons( 'A' );
+								//write_vk2cons( 'B' );
+								//write_vk2cons( 'C' );
+								//write_vk2cons( 'D' );
+								//write_vk2cons( 'E' );
+								//write_vk2cons( 'F' );
+								//write_vk2cons( 'G' );
+								//write_vk2cons( 'H' );
+								//write_vk2cons( 'I' );
+								//write_vk2cons( 'J' );
+								//write_vk2cons( 'K' );
+								//write_vk2cons( 'L' );
+								//write_vk2cons( 'M' );
+								//write_vk2cons( 'N' );
+								//write_vk2cons( 'O' );
+								//write_vk2cons( 'P' );
+								//write_vk2cons( 'Q' );
+								//write_vk2cons( 'R' );
+								//write_vk2cons( 'S' );
+								//write_vk2cons( 'T' );
+								//write_vk2cons( 'U' );
+								//write_vk2cons( 'V' );
+								//write_vk2cons( 'W' );
+								//write_vk2cons( 'X' );
+								//write_vk2cons( 'Y' );
+								//write_vk2cons( 'Z' );
+								//write_vk2cons( VK_RETURN );
 							} else {
 							}
 							break;
@@ -104,13 +159,14 @@ int main( int argc, char *argv[] )
 							ir.EventType = KEY_EVENT;
 							ir.Event.KeyEvent = c.key;
 							DWORD wr = 0;
-							WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+							//WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
 							break;
 						}
 					case command::cmdBreak:
 						GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, GetCurrentProcessId() );
 						break;
 					case command::cmdExit:
+						write_vk2cons( VK_RETURN );
 						write_vk2cons( 'E' );
 						write_vk2cons( 'X' );
 						write_vk2cons( 'I' );
@@ -125,7 +181,16 @@ int main( int argc, char *argv[] )
 				}
 			}
 			// close all child processes
+		} else {
+			std::cout << "[ERROR] Pipe creation error" << std::endl;
 		}
+	}
+	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
+	return 0;
+
+}
+
+
 		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
 		//csbiex.cbSize = sizeof( csbiex );
 
@@ -190,11 +255,7 @@ int main( int argc, char *argv[] )
 		//	//write_vk2cons( VK_RETURN );
 		//	WaitForSingleObject( pi.hProcess, INFINITE );
 		//}
-	}
-	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
-	return 0;
 
-}
 
 void write2cons( std::string const& s ) {
 	size_t const bsz = sizeof( INPUT_RECORD ) * ( 2 * s.length() );

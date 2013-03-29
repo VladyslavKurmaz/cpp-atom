@@ -11,6 +11,13 @@
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
+			//uni_string s(
+			//	"cmd.exe"
+			//	//"d:\\work\\env\\cygwin\\bin\\bash.exe --login -i"
+			//	//"powershell.exe"
+			//	//"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\msbuild.exe"
+			//	);
+
 window::window( logger_ptr l, pref_ptr p ) :
 wwindow( *this, INITLIST_9( &window::onkey, &window::onkey, &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	current_frame()
@@ -68,15 +75,6 @@ bool window::init() {
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
 		//
-		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
-		uni_string s(
-			"cmd"
-			//"d:\\work\\env\\cygwin\\bin\\bash.exe --login -i"
-			//"powershell.exe"
-			//"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\msbuild.exe"
-			);
-		this->current_frame->run( s );
-		//
 		(*this)
 		( preferences::pre, po_none )
 			( preferences::update, po_autostart )
@@ -110,6 +108,9 @@ bool window::init() {
 			( preferences::update, po_ui_scroll )
 		( preferences::post, po_none );
 		//
+		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
+		this->current_frame->run( "cmd.exe" );
+		//
 		return true;
 	}
 	return false;
@@ -135,38 +136,41 @@ void window::clear() {
 	l.for_each( boost::bind( &_::__, _1 ) );
 }
 
+bool bsend = true;
 void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
-	KEY_EVENT_RECORD key;
-	key.bKeyDown			=	down;
-	key.wRepeatCount		=	repeat;
-	key.wVirtualKeyCode		=	vk;
-	key.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
-	BYTE kbrd[256] = { 0 };
-	WORD c = 0;
-	GetKeyboardState( kbrd );
-	ToAscii(
-		key.wVirtualKeyCode,
-		key.wVirtualScanCode,
-		kbrd,
-		&c,
-		0
-		);
-	key.uChar.UnicodeChar	=	c;
-	key.uChar.AsciiChar;
-	key.dwControlKeyState	=
-		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
-		//ENHANCED_KEY
-		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
+	if ( bsend ) {
+		KEY_EVENT_RECORD key;
+		key.bKeyDown			=	down;
+		key.wRepeatCount		=	repeat;
+		key.wVirtualKeyCode		=	vk;
+		key.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
+		BYTE kbrd[256] = { 0 };
+		WORD c = 0;
+		GetKeyboardState( kbrd );
+		ToAscii(
+			key.wVirtualKeyCode,
+			key.wVirtualScanCode,
+			kbrd,
+			&c,
+			0
+			);
+		key.uChar.UnicodeChar	=	c;
+		key.uChar.AsciiChar;
+		key.dwControlKeyState	=
+			( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+			//ENHANCED_KEY
+			( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+			( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+			( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+			( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+			( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+			( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+			( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
-	this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
-	this->current_frame->onkey( key );
-	this->invalidate();
+		this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
+		//this->current_frame->onkey( key );
+		this->invalidate();
+	}
 }
 
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
@@ -268,6 +272,7 @@ void window::onpaint( HWND hWnd ){
 }
 
 void window::onclose( HWND ) {
+	bsend = false;
 	PostQuitMessage( 0 );
 }
 
@@ -303,10 +308,12 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
-		atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
-		this->head_frame->reorder();
-		this->current_frame->run( "cmd" );
-		break;
+		{
+			atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
+			this->head_frame->reorder();
+			this->current_frame->run( "cmd.exe" );
+			break;
+		}
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
 		break;
