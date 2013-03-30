@@ -32,7 +32,7 @@ void write_vk2cons( WORD const vk ) {
 	ir[0].Event.KeyEvent.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
 	BYTE kbrd[256] = { 0 };
 	WORD c = 0;
-	GetKeyboardState( kbrd );
+	//GetKeyboardState( kbrd );
 	ToAscii(
 		ir[0].Event.KeyEvent.wVirtualKeyCode,
 		ir[0].Event.KeyEvent.wVirtualScanCode,
@@ -40,18 +40,18 @@ void write_vk2cons( WORD const vk ) {
 		&c,
 		0
 		);
-	//ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
-	ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
-	//ir[0].Event.KeyEvent.dwControlKeyState	=
-	//	( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
-	//	//ENHANCED_KEY
-	//	( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
-	//	( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
-	//	( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
-	//	( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
-	//	( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
-	//	( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
-	//	( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
+	ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
+	//ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
+	ir[0].Event.KeyEvent.dwControlKeyState	=
+		( ( kbrd[ VK_CAPITAL ] & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+		//ENHANCED_KEY
+		( ( kbrd[ VK_LMENU ] & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_LCONTROL ] & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_NUMLOCK ] & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+		( ( kbrd[ VK_RMENU ] & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_RCONTROL ] & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_SCROLL ] & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+		( ( kbrd[ VK_SHIFT ] & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 	//
 	ir[1] = ir[0];
@@ -78,28 +78,28 @@ int main( int argc, char *argv[] )
 	//	std::cout << "[" << i << "]:" << argv[i] << std::endl;
 	//}
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
-		//atom::po po;
-		//atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
-		////
-		//po.
-		//add_option( 1, "pipe", boost::program_options::value<std::string>(), "pipe name", desc );
-		//try {
-		//	po.parse_arg( argc, argv, desc, true );
-		//	//
-		//	if ( !po.count( 1 ) )
-		//		throw std::exception( "[ERROR] Pipe's name wasn't defined" );
-		//	//
-		//} catch( std::exception& excpt ) {
-		//	std::stringstream ss;
-		//	desc.print( ss );
-		//	std::cout << excpt.what() << std::endl;
-		//	std::cout << ss.str() << std::endl;
-		//	wait_please();
-		//	return -1;
-		//}
+		atom::po po;
+		atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
+		std::string pipe_name;
+		//
+		po.add_option( 1, "pipe", boost::program_options::value<std::string>( &pipe_name ), "pipe name", desc );
+		try {
+			po.parse_arg( argc, argv, desc, true );
+			//
+			if ( !po.count( 1 ) )
+				throw std::exception( "[ERROR] Pipe's name wasn't defined" );
+			//
+		} catch( std::exception& excpt ) {
+			std::stringstream ss;
+			desc.print( ss );
+			std::cout << excpt.what() << std::endl;
+			std::cout << ss.str() << std::endl;
+			wait_please();
+			return -1;
+		}
 		//
 		atom::pipe pipe;
-		if ( pipe.open( argv[1]/*po.as<std::string>( 1 )*/ ) ) {
+		if ( pipe.open( pipe_name ) ) {
 			//
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
@@ -159,7 +159,7 @@ int main( int argc, char *argv[] )
 							ir.EventType = KEY_EVENT;
 							ir.Event.KeyEvent = c.key;
 							DWORD wr = 0;
-							//WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+							WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
 							break;
 						}
 					case command::cmdBreak:

@@ -32,11 +32,11 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	this->si.wShowWindow	= SW_SHOW;
 	//
 	std::stringstream ss;
-	ss << _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe " ) /*<< "--pipe="*/ << this->pipe.get_name();
+	ss << _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe " ) << "--pipe=" << this->pipe.get_name();
 	this->get_logger() << pipe.get_name();
 	TCHAR cmd_line[MAX_PATH] = { 0 };
 	strcpy_s( cmd_line, ss.str().c_str() );
-	if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, CREATE_NEW_CONSOLE/* | CREATE_NEW_PROCESS_GROUP*/, NULL, NULL, &si, &pi ) ) {
+	if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
 		// ????? check if process finished immediately
 		this->pipe.connect();
 		//
@@ -124,10 +124,10 @@ void frame::run( uni_string const& cmd ) {
 }
 
 void frame::onkey( KEY_EVENT_RECORD const& key ) {
-	//command c;
-	//c.type = command::cmdKbrd;
-	//c.key = key;
-	//this->pipe.write( &c, sizeof( c ) );
+	command c;
+	c.type = command::cmdKbrd;
+	c.key = key;
+	this->pipe.write( &c, sizeof( c ) );
 }
 
 void frame::onchar( TCHAR ch ) {

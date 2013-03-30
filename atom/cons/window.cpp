@@ -109,7 +109,7 @@ bool window::init() {
 		( preferences::post, po_none );
 		//
 		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
-		this->current_frame->run( "cmd.exe" );
+		this->current_frame->run( "d:\\work\\env\\cygwin\\cygwin.bat" );
 		//
 		return true;
 	}
@@ -168,7 +168,7 @@ void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
 			( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 		this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
-		//this->current_frame->onkey( key );
+		this->current_frame->onkey( key );
 		this->invalidate();
 	}
 }
