@@ -3,10 +3,9 @@
 struct command {
 	enum {
 		cmdSize,
-		cmdRun,
-		cmdRunas,
 		cmdKbrd,
-		cmdBreak,
+		cmdCtrlBreak,
+		cmdCtrlC,
 		cmdExit
 	} type;
 	union {

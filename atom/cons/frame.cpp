@@ -116,13 +116,6 @@ void frame::reorder() {
 	} while( f.get() != this );
 }
 
-void frame::run( uni_string const& cmd ) {
-	command c;
-	c.type = command::cmdRun;
-	strcpy_s( c.process.cmd_line, cmd.c_str() );
-	this->pipe.write( &c, sizeof( c ) );
-}
-
 void frame::onkey( KEY_EVENT_RECORD const& key ) {
 	command c;
 	c.type = command::cmdKbrd;
@@ -134,9 +127,15 @@ void frame::onchar( TCHAR ch ) {
 }
 
 void frame::ctrl_break() {
-	//command c;
-	//c.type = command::cmdBreak;
-	//this->pipe.write( &c, sizeof( c ) );
+	command c;
+	c.type = command::cmdCtrlBreak;
+	this->pipe.write( &c, sizeof( c ) );
+}
+
+void frame::ctrl_c() {
+	command c;
+	c.type = command::cmdCtrlC;
+	this->pipe.write( &c, sizeof( c ) );
 }
 
 void frame::clear() {

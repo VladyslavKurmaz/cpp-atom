@@ -109,7 +109,6 @@ bool window::init() {
 		( preferences::post, po_none );
 		//
 		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
-		this->current_frame->run( "d:\\work\\env\\cygwin\\cygwin.bat" );
 		//
 		return true;
 	}
@@ -311,7 +310,6 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		{
 			atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
 			this->head_frame->reorder();
-			this->current_frame->run( "cmd.exe" );
 			break;
 		}
 	case CMDID_EXPAND:
@@ -329,6 +327,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame->ctrl_break();
 		break;
 	case CMDID_CTRL_C:
+		this->current_frame->ctrl_c();
 		break;
 	case CMDID_CLOSE:
 		break;

@@ -79,9 +79,6 @@ public:
 	reorder();
 	///
 	void
-	run( uni_string const& cmd );
-	///
-	void
 	onkey( KEY_EVENT_RECORD const& key );
 	///
 	void
@@ -89,6 +86,9 @@ public:
 	///
 	void
 	ctrl_break();
+	///
+	void
+	ctrl_c();
 	///
 	void
 	clear();
