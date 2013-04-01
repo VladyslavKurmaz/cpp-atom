@@ -1,12 +1,14 @@
-- run/runas
++ run
+- runas
 - blinking cursor
 - 4 states:
  - cons
  - process
  - scroll/edit
  - history
-- break signal
++/- break signal
 - add version
-- parse hotkeys
-- startup banner
--  
++ parse hotkeys
++ startup banner
+- read consoles output
+- cascade closing all child processes
