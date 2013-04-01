@@ -11,6 +11,7 @@
 #include "./cmds.hpp"
 #include <atom/util/pipe.hpp>
 
+//SetWinEventHook.
 /*
 TODO:
 - share keyboard state between main application andchild console
