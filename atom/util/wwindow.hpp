@@ -170,9 +170,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onlbuttondown_t)(HWND, BOOL, int, int, UINT);
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_LBUTTONDOWN >::type, onlbuttondown_t >::type
-	//	onlbuttondown_pair_type_t;
+#define	ATOM_DEF_ONLBUTTONDOWN( c )	typedef void( c::* onlbuttondown_t )( HWND, BOOL, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_LBUTTONDOWN >::type, onlbuttondown_t >::type onlbuttondown_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_LBUTTONDOWN, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -180,9 +178,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onlbuttonup_t)(HWND, int, int, UINT);
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_LBUTTONUP >::type, onlbuttonup_t >::type
-	//	onlbuttonup_pair_type_t;
+#define	ATOM_DEF_ONLBUTTONUP( c )	typedef void( c::* onlbuttonup_t )( HWND, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_LBUTTONUP >::type, onlbuttonup_t >::type onlbuttonup_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_LBUTTONUP, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -190,9 +186,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onmousemove_t)( HWND, int, int, UINT);
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_MOUSEMOVE >::type, onmousemove_t >::type
-	//	onmousemove_pair_type_t;
+#define	ATOM_DEF_ONMOUSEMOVE( c )	typedef void( c::* onmousemove_t )( HWND, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_MOUSEMOVE >::type, onmousemove_t >::type onmousemove_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_MOUSEMOVE, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -230,9 +224,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onclose_t)( HWND );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
-	//	onclose_pair_type_t;
+#define	ATOM_DEF_ONCLOSE( c )	typedef void( c::* onclose_t )( HWND ); typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type onclose_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_CLOSE, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -382,16 +374,14 @@ namespace atom {
 			  return false;
 		  }
 		  ///
-		  static void runl( boost::function< bool() > tick ) {
+		  static void run( boost::function< bool() > tick, int ) {
 			  MSG msg = { 0 };
 			  bool cont = true;
 			  do {
 				  while ( cont && PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) ) {
 					  if ( ( cont = ( msg.message != WM_QUIT ) ) == true ) {
-						  /*if ( !process_dlg_msgs( msg.hwnd, msg ) )*/ {
-							  TranslateMessage( &msg );
-							  DispatchMessage( &msg );
-						  }
+						  TranslateMessage( &msg );
+						  DispatchMessage( &msg );
 					  }
 				  }
 			  } while( cont && tick() );
@@ -407,7 +397,7 @@ namespace atom {
 		  }
 		  ///
 		  static void run( boost::function< bool( HWND, MSG* ) > pred ) {
-			  MSG msg;
+			  MSG msg = { 0 };
 			  BOOL bRet;
 			  while( ( bRet = GetMessage( &msg, 0, 0, 0 ) ) != 0 ) {
 				  if ( bRet == -1 ) {
@@ -488,9 +478,6 @@ namespace atom {
 		///
 		static LRESULT CALLBACK proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
 			wwindow* win = NULL;
-			//if ( uMsg == WM_COMMAND ){
-			//	return 0;
-			//}
 			if ( get_window_object( hWnd, win ) ) {
 				return ( win->msg.process( win->base, hWnd, uMsg, wParam, lParam ) );
 				//return ( win->subcl.call( hWnd, uMsg, wParam, lParam ) );
