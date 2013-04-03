@@ -106,6 +106,9 @@ protected:
 	//
 	pref&
 	get_pref() { return ( *( get_slot<frame2pref>().item() ) ); }
+	///
+	void
+	build_shmem( unsigned int const width, unsigned int const height );
 
 private:
 	///
@@ -132,6 +135,12 @@ private:
 	///
 	atom::pipe
 		pipe;
+	///
+	boost::shared_ptr< boost::interprocess::windows_shared_memory >
+		shmem;
+	///
+	boost::shared_ptr< boost::interprocess::mapped_region >
+		shmem_region;
 	///
 	uni_string
 		process_caption;

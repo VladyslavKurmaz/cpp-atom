@@ -15,6 +15,8 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	,	pi()
 	,	si()
 	,	pipe()
+	,	shmem()
+	,	shmem_region()
 	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
@@ -33,14 +35,28 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	this->si.dwYCountChars	= this->get_pref().get<unsigned int>( po_ui_lines_count );
 	this->si.wShowWindow	= SW_SHOW;
 	//
+	TCHAR path[MAX_PATH] = { 0 };
+	TCHAR drive[MAX_PATH] = { 0 };
+	TCHAR dir[MAX_PATH] = { 0 };
+	TCHAR filename[MAX_PATH] = { 0 };
+	TCHAR ext[MAX_PATH] = { 0 };
+	GetModuleFileName( NULL, path, MAX_PATH );
+	_tsplitpath_s( path, drive, dir, filename, ext );
+	_tmakepath_s( path, drive, dir, _T("consd"), ext );
 	std::stringstream ss;
-	ss << _T( "D:\\work\\env\\cpp-atom\\tmp\\msvc10_x86_Debug\\atom\\cons\\Debug\\consd.exe " ) << "--pipe=" << this->pipe.get_name();
+	ss
+		<< path
+		<< " --pipe=" << this->pipe.get_name()
+		<< " --width=" << this->si.dwXCountChars
+		<< " --height=" << this->si.dwYCountChars
+		;
 	this->get_logger() << pipe.get_name();
 	TCHAR cmd_line[MAX_PATH] = { 0 };
 	strcpy_s( cmd_line, ss.str().c_str() );
 	if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
 		// ????? check if process finished immediately
 		this->pipe.connect();
+		this->build_shmem( this->si.dwXCountChars, this->si.dwYCountChars );
 		//
 		struct ep_t {
 			HWND	cons_wnd;
@@ -167,10 +183,36 @@ void frame::draw( HDC dc, RECT const& rt ) {
 		}
 	};
 	//this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
+	CHAR_INFO const* ci = static_cast< CHAR_INFO const* >( this->shmem_region->get_address() );
+	std::string s;
+	for( unsigned int i = 0; i < this->si.dwXCountChars; ++i ) {
+		s += ci[i].Char.AsciiChar;
+	}
+	DrawText( dc, s.c_str(), -1, &rect, DT_LEFT | DT_TOP );
 }
 
 uni_string frame::get_caption() const {
 	std::stringstream ss;
-	ss << this->process_caption << " #" << this->index + 1;
+	ss << /*this->process_caption << */" #" << this->index + 1;
 	return ( ss.str() );
+}
+
+void frame::build_shmem( unsigned int const width, unsigned int const height ) {
+	this->shmem = boost::shared_ptr< boost::interprocess::windows_shared_memory >( 
+		new boost::interprocess::windows_shared_memory( 
+				boost::interprocess::create_only,
+				"MySharedMemory",
+				boost::interprocess::read_write,
+				width * height * sizeof( CHAR_INFO ) )
+				);
+	this->shmem_region = boost::shared_ptr< boost::interprocess::mapped_region >(
+		new boost::interprocess::mapped_region(
+				*(this->shmem.get()),
+				boost::interprocess::read_write
+				)
+		);
+	CHAR_INFO * ci = static_cast< CHAR_INFO* >( this->shmem_region->get_address() );
+	for ( int i = 0; i < 10; ++i ) {
+		(ci++)->Char.AsciiChar = 'a';
+	}
 }
