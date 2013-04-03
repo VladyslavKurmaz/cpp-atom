@@ -12,14 +12,6 @@
 #include <atom/util/pipe.hpp>
 
 //SetWinEventHook.
-/*
-TODO:
-- share keyboard state between main application andchild console
-- ctrl+break, ctr+c, correct exit after pressing prev combinations
-- close from all processes in chain
-- languages other than english
-- run param +caption, +prefix
-*/
 
 void write_vk2cons( WORD const vk ) {
 	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
@@ -99,51 +91,109 @@ BOOL WINAPI HandlerRoutine ( DWORD dwCtrlType ) {
 	return FALSE;
 }
 
+
+bool HandleSize( command const& c ) {
+	std::cout << "SIZE!!!!!!!!!!!!!!!!!!!!";
+	return true;
+}
+
+bool HandleKbrd( command const& c ) {
+	INPUT_RECORD ir;
+	ir.EventType = KEY_EVENT;
+	ir.Event.KeyEvent = c.key;
+	DWORD wr = 0;
+	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+	//if ( ir.Event.KeyEvent.wVirtualKeyCode == VK_RETURN ) {
+	//	//std::cout << "!!!!!!!!!!!!!!!!!!!!";
+	//	write_vk2cons( 'G' );
+	//	write_vk2cons( 'I' );
+	//	write_vk2cons( 'T' );
+	//	write_vk2cons( VK_SPACE );
+	//}
+	return true;
+}
+
+bool HandleCtrlBreak( command const& c ) {
+	GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, 0 );
+	return true;
+}
+
+bool HandleCtrlC( command const& c ) {
+	GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
+	return true;
+}
+
+bool HandleExit( command const& c ) {
+	write_vk2cons( VK_RETURN );
+	write_vk2cons( 'E' );
+	write_vk2cons( 'X' );
+	write_vk2cons( 'I' );
+	write_vk2cons( 'T' );
+	write_vk2cons( VK_RETURN );
+	return false;
+}
+				//INPUT_RECORD ir;
+				//ir.EventType = KEY_EVENT;
+				//ir.Event.KeyEvent = c.key;
+				//DWORD wr = 0;
+				//WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+
+#if 0
+
 DWORD WINAPI PipeGuard( LPVOID lpParameter ) {
+	static bool ( *router[] ) ( command const& ) = {
+		NULL,
+		HandleSize,
+		HandleKbrd,
+		HandleCtrlBreak,
+		HandleCtrlC,
+		HandleExit
+	};
 	atom::pipe* pipe = reinterpret_cast<atom::pipe*>( lpParameter );
 	bool cont = true;
 	while ( cont ) {
 		command c;
-		if ( pipe->read( &c, sizeof( c )  ) ) {
-			switch( c.type ) {
-			case command::cmdSize:
-				break;
-			case command::cmdKbrd:
-				{
-					INPUT_RECORD ir;
-					ir.EventType = KEY_EVENT;
-					ir.Event.KeyEvent = c.key;
-					DWORD wr = 0;
-					WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
-					break;
-				}
-			case command::cmdCtrlBreak:
-				{
-					GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, 0 );
-					break;
-				}
-			case command::cmdCtrlC:
-				{
-					GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
-					break;
-				}
-			case command::cmdExit:
-				write_vk2cons( VK_RETURN );
-				write_vk2cons( 'E' );
-				write_vk2cons( 'X' );
-				write_vk2cons( 'I' );
-				write_vk2cons( 'T' );
-				write_vk2cons( VK_RETURN );
-				cont = false;
-				break;
-			}
-		} else {
-			cont = false;
+		if ( cont = pipe->read( &c, sizeof( c ) ) ) {
+			cont = router[c.type]( c );
 		}
 	}
 	//close all child processes
 	return 0;
 }
+
+
+#else
+
+DWORD WINAPI PipeGuard( LPVOID lpParameter ) {
+	atom::pipe* pipe = reinterpret_cast<atom::pipe*>( lpParameter );
+	bool cont = true;
+	while ( cont ) {
+		command c;
+		memset( &c, 0, sizeof( c ) );
+		if ( cont = pipe->read( &c, sizeof( c )  ) ) {
+			switch( c.type ) {
+			case command::cmdSize:
+				HandleSize( c );
+				break;
+			case command::cmdKbrd:
+				HandleKbrd( c );
+				break;
+			case command::cmdCtrlBreak:
+				HandleCtrlBreak( c );
+				break;
+			case command::cmdCtrlC:
+				GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
+				break;
+			case command::cmdExit:
+				cont = HandleExit( c );
+				break;
+			}
+		}
+	}
+	//close all child processes
+	return 0;
+}
+#endif
 
 int main( int argc, char *argv[] )
 {

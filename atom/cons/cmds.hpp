@@ -2,13 +2,15 @@
 
 struct command {
 	enum {
-		cmdSize,
-		cmdKbrd,
-		cmdCtrlBreak,
-		cmdCtrlC,
-		cmdExit
+		cmdNone			= 0,
+		cmdSize			= 1,
+		cmdKbrd			= 2,
+		cmdCtrlBreak	= 3,
+		cmdCtrlC		= 4,
+		cmdExit			= 5
 	} type;
 	union {
+		COORD				size;
 		KEY_EVENT_RECORD	key;
 		struct {
 			TCHAR				domain[MAX_PATH];
