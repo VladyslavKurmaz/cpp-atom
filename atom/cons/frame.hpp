@@ -103,6 +103,9 @@ protected:
 	//
 	logger&
 	get_logger() { return ( *( get_slot<frame2logger>().item() ) ); }
+	//
+	pref&
+	get_pref() { return ( *( get_slot<frame2pref>().item() ) ); }
 
 private:
 	///

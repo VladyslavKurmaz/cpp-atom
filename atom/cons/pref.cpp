@@ -77,8 +77,10 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
 		add_option( po_ui_alpha,				"ui.alpha",
 		boost::program_options::value<unsigned int>()->default_value( 0xF0 ),					"", desc ).
-		add_option( po_ui_bk_color,				"ui.bk.color",
+		add_option( po_ui_bk_color,				"ui.bk_color",
 		boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ),				"", desc ).
+		add_option( po_ui_lines_count,			"ui.lines_count",
+		boost::program_options::value<unsigned int>()->default_value( 500 ),					"", desc ).
 		//[ui.font.*]
 		add_option( po_ui_font_text,			"ui.font.text",
 		boost::program_options::value<std::string>()->default_value( "name:Consolas;height:16;color:FFFFFF" ),				"", desc ).

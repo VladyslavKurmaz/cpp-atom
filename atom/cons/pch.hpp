@@ -52,8 +52,9 @@ static atom::po::id_t const po_ui_height			=	po_ui_width + 1;
 static atom::po::id_t const po_ui_clip				=	po_ui_height + 1;
 static atom::po::id_t const po_ui_alpha				=	po_ui_clip + 1;
 static atom::po::id_t const po_ui_bk_color			=	po_ui_alpha + 1;
+static atom::po::id_t const po_ui_lines_count		=	po_ui_bk_color + 1;
 //[ui.font.*]
-static atom::po::id_t const po_ui_font_text			=	po_ui_bk_color + 1;
+static atom::po::id_t const po_ui_font_text			=	po_ui_lines_count + 1;
 static atom::po::id_t const po_ui_font_sys			=	po_ui_font_text + 1;
 //[ui.margin.*]
 static atom::po::id_t const po_ui_margin			=	po_ui_font_sys + 1;
@@ -61,7 +62,7 @@ static atom::po::id_t const po_ui_margin			=	po_ui_font_sys + 1;
 static atom::po::id_t const po_ui_border			=	po_ui_margin + 1;
 //[ui.padding.*]
 static atom::po::id_t const po_ui_padding			=	po_ui_border + 1;
-		//[ui.scroll.*]
+//[ui.scroll.*]
 static atom::po::id_t const po_ui_scroll			=	po_ui_padding + 1;
 
 ///

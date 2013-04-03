@@ -12,6 +12,7 @@
 #include <atom/util/pipe.hpp>
 
 //SetWinEventHook.
+//#define STANDALONE
 
 void write_vk2cons( WORD const vk ) {
 	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
@@ -93,7 +94,49 @@ BOOL WINAPI HandlerRoutine ( DWORD dwCtrlType ) {
 
 
 bool HandleSize( command const& c ) {
-	std::cout << "SIZE!!!!!!!!!!!!!!!!!!!!";
+	//CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
+	//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+	//csbi.dwSize = c.size;
+	//csbi.dwCursorPosition;
+	//csbi.wAttributes;
+	//csbi.srWindow;
+	//csbi.dwMaximumWindowSize;
+
+	//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+
+#if 0
+	CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
+	csbiex.cbSize = sizeof( csbiex );
+
+	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+	csbiex.dwSize.X = 100;
+	csbiex.dwSize.Y = 40;
+	csbiex.dwMaximumWindowSize.X = 100;
+	csbiex.dwMaximumWindowSize.Y = 40;
+	csbiex.srWindow.Right = 97;
+	csbiex.srWindow.Bottom = 33;
+
+
+	if ( SetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex ) ) {
+		GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+		SMALL_RECT crt;
+		crt.Left = 0;
+		crt.Top = 0;
+		crt.Right	= 99;
+		crt.Bottom	= 39;
+		SetConsoleWindowInfo( GetStdHandle( STD_OUTPUT_HANDLE ), FALSE, &crt );
+		GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
+	}
+
+	GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+
+	SMALL_RECT crt;
+	crt.Left	= csbi.srWindow.Left;
+	crt.Top		= csbi.srWindow.Top;
+	crt.Right	= csbi.dwSize.X - 1;
+	crt.Bottom	= csbi.dwSize.Y - 1;
+	SetConsoleWindowInfo( GetStdHandle( STD_OUTPUT_HANDLE ), FALSE, &crt );
+#endif
 	return true;
 }
 
@@ -206,13 +249,19 @@ int main( int argc, char *argv[] )
 		atom::po po;
 		atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
 		std::string pipe_name;
+		unsigned int csb_width = 0;
+		unsigned int csb_height = 0;
 		//
-		po.add_option( 1, "pipe", boost::program_options::value<std::string>( &pipe_name ), "pipe name", desc );
+		po.add_option( 1, "pipe,p", boost::program_options::value<std::string>( &pipe_name ), "pipe name", desc );
+		po.add_option( 2, "width,w", boost::program_options::value<unsigned int>( &csb_width )->default_value(20), "screen buffer width", desc );
+		po.add_option( 3, "height,h", boost::program_options::value<unsigned int>( &csb_height )->default_value(500), "screen buffer height", desc );
 		try {
 			po.parse_arg( argc, argv, desc, true );
 			//
+#ifndef STANDALONE
 			if ( !po.count( 1 ) )
 				throw std::exception( "[ERROR] Pipe's name wasn't defined" );
+#endif
 			//
 		} catch( std::exception& excpt ) {
 			std::stringstream ss;
@@ -331,14 +380,14 @@ int main( int argc, char *argv[] )
 					//
 					atom::po::options_description_t& rd = this->add_desc( run_desk, "run", boost::bind( &tty::on_run, this, _1, _2 )  );
 					po.
-						add_option( run_desk_command, "c", boost::program_options::value<std::string>(), "command to run", rd );
+						add_option( run_desk_command, "command,c", boost::program_options::value<std::string>(), "command to run", rd );
 					//
 					atom::po::options_description_t& rad = this->add_desc( runas_desk, "runas", boost::bind( &tty::on_runas, this, _1, _2 )  );
 					po.
-						add_option( runas_desk_command, "c", boost::program_options::value<std::string>(), "command run", rad ).
-						add_option( runas_desk_domain, "d", boost::program_options::value<std::string>(), "domain", rad ).
-						add_option( runas_desk_user, "u", boost::program_options::value<std::string>(), "user", rad ).
-						add_option( runas_desk_password, "p", boost::program_options::value<std::string>(), "pasword", rad );
+						add_option( runas_desk_command, "command,c", boost::program_options::value<std::string>(), "command to run", rad ).
+						add_option( runas_desk_domain, "domain,d", boost::program_options::value<std::string>(), "domain", rad ).
+						add_option( runas_desk_user, "user,u", boost::program_options::value<std::string>(), "user", rad ).
+						add_option( runas_desk_password, "password,p", boost::program_options::value<std::string>(), "pasword", rad );
 					//
 					//
 					atom::po::options_description_t& cd = this->add_desc( config_desk, "config", boost::bind( &tty::on_config, this, _1, _2 )  );
@@ -378,16 +427,25 @@ int main( int argc, char *argv[] )
 					  this->os << std::endl;
 				  }
 			  }
-		} tty1(  std::cout  );
+		} tty1( std::cout );
 		atom::pipe pipe;
+#ifndef STANDALONE
 		if ( pipe.open( pipe_name ) ) {
+#endif
+			command c;
+			c.type = command::cmdSize;
+			c.size.X = csb_width;
+			c.size.Y = csb_height;
+			HandleSize( c );
 			//
 			HANDLE ht = CreateThread( NULL, 0, PipeGuard, reinterpret_cast<LPVOID>( &pipe ), 0, NULL );
 			tty1.run();
 			WaitForSingleObject( ht, INFINITE );
+#ifndef STANDALONE
 		} else {
 			std::cout << "[ERROR] Pipe creation error" << std::endl;
 		}
+#endif
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;
@@ -395,42 +453,6 @@ int main( int argc, char *argv[] )
 }
 
 
-		//CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
-		//csbiex.cbSize = sizeof( csbiex );
-
-		//GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
-		//csbiex.dwSize.X = 100;
-		//csbiex.dwSize.Y = 40;
-		//csbiex.dwMaximumWindowSize.X = 100;
-		//csbiex.dwMaximumWindowSize.Y = 40;
-		//csbiex.srWindow.Right = 97;
-		//csbiex.srWindow.Bottom = 33;
-
-
-		//if ( SetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex ) ) {
-		//	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
-		//	SMALL_RECT crt;
-		//	crt.Left = 0;
-		//	crt.Top = 0;
-		//	crt.Right	= 99;
-		//	crt.Bottom	= 39;
-		//	SetConsoleWindowInfo( GetStdHandle( STD_OUTPUT_HANDLE ), FALSE, &crt );
-		//	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
-		//}
-
-		//CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
-		//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
-		//csbi.dwSize.X = 100;
-		//csbi.dwSize.Y = 40;
-		//SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), csbi.dwSize );
-		//GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
-
-		//SMALL_RECT crt;
-		//crt.Left	= csbi.srWindow.Left;
-		//crt.Top		= csbi.srWindow.Top;
-		//crt.Right	= csbi.dwSize.X - 1;
-		//crt.Bottom	= csbi.dwSize.Y - 1;
-		//SetConsoleWindowInfo( GetStdHandle( STD_OUTPUT_HANDLE ), FALSE, &crt );
 		//
 		//std::string s;
 		//std::getline( std::cin, s);

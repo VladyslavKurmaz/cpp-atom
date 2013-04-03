@@ -27,6 +27,7 @@
 #pragma warning( pop )
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace atom {
 	//-------------------------------------------------------------------------
@@ -36,6 +37,8 @@ namespace atom {
 	public:
 		typedef std::string
 			string_t;
+		typedef std::vector< std::string >
+			strings_t;
 		typedef unsigned int
 			id_t;
 		typedef boost::program_options::options_description
@@ -48,7 +51,7 @@ namespace atom {
 		typedef std::map< string_t, id_t >
 			names_string_id_map_t;
 		typedef std::map< id_t, string_t >
-			names_id_string_map_t;
+			names_id_string_mmap_t;
 		typedef std::map< id_t, boost::shared_ptr< options_description_t > >
 			options_descriptions_map_t;
 		///
@@ -60,32 +63,40 @@ namespace atom {
 		//
 		names_string_id_map_t
 			si_names;
-		names_id_string_map_t
+		names_id_string_mmap_t
 			is_names;
 
 	protected:
 		///
 		void
-			reg_name( id_t const id, string_t const& name ) {
-				si_names[ name ] = id;
-				is_names[ id ] = name;
+		reg_name( id_t const id, string_t const& name ) {
+			strings_t strs;
+			boost::split( strs, name, boost::is_any_of( "," ) );
+			BOOST_FOREACH( string_t const& s, strs ) {
+				this->si_names[ s ] = id;
+				this->is_names.insert( std::make_pair( id, s ) );
+			}
 		}
 		///
 		id_t
-			get_id( string_t const& name ) {
-				return ( si_names[ name ] );
+		get_id( string_t const& name ) {
+			return ( si_names[ name ] );
 		}
 		///
-		string_t const&
-			get_name( id_t const id ) {
-				return ( is_names[ id ] );
+		strings_t
+		get_name( id_t const id ) {
+			strings_t result;
+			for( names_id_string_mmap_t::const_iterator it = this->is_names.lower_bound( id ); it != this->is_names.upper_bound( id ); ++it ){
+				result.push_back( (*it).second );
+			}
+			return ( result );
 		}
 		///
 		void
-			notify( bool const ntf ) {
-				if ( ntf ) {
-					boost::program_options::notify( vm );  
-				}
+		notify( bool const ntf ) {
+			if ( ntf ) {
+				boost::program_options::notify( vm );  
+			}
 		}
 
 	public:
@@ -169,22 +180,30 @@ namespace atom {
 		  template< class T >
 		  T
 		  as( id_t const option_id ) {
-			  std::string n = get_name( option_id );
-			  return ( vm[ n ].as<T>() );
+			  strings_t strs = this->get_name( option_id );
+			  BOOST_FOREACH( string_t const& s, strs ) {
+				  variables_map_t::const_iterator it = this->vm.find( s );
+				  if ( it != this->vm.end() ) {
+					  return ( (*it).second.as< T >() );
+				  }
+			  }
+			  return ( T() );
 		  }
 		  ///
 		  template< class T, class U >
 		  T
 		  cast( id_t const option_id ) {
-			  std::string n = get_name( option_id );
-			  U u = vm[ n ].as<U>();
-			  return ( boost::lexical_cast<T>( u ) );
+			  return ( boost::lexical_cast<T>( this->as<U>( option_id ) ) );
 		  }
 		  ///
 		  size_t
 		  count( id_t const option_id ) {
-			  std::string n = get_name( option_id );
-			  return ( vm.count( n ) );
+			  size_t result = 0;
+			  strings_t strs = this->get_name( option_id );
+			  BOOST_FOREACH( string_t const& s, strs ) {
+				  result +=  this->vm.count( s );
+			  }
+			  return ( result );
 		  }
 	};
 	//-------------------------------------------------------------------------
