@@ -13,7 +13,6 @@ add_executable(
 	"./frame.cpp"
 	"./pref.cpp"
 	"./window.cpp"
-	"./process.cpp"
 )
 
 add_executable( 
