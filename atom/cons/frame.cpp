@@ -31,7 +31,7 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	// start child console process
 	this->si.cb				= sizeof( this->si );
 	this->si.dwFlags		= STARTF_USECOUNTCHARS | STARTF_USESHOWWINDOW;
-	this->si.dwXCountChars	= 160;
+	this->si.dwXCountChars	= 80;
 	this->si.dwYCountChars	= this->get_pref().get<unsigned int>( po_ui_lines_count );
 	this->si.wShowWindow	= SW_SHOW;
 	//
