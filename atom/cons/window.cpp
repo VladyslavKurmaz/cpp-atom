@@ -173,8 +173,6 @@ void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
 }
 
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
-	this->current_frame->onchar( ch );
-	this->invalidate();
 }
 
 void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {

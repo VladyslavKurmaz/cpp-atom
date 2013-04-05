@@ -124,9 +124,6 @@ public:
 	  ///
 	  void run( unsigned int const w, unsigned int const h ) {
 #ifndef STANDALONE
-		  boost::interprocess::windows_shared_memory shm ( boost::interprocess::open_only, "MySharedMemory", boost::interprocess::read_write );
-		  boost::interprocess::mapped_region region(shm, boost::interprocess::read_write );
-		  CHAR_INFO *ci = static_cast<CHAR_INFO *>(region.get_address());
 #else
 		  CHAR_INFO* ci = static_cast<CHAR_INFO*>( _alloca( sizeof( CHAR_INFO ) * w * h ) );
 #endif
@@ -138,20 +135,20 @@ public:
 			  std::string s;
 			  std::getline( std::cin, s );
 			  //
-			  COORD size = { w, h };
-			  COORD top_left = { 0, 0 };
-			  SMALL_RECT reg = { 0, 0, w - 1, /*h - */1 };
+			  //COORD size = { w, h };
+			  //COORD top_left = { 0, 0 };
+			  //SMALL_RECT reg = { 0, 0, w - 1, /*h - */1 };
 
-			  if ( ! ReadConsoleOutput(
-				  GetStdHandle( STD_OUTPUT_HANDLE ),
-				  ci,
-				  size,
-				  top_left,
-				  &reg ) ) {
-				  this->os << "read error" << std::endl;
-			  }
-			  std::string ts;
-			  ts.push_back( ci->Char.AsciiChar );
+			  //if ( ! ReadConsoleOutput(
+				 // GetStdHandle( STD_OUTPUT_HANDLE ),
+				 // ci,
+				 // size,
+				 // top_left,
+				 // &reg ) ) {
+				 // this->os << "read error" << std::endl;
+			  //}
+			  //std::string ts;
+			  //ts.push_back( ci->Char.AsciiChar );
 			  //
 			  std::stringstream ss;
 			  ss << s;

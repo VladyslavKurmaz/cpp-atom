@@ -1,5 +1,6 @@
 #pragma once
 #include "./classes.hpp"
+#include "./cons_mpp.hpp"
 
 class fraction {
 public:
@@ -82,9 +83,6 @@ public:
 	onkey( KEY_EVENT_RECORD const& key );
 	///
 	void
-	onchar( TCHAR ch );
-	///
-	void
 	ctrl_break();
 	///
 	void
@@ -106,9 +104,6 @@ protected:
 	//
 	pref&
 	get_pref() { return ( *( get_slot<frame2pref>().item() ) ); }
-	///
-	void
-	build_shmem( unsigned int const width, unsigned int const height );
 
 private:
 	///
@@ -133,14 +128,8 @@ private:
 	STARTUPINFO
 		si;
 	///
-	atom::pipe
-		pipe;
-	///
-	boost::shared_ptr< boost::interprocess::windows_shared_memory >
-		shmem;
-	///
-	boost::shared_ptr< boost::interprocess::mapped_region >
-		shmem_region;
+	cons_mpp
+		cmpp;
 	///
 	uni_string
 		process_caption;
