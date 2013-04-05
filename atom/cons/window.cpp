@@ -166,7 +166,7 @@ void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
 			( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
 			( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
-		this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
+		//this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
 		this->current_frame->onkey( key );
 		this->invalidate();
 	}

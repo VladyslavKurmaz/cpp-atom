@@ -23,11 +23,14 @@ bool cons_mpp::init( HWND hWnd, unsigned int const width, unsigned int const hei
 	this->shmem_name = this->gen_guid();
 	//
 	if ( this->pipe.create( this->pipe_name ) ) {
-		this->build_shmem( true, width, height );
-		// ??? create child process
-		//this->pipe.connect();
+		return ( this->build_shmem( true, width, height ) );
 	}
 	return false;
+}
+
+bool cons_mpp::bind() {
+	// ???? create boost::bind for server only
+	return ( this->pipe.connect() );
 }
 
 bool cons_mpp::init( string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout ) {
@@ -71,7 +74,7 @@ cons_mpp::string_t cons_mpp::gen_guid() {
 	return ( gss.str() );
 }
 
-void cons_mpp::build_shmem( bool const create, unsigned int const width, unsigned int const height ) {
+bool cons_mpp::build_shmem( bool const create, unsigned int const width, unsigned int const height ) {
 	size_t const shm_size = sizeof( shared_block_t ) + width * height * sizeof( CHAR_INFO );
 	if ( create ) {
 		this->shmem = boost::shared_ptr< boost::interprocess::windows_shared_memory >( 
@@ -96,6 +99,7 @@ void cons_mpp::build_shmem( bool const create, unsigned int const width, unsigne
 				)
 		);
 	this->shared_block = static_cast< shared_block_t* >( this->shmem_region->get_address() );
+	return true;
 }
 
 #if 0

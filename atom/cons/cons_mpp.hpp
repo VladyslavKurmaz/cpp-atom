@@ -15,6 +15,8 @@ public:
 	/// from client side
 	bool init( string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout );
 	///
+	bool bind();
+	///
 	void onkey( KEY_EVENT_RECORD const& key );
 	///
 	void ctrl_break();
@@ -30,7 +32,7 @@ protected:
 	string_t
 	gen_guid();
 	///
-	void
+	bool
 	build_shmem( bool const create, unsigned int const width, unsigned int const height );
 
 private:

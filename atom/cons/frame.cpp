@@ -1,10 +1,24 @@
 #include "./pch.hpp"
 #include "./cmds.hpp"
+#include "./consd_tty.hpp"
+
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"
 #include "./window.hpp"
 #include "./frame.hpp"
+
+
+HANDLE ht;
+CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
+
+DWORD WINAPI ConsEmul( LPVOID lpParameter ) {
+	tty tty1( std::cout );
+	tty1.run( csbiex.dwSize.X, csbiex.dwSize.Y );
+	return 0;
+}
+
+
 
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 		index( 0 )
@@ -20,13 +34,17 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
 	//
-	CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
 	csbiex.cbSize = sizeof( csbiex );
 	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
 	this->cmpp.init( w->get_hwnd(), csbiex.dwSize.X, csbiex.dwSize.Y );
+	//
+	HANDLE ht = CreateThread( NULL, 0, ConsEmul, reinterpret_cast<LPVOID>( NULL ), 0, NULL );
+	///
+	this->cmpp.bind();
 }
 
 frame::~frame() {
+	WaitForSingleObject( ht, INFINITE );
 }
 
 frame_ptr frame::split( bool const pref_h ){
