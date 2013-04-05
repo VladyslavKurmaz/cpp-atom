@@ -13,9 +13,12 @@ add_executable(
 	"./frame.cpp"
 	"./pref.cpp"
 	"./window.cpp"
+	"./cons_mpp.cpp"
 )
 
 add_executable( 
 	consd
+	"./pch.cpp"
 	"./consd.cpp"
+	"./cons_mpp.cpp"
 )

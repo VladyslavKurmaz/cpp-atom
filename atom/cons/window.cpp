@@ -236,15 +236,15 @@ void window::onpaint( HWND hWnd ){
 			rt.right	= rt.left + rw / coord.width;
 			rt.bottom	= rt.top + rh / coord.height;
 			//
-			InflateRect( &rt, -cntx.pp.margin_size, -cntx.pp.margin_size );
+			InflateRect( &rt, -(int)cntx.pp.margin_size, -(int)cntx.pp.margin_size );
 			//
 			HBRUSH bb = (( cntx.focused && ( f == cntx.current ) )?(cntx.pp.border_brush):(cntx.pp.border_brush_inactive));
-			for( int i = 0; i < cntx.pp.border_size; ++i ) {
+			for( unsigned int i = 0; i < cntx.pp.border_size; ++i ) {
 				FrameRect( dc, &rt, bb );
 				InflateRect( &rt, -1, -1 );
 			}
 			//
-			InflateRect( &rt, -cntx.pp.padding_size, -cntx.pp.padding_size );
+			InflateRect( &rt, -(int)cntx.pp.padding_size, -(int)cntx.pp.padding_size );
 			//
 			SetBkMode( dc, TRANSPARENT );
 			//

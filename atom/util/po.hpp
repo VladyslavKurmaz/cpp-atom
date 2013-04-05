@@ -23,11 +23,12 @@
 #pragma warning( push )
 #pragma warning( disable : 4512 )
 #pragma warning( disable : 4503 )
+#pragma warning ( disable : 4996 )
 #	include <boost/program_options.hpp>
+#	include <boost/noncopyable.hpp>
+#	include <boost/foreach.hpp>
+#	include <boost/algorithm/string.hpp>
 #pragma warning( pop )
-#include <boost/noncopyable.hpp>
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
 
 namespace atom {
 	//-------------------------------------------------------------------------
