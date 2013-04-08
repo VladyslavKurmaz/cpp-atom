@@ -33,11 +33,15 @@ bool cons_mpp::bind() {
 	return ( this->pipe.connect() );
 }
 
-bool cons_mpp::init( string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout ) {
+bool cons_mpp::init(string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout, unsigned int const width, unsigned int const height) {
 	this->pipe_name = pname;
 	this->shmem_name = shmname;
 	this->input = input;
 	this->output = output;
+	//
+	if ( this->pipe.open( this->pipe_name ) ) {
+		return ( this->build_shmem( false, width, height ) );
+	}
 	return false;
 }
 
@@ -101,6 +105,91 @@ bool cons_mpp::build_shmem( bool const create, unsigned int const width, unsigne
 	this->shared_block = static_cast< shared_block_t* >( this->shmem_region->get_address() );
 	return true;
 }
+
+bool cons_mpp::handle_kbrd( command const& c ) {
+	INPUT_RECORD ir;
+	ir.EventType = KEY_EVENT;
+	ir.Event.KeyEvent = c.key;
+	DWORD wr = 0;
+	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+	//if ( ir.Event.KeyEvent.wVirtualKeyCode == VK_RETURN ) {
+	//	//std::cout << "!!!!!!!!!!!!!!!!!!!!";
+	//	write_vk2cons( 'G' );
+	//	write_vk2cons( 'I' );
+	//	write_vk2cons( 'T' );
+	//	write_vk2cons( VK_SPACE );
+	//}
+	return true;
+}
+
+bool cons_mpp::handle_ctrl_break( command const& c ) {
+	GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, 0 );
+	return true;
+}
+
+bool cons_mpp::handle_ctrl_c( command const& c ) {
+	GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
+	return true;
+}
+
+void write_vk2cons( WORD const vk ) {
+	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
+	//SHORT vk2 = VkKeyScanEx( 'A', GetKeyboardLayout( GetCurrentThreadId() ) );
+	//
+	INPUT_RECORD ir[2] = { 0 };
+	//
+	ir[0].EventType = KEY_EVENT;
+	ir[0].Event.KeyEvent.bKeyDown			=	TRUE;
+	ir[0].Event.KeyEvent.wRepeatCount		=	1;
+	ir[0].Event.KeyEvent.wVirtualKeyCode	=	vk;
+	ir[0].Event.KeyEvent.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
+	BYTE kbrd[256] = { 0 };
+	WORD c = 0;
+	//GetKeyboardState( kbrd );
+	ToAscii(
+		ir[0].Event.KeyEvent.wVirtualKeyCode,
+		ir[0].Event.KeyEvent.wVirtualScanCode,
+		kbrd,
+		&c,
+		0
+		);
+	ir[0].Event.KeyEvent.uChar.UnicodeChar	=	c;
+	//ir[0].Event.KeyEvent.uChar.AsciiChar	=	MapVirtualKey( vk, MAPVK_VK_TO_CHAR );
+	ir[0].Event.KeyEvent.dwControlKeyState	=
+		( ( kbrd[ VK_CAPITAL ] & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+		//ENHANCED_KEY
+		( ( kbrd[ VK_LMENU ] & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_LCONTROL ] & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_NUMLOCK ] & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+		( ( kbrd[ VK_RMENU ] & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_RCONTROL ] & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( kbrd[ VK_SCROLL ] & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+		( ( kbrd[ VK_SHIFT ] & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
+
+	//
+	ir[1] = ir[0];
+	ir[1].Event.KeyEvent.bKeyDown			=	FALSE;
+
+	//	HKL WINAPI GetKeyboardLayout(
+	//  _In_  DWORD idThread
+	//);
+
+	//
+	DWORD wr = 0;
+	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, sizeof( ir ) / sizeof( ir[0] ), &wr );
+}
+
+
+bool cons_mpp::handle_exit( command const& c ) {
+	write_vk2cons( VK_RETURN );
+	write_vk2cons( 'E' );
+	write_vk2cons( 'X' );
+	write_vk2cons( 'I' );
+	write_vk2cons( 'T' );
+	write_vk2cons( VK_RETURN );
+	return false;
+}
+
 
 #if 0
 	// start child console process

@@ -10,10 +10,17 @@ public:
 	cons_mpp();
 	///
 	~cons_mpp();
+	///
+	string_t
+	get_pipe_name() {
+		return ( this->pipe_name ); }
+	string_t
+	get_shmem_name() {
+		return ( this->shmem_name ); }
 	/// from server side
 	bool init( HWND hWnd, unsigned int const width, unsigned int const height );
 	/// from client side
-	bool init( string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout );
+	bool init( string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout, unsigned int const width, unsigned int const height );
 	///
 	bool bind();
 	///
@@ -34,6 +41,19 @@ protected:
 	///
 	bool
 	build_shmem( bool const create, unsigned int const width, unsigned int const height );
+	///
+	bool
+	handle_kbrd( command const& c );
+	///
+	bool
+	handle_ctrl_break( command const& c );
+	///
+	bool
+	handle_ctrl_c( command const& c );
+	///
+	bool
+	handle_exit( command const& c );
+
 
 private:
 	///

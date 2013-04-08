@@ -11,14 +11,18 @@
 
 HANDLE ht;
 CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
+std::string pipe_name;
+std::string shmem_name;
+COORD size;
 
 DWORD WINAPI ConsEmul( LPVOID lpParameter ) {
-	tty tty1( std::cout );
-	tty1.run( csbiex.dwSize.X, csbiex.dwSize.Y );
+	cons_mpp cmpp;
+	if ( cmpp.init( pipe_name, shmem_name, GetStdHandle( STD_INPUT_HANDLE ), GetStdHandle( STD_OUTPUT_HANDLE ), csbiex.dwSize.X, csbiex.dwSize.Y ) ) {
+		tty tty1( std::cout );
+		tty1.run( csbiex.dwSize.X, csbiex.dwSize.Y );
+	}
 	return 0;
 }
-
-
 
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 		index( 0 )
@@ -40,6 +44,8 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	//
 	HANDLE ht = CreateThread( NULL, 0, ConsEmul, reinterpret_cast<LPVOID>( NULL ), 0, NULL );
 	///
+	pipe_name = this->cmpp.get_pipe_name();
+	shmem_name = this->cmpp.get_shmem_name();
 	this->cmpp.bind();
 }
 
