@@ -26,13 +26,13 @@ public:
 	///
 	void onkey( KEY_EVENT_RECORD const& key );
 	///
-	void ctrl_break();
+	void onctrl_break();
 	///
-	void ctrl_c();
+	void onctrl_c();
 	///
 	void onexit();
-
-
+	///
+	void handle_input();
 
 protected:
 	///

@@ -1,4 +1,5 @@
 #include "./pch.hpp"
+#include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"

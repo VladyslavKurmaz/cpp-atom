@@ -15,11 +15,23 @@ std::string pipe_name;
 std::string shmem_name;
 COORD size;
 
+DWORD WINAPI PipeGuard( LPVOID lpParameter ) {
+	cons_mpp* cmpp = reinterpret_cast<cons_mpp*>( lpParameter );
+	cmpp->handle_input();
+	//close all child processes
+	return 0;
+}
+
+
 DWORD WINAPI ConsEmul( LPVOID lpParameter ) {
 	cons_mpp cmpp;
 	if ( cmpp.init( pipe_name, shmem_name, GetStdHandle( STD_INPUT_HANDLE ), GetStdHandle( STD_OUTPUT_HANDLE ), csbiex.dwSize.X, csbiex.dwSize.Y ) ) {
+		HANDLE hgt = CreateThread( NULL, 0, PipeGuard, reinterpret_cast<LPVOID>( &cmpp ), 0, NULL );
+		//
 		tty tty1( std::cout );
 		tty1.run( csbiex.dwSize.X, csbiex.dwSize.Y );
+		//
+		WaitForSingleObject( hgt, INFINITE );
 	}
 	return 0;
 }
@@ -108,11 +120,11 @@ void frame::onkey( KEY_EVENT_RECORD const& key ) {
 }
 
 void frame::ctrl_break() {
-	this->cmpp.ctrl_break();
+	this->cmpp.onctrl_break();
 }
 
 void frame::ctrl_c() {
-	this->cmpp.ctrl_c();
+	this->cmpp.onctrl_c();
 }
 
 void frame::clear() {

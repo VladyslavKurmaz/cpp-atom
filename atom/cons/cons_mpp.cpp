@@ -52,13 +52,13 @@ void cons_mpp::onkey( KEY_EVENT_RECORD const& key ) {
 	this->pipe.write( &c, sizeof( c ) );
 }
 
-void cons_mpp::ctrl_break() {
+void cons_mpp::onctrl_break() {
 	command c;
 	c.type = command::cmdCtrlBreak;
 	this->pipe.write( &c, sizeof( c ) );
 }
 
-void cons_mpp::ctrl_c() {
+void cons_mpp::onctrl_c() {
 	command c;
 	c.type = command::cmdCtrlC;
 	this->pipe.write( &c, sizeof( c ) );
@@ -69,6 +69,34 @@ void cons_mpp::onexit() {
 	c.type = command::cmdExit;
 	this->pipe.write( &c, sizeof( c ) );
 }
+
+void cons_mpp::handle_input() {
+	// ???? create boost::bind for client only
+	bool cont = true;
+	while ( cont ) {
+		command c;
+		memset( &c, 0, sizeof( c ) );
+		if ( cont = pipe.read( &c, sizeof( c )  ) ) {
+			switch( c.type ) {
+			case command::cmdSize:
+				break;
+			case command::cmdKbrd:
+				handle_kbrd( c );
+				break;
+			case command::cmdCtrlBreak:
+				handle_ctrl_break( c );
+				break;
+			case command::cmdCtrlC:
+				handle_ctrl_c( c );
+				break;
+			case command::cmdExit:
+				cont = handle_exit( c );
+				break;
+			}
+		}
+	}
+}
+
 
 cons_mpp::string_t cons_mpp::gen_guid() {
 	GUID guid;

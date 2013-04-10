@@ -9,6 +9,11 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>
 #include <boost/interprocess/mapped_region.hpp>
+#include <boost/algorithm/string.hpp>
+
+//#include <boost/function.hpp>
+//#include <boost/bind.hpp>
+
 
 #include <atom/util/log.hpp>
 #include <atom/node/tldefs.hpp>

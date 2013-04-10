@@ -1,12 +1,11 @@
 #include "./pch.hpp"
+#include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./process.hpp"
 #include "./frame.hpp"
 #include "./window.hpp"
 #include "./appl.hpp"
-
-
 
 int main( int argc, char *argv[] )
 {

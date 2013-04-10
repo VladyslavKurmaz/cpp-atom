@@ -137,23 +137,23 @@ DWORD WINAPI PipeGuard( LPVOID lpParameter ) {
 		command c;
 		memset( &c, 0, sizeof( c ) );
 		if ( cont = pipe->read( &c, sizeof( c )  ) ) {
-			switch( c.type ) {
-			case command::cmdSize:
-				HandleSize( c );
-				break;
-			case command::cmdKbrd:
-				HandleKbrd( c );
-				break;
-			case command::cmdCtrlBreak:
-				HandleCtrlBreak( c );
-				break;
-			case command::cmdCtrlC:
-				GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
-				break;
-			case command::cmdExit:
-				cont = HandleExit( c );
-				break;
-			}
+			//switch( c.type ) {
+			//case command::cmdSize:
+			//	HandleSize( c );
+			//	break;
+			//case command::cmdKbrd:
+			//	HandleKbrd( c );
+			//	break;
+			//case command::cmdCtrlBreak:
+			//	HandleCtrlBreak( c );
+			//	break;
+			//case command::cmdCtrlC:
+			//	GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
+			//	break;
+			//case command::cmdExit:
+			//	cont = HandleExit( c );
+			//	break;
+			//}
 		}
 	}
 	//close all child processes
