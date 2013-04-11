@@ -2,6 +2,9 @@
 cmake_minimum_required( VERSION 2.6 )
 project( cpp-atom )
 
+#add_definitions(-DUNICODE -D_UNICODE)
+
+
 # Inc/Lib
 include_directories( "./" )
 
@@ -13,3 +16,4 @@ include_directories( "$ENV{DPM_LOKI_0_1_7_INC}" )
 # Real stuff
 #add_subdirectory ( "./libs" )
 add_subdirectory ( "./atom/cons" )
+add_subdirectory ( "./atom/dpm" )
