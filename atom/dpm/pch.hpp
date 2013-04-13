@@ -39,7 +39,8 @@ typedef std::basic_string< TCHAR >
 static atom::po::id_t const po_none					=	0;
 static atom::po::id_t const po_help					=	po_none + 1;
 static atom::po::id_t const po_interactive			=	po_help + 1;
-static atom::po::id_t const po_home					=	po_interactive + 1;
+static atom::po::id_t const po_exit					=	po_interactive + 1;
+static atom::po::id_t const po_home					=	po_exit + 1;
 static atom::po::id_t const po_stages				=	po_home + 1;
 static atom::po::id_t const po_components			=	po_stages + 1;
 static atom::po::id_t const po_recursive			=	po_components + 1;

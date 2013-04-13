@@ -139,7 +139,7 @@ namespace atom {
 		  }
 		  ///
 		  void
-		  parse_config( string_t const& file_name, options_description_t& desc, bool const ntf ) {
+		  parse_config( string_t const& file_name, options_description_t const& desc, bool const ntf ) {
 			  vm.clear();
 			  std::ifstream ifs( file_name.c_str() );
 			  store( parse_config_file( ifs, desc ), vm );
@@ -148,7 +148,7 @@ namespace atom {
 #ifdef _WINDOWS
 		  ///
 		  void
-		  parse_cmd_line( std::string const& cmd_line, options_description_t& desc, bool const ntf ) {
+		  parse_cmd_line( std::string const& cmd_line, options_description_t const& desc, bool const ntf ) {
 			  vm.clear();
 			  std::vector< std::string > args = boost::program_options::split_winmain( cmd_line );
 			  boost::program_options::store( boost::program_options::command_line_parser( args ).options( desc ).run(), vm );
@@ -156,7 +156,7 @@ namespace atom {
 		  }
 		  ///
 		  void
-		  parse_cmd_line( std::wstring const& cmd_line, options_description_t& desc, bool const ntf ) {
+		  parse_cmd_line( std::wstring const& cmd_line, options_description_t const& desc, bool const ntf ) {
 			  vm.clear();
 			  std::vector< std::wstring > args = boost::program_options::split_winmain( cmd_line );
 			  boost::program_options::store( boost::program_options::wcommand_line_parser( args ).options( desc ).run(), vm );
@@ -165,13 +165,13 @@ namespace atom {
 #endif
 		  ///
 		  void
-		  parse_arg( int argc, char const * const argv[], options_description_t& desc, bool const ntf ) {
+		  parse_arg( int argc, char const * const argv[], options_description_t const& desc, bool const ntf ) {
 			  vm.clear();
 			  boost::program_options::store( boost::program_options::parse_command_line( argc, argv, desc ), vm );
 			  notify( ntf );
 		  }
 		  ///
-		  void parse_arg( int argc , wchar_t * argv[], options_description_t& desc, bool const ntf )
+		  void parse_arg( int argc , wchar_t * argv[], options_description_t const& desc, bool const ntf )
 		  {
 			  vm.clear();
 			  boost::program_options::store( boost::program_options::parse_command_line( argc, argv, desc ), vm );

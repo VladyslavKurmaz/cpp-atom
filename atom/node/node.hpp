@@ -163,5 +163,9 @@ namespace atom {
 	template < typename TT, typename UT, class T, class U >
 	void unmount( T t, U u )
 		{ unmount< TT >( t, u ); u-> template detach< UT >( t ); }
+	/// cleare node via smart pointer
+	template < class T >
+	void clear( T & p ) {
+		if ( p ) { p->clear(); } }
 }
 #endif//ATOM_NODE_NODE_HPP

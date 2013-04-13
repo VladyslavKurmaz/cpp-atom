@@ -21,21 +21,30 @@ public:
 	bool
 	init( int argc, char const * const argv[] );
 	///
-	appl&
-	run();
+	void
+	run( std::ostream& os, std::istream& is );
 	///
 	void
 	clear();
 
 protected:
 	//
-	logger_ptr get_logger() {
-		return ( get_value( boost::mpl::identity< appl2logger >() ).item() );
-	}
+	logger_ptr
+	get_logger() {
+		return ( get_value( boost::mpl::identity< appl2logger >() ).item() ); }
 	//
-	env_ptr get_env() {
-		return ( get_value( boost::mpl::identity< appl2env >() ).item() );
-	}
+	env_ptr
+	get_env() {
+		return ( get_value( boost::mpl::identity< appl2env >() ).item() ); }
+	///
+	void
+	scan();
+	///
+	bool
+	process_command();
+	///
+	void
+	print_error( atom::po::options_description_t const& desc, std::exception& exc );
 
 private:
 	///
@@ -43,4 +52,10 @@ private:
 	///
 	atom::po
 		po;
+	///
+	bool
+		interactive;
+	///
+	string_t
+		home;
 };
