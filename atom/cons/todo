@@ -1,9 +1,0 @@
-- hotkey definition with char (not only vk codes)
-+ parse hotkey strings
-- commands' history
-- CLI for cons configuration
-- states
-- self test on start - check hotkeys
-- close frame
-- rotate frame
-- console mapping between two processes
