@@ -2,6 +2,8 @@
 #pragma warning(disable : 4996)
 #pragma warning(disable : 4355)
 
+#define STANDALONE
+
 #include <windows.h>
 
 #include <iostream>

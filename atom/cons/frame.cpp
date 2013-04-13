@@ -1,6 +1,5 @@
 #include "./pch.hpp"
 #include "./cmds.hpp"
-#include "./consd_tty.hpp"
 
 #include "./log.hpp"
 #include "./pref.hpp"
@@ -9,32 +8,6 @@
 #include "./frame.hpp"
 
 
-HANDLE ht;
-CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { 0 };
-std::string pipe_name;
-std::string shmem_name;
-COORD size;
-
-DWORD WINAPI PipeGuard( LPVOID lpParameter ) {
-	cons_mpp* cmpp = reinterpret_cast<cons_mpp*>( lpParameter );
-	cmpp->handle_input();
-	//close all child processes
-	return 0;
-}
-
-
-DWORD WINAPI ConsEmul( LPVOID lpParameter ) {
-	cons_mpp cmpp;
-	if ( cmpp.init( pipe_name, shmem_name, GetStdHandle( STD_INPUT_HANDLE ), GetStdHandle( STD_OUTPUT_HANDLE ), csbiex.dwSize.X, csbiex.dwSize.Y ) ) {
-		HANDLE hgt = CreateThread( NULL, 0, PipeGuard, reinterpret_cast<LPVOID>( &cmpp ), 0, NULL );
-		//
-		tty tty1( std::cout );
-		tty1.run( csbiex.dwSize.X, csbiex.dwSize.Y );
-		//
-		WaitForSingleObject( hgt, INFINITE );
-	}
-	return 0;
-}
 
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 		index( 0 )
@@ -50,22 +23,21 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
 	//
-	csbiex.cbSize = sizeof( csbiex );
-	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiex );
-	this->cmpp.init( w->get_hwnd(), csbiex.dwSize.X, csbiex.dwSize.Y );
+	if ( this->cmpp.server_init( w->get_hwnd(), 160, 500 ) ) {
+		if ( this->cmpp.server_bind() ) {
+			return;
+		}
+	}
 	//
-	HANDLE ht = CreateThread( NULL, 0, ConsEmul, reinterpret_cast<LPVOID>( NULL ), 0, NULL );
-	///
-	pipe_name = this->cmpp.get_pipe_name();
-	shmem_name = this->cmpp.get_shmem_name();
-	this->cmpp.bind();
+	throw std::runtime_error( "Console mapping initialisation error" );
 }
 
 frame::~frame() {
-	WaitForSingleObject( ht, INFINITE );
+	this->cmpp.server_close();
 }
 
 frame_ptr frame::split( bool const pref_h ){
+#ifndef STANDALONE
 	frame_coord fc = this->coord;
 	if ( ( this->coord.width < this->coord.height) || ( ( this->coord.width == this->coord.height ) && pref_h ) ) {
 		// split vertical
@@ -93,6 +65,9 @@ frame_ptr frame::split( bool const pref_h ){
 	std::swap( r->prev, f->prev );
 	//
 	return f;
+#else
+	return ( this->shared_from_this() );
+#endif
 }
 
 frame_ptr frame::get_by_index( unsigned int const i ) {

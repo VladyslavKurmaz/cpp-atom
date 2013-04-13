@@ -18,11 +18,13 @@ public:
 	get_shmem_name() {
 		return ( this->shmem_name ); }
 	/// from server side
-	bool init( HWND hWnd, unsigned int const width, unsigned int const height );
-	/// from client side
-	bool init( string_t const& pname, string_t const& shmname, HANDLE hin, HANDLE hout, unsigned int const width, unsigned int const height );
+	bool server_init( HWND hWnd, unsigned int const width, unsigned int const height );
 	///
-	bool bind();
+	bool server_bind();
+	///
+	void cons_mpp::server_close();
+	/// from client side
+	void client_run( string_t const& pname, string_t const& shmname );
 	///
 	void onkey( KEY_EVENT_RECORD const& key );
 	///
@@ -40,20 +42,7 @@ protected:
 	gen_guid();
 	///
 	bool
-	build_shmem( bool const create, unsigned int const width, unsigned int const height );
-	///
-	bool
-	handle_kbrd( command const& c );
-	///
-	bool
-	handle_ctrl_break( command const& c );
-	///
-	bool
-	handle_ctrl_c( command const& c );
-	///
-	bool
-	handle_exit( command const& c );
-
+	build_shmem( unsigned int const width, unsigned int const height );
 
 private:
 	///
@@ -86,8 +75,5 @@ private:
 		wnd;
 	///
 	HANDLE
-		input;
-	///
-	HANDLE
-		output;
+		child;
 };
