@@ -76,4 +76,13 @@ private:
 	///
 	HANDLE
 		child;
+#ifndef STANDALONE
+	///
+	PROCESS_INFORMATION
+		pi;
+	///
+	STARTUPINFO
+		si;
+#endif
+
 };

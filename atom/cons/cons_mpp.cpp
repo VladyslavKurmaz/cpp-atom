@@ -58,7 +58,12 @@ cons_mpp::cons_mpp() :
 	,	shmem_region()
 	,	shared_block( NULL )
 	,	wnd( NULL )
-	,	child( 0 ) {
+	,	child( 0 )
+#ifndef STANDALONE
+	,	pi()
+	,	si()
+#endif
+{
 }
 
 cons_mpp::~cons_mpp() {
@@ -91,36 +96,36 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 			std::stringstream ss;
 			ss
 				<< path
-				<< " --pipe=" << this->pipe.get_name()
-				<< " --width=" << this->si.dwXCountChars
-				<< " --height=" << this->si.dwYCountChars
+				<< " --pipe=" << this->pipe_name
+				<< " --shmem=" << this->shmem_name
 				;
-			this->get_logger() << pipe.get_name();
+			//this->get_logger() << pipe.get_name();
 			TCHAR cmd_line[MAX_PATH] = { 0 };
 			strcpy_s( cmd_line, ss.str().c_str() );
 			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
 				// ????? check if process finished immediately
 				//
-				struct ep_t {
-					HWND	cons_wnd;
-					DWORD	pid;
-				} ep = { NULL, this->pi.dwProcessId };
-				struct _ {
-					static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
-						ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
-						DWORD pid = 0;
-						GetWindowThreadProcessId( hwnd, &pid ); 
-						if ( pid == p.pid ) {
-							p.cons_wnd = hwnd;
-							return FALSE;
-						}
-						return TRUE;
-					}
-				};
-				EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
-				TCHAR caption[ MAX_PATH ] = { 0 };
-				GetWindowText( ep.cons_wnd, caption, MAX_PATH );
-				this->process_caption = uni_string( caption );
+				//struct ep_t {
+				//	HWND	cons_wnd;
+				//	DWORD	pid;
+				//} ep = { NULL, this->pi.dwProcessId };
+				//struct _ {
+				//	static BOOL CALLBACK __( HWND hwnd, LPARAM lParam ) {
+				//		ep_t& p = *(reinterpret_cast<ep_t*>( lParam ));
+				//		DWORD pid = 0;
+				//		GetWindowThreadProcessId( hwnd, &pid ); 
+				//		if ( pid == p.pid ) {
+				//			p.cons_wnd = hwnd;
+				//			return FALSE;
+				//		}
+				//		return TRUE;
+				//	}
+				//};
+				//EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
+				//TCHAR caption[ MAX_PATH ] = { 0 };
+				//GetWindowText( ep.cons_wnd, caption, MAX_PATH );
+				//this->process_caption = uni_string( caption );
+				this->child = this->pi.hProcess;
 				return true;
 			}
 #else

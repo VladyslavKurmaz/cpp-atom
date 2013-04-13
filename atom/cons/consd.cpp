@@ -1,20 +1,7 @@
-#include <windows.h>
-#include <iostream>
-#include <string>
-#include <assert.h>
-#include <boost/interprocess/windows_shared_memory.hpp>
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/foreach.hpp>
-#include <boost/bind.hpp>
-
-#include <atom/util/dbg.hpp>
-#include <atom/util/po.hpp>
-#include <atom/util/pipe.hpp>
-
-//#define STANDALONE
-
-#include "./cmds.hpp"
+#include "./pch.hpp"
 #include "./consd_tty.hpp"
+#include "./cmds.hpp"
+#include "./cons_mpp.hpp"
 
 //SetWinEventHook.
 
@@ -48,6 +35,48 @@ BOOL WINAPI HandlerRoutine ( DWORD dwCtrlType ) {
 		}
 	}
 	return FALSE;
+}
+
+
+
+int main( int argc, char *argv[] )
+{
+	SetConsoleCtrlHandler( HandlerRoutine, TRUE );
+	//std::cout << "consd stared" << std::endl;
+	//for ( int i = 0; i < argc; ++i ) {
+	//	std::cout << "[" << i << "]:" << argv[i] << std::endl;
+	//}
+	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
+		atom::po po;
+		atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
+		std::string pipe_name;
+		std::string shmem_name;
+		unsigned int csb_width = 0;
+		unsigned int csb_height = 0;
+		//
+		po.add_option( 1, "pipe,p", boost::program_options::value<std::string>( &pipe_name ), "pipe name", desc );
+		po.add_option( 2, "shmem,s", boost::program_options::value<std::string>( &shmem_name ), "shmem name", desc );
+		try {
+			po.parse_arg( argc, argv, desc, true );
+			//
+			if ( !( po.count( 1 ) && po.count( 2 ) ) ) {
+				throw std::exception( "[ERROR] Pipe's name and/or Shered memory's name wasn't defined" );
+			}
+			//
+		} catch( std::exception& excpt ) {
+			std::stringstream ss;
+			desc.print( ss );
+			std::cout << excpt.what() << std::endl;
+			std::cout << ss.str() << std::endl;
+			wait_please();
+			return -1;
+		}
+		cons_mpp cmpp;
+		cmpp.client_run( po.as< std::string >( 1 ), po.as< std::string >( 2 ) );
+	}
+	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
+	return 0;
+
 }
 
 
@@ -161,64 +190,6 @@ DWORD WINAPI PipeGuard( LPVOID lpParameter ) {
 }
 #endif
 
-int main( int argc, char *argv[] )
-{
-	SetConsoleCtrlHandler( HandlerRoutine, TRUE );
-	//std::cout << "consd stared" << std::endl;
-	//for ( int i = 0; i < argc; ++i ) {
-	//	std::cout << "[" << i << "]:" << argv[i] << std::endl;
-	//}
-	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
-		atom::po po;
-		atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
-		std::string pipe_name;
-		unsigned int csb_width = 0;
-		unsigned int csb_height = 0;
-		//
-		po.add_option( 1, "pipe,p", boost::program_options::value<std::string>( &pipe_name ), "pipe name", desc );
-		po.add_option( 2, "width,w", boost::program_options::value<unsigned int>( &csb_width )->default_value(20), "screen buffer width", desc );
-		po.add_option( 3, "height,h", boost::program_options::value<unsigned int>( &csb_height )->default_value(500), "screen buffer height", desc );
-		try {
-			po.parse_arg( argc, argv, desc, true );
-			//
-#ifndef STANDALONE
-			if ( !po.count( 1 ) )
-				throw std::exception( "[ERROR] Pipe's name wasn't defined" );
-#endif
-			//
-		} catch( std::exception& excpt ) {
-			std::stringstream ss;
-			desc.print( ss );
-			std::cout << excpt.what() << std::endl;
-			std::cout << ss.str() << std::endl;
-			wait_please();
-			return -1;
-		}
-		//
-		tty tty1( std::cout );
-		atom::pipe pipe;
-#ifndef STANDALONE
-		if ( pipe.open( pipe_name ) ) {
-#endif
-			command c;
-			c.type = command::cmdSize;
-			c.size.X = csb_width;
-			c.size.Y = csb_height;
-			HandleSize( c );
-			//
-			HANDLE ht = CreateThread( NULL, 0, PipeGuard, reinterpret_cast<LPVOID>( &pipe ), 0, NULL );
-			tty1.run( csb_width, csb_height );
-			WaitForSingleObject( ht, INFINITE );
-#ifndef STANDALONE
-		} else {
-			std::cout << "[ERROR] Pipe creation error" << std::endl;
-		}
-#endif
-	}
-	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
-	return 0;
-
-}
 
 
 		//

@@ -122,12 +122,6 @@ private:
 	frame_ptr
 		prev;
 	///
-	PROCESS_INFORMATION
-		pi;
-	///
-	STARTUPINFO
-		si;
-	///
 	cons_mpp
 		cmpp;
 	///

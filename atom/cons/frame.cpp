@@ -15,8 +15,6 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	,	coord( fc )
 	,	next()
 	,	prev()
-	,	pi()
-	,	si()
 	,	cmpp()
 	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
