@@ -16,6 +16,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread.hpp>
 //
 #include <atom/node/node.hpp>
 
