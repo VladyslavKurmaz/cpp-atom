@@ -3,9 +3,6 @@
 #include "./cmds.hpp"
 #include "./cons_mpp.hpp"
 
-//SetWinEventHook.
-
-
 void wait_please() {
 	std::string s;
 	std::getline( std::cin, s );

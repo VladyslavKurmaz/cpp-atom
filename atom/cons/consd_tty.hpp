@@ -41,7 +41,7 @@ protected:
 	}
 	///
 	void show_banner() {
-		this->os << "cons v0.1.0 [github::cpp-atom]" << std::endl;
+		this->os<< std::endl << "cons v0.1.0 [/github/cpp-atom/cons]" << std::endl;
 		this->os << std::endl;
 		BOOST_FOREACH( descs_t::value_type &i, this->descs ) {
 			std::stringstream ss;
@@ -122,33 +122,12 @@ public:
 			  atom::po::options_description_t& ed = this->add_desc( exit_desk, "exit", boost::bind( &tty::on_exit, this, _1, _2 )  );
 	  }
 	  ///
-	  void run( unsigned int const w, unsigned int const h ) {
-#ifndef STANDALONE
-#else
-		  CHAR_INFO* ci = static_cast<CHAR_INFO*>( _alloca( sizeof( CHAR_INFO ) * w * h ) );
-#endif
-		  this->os << w << " " << h << std::endl;
-
+	  void run() {
 		  this->show_banner();
 		  while( this->loop ) {
 			  this->show_prompt();
 			  std::string s;
 			  std::getline( std::cin, s );
-			  //
-			  //COORD size = { w, h };
-			  //COORD top_left = { 0, 0 };
-			  //SMALL_RECT reg = { 0, 0, w - 1, /*h - */1 };
-
-			  //if ( ! ReadConsoleOutput(
-				 // GetStdHandle( STD_OUTPUT_HANDLE ),
-				 // ci,
-				 // size,
-				 // top_left,
-				 // &reg ) ) {
-				 // this->os << "read error" << std::endl;
-			  //}
-			  //std::string ts;
-			  //ts.push_back( ci->Char.AsciiChar );
 			  //
 			  std::stringstream ss;
 			  ss << s;

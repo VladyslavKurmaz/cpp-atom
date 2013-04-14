@@ -14,6 +14,7 @@ public:
 	string_t
 	get_pipe_name() {
 		return ( this->pipe_name ); }
+	///
 	string_t
 	get_shmem_name() {
 		return ( this->shmem_name ); }
@@ -34,7 +35,7 @@ public:
 	///
 	void onexit();
 	///
-	void handle_input();
+	void draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) const;
 
 protected:
 	///
@@ -43,6 +44,9 @@ protected:
 	///
 	bool
 	build_shmem( unsigned int const width, unsigned int const height );
+	///
+	void
+	copy_csb();
 
 private:
 	///
@@ -65,7 +69,7 @@ private:
 #pragma warning ( disable : 4200 )
 	struct shared_block_t {
 		CONSOLE_SCREEN_BUFFER_INFOEX
-			csbex;
+			csbiex;
 		CHAR_INFO
 			csb[0];
 	} *shared_block;

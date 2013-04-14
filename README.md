@@ -41,8 +41,9 @@ cons:
 - ctrl+break, ctr+c, correct exit after pressing prev combinations
 - close from all processes in chain
 - languages other than english
-- run param +caption, +prefix
-
+- run param +caption, +prefix, +nocolor
+- hide consd inside cons resource
+- ctrl+c, ctrl+v, ctrl+ins, shift+ins
 
 
 build

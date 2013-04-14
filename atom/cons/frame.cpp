@@ -108,29 +108,10 @@ void frame::clear() {
 }
 
 void frame::draw( HDC dc, RECT const& rt ) {
-	RECT rect = rt;
-	struct _{
-		static bool __( TCHAR const* str, size_t const count, HDC dc, RECT& rect ) {
-			RECT rt;
-			SetRectEmpty( &rt );
-			DrawText( dc, str, count, &rt, DT_LEFT | DT_TOP | DT_CALCRECT );
-			//SIZE sz;
-			//GetTextExtentPoint32( dc, str, count, &sz );
-			if ( ( rect.bottom -= rt.bottom ) > rect.top ) {
-				OffsetRect( &rt, rect.left, rect.bottom );
-				DrawText( dc, str, count, &rt, DT_LEFT | DT_TOP );
-				return true;
-			}
-			return false;
-		}
-	};
-	//this->bf.for_each( 0, boost::bind( &_::__, _1, _2, dc, boost::ref( rect ) ) );
-	//CHAR_INFO const* ci = static_cast< CHAR_INFO const* >( this->shmem_region->get_address() );
-	//std::string s;
-	//for( unsigned int i = 0; i < this->si.dwXCountChars; ++i ) {
-	//	s += ci[i].Char.AsciiChar;
-	//}
-	//DrawText( dc, s.c_str(), -1, &rect, DT_LEFT | DT_TOP );
+	RECT rect;
+	SetRectEmpty( &rect );
+	DrawText( dc, "A", 1, &rect, DT_LEFT | DT_TOP | DT_CALCRECT );
+	this->cmpp.draw( dc, rt, rect.right, rect.bottom );
 }
 
 uni_string frame::get_caption() const {

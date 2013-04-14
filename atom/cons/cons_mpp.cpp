@@ -83,7 +83,7 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 			this->si.dwFlags		= STARTF_USECOUNTCHARS | STARTF_USESHOWWINDOW;
 			this->si.dwXCountChars	= width;
 			this->si.dwYCountChars	= height;
-			this->si.wShowWindow	= SW_SHOW;
+			this->si.wShowWindow	= SW_HIDE;//SW_SHOW;
 			//
 			TCHAR path[MAX_PATH] = { 0 };
 			TCHAR drive[MAX_PATH] = { 0 };
@@ -137,6 +137,8 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 					return 0;
 				}
 			};
+			COORD size = { width, height };
+			SetConsoleScreenBufferSize( GetStdHandle( STD_OUTPUT_HANDLE ), size );
 			this->child = CreateThread( NULL, 0, _::__, reinterpret_cast<LPVOID>( this ), 0, NULL );
 			return true;
 #endif
@@ -180,6 +182,7 @@ void cons_mpp::client_run( string_t const& pname, string_t const& shmname ) {
 									ir.Event.KeyEvent = c.key;
 									DWORD wr = 0;
 									WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+									cmpp->copy_csb();
 									//if ( ir.Event.KeyEvent.wVirtualKeyCode == VK_RETURN ) {
 									//	//std::cout << "!!!!!!!!!!!!!!!!!!!!";
 									//	write_vk2cons( 'G' );
@@ -221,7 +224,7 @@ void cons_mpp::client_run( string_t const& pname, string_t const& shmname ) {
 			HANDLE thread = CreateThread( NULL, 0, _::__, reinterpret_cast<LPVOID>( this ), 0, NULL );
 			//
 			tty tty1( std::cout );
-			tty1.run( this->shared_block->csbex.dwSize.X, this->shared_block->csbex.dwSize.Y );
+			tty1.run();
 			//
 			WaitForSingleObject( thread, INFINITE );
 		}
@@ -252,6 +255,44 @@ void cons_mpp::onexit() {
 	c.type = command::cmdExit;
 	this->pipe.write( &c, sizeof( c ) );
 }
+
+void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) const {
+	LONG const cols = ( rt.right - rt.left ) / cw;
+	LONG rows = ( rt.bottom - rt.top ) / ch;
+	//
+	CONSOLE_SCREEN_BUFFER_INFOEX const& csbiex = this->shared_block->csbiex;
+	size_t const columns		= ( cols > csbiex.dwSize.X ) ? ( 1 ) : ( csbiex.dwSize.X / cols );
+	size_t const first_count	= ( columns > 1 ) ? ( csbiex.dwSize.X % cols ) : ( csbiex.dwSize.X );
+	size_t const next_count		= ( cols );
+	//
+	RECT rect;
+	SetRect( &rect, rt.left, rt.bottom - ch, rt.right, rt.bottom );
+	//
+	TCHAR* chars = static_cast< TCHAR* >( _alloca( sizeof( TCHAR ) * cols ) );
+	CHAR_INFO *csb_char = this->shared_block->csb;
+	//
+	SHORT csb_row = csbiex.srWindow.Bottom;
+	size_t c_count = first_count;
+	size_t c_column = columns;
+	while( rows && csb_row ) {
+		for( size_t i = 0; i < c_count; ++i ) {
+			chars[i] = csb_char[ csb_row * csbiex.dwSize.X + ( c_column - 1 ) * next_count + i ].Char.AsciiChar;
+		}
+		DrawText( dc, chars, c_count, &rect, DT_LEFT | DT_TOP );
+		OffsetRect( &rect, 0, -ch ); 
+		//
+		rows--;
+		if ( --c_column ) {
+			c_count = next_count;
+
+		} else {
+			c_column = columns;
+			c_count = first_count;
+			csb_row--;
+		}
+	}
+}
+
 
 cons_mpp::string_t cons_mpp::gen_guid() {
 	GUID guid;
@@ -287,15 +328,34 @@ bool cons_mpp::build_shmem( unsigned int const width, unsigned int const height 
 				)
 		);
 	//
-	this->shared_block = static_cast< shared_block_t* >( this->shmem_region->get_address() );
-	//
-	if ( create ) {
-		this->shared_block->csbex.dwSize.X = width;
-		this->shared_block->csbex.dwSize.Y = height;
-	} else {
+	if ( this->shared_block = static_cast< shared_block_t* >( this->shmem_region->get_address() ) ) {
+		if ( create ) {
+			//this->shared_block->csbex.dwSize.X = width;
+			//this->shared_block->csbex.dwSize.Y = height;
+		} else {
+			this->shared_block->csbiex.cbSize = sizeof( this->shared_block->csbiex ); 
+			GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &( this->shared_block->csbiex ) );
+		}
 	}
 	return true;
 }
 
+void
+cons_mpp::copy_csb() {
+	GetConsoleScreenBufferInfoEx( GetStdHandle( STD_OUTPUT_HANDLE ), &( this->shared_block->csbiex ) );
+	CONSOLE_SCREEN_BUFFER_INFOEX const& csbiex = this->shared_block->csbiex;
+	//
+	COORD size = { csbiex.dwSize.X, csbiex.dwSize.Y };
+	COORD left_top = { 0, csbiex.srWindow.Top };
+	SMALL_RECT reg = { 0, csbiex.srWindow.Top, csbiex.dwSize.X - 1, csbiex.srWindow.Bottom };
 
+	if ( !ReadConsoleOutput(
+		GetStdHandle( STD_OUTPUT_HANDLE ),
+		this->shared_block->csb,
+		size,
+		left_top,
+		&reg ) ) {
+			std::cerr << " copy console screen buffer error" << std::endl;
+	}
+}
 
