@@ -83,7 +83,7 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 			this->si.dwFlags		= STARTF_USECOUNTCHARS | STARTF_USESHOWWINDOW;
 			this->si.dwXCountChars	= width;
 			this->si.dwYCountChars	= height;
-			this->si.wShowWindow	= /*SW_HIDE*/SW_SHOW;
+			this->si.wShowWindow	= SW_HIDE/*SW_SHOW*/;
 			//
 			TCHAR path[MAX_PATH] = { 0 };
 			TCHAR drive[MAX_PATH] = { 0 };
@@ -261,9 +261,12 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) cons
 	LONG rows = ( rt.bottom - rt.top ) / ch;
 	//
 	CONSOLE_SCREEN_BUFFER_INFOEX const& csbiex = this->shared_block->csbiex;
-	size_t const columns		= ( cols > csbiex.dwSize.X ) ? ( 1 ) : ( csbiex.dwSize.X / cols + 1 );
-	size_t const first_count	= ( columns > 1 ) ? ( csbiex.dwSize.X % cols ) : ( csbiex.dwSize.X );
-	size_t const next_count		= ( cols );
+	size_t const q = csbiex.dwSize.X / cols;
+	size_t const m = csbiex.dwSize.X % cols;
+
+	size_t const columns		= ( q )?( ( m )?( q + 1 ):( q ) ):( 1 );
+	size_t const first_count	= ( q )?( ( m )?( m ):( cols ) ):( csbiex.dwSize.X );
+	size_t const next_count		= cols;
 	//
 	RECT rect;
 	SetRect( &rect, rt.left, rt.bottom - ch, rt.right, rt.bottom );
@@ -275,17 +278,20 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) cons
 	size_t c_count = first_count;
 	size_t c_column = columns;
 	while( rows && csb_row ) {
+		bool found = false;
 		for( size_t i = 0; i < c_count; ++i ) {
 			chars[i] = csb_char[ csb_row * csbiex.dwSize.X + ( c_column - 1 ) * next_count + i ].Char.AsciiChar;
+			found |= ( chars[i] != _T(' ') );
 		}
-		DrawText( dc, chars, c_count, &rect, DT_LEFT | DT_TOP );
-		//DrawText( dc, "TEST", -1, &rect, DT_LEFT | DT_TOP );
-		OffsetRect( &rect, 0, -ch ); 
+		if ( found ) {
+			DrawText( dc, chars, c_count, &rect, DT_LEFT | DT_TOP );
+			//DrawText( dc, "TEST", -1, &rect, DT_LEFT | DT_TOP );
+			OffsetRect( &rect, 0, -ch ); 
+			rows--;
+		}
 		//
-		rows--;
 		if ( --c_column ) {
 			c_count = next_count;
-
 		} else {
 			c_column = columns;
 			c_count = first_count;
