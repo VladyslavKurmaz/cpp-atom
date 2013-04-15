@@ -83,7 +83,7 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 			this->si.dwFlags		= STARTF_USECOUNTCHARS | STARTF_USESHOWWINDOW;
 			this->si.dwXCountChars	= width;
 			this->si.dwYCountChars	= height;
-			this->si.wShowWindow	= SW_HIDE;//SW_SHOW;
+			this->si.wShowWindow	= /*SW_HIDE*/SW_SHOW;
 			//
 			TCHAR path[MAX_PATH] = { 0 };
 			TCHAR drive[MAX_PATH] = { 0 };
@@ -261,7 +261,7 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) cons
 	LONG rows = ( rt.bottom - rt.top ) / ch;
 	//
 	CONSOLE_SCREEN_BUFFER_INFOEX const& csbiex = this->shared_block->csbiex;
-	size_t const columns		= ( cols > csbiex.dwSize.X ) ? ( 1 ) : ( csbiex.dwSize.X / cols );
+	size_t const columns		= ( cols > csbiex.dwSize.X ) ? ( 1 ) : ( csbiex.dwSize.X / cols + 1 );
 	size_t const first_count	= ( columns > 1 ) ? ( csbiex.dwSize.X % cols ) : ( csbiex.dwSize.X );
 	size_t const next_count		= ( cols );
 	//
@@ -271,7 +271,7 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) cons
 	TCHAR* chars = static_cast< TCHAR* >( _alloca( sizeof( TCHAR ) * cols ) );
 	CHAR_INFO *csb_char = this->shared_block->csb;
 	//
-	SHORT csb_row = csbiex.srWindow.Bottom;
+	SHORT csb_row = min( csbiex.srWindow.Bottom, csbiex.dwCursorPosition.Y );
 	size_t c_count = first_count;
 	size_t c_column = columns;
 	while( rows && csb_row ) {
@@ -279,6 +279,7 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) cons
 			chars[i] = csb_char[ csb_row * csbiex.dwSize.X + ( c_column - 1 ) * next_count + i ].Char.AsciiChar;
 		}
 		DrawText( dc, chars, c_count, &rect, DT_LEFT | DT_TOP );
+		//DrawText( dc, "TEST", -1, &rect, DT_LEFT | DT_TOP );
 		OffsetRect( &rect, 0, -ch ); 
 		//
 		rows--;

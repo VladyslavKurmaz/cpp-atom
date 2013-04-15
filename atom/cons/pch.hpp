@@ -7,6 +7,7 @@
 #include <windows.h>
 
 #include <iostream>
+#include <algorithm>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>

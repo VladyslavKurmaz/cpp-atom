@@ -21,7 +21,7 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
 	//
-	if ( this->cmpp.server_init( w->get_hwnd(), 160, 500 ) ) {
+	if ( this->cmpp.server_init( w->get_hwnd(), 80, 500 ) ) {
 		if ( this->cmpp.server_bind() ) {
 			return;
 		}
