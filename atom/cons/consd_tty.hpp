@@ -4,15 +4,11 @@ static atom::po::id_t const help_desk			=	1;
 //
 static atom::po::id_t const run_desk			=	help_desk + 1;
 static atom::po::id_t const run_desk_command	=	run_desk + 1;
+static atom::po::id_t const run_desk_domain		=	run_desk_command + 1;
+static atom::po::id_t const run_desk_user		=	run_desk_domain + 1;
+static atom::po::id_t const run_desk_password	=	run_desk_user + 1;
 //
-static atom::po::id_t const runas_desk			=	run_desk_command + 1;
-static atom::po::id_t const runas_desk_command	=	runas_desk + 1;
-//
-static atom::po::id_t const runas_desk_domain	=	runas_desk_command + 1;
-static atom::po::id_t const runas_desk_user		=	runas_desk_domain + 1;
-static atom::po::id_t const runas_desk_password	=	runas_desk_user + 1;
-//
-static atom::po::id_t const config_desk			=	runas_desk_password + 1;
+static atom::po::id_t const config_desk			=	run_desk_password + 1;
 //
 static atom::po::id_t const exit_desk			=	config_desk + 1;
 //
@@ -20,6 +16,9 @@ class tty {
 	///
 	std::ostream&
 		os;
+	///
+	std::istream&
+		is;
 	///
 	bool
 		loop;
@@ -84,10 +83,6 @@ protected:
 		return true;
 	}
 	///
-	bool on_runas( atom::po::options_description_t&, std::string& ) {
-		return true;
-	}
-	///
 	bool on_config( atom::po::options_description_t&, std::string& ) {
 		return true;
 	}
@@ -97,25 +92,21 @@ protected:
 
 public:
 	///
-	tty( std::ostream& o ) :
-	  os( o )
-		  ,	loop( true )
-		  ,	po()
-		  ,	descs() {
+	tty( std::ostream& o, std::istream& i ) :
+			os( o )
+		,	is( i )
+		,	loop( true )
+		,	po()
+		,	descs() {
 			  //
 			  atom::po::options_description_t& hd = this->add_desc( help_desk, "help", boost::bind( &tty::on_help, this, _1, _2 ) );
 			  //
 			  atom::po::options_description_t& rd = this->add_desc( run_desk, "run", boost::bind( &tty::on_run, this, _1, _2 )  );
 			  po.
-				  add_option( run_desk_command, "command,c", boost::program_options::value<std::string>(), "command to run", rd );
-			  //
-			  atom::po::options_description_t& rad = this->add_desc( runas_desk, "runas", boost::bind( &tty::on_runas, this, _1, _2 )  );
-			  po.
-				  add_option( runas_desk_command, "command,c", boost::program_options::value<std::string>(), "command to run", rad ).
-				  add_option( runas_desk_domain, "domain,d", boost::program_options::value<std::string>(), "domain", rad ).
-				  add_option( runas_desk_user, "user,u", boost::program_options::value<std::string>(), "user", rad ).
-				  add_option( runas_desk_password, "password,p", boost::program_options::value<std::string>(), "pasword", rad );
-			  //
+				  add_option( run_desk_command,		"command,c",	boost::program_options::value<std::string>(), "command to run", rd ).
+				  add_option( run_desk_domain,		"domain,d",		boost::program_options::value<std::string>(), "domain", rd ).
+				  add_option( run_desk_user,		"user,u",		boost::program_options::value<std::string>(), "user", rd ).
+				  add_option( run_desk_password,	"password,p",	boost::program_options::value<std::string>(), "password", rd );
 			  //
 			  atom::po::options_description_t& cd = this->add_desc( config_desk, "config", boost::bind( &tty::on_config, this, _1, _2 )  );
 			  //
@@ -127,7 +118,7 @@ public:
 		  while( this->loop ) {
 			  this->show_prompt();
 			  std::string s;
-			  std::getline( std::cin, s );
+			  std::getline( this->is, s );
 			  //
 			  std::stringstream ss;
 			  ss << s;

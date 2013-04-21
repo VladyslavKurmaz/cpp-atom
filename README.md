@@ -44,6 +44,7 @@ cons:
 - run param +caption, +prefix, +nocolor
 - hide consd inside cons resource
 - ctrl+c, ctrl+v, ctrl+ins, shift+ins
+- process mouse events
 
 
 build

@@ -72,6 +72,7 @@ int main( int argc, char *argv[] )
 		}
 		cons_mpp cmpp;
 		cmpp.client_run( po.as< std::string >( 1 ), po.as< std::string >( 2 ), po.as< std::string >( 3 ) );
+		cmpp.close();
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;

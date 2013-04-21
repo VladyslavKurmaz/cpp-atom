@@ -19,6 +19,7 @@
 window::window( logger_ptr l, pref_ptr p ) :
 wwindow( *this, INITLIST_9( &window::onkey, &window::onkey, &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	current_frame()
+	,	head_frame()
 	,	expand_mode( false )
 	,	appear_hk()
 	,	accel()
@@ -131,6 +132,7 @@ void window::clear() {
 		}
 	};
 	l.for_each( boost::bind( &_::__, _1 ) );
+	base_node_t::clear();
 }
 
 bool bsend = true;
@@ -304,8 +306,10 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
 		{
+#ifndef STANDALONE
 			atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
 			this->head_frame->reorder();
+#endif
 			break;
 		}
 	case CMDID_EXPAND:
@@ -326,7 +330,11 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame->ctrl_c();
 		break;
 	case CMDID_CLOSE:
-		break;
+		{
+			if ( get_slot<window2frame>().size() ) {
+			}
+			break;
+		}
 	case CMDID_TTY1:
 	case CMDID_TTY2:
 	case CMDID_TTY3:

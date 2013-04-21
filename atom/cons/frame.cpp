@@ -31,7 +31,7 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 }
 
 frame::~frame() {
-	this->cmpp.server_close();
+	this->cmpp.close();
 }
 
 frame_ptr frame::split( bool const pref_h ){
@@ -67,6 +67,12 @@ frame_ptr frame::split( bool const pref_h ){
 	return ( this->shared_from_this() );
 #endif
 }
+
+frame_ptr frame::close() {
+	frame_ptr f = this->get_next();
+	return ( f );
+}
+
 
 frame_ptr frame::get_by_index( unsigned int const i ) {
 	frame_ptr f = shared_from_this();

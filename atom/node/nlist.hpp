@@ -64,6 +64,11 @@ namespace atom {
 				}
 			}
 		}
+		///
+		size_t size() const {
+			return ( base_type::size() );
+		}
+
 	};
 }
 #endif//ATOM_NODE_NLIST_HPP

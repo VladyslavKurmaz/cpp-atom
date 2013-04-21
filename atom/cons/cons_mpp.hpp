@@ -91,7 +91,7 @@ public:
 	///
 	bool server_bind();
 	///
-	void cons_mpp::server_close();
+	void cons_mpp::close();
 	/// from client side
 	void client_run( string_t const& pname, string_t const& mname, string_t const& hname );
 	///

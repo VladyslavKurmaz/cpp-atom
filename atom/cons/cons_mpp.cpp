@@ -88,6 +88,7 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 						cons_mpp* s = reinterpret_cast<cons_mpp*>( lpParameter );
 						cons_mpp cmpp;
 						cmpp.client_run( s->get_pipe_name(), s->get_mutex_name(), s->get_header_name() );
+						cmpp.close();
 						return 0;
 					}
 				};
@@ -101,7 +102,7 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 				this->si.dwFlags		= STARTF_USECOUNTCHARS | STARTF_USESHOWWINDOW;
 				this->si.dwXCountChars	= width;
 				this->si.dwYCountChars	= height;
-				this->si.wShowWindow	= SW_HIDE/*SW_SHOW*/;
+				this->si.wShowWindow	= /*SW_HIDE*/SW_SHOW;
 				//
 				TCHAR path[MAX_PATH] = { 0 };
 				TCHAR drive[MAX_PATH] = { 0 };
@@ -153,7 +154,7 @@ bool cons_mpp::server_bind() {
 	return ( this->pipe.connect() );
 }
 
-void cons_mpp::server_close() {
+void cons_mpp::close() {
 	WaitForSingleObject( this->child, INFINITE );
 }
 
@@ -176,7 +177,7 @@ void cons_mpp::client_run( string_t const& pname, string_t const& mname, string_
 				strcpy_s( this->header_ptr->buffer_name, buffer_name.c_str() );
 				this->header_ptr->invalid = true;
 				//
-				if ( this->build_shmem( buffer_name, this->header_ptr->csbiex.dwSize.X * this->header_ptr->csbiex.dwSize.X * sizeof( CHAR_INFO ), this->buffer, this->buffer_region, this->buffer_ptr ) ) {
+				if ( this->build_shmem( buffer_name, this->header_ptr->csbiex.dwSize.X * this->header_ptr->csbiex.dwSize.Y * sizeof( CHAR_INFO ), this->buffer, this->buffer_region, this->buffer_ptr ) ) {
 					run = true;
 				}
 			}
@@ -244,12 +245,10 @@ void cons_mpp::client_run( string_t const& pname, string_t const& mname, string_
 			}
 		};
 		//, GetStdHandle( STD_INPUT_HANDLE ), GetStdHandle( STD_OUTPUT_HANDLE ) )
-		HANDLE thread = CreateThread( NULL, 0, _::__, reinterpret_cast<LPVOID>( this ), 0, NULL );
+		this->child = CreateThread( NULL, 0, _::__, reinterpret_cast<LPVOID>( this ), 0, NULL );
 		//
-		tty tty1( std::cout );
+		tty tty1( std::cout, std::cin );
 		tty1.run();
-		//
-		WaitForSingleObject( thread, INFINITE );
 	}
 }
 
@@ -308,6 +307,7 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) {
 		SHORT csb_row = min( csbiex.srWindow.Bottom, csbiex.dwCursorPosition.Y );
 		size_t c_count = first_count;
 		size_t c_column = columns;
+		size_t c_empty_columns = columns;
 		while( rows && csb_row ) {
 			bool found = false;
 			for( size_t i = 0; i < c_count; ++i ) {
@@ -316,15 +316,20 @@ void cons_mpp::draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch ) {
 			}
 			if ( found ) {
 				DrawText( dc, chars, c_count, &rect, DT_LEFT | DT_TOP );
-				//DrawText( dc, "TEST", -1, &rect, DT_LEFT | DT_TOP );
 				OffsetRect( &rect, 0, -ch ); 
 				rows--;
+			} else {
+				c_empty_columns--;
 			}
 			//
 			if ( --c_column ) {
 				c_count = next_count;
 			} else {
-				c_column = columns;
+				if ( !c_empty_columns ) {
+					OffsetRect( &rect, 0, -ch ); 
+					rows--;
+				}
+				c_column = c_empty_columns = columns;
 				c_count = first_count;
 				csb_row--;
 			}

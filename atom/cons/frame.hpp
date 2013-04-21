@@ -74,6 +74,9 @@ public:
 	split( bool const pref_h );
 	///
 	frame_ptr
+	close();
+	///
+	frame_ptr
 	get_by_index( unsigned int const i );
 	///
 	void
