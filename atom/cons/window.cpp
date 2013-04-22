@@ -124,52 +124,46 @@ void window::run() {
 }
 
 void window::clear() {
-	window2frame& l = this->get_value( boost::mpl::identity< window2frame >() );
-	struct _{
-		static bool __( frame_ptr& f ) {
-			f->clear();
-			return true;
-		}
-	};
-	l.for_each( boost::bind( &_::__, _1 ) );
+	while ( get_slot<window2frame>().size() ) {
+		this->frame_close();
+	}
+	this->current_frame = this->head_frame = frame_ptr();
 	base_node_t::clear();
 }
 
-bool bsend = true;
 void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
-	if ( bsend ) {
-		KEY_EVENT_RECORD key;
-		key.bKeyDown			=	down;
-		key.wRepeatCount		=	repeat;
-		key.wVirtualKeyCode		=	vk;
-		key.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
-		BYTE kbrd[256] = { 0 };
-		WORD c = 0;
-		GetKeyboardState( kbrd );
-		ToAscii(
-			key.wVirtualKeyCode,
-			key.wVirtualScanCode,
-			kbrd,
-			&c,
-			0
-			);
-		key.uChar.UnicodeChar	=	c;
-		key.uChar.AsciiChar;
-		key.dwControlKeyState	=
-			( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
-			//ENHANCED_KEY
-			( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
-			( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
-			( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
-			( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
-			( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
-			( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
-			( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
+	KEY_EVENT_RECORD key;
+	key.bKeyDown			=	down;
+	key.wRepeatCount		=	repeat;
+	key.wVirtualKeyCode		=	vk;
+	key.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
+	BYTE kbrd[256] = { 0 };
+	WORD c = 0;
+	GetKeyboardState( kbrd );
+	ToAscii(
+		key.wVirtualKeyCode,
+		key.wVirtualScanCode,
+		kbrd,
+		&c,
+		0
+		);
+	key.uChar.UnicodeChar	=	c;
+	key.uChar.AsciiChar;
+	key.dwControlKeyState	=
+		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
+		//ENHANCED_KEY
+		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
+		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
+		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
+		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
-		//this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
-		this->current_frame->onkey( key );
-		this->invalidate();
-	}
+	//this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
+	this->current_frame->onkey( key );
+	this->invalidate();
+
 }
 
 void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
@@ -269,7 +263,6 @@ void window::onpaint( HWND hWnd ){
 }
 
 void window::onclose( HWND ) {
-	bsend = false;
 	PostQuitMessage( 0 );
 }
 
@@ -305,13 +298,8 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
-		{
-#ifndef STANDALONE
-			atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
-			this->head_frame->reorder();
-#endif
-			break;
-		}
+		frame_split();
+		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
 		break;
@@ -330,11 +318,8 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame->ctrl_c();
 		break;
 	case CMDID_CLOSE:
-		{
-			if ( get_slot<window2frame>().size() ) {
-			}
-			break;
-		}
+		frame_close();
+		break;
 	case CMDID_TTY1:
 	case CMDID_TTY2:
 	case CMDID_TTY3:
@@ -347,6 +332,31 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		return;
 	}
 	this->invalidate();
+}
+
+void
+window::frame_split() {
+#ifndef STANDALONE
+	atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
+	this->head_frame->reorder();
+#endif
+}
+
+void
+window::frame_close() {
+	frame_ptr f = this->current_frame;
+	bool update_head =  ( this->head_frame == f );
+	this->current_frame = f->close();
+	atom::unmount<window2frame>( this, f );
+	//
+	if ( update_head ) {
+		this->head_frame = this->current_frame;
+	}
+	if ( get_slot<window2frame>().size() ) {
+		this->head_frame->reorder();
+	} else {
+		this->onclose( this->get_hwnd() );
+	}
 }
 
 /*

@@ -252,26 +252,26 @@ void cons_mpp::client_run( string_t const& pname, string_t const& mname, string_
 	}
 }
 
-void cons_mpp::onkey( KEY_EVENT_RECORD const& key ) {
+void cons_mpp::send_key( KEY_EVENT_RECORD const& key ) {
 	command c;
 	c.type = command::cmdKbrd;
 	c.key = key;
 	this->pipe.write( &c, sizeof( c ) );
 }
 
-void cons_mpp::onctrl_break() {
+void cons_mpp::send_ctrl_break() {
 	command c;
 	c.type = command::cmdCtrlBreak;
 	this->pipe.write( &c, sizeof( c ) );
 }
 
-void cons_mpp::onctrl_c() {
+void cons_mpp::send_ctrl_c() {
 	command c;
 	c.type = command::cmdCtrlC;
 	this->pipe.write( &c, sizeof( c ) );
 }
 
-void cons_mpp::onexit() {
+void cons_mpp::send_exit() {
 	command c;
 	c.type = command::cmdExit;
 	this->pipe.write( &c, sizeof( c ) );

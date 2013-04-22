@@ -31,7 +31,6 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) :
 }
 
 frame::~frame() {
-	this->cmpp.close();
 }
 
 frame_ptr frame::split( bool const pref_h ){
@@ -69,10 +68,19 @@ frame_ptr frame::split( bool const pref_h ){
 }
 
 frame_ptr frame::close() {
-	frame_ptr f = this->get_next();
+	this->cmpp.send_exit();
+	this->cmpp.close();
+	frame_ptr f = frame_ptr();
+	if ( ( this->get_next() != this->shared_from_this() ) && ( this->get_prev() != this->shared_from_this() ) ) {
+		f = this->get_next();
+		this->next->prev = this->get_prev();
+		this->prev->next = this->get_next();
+	}
+	//
+	this->next = this->prev = frame_ptr();
+	base_node_t::clear();
 	return ( f );
 }
-
 
 frame_ptr frame::get_by_index( unsigned int const i ) {
 	frame_ptr f = shared_from_this();
@@ -95,22 +103,15 @@ void frame::reorder() {
 }
 
 void frame::onkey( KEY_EVENT_RECORD const& key ) {
-	this->cmpp.onkey( key );
+	this->cmpp.send_key( key );
 }
 
 void frame::ctrl_break() {
-	this->cmpp.onctrl_break();
+	this->cmpp.send_ctrl_break();
 }
 
 void frame::ctrl_c() {
-	this->cmpp.onctrl_c();
-}
-
-void frame::clear() {
-	this->cmpp.onexit();
-	//
-	this->next = this->prev = frame_ptr();
-	base_node_t::clear();
+	this->cmpp.send_ctrl_c();
 }
 
 void frame::draw( HDC dc, RECT const& rt ) {

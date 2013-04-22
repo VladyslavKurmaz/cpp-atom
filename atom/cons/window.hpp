@@ -96,6 +96,12 @@ protected:
 	{ return ( *( get_value( boost::mpl::identity< window2pref >() ).item() ) ); }
 	//
 	void
+	frame_split();
+	//
+	void
+	frame_close();
+	//
+	void
 	update_hotkeys();
 	//
 	void

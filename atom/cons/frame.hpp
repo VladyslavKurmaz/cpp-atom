@@ -54,8 +54,7 @@ public:
 	///
 	static frame_ptr create( logger_ptr l, pref_ptr p, window_ptr w, frame_coord const & fc ) {
 		frame_ptr f = frame_ptr( new frame( l, p, w, fc ) );
-		f->prev = f;
-		f->next = f;
+		f->next = f->prev = f;
 		return ( f );
 	}
 	///
@@ -90,9 +89,6 @@ public:
 	///
 	void
 	ctrl_c();
-	///
-	void
-	clear();
 	///
 	void
 	draw( HDC dc, RECT const& rt );

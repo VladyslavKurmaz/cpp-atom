@@ -95,13 +95,13 @@ public:
 	/// from client side
 	void client_run( string_t const& pname, string_t const& mname, string_t const& hname );
 	///
-	void onkey( KEY_EVENT_RECORD const& key );
+	void send_key( KEY_EVENT_RECORD const& key );
 	///
-	void onctrl_break();
+	void send_ctrl_break();
 	///
-	void onctrl_c();
+	void send_ctrl_c();
 	///
-	void onexit();
+	void send_exit();
 	///
 	void draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch );
 
