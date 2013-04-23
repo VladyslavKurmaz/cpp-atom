@@ -82,13 +82,7 @@ public:
 	reorder();
 	///
 	void
-	onkey( KEY_EVENT_RECORD const& key );
-	///
-	void
-	ctrl_break();
-	///
-	void
-	ctrl_c();
+	process( command::type const id, void const* param );
 	///
 	void
 	draw( HDC dc, RECT const& rt );

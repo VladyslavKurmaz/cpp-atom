@@ -95,13 +95,8 @@ public:
 	/// from client side
 	void client_run( string_t const& pname, string_t const& mname, string_t const& hname );
 	///
-	void send_key( KEY_EVENT_RECORD const& key );
-	///
-	void send_ctrl_break();
-	///
-	void send_ctrl_c();
-	///
-	void send_exit();
+	void
+	process( command::type const id, void const* param );
 	///
 	void draw( HDC dc, RECT const& rt, LONG const cw, LONG const ch );
 

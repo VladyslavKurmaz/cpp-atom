@@ -50,6 +50,15 @@ void write_vk2cons( WORD const vk ) {
 	WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), ir, sizeof( ir ) / sizeof( ir[0] ), &wr );
 }
 
+void write_exit2cons() {
+	write_vk2cons( VK_RETURN );
+	write_vk2cons( 'E' );
+	write_vk2cons( 'X' );
+	write_vk2cons( 'I' );
+	write_vk2cons( 'T' );
+	write_vk2cons( VK_RETURN );
+}
+
 cons_mpp::cons_mpp() :
 		pipe_name()
 	,	pipe()
@@ -194,7 +203,7 @@ void cons_mpp::client_run( string_t const& pname, string_t const& mname, string_
 					command c;
 					memset( &c, 0, sizeof( c ) );
 					if ( cont = cmpp->pipe.read( &c, sizeof( c )  ) ) {
-						switch( c.type ) {
+						switch( c.id ) {
 						case command::cmdSize:
 							{
 								break;
@@ -228,12 +237,30 @@ void cons_mpp::client_run( string_t const& pname, string_t const& mname, string_
 							}
 						case command::cmdExit:
 							{
-								write_vk2cons( VK_RETURN );
-								write_vk2cons( 'E' );
-								write_vk2cons( 'X' );
-								write_vk2cons( 'I' );
-								write_vk2cons( 'T' );
-								write_vk2cons( VK_RETURN );
+								write_exit2cons();
+								break;
+							}
+						case command::cmdTerminate:
+							{
+								DWORD pl[64] = { 0 };
+								DWORD plc = GetConsoleProcessList( pl, 64 );
+								DWORD me = GetCurrentProcessId();
+								for( DWORD i = 0; i < plc; ++i ) {
+									if ( me != pl[i] ) {
+										HANDLE h = OpenProcess( PROCESS_TERMINATE, FALSE, pl[i] );
+										if ( h != NULL ) {
+											TerminateProcess( h, 0 );
+											CloseHandle( h );
+										}
+									}
+								}
+								//????????????? set exit event for tty
+								// uncomment next line and remove break statement
+								//write_exit2cons();
+								break;
+							}
+						case command::cmdQuit:
+							{
 								cont = false;
 								break;
 							}
@@ -249,31 +276,19 @@ void cons_mpp::client_run( string_t const& pname, string_t const& mname, string_
 		//
 		tty tty1( std::cout, std::cin );
 		tty1.run();
+		// ???????????? send close to the server;
 	}
 }
 
-void cons_mpp::send_key( KEY_EVENT_RECORD const& key ) {
+void
+cons_mpp::process( command::type const id, void const* param ) {
 	command c;
-	c.type = command::cmdKbrd;
-	c.key = key;
-	this->pipe.write( &c, sizeof( c ) );
-}
-
-void cons_mpp::send_ctrl_break() {
-	command c;
-	c.type = command::cmdCtrlBreak;
-	this->pipe.write( &c, sizeof( c ) );
-}
-
-void cons_mpp::send_ctrl_c() {
-	command c;
-	c.type = command::cmdCtrlC;
-	this->pipe.write( &c, sizeof( c ) );
-}
-
-void cons_mpp::send_exit() {
-	command c;
-	c.type = command::cmdExit;
+	c.id = id;
+	//
+	if ( id  == command::cmdKbrd ) {
+		c.key = *( static_cast< KEY_EVENT_RECORD const* >( param ) );
+	}
+	//
 	this->pipe.write( &c, sizeof( c ) );
 }
 

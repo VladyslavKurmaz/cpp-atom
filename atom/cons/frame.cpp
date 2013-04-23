@@ -68,7 +68,8 @@ frame_ptr frame::split( bool const pref_h ){
 }
 
 frame_ptr frame::close() {
-	this->cmpp.send_exit();
+	this->cmpp.process( command::cmdExit, NULL );
+	this->cmpp.process( command::cmdQuit, NULL );
 	this->cmpp.close();
 	frame_ptr f = frame_ptr();
 	if ( ( this->get_next() != this->shared_from_this() ) && ( this->get_prev() != this->shared_from_this() ) ) {
@@ -102,16 +103,9 @@ void frame::reorder() {
 	} while( f.get() != this );
 }
 
-void frame::onkey( KEY_EVENT_RECORD const& key ) {
-	this->cmpp.send_key( key );
-}
-
-void frame::ctrl_break() {
-	this->cmpp.send_ctrl_break();
-}
-
-void frame::ctrl_c() {
-	this->cmpp.send_ctrl_c();
+void
+frame::process( command::type const id, void const* param ) {
+	this->cmpp.process( id, param );
 }
 
 void frame::draw( HDC dc, RECT const& rt ) {

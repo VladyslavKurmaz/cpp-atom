@@ -85,6 +85,7 @@ bool window::init() {
 			( preferences::update, po_hk_prev )
 			( preferences::update, po_hk_ctrl_break )
 			( preferences::update, po_hk_ctrl_c )
+			( preferences::update, po_hk_terminate )
 			( preferences::update, po_hk_close )
 			( preferences::update, po_hk_tty1 )
 			( preferences::update, po_hk_tty2 )
@@ -161,7 +162,7 @@ void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
 		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 	//this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
-	this->current_frame->onkey( key );
+	this->current_frame->process( command::cmdKbrd, &key );
 	this->invalidate();
 
 }
@@ -312,10 +313,13 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame = this->current_frame->get_prev();
 		break;
 	case CMDID_CTRL_BREAK:
-		this->current_frame->ctrl_break();
+		this->current_frame->process( command::cmdCtrlBreak, NULL );
 		break;
 	case CMDID_CTRL_C:
-		this->current_frame->ctrl_c();
+		this->current_frame->process( command::cmdCtrlC, NULL );
+		break;
+	case CMDID_TERMINATE:
+		this->current_frame->process( command::cmdTerminate, NULL );
 		break;
 	case CMDID_CLOSE:
 		frame_close();
@@ -579,6 +583,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 		case po_hk_prev:
 		case po_hk_ctrl_break:
 		case po_hk_ctrl_c:
+		case po_hk_terminate:
 		case po_hk_close:
 		case po_hk_tty1:
 		case po_hk_tty2:
@@ -595,6 +600,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 					CMDID_PREV,
 					CMDID_CTRL_BREAK,
 					CMDID_CTRL_C,
+					CMDID_TERMINATE,
 					CMDID_CLOSE,
 					CMDID_TTY1,
 					CMDID_TTY2,
