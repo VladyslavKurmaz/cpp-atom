@@ -8,37 +8,11 @@ void wait_please() {
 	std::getline( std::cin, s );
 }
 
-BOOL WINAPI HandlerRoutine ( DWORD dwCtrlType ) {
-	switch ( dwCtrlType ){
-	case CTRL_C_EVENT:
-		{
-			return TRUE;
-		}
-	case CTRL_BREAK_EVENT:
-		{
-			return TRUE;
-		}
-	case CTRL_CLOSE_EVENT:
-		{
-			return TRUE;
-		}
-	case CTRL_LOGOFF_EVENT:
-		{
-			return TRUE;
-		}
-	case CTRL_SHUTDOWN_EVENT:
-		{
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
 
 
 
 int main( int argc, char *argv[] )
 {
-	SetConsoleCtrlHandler( HandlerRoutine, TRUE );
 	//std::cout << "consd stared" << std::endl;
 	//for ( int i = 0; i < argc; ++i ) {
 	//	std::cout << "[" << i << "]:" << argv[i] << std::endl;

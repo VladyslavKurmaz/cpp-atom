@@ -9,7 +9,7 @@
 
 int main( int argc, char *argv[] )
 {
-	ATOM_DBG_MARK_BEGIN( p1, 146 ); {
+	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		logger_ptr l = logger::create();
 		l->add_std_cout();
 		//

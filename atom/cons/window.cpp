@@ -6,6 +6,7 @@
 #include "./frame.hpp"
 #include "./window.hpp"
 
+//?????????// add processing for WM_QUERYENDSESSION
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 

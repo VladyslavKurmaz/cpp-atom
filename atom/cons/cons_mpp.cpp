@@ -59,6 +59,32 @@ void write_exit2cons() {
 	write_vk2cons( VK_RETURN );
 }
 
+BOOL WINAPI HandlerRoutine ( DWORD dwCtrlType ) {
+	switch ( dwCtrlType ){
+	case CTRL_C_EVENT:
+		{
+			return TRUE;
+		}
+	case CTRL_BREAK_EVENT:
+		{
+			return TRUE;
+		}
+	case CTRL_CLOSE_EVENT:
+		{
+			return TRUE;
+		}
+	case CTRL_LOGOFF_EVENT:
+		{
+			return TRUE;
+		}
+	case CTRL_SHUTDOWN_EVENT:
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 cons_mpp::cons_mpp() :
 		pipe_name()
 	,	pipe()
@@ -76,9 +102,11 @@ cons_mpp::cons_mpp() :
 	,	pi()
 	,	si()
 {
+	SetConsoleCtrlHandler( HandlerRoutine, TRUE );
 }
 
 cons_mpp::~cons_mpp() {
+	SetConsoleCtrlHandler( HandlerRoutine, TRUE );
 }
 
 bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int const height ) {
