@@ -20,17 +20,14 @@
 #include <boost/smart_ptr.hpp>
 
 
-#define ATOM_ZOOM_DEF_PTR( x ) class x; typedef boost::shared_ptr< x > #x_ptr;
+#define ATOM_ZOOM_DEF_PTR( x ) class x; typedef boost::shared_ptr< x > x##_ptr;
 
 namespace atom { namespace zoom {
 
-
 ATOM_ZOOM_DEF_PTR( entity )
 
+} }
 
 #include "./entity.hpp"
-
-
-} }
 
 #endif//ATOM_ZOOM_ZOOM_HPP
