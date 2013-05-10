@@ -12,48 +12,31 @@
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef ATOM_ZOOM_RENDER_HPP
-#define ATOM_ZOOM_RENDER_HPP
+#ifndef ATOM_ZOOM_DX9RENDER_HPP
+#define ATOM_ZOOM_DX9RENDER_HPP
 #pragma once
 
-#include <atom/node.hpp>
+#include <atom/zoom/render.hpp>
 
 namespace atom { namespace zoom {
 
-	typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > render2logger;
-
-	template < class T, class L >
-	class render :
-		public atom::node< LOKI_TYPELIST_1( render2logger ) >,
-		public boost::enable_shared_from_this< T > {
-
-
+	class dx9render :
+		public render< dx9render, atom::lock_t > {
 	public:
+		///
+		static dx9render_ptr create( logger_ptr l ) {
+			return dx9render_ptr( new dx9render( l ) );
+		}
+		///
+		~dx9render();
 
 	protected:
 
-		typedef boost::lock_guard< L >
-			guard_t;
-		L
-			lock;
-		///
-		logger&
-			get_logger() { return ( *( get_slot<render2logger>().item() ) ); }
-
-		///
-		render( logger_ptr l ) :
-				lock() {
-			atom::mount<render2logger>( this, l );
-			this->get_logger() << "render has been created" << std::endl;
-		}
-		///
-		~render() {
-			this->get_logger() << "render has been destoyed" << std::endl;
-		}
-
 	private:
+		///
+		dx9render( logger_ptr l );
 	};
 
 } }
 
-#endif//ATOM_ZOOM_RENDER_HPP
+#endif//ATOM_ZOOM_DX9RENDER_HPP

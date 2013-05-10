@@ -18,6 +18,9 @@
 
 #include <boost/function.hpp>
 #include <boost/smart_ptr.hpp>
+#include <boost/thread/locks.hpp>
+
+#include <atom/util/lock.hpp>
 
 
 #define ATOM_ZOOM_DEF_PTR( x ) class x; typedef boost::shared_ptr< x > x##_ptr;
@@ -26,7 +29,6 @@ namespace atom { namespace zoom {
 
 ATOM_ZOOM_DEF_PTR( logger )
 ATOM_ZOOM_DEF_PTR( entity )
-ATOM_ZOOM_DEF_PTR( render )
 
 } }
 
