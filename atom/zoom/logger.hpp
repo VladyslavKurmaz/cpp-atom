@@ -6,32 +6,39 @@
 |-----------------------------------------------------------------------------|
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
-| HISTORY:     2013.05.09 - initial structure                                 |
+| HISTORY:     2013.05.10 - initial structure                                 |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef ATOM_ZOOM_ZOOM_HPP
-#define ATOM_ZOOM_ZOOM_HPP
+#ifndef ATOM_ZOOM_LOGGER_HPP
+#define ATOM_ZOOM_LOGGER_HPP
 #pragma once
 
-#include <boost/function.hpp>
-#include <boost/smart_ptr.hpp>
-
-
-#define ATOM_ZOOM_DEF_PTR( x ) class x; typedef boost::shared_ptr< x > x##_ptr;
+#include <atom/util/log.hpp>
 
 namespace atom { namespace zoom {
 
-ATOM_ZOOM_DEF_PTR( logger )
-ATOM_ZOOM_DEF_PTR( entity )
-ATOM_ZOOM_DEF_PTR( render )
+	class logger :
+		public atom::log,
+		public boost::enable_shared_from_this< logger >
+	{
+	public:
+		///
+		static logger_ptr create() {
+			return logger_ptr( new logger );
+		}
 
+		~logger() {
+		}
+
+	private:
+		///
+		logger() : atom::log() {
+		}
+	};
 } }
 
-#include "./logger.hpp"
-#include "./entity.hpp"
-#include "./render.hpp"
+#endif//ATOM_ZOOM_LOGGER_HPP
 
-#endif//ATOM_ZOOM_ZOOM_HPP
