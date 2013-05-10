@@ -28,6 +28,7 @@
 namespace atom { namespace zoom {
 
 ATOM_ZOOM_DEF_PTR( logger )
+ATOM_ZOOM_DEF_PTR( render )
 ATOM_ZOOM_DEF_PTR( entity )
 
 } }

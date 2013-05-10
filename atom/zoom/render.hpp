@@ -22,19 +22,18 @@ namespace atom { namespace zoom {
 
 	typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > render2logger;
 
-	template < class T, class L >
 	class render :
 		public atom::node< LOKI_TYPELIST_1( render2logger ) >,
-		public boost::enable_shared_from_this< T > {
+		public boost::enable_shared_from_this< render > {
 
 
 	public:
 
 	protected:
 
-		typedef boost::lock_guard< L >
+		typedef boost::lock_guard< atom::lock_t >
 			guard_t;
-		L
+		atom::lock_t
 			lock;
 		///
 		logger&
@@ -44,11 +43,9 @@ namespace atom { namespace zoom {
 		render( logger_ptr l ) :
 				lock() {
 			atom::mount<render2logger>( this, l );
-			this->get_logger() << "render has been created" << std::endl;
 		}
 		///
-		~render() {
-			this->get_logger() << "render has been destoyed" << std::endl;
+		virtual ~render() {
 		}
 
 	private:

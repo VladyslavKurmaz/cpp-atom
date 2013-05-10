@@ -3,12 +3,14 @@
 namespace atom { namespace zoom {
 
 	dx9render::dx9render( logger_ptr l ) :
-			render< dx9render, atom::lock_t >( l ) {
+			render( l ) {
+			this->get_logger() << "render has been created" << std::endl;
 
 	}
 
 	dx9render::~dx9render() {
 		guard_t l( this->lock );
+		this->get_logger() << "render has been destoyed" << std::endl;
 	}
 
 } }

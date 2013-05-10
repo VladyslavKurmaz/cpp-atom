@@ -21,14 +21,14 @@
 namespace atom { namespace zoom {
 
 	class dx9render :
-		public render< dx9render, atom::lock_t > {
+		public render {
 	public:
 		///
-		static dx9render_ptr create( logger_ptr l ) {
-			return dx9render_ptr( new dx9render( l ) );
+		static render_ptr create( logger_ptr l ) {
+			return render_ptr( new dx9render( l ) );
 		}
 		///
-		~dx9render();
+		virtual ~dx9render();
 
 	protected:
 
