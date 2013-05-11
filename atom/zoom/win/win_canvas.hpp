@@ -49,7 +49,7 @@ namespace atom { namespace zoom {
 		get_handle();
 		///
 		virtual void
-		run();
+		run( boost::function< bool() > tick );
 		///
 		virtual void
 		clear();

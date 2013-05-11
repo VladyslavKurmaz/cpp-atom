@@ -34,6 +34,9 @@ namespace atom { namespace zoom {
 		virtual bool
 		init() = 0;
 		///
+		virtual bool
+		frame() = 0;
+		///
 		virtual void
 		clear() = 0;
 

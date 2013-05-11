@@ -65,8 +65,8 @@ namespace atom { namespace zoom {
 	}
 
 	void
-	win_canvas::run() {
-		wwindow_base_t::run();
+	win_canvas::run( boost::function< bool() > tick ) {
+		wwindow_base_t::run( tick, 0 );
 	}
 		
 	void

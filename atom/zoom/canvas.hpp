@@ -36,7 +36,7 @@ namespace atom { namespace zoom {
 		get_handle() = 0;
 		///
 		virtual void
-		run() = 0;
+		run( boost::function< bool() > ) = 0;
 		///
 		virtual void
 		clear() = 0;

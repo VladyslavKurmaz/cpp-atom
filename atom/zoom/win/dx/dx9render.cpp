@@ -56,6 +56,22 @@ namespace atom { namespace zoom {
 		return false;
 	}
 
+	bool
+	dx9render::frame() {
+		if ( render::frame() ) {
+			this->device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 92, 92, 92 ), 1.0f, 0 );
+			if( SUCCEEDED( this->device->BeginScene() ) )
+			{
+				this->device->EndScene();
+			}
+
+			// Present the backbuffer contents to the display
+			this->device->Present( NULL, NULL, NULL, NULL );
+			return true;
+		}
+		return false;
+	}
+
 	void
 	dx9render::clear(){
 		guard_t l( this->lock );

@@ -16,6 +16,11 @@ namespace atom { namespace zoom {
 		return true;
 	}
 
+	bool
+	render::frame() {
+		return true;
+	}
+
 	void
 	render::clear() {
 		base_node_t::clear();
