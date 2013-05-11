@@ -9,6 +9,11 @@ namespace atom { namespace zoom {
 	canvas::~canvas(){
 	}
 		
+	bool
+	canvas::init() {
+		return true;
+	}
+
 	void
 	canvas::clear(){
 		base_node_t::clear();
