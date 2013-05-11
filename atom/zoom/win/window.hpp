@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 #include <atom/util/wwindow.hpp>
 
@@ -41,3 +42,4 @@ private:
 		mouse_dy;
 
 };
+#endif

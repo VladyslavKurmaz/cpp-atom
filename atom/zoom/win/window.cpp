@@ -1,3 +1,5 @@
+#if 0
+
 #include "./pch.hpp"
 #include "./window3d.hpp"
 #include <time.h>
@@ -459,3 +461,4 @@ void window3d::render()
 		d3d->Release();
 }
 
+#endif

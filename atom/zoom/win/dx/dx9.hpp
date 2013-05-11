@@ -12,12 +12,17 @@
 \-----------------------------------------------------------------------------/
 */
 
-#include "./../zoom.hpp"
+#ifndef ATOM_ZOOM_WIN_DX_DX9_HPP
+#define ATOM_ZOOM_WIN_DX_DX9_HPP
+#pragma once
+
+#include "./../win.hpp"
 #include <d3dx9.h>
 
 namespace atom { namespace zoom {
 
 } }
 
-#include "./window.hpp"
 #include "./dx9render.hpp"
+
+#endif //ATOM_ZOOM_WIN_DX_DX9_HPP
