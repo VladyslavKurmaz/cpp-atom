@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atom/zoom/render.hpp>
+#include <d3dx9.h>
 
 namespace atom { namespace zoom {
 
@@ -41,6 +42,19 @@ namespace atom { namespace zoom {
 		dx9render( logger_ptr l, stream_ptr s, canvas_ptr c );
 
 	private:
+		///
+		D3DPRESENT_PARAMETERS
+			d3dpp;
+		///
+		typedef boost::interprocess::unique_ptr< IDirect3D9, atom::unique_com_ptr_deleter< IDirect3D9 > >
+			d3d_t;
+		d3d_t
+			d3d;
+		///
+		typedef boost::interprocess::unique_ptr< IDirect3DDevice9, atom::unique_com_ptr_deleter< IDirect3DDevice9 > >
+			device_t;
+		device_t
+			device;
 	};
 
 } }

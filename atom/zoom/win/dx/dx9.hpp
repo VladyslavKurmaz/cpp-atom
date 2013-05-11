@@ -17,6 +17,8 @@
 #pragma once
 
 #include "./../win.hpp"
+#include <atom/util/ptr.hpp>
+
 #include <d3dx9.h>
 
 namespace atom { namespace zoom {

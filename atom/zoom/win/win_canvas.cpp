@@ -49,7 +49,7 @@ namespace atom { namespace zoom {
 				}
 			};
 			SetRect( &rect, 0, 0, 800, 600 );
-			//window3d::calc_rect( rect, style, ex_style, false, true );
+			wwindow_base_t::calc_rect( rect, style, ex_style, false, true );
 			if ( wwindow_base_t::init( boost::bind( _::__, _1, _2, boost::ref( rect ), style, ex_style ), true ) )
 			{
 				wwindow_base_t::show( true );
@@ -57,6 +57,11 @@ namespace atom { namespace zoom {
 			}
 		}
 		return false;
+	}
+
+	void*
+	win_canvas::get_handle() {
+		return static_cast<void*>( wwindow_base_t::get_hwnd() );
 	}
 
 	void

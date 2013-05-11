@@ -50,6 +50,9 @@ namespace atom { namespace zoom {
 		stream&
 		get_stream() { return ( *( get_slot<render2stream>().item() ) ); }
 		///
+		canvas&
+		get_canvas() { return ( *( get_slot<render2canvas>().item() ) ); }
+		///
 		render( logger_ptr l, stream_ptr s, canvas_ptr c );
 		///
 		virtual ~render();

@@ -22,6 +22,7 @@
 #include <windows.h>
 
 #include <boost/smart_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
 namespace atom {
 	
@@ -59,6 +60,17 @@ namespace atom {
 			if ( h != 0 ) DeleteObject( h );
 		}
 	};
+
+	template < typename T >
+	struct unique_com_ptr_deleter {
+		void operator()( T *p )
+		{
+			if ( p != 0 ) {
+				p->Release();
+			}
+		}
+	};
+
 }
 
 #endif

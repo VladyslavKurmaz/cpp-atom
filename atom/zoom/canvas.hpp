@@ -32,6 +32,9 @@ namespace atom { namespace zoom {
 		virtual bool
 		init() = 0;
 		///
+		virtual void*
+		get_handle() = 0;
+		///
 		virtual void
 		run() = 0;
 		///
