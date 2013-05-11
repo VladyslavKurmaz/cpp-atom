@@ -2,15 +2,15 @@
 
 namespace atom { namespace zoom {
 
-	dx9render::dx9render( logger_ptr l, stream_ptr s ) : render( l, s ) {
+	dx9render::dx9render( logger_ptr l, stream_ptr s, canvas_ptr c ) : render( l, s, c ) {
 	}
 
 	dx9render::~dx9render() {
-		guard_t l( this->lock );
 	}
 
 	bool
 	dx9render::init() {
+		guard_t l( this->lock );
 		if ( render::init() ) {
 			return true;
 		}
@@ -19,6 +19,7 @@ namespace atom { namespace zoom {
 
 	void
 	dx9render::clear(){
+		guard_t l( this->lock );
 		render::clear();
 	}
 

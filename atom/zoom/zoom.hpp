@@ -20,6 +20,8 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/thread/locks.hpp>
 
+
+#include <atom/node.hpp>
 #include <atom/util/lock.hpp>
 
 
@@ -28,6 +30,7 @@
 namespace atom { namespace zoom {
 
 	ATOM_ZOOM_DEF_PTR( logger )
+	ATOM_ZOOM_DEF_PTR( canvas )
 	ATOM_ZOOM_DEF_PTR( render )
 	ATOM_ZOOM_DEF_PTR( entity )
 
@@ -43,7 +46,8 @@ namespace atom { namespace zoom {
 } }
 
 #include "./logger.hpp"
-#include "./entity.hpp"
+#include "./canvas.hpp"
 #include "./render.hpp"
+#include "./entity.hpp"
 
 #endif//ATOM_ZOOM_ZOOM_HPP

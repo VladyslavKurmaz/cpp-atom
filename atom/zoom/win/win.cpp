@@ -1,3 +1,3 @@
 
 #include "./../zoom.cpp"
-#include "./window.cpp"
+#include "./win_canvas.cpp"

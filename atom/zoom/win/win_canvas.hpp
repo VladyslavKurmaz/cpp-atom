@@ -6,21 +6,42 @@
 |-----------------------------------------------------------------------------|
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
-| HISTORY:     2013.05.09 - initial structure                                 |
+| HISTORY:     2013.05.11 - initial structure                                 |
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
 \-----------------------------------------------------------------------------/
 */
-#ifndef ATOM_ZOOM_WIN_WIN_HPP
-#define ATOM_ZOOM_WIN_WIN_HPP
-#pragma once
 
-#include "./../zoom.hpp"
+#ifndef ATOM_ZOOM_WINCANVAS_HPP
+#define ATOM_ZOOM_WINCANVAS_HPP
+#pragma once
 
 namespace atom { namespace zoom {
 
+	typedef atom::nstorage< stream, boost::shared_ptr, atom::narray1 > canvas2stream;
+
+	class win_canvas :
+		public canvas {
+
+	public:
+		///
+		static canvas_ptr create( stream_ptr s ) {
+			return canvas_ptr( new win_canvas( s ) );
+		}
+
+		///
+		virtual void
+		clear();
+		///
+		virtual ~win_canvas();
+
+	protected:
+		///
+		win_canvas( stream_ptr s );
+
+	private:
+	};
+
 } }
 
-#include "./win_canvas.hpp"
-
-#endif //ATOM_ZOOM_WIN_WIN_HPP
+#endif //ATOM_ZOOM_WINCANVAS_HPP

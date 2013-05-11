@@ -24,8 +24,8 @@ namespace atom { namespace zoom {
 		public render {
 	public:
 		///
-		static render_ptr create( logger_ptr l, stream_ptr s ) {
-			return render_ptr( new dx9render( l, s ) );
+		static render_ptr create( logger_ptr l, stream_ptr s, canvas_ptr c ) {
+			return render_ptr( new dx9render( l, s, c ) );
 		}
 		///
 		virtual bool
@@ -38,7 +38,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		dx9render( logger_ptr l, stream_ptr s );
+		dx9render( logger_ptr l, stream_ptr s, canvas_ptr c );
 
 	private:
 	};
