@@ -13,9 +13,11 @@
 */
 
 #include "./../zoom.hpp"
+#include <d3dx9.h>
 
 namespace atom { namespace zoom {
 
 } }
 
+#include "./window.hpp"
 #include "./dx9render.hpp"

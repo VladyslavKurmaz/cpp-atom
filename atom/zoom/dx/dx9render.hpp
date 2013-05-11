@@ -24,17 +24,23 @@ namespace atom { namespace zoom {
 		public render {
 	public:
 		///
-		static render_ptr create( logger_ptr l ) {
-			return render_ptr( new dx9render( l ) );
+		static render_ptr create( logger_ptr l, stream_ptr s ) {
+			return render_ptr( new dx9render( l, s ) );
 		}
+		///
+		virtual bool
+		init();
+		///
+		virtual void
+		clear();
 		///
 		virtual ~dx9render();
 
 	protected:
+		///
+		dx9render( logger_ptr l, stream_ptr s );
 
 	private:
-		///
-		dx9render( logger_ptr l );
 	};
 
 } }

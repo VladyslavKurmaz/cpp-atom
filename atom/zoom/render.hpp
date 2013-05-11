@@ -21,32 +21,38 @@
 namespace atom { namespace zoom {
 
 	typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > render2logger;
+	typedef atom::nstorage< stream, boost::shared_ptr, atom::narray1 > render2stream;
 
 	class render :
-		public atom::node< LOKI_TYPELIST_1( render2logger ) >,
+		public atom::node< LOKI_TYPELIST_2( render2logger, render2stream ) >,
 		public boost::enable_shared_from_this< render > {
-
+			typedef atom::node< LOKI_TYPELIST_2( render2logger, render2stream ) >
+				base_node_t;
 
 	public:
+		///
+		virtual bool
+		init() = 0;
+		///
+		virtual void
+		clear() = 0;
 
 	protected:
-
+		///
 		typedef boost::lock_guard< atom::lock_t >
 			guard_t;
 		atom::lock_t
 			lock;
 		///
 		logger&
-			get_logger() { return ( *( get_slot<render2logger>().item() ) ); }
-
+		get_logger() { return ( *( get_slot<render2logger>().item() ) ); }
 		///
-		render( logger_ptr l ) :
-				lock() {
-			atom::mount<render2logger>( this, l );
-		}
+		stream&
+		get_stream() { return ( *( get_slot<render2stream>().item() ) ); }
 		///
-		virtual ~render() {
-		}
+		render( logger_ptr l, stream_ptr s );
+		///
+		virtual ~render();
 
 	private:
 	};
