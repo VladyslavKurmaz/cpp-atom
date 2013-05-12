@@ -12,12 +12,12 @@
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef ATOM_ZOOM_GO_HPP
-#define ATOM_ZOOM_GO_HPP
+#ifndef ATOM_ZOOM_WO_HPP
+#define ATOM_ZOOM_WO_HPP
 #pragma once
 
 namespace atom { namespace zoom {
 
 } }
 
-#endif//ATOM_ZOOM_GO_HPP
+#endif //ATOM_ZOOM_WO_HPP
