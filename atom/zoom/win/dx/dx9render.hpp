@@ -16,13 +16,9 @@
 #define ATOM_ZOOM_DX9RENDER_HPP
 #pragma once
 
-#include <atom/zoom/render.hpp>
-#include <d3dx9.h>
-
 namespace atom { namespace zoom {
 
-	class dx9render :
-		public render {
+	class dx9render : public render {
 	public:
 		///
 		static render_ptr create( logger_ptr l, stream_ptr s, canvas_ptr c ) {

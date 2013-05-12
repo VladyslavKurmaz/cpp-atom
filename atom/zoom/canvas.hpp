@@ -20,12 +20,10 @@ namespace atom { namespace zoom {
 
 	typedef atom::nstorage< stream, boost::shared_ptr, atom::narray1 > canvas2stream;
 
-	class canvas :
-		public atom::node< LOKI_TYPELIST_1( canvas2stream ) >,
-		public boost::enable_shared_from_this< canvas > {
+	class canvas : public entity< canvas > {
 
-			typedef atom::node< LOKI_TYPELIST_1( canvas2stream ) >
-				base_node_t;
+			typedef entity< canvas >
+				base_entity_t;
 
 	public:
 		///
@@ -43,7 +41,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		canvas( stream_ptr s );
+		canvas( logger_ptr l, stream_ptr s );
 		///
 		virtual ~canvas();
 

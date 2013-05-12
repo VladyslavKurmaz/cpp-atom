@@ -2,8 +2,7 @@
 
 namespace atom { namespace zoom {
 
-	canvas::canvas( stream_ptr s ){
-		atom::mount<canvas2stream>( this, s );
+	canvas::canvas( logger_ptr l, stream_ptr s ) : base_entity_t( l, s ) {
 	}
 
 	canvas::~canvas(){
@@ -16,7 +15,7 @@ namespace atom { namespace zoom {
 
 	void
 	canvas::clear(){
-		base_node_t::clear();
+		base_entity_t::clear();
 	}
 
 } }

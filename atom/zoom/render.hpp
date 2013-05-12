@@ -19,16 +19,11 @@
 
 namespace atom { namespace zoom {
 
-	typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > render2logger;
-	typedef atom::nstorage< stream, boost::shared_ptr, atom::narray1 > render2stream;
 	typedef atom::nstorage< canvas, boost::shared_ptr, atom::narray1 > render2canvas;
 
-	class render :
-		public atom::node< LOKI_TYPELIST_3( render2logger, render2stream, render2canvas ) >,
-		public boost::enable_shared_from_this< render > {
-			typedef atom::node< LOKI_TYPELIST_3( render2logger, render2stream, render2canvas ) >
-				base_node_t;
-
+	class render : public entity< render > {
+		typedef entity< render >
+			base_entity_t;
 	public:
 		///
 		virtual bool
@@ -47,20 +42,18 @@ namespace atom { namespace zoom {
 		atom::lock_t
 			lock;
 		///
-		logger&
-		get_logger() { return ( *( get_slot<render2logger>().item() ) ); }
 		///
-		stream&
-		get_stream() { return ( *( get_slot<render2stream>().item() ) ); }
-		///
-		canvas&
-		get_canvas() { return ( *( get_slot<render2canvas>().item() ) ); }
+		canvas_ptr&
+		get_canvas() { return ( this->canvas ); }
 		///
 		render( logger_ptr l, stream_ptr s, canvas_ptr c );
 		///
 		virtual ~render();
 
 	private:
+		///
+		canvas_ptr
+			canvas;
 	};
 
 } }

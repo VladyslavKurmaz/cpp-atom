@@ -30,7 +30,7 @@ namespace atom { namespace zoom {
 				d3dpp.MultiSampleQuality		=	0;
 
 				d3dpp.SwapEffect				=	D3DSWAPEFFECT_DISCARD;
-				d3dpp.hDeviceWindow				=	static_cast< HWND >( this->get_canvas().get_handle() );
+				d3dpp.hDeviceWindow				=	static_cast< HWND >( this->get_canvas()->get_handle() );
 				d3dpp.Windowed					=	TRUE;
 				d3dpp.EnableAutoDepthStencil	=	TRUE;
 				d3dpp.AutoDepthStencilFormat	=	D3DFMT_D16; //D3DFMT_D24S8;

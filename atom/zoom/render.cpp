@@ -2,10 +2,10 @@
 
 namespace atom { namespace zoom {
 
-	render::render( logger_ptr l, stream_ptr s, canvas_ptr c ) : lock() {
-		atom::mount<render2logger>( this, l );
-		atom::mount<render2stream>( this, s );
-		atom::mount<render2canvas>( this, c );
+	render::render( logger_ptr l, stream_ptr s, canvas_ptr c ) :
+			base_entity_t( l, s )
+		,	lock()
+		,	canvas( c ) {
 	}
 
 	render::~render() {
@@ -23,7 +23,8 @@ namespace atom { namespace zoom {
 
 	void
 	render::clear() {
-		base_node_t::clear();
+		this->canvas.reset();
+		base_entity_t::clear();
 	}
 
 } }
