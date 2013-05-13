@@ -37,13 +37,28 @@ typedef std::basic_string< TCHAR >
 	string_t;
 
 static atom::po::id_t const po_none					=	0;
-static atom::po::id_t const po_help					=	po_none + 1;
+// help
+static atom::po::id_t const po_desc1				=	po_none + 1;
+// interactive, home
+static atom::po::id_t const po_desc2				=	po_desc1 + 1;
+// stages, components, recursive, tree
+static atom::po::id_t const po_desc3				=	po_desc2 + 1;
+// switch, exit 
+static atom::po::id_t const po_desc4				=	po_desc3 + 1;
+// desc1 + desc2 + desc3 
+static atom::po::id_t const po_desc_cmdline			=	po_desc4 + 1;
+// desc1 + desc3 + desc4 
+static atom::po::id_t const po_desc_console			=	po_desc_cmdline + 1;
+
+static atom::po::id_t const po_help					=	po_desc_console + 1;
 static atom::po::id_t const po_interactive			=	po_help + 1;
-static atom::po::id_t const po_exit					=	po_interactive + 1;
-static atom::po::id_t const po_home					=	po_exit + 1;
+static atom::po::id_t const po_home					=	po_interactive + 1;
 static atom::po::id_t const po_stages				=	po_home + 1;
 static atom::po::id_t const po_components			=	po_stages + 1;
 static atom::po::id_t const po_recursive			=	po_components + 1;
+static atom::po::id_t const po_tree					=	po_recursive + 1;
+static atom::po::id_t const po_switch				=	po_tree + 1;
+static atom::po::id_t const po_exit					=	po_switch + 1;
 
 
 

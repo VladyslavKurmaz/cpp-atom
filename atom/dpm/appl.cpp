@@ -9,21 +9,38 @@ appl::appl( logger_ptr l ) :
 	,	home() {
 	atom::mount<appl2logger>( this, l );
 	//
-	atom::po::options_description_t& desc = this->po.add_desc( 0, "dpm options" );
-	//
 	string_t h( getenv( "DPM_HOME" ) );
-	po.
-		add_option( po_help,					"help,h",											"show this (h)elp", desc ).
-		add_option( po_interactive,				"interactive,i",									"(i)nteractive mode", desc ).
-		add_option( po_exit,					"exit,e",											"(e)xit from interactive mode", desc ).
+	//
+	atom::po::options_description_t& desc1 = this->po.add_desc( po_desc1, "" );
+	this->po.
+		add_option( po_help,					"help,h",											"show this (h)elp", desc1 );
+	//
+	atom::po::options_description_t& desc2 = this->po.add_desc( po_desc2, "" );
+	this->po.
+		add_option( po_interactive,				"interactive,i",									"(i)nteractive mode", desc2 ).
 		add_option( po_home,					"home,o",
-		boost::program_options::value<std::string>()->default_value( h ),							"define dpm h(o)me directory,override %DPM_HOME% environment var", desc ).
+			boost::program_options::value<std::string>()->default_value( h ),						"define dpm h(o)me directory,override %DPM_HOME% env var", desc2 );
+	
+	atom::po::options_description_t& desc3 = this->po.add_desc( po_desc3, "" );
+	this->po.
 		add_option( po_stages,					"stages,s",
-		boost::program_options::value<std::string>()->default_value( "" ),							"(s)tages", desc ).
+			boost::program_options::value<std::string>()->default_value( "" ),						"(s)tages \"stat;sync;conf;build\"", desc3 ).
 		add_option( po_components,				"components,c",
-		boost::program_options::value<std::string>()->default_value( "" ),							"(c)omponents", desc ).
-		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc )
-		;
+			boost::program_options::value<std::string>()->default_value( "" ),						"(c)omponents \"boost\"", desc3 ).
+		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc3 ).
+		add_option( po_tree,					"tree,t",											"show components' (t)ree", desc3 );
+	//
+	atom::po::options_description_t& desc4 = this->po.add_desc( po_desc4, "" );
+	this->po.
+		add_option( po_switch,					"switch,s",
+			boost::program_options::value<std::string>()->default_value( "" ),						"s(w)itch to new environment", desc4 ).
+		add_option( po_exit,					"exit,e",											"(e)xit from interactive mode", desc4 );
+	//
+	atom::po::options_description_t& desc_cmdline = this->po.add_desc( po_desc_cmdline, "" );
+	desc_cmdline.add( desc1 ).add( desc2 ).add( desc3 );
+
+	atom::po::options_description_t& desc_console = this->po.add_desc( po_desc_console, "" );
+	desc_console.add( desc1 ).add( desc3 ).add( desc4 );
 }
 
 appl::~appl() {
@@ -31,7 +48,7 @@ appl::~appl() {
 
 bool
 appl::init( int argc, char const * const argv[] ) {
-	atom::po::options_description_t& desc = this->po.get_desc( 0 );
+	atom::po::options_description_t& desc = this->po.get_desc( po_desc_cmdline );
 	try {
 		this->po.parse_arg( argc, argv, desc, true );
 		this->interactive = this->po.count( po_interactive ) > 0;
@@ -46,7 +63,7 @@ appl::init( int argc, char const * const argv[] ) {
 
 void
 appl::run( std::ostream& os, std::istream& is ) {
-	atom::po::options_description_t const& desc = this->po.get_desc( 0 );
+	atom::po::options_description_t const& desc = this->po.get_desc( po_desc_console );
 	bool l = true;
 	while( l && this->interactive ) {
 		std::string s;

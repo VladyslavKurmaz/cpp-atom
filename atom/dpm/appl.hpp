@@ -31,11 +31,11 @@ protected:
 	//
 	logger_ptr
 	get_logger() {
-		return ( get_value( boost::mpl::identity< appl2logger >() ).item() ); }
+		return ( get_slot<appl2logger>().item() ); }
 	//
 	env_ptr
 	get_env() {
-		return ( get_value( boost::mpl::identity< appl2env >() ).item() ); }
+		return ( get_slot<appl2env>().item() ); }
 	///
 	void
 	scan();
