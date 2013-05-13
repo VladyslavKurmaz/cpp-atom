@@ -29,28 +29,34 @@ namespace atom { namespace zoom {
 	class dx9 : public win {
 	public:	
 		///
-		dx9() : win(), d3d9( NULL ), d3d9device( NULL ) {
+		dx9() : win(), d3dpp(), d3d( NULL ), d3ddevice( NULL ) {
 			memset( &d3dpp, 0, sizeof( d3dpp ) );
 		}
 		///
 		~dx9() {
+			if ( d3ddevice != NULL ) {
+				d3ddevice->Release();
+			}
+			if ( d3d != NULL ) {
+				d3d->Release();
+			}
 		}
 		///
 		D3DPRESENT_PARAMETERS
 			d3dpp;
 		///
 		IDirect3D9*
-			d3d9;
+			d3d;
 		///
 		IDirect3DDevice9*
-			d3d9device;
+			d3ddevice;
 	};
 
 	ATOM_ZOOM_DEF_PTR( dx9 )
 
-	class dx9_holder {
+	class dx9holder {
 	public:
-		dx9_holder( dx9_ptr d ) : dx9data( d ) {
+		dx9holder( dx9_ptr d ) : dx9data( d ) {
 		}
 	protected:
 		dx9_ptr

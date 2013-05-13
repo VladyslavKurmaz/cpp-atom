@@ -18,7 +18,7 @@
 
 namespace atom { namespace zoom {
 
-	class dx9render : public render, protected dx9_holder {
+	class dx9render : public render, protected dx9holder {
 	public:
 		///
 		static dx9render_ptr create( logger_ptr l, stream_ptr s, canvas_ptr c ) {
@@ -47,6 +47,9 @@ namespace atom { namespace zoom {
 		///
 		dx9_ptr
 			dx9platform;
+		///
+		mesh_ptr
+			m;
 	};
 
 } }

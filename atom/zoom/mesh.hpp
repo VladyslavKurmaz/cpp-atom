@@ -19,6 +19,12 @@ namespace atom { namespace zoom {
 
 	public:
 		///
+		virtual bool
+		build_sphere( float_t radius, uint_t slices, uint_t stacks ) = 0;
+		///
+		virtual void
+		render() = 0;
+		///
 		virtual void
 		clear();
 

@@ -4,7 +4,8 @@ namespace atom { namespace zoom {
 
 	dx9render::dx9render( logger_ptr l, stream_ptr s, canvas_ptr c ) :
 			render( l, s, c )
-		,	dx9_holder( dx9_ptr( new dx9() ) )
+		,	dx9holder( dx9_ptr( new dx9() ) )
+		,	m()
 	{
 	}
 
@@ -16,7 +17,7 @@ namespace atom { namespace zoom {
 		guard_t l( this->lock );
 		if ( render::init() ) {
 			//
-			if ( this->dx9data->d3d9 = Direct3DCreate9( D3D_SDK_VERSION ) ) {
+			if ( this->dx9data->d3d = Direct3DCreate9( D3D_SDK_VERSION ) ) {
 				D3DPRESENT_PARAMETERS& d3dpp = this->dx9data->d3dpp;
 				//
 				d3dpp.BackBufferWidth			=	800;
@@ -38,7 +39,7 @@ namespace atom { namespace zoom {
 				d3dpp.PresentationInterval		=	D3DPRESENT_INTERVAL_DEFAULT;
 				//
 				IDirect3DDevice9* d = NULL;
-				if( SUCCEEDED( this->dx9data->d3d9->CreateDevice(
+				if( SUCCEEDED( this->dx9data->d3d->CreateDevice(
 											D3DADAPTER_DEFAULT,
 											D3DDEVTYPE_HAL,
 											d3dpp.hDeviceWindow,
@@ -46,7 +47,9 @@ namespace atom { namespace zoom {
 											&d3dpp,
 											&d ) ) )
 				{
-					this->dx9data->d3d9device = d;
+					this->dx9data->d3ddevice = d;
+					m = this->create_mesh();
+					m->build_sphere( 1.f, 100, 100 );
 					return true;
 				}
 			}
@@ -54,17 +57,78 @@ namespace atom { namespace zoom {
 		return false;
 	}
 
+	inline void	get_vector3( const D3DXMATRIX& Mtx, const int Line, D3DXVECTOR3& Vec )
+	{
+		Vec.x = Mtx.m[ Line ][ 0 ];
+		Vec.y = Mtx.m[ Line ][ 1 ];
+		Vec.z = Mtx.m[ Line ][ 2 ];
+	}
+
+	void build_viewport( float const AngleX, float const AngleY, D3DXVECTOR3& Pos, D3DXMATRIX& ViewMtx )
+	{
+		D3DXMATRIX	mtx;
+		D3DXMATRIX	rot_x;
+		D3DXMATRIX	rot_y;
+		D3DXMATRIX	pos;
+		//
+		D3DXMatrixRotationX( &rot_x, AngleX );
+		D3DXMatrixRotationY( &rot_y, AngleY );
+		D3DXMatrixTranslation( &pos, Pos.x, Pos.y, Pos.z );
+		//
+		mtx = rot_x * rot_y * pos;
+		//
+		D3DXVECTOR3	v3;
+		D3DXVECTOR3	v2;
+		D3DXVECTOR3	v1;
+		get_vector3( mtx, 3, v3 );
+		get_vector3( mtx, 2, v2 );
+		get_vector3( mtx, 1, v1 );
+		v2 += v3;
+		//
+		D3DXMatrixLookAtLH( 
+			&ViewMtx,
+			&v3,
+			&v2,
+			&v1 );
+	}
+
 	bool
 	dx9render::frame() {
 		if ( render::frame() ) {
-			this->dx9data->d3d9device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 92, 92, 92 ), 1.0f, 0 );
-			if( SUCCEEDED( this->dx9data->d3d9device->BeginScene() ) )
+			//
+			this->dx9data->d3ddevice->SetRenderState( D3DRS_ZENABLE, TRUE );
+			this->dx9data->d3ddevice->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );
+			this->dx9data->d3ddevice->SetRenderState( D3DRS_LIGHTING, FALSE );
+			//
+			float_t const w = static_cast<float_t>( this->dx9data->d3dpp.BackBufferWidth );
+			float_t const h = static_cast<float_t>( this->dx9data->d3dpp.BackBufferHeight );
+			float_t const r = w / h;
+			float_t const fovx = D3DXToRadian( 60.f );
+			float_t const fovy = 2 * atan( tan( fovx / 2.f ) / r );
+
+			D3DXMATRIXA16 matProj;
+			D3DXMatrixPerspectiveFovLH( &matProj, fovy, r, 0.1f, 200.0f );
+			this->dx9data->d3ddevice->SetTransform( D3DTS_PROJECTION, &matProj );
+			//
+			D3DXMATRIX matView;
+			float_t const angle_x = 0.f;
+			float_t const angle_y = 0.f;
+			D3DXVECTOR3 pos( 0.f, 0.f, -2.f );
+	
+			build_viewport( angle_x, angle_y, pos, matView );
+			this->dx9data->d3ddevice->SetTransform( D3DTS_VIEW, &matView );
+			//
+			this->dx9data->d3ddevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 92, 92, 92 ), 1.0f, 0 );
+			this->dx9data->d3ddevice->SetRenderState( D3DRS_FILLMODE, ((( GetKeyState( VK_SPACE ) & 0x80 ))?(D3DFILL_WIREFRAME):(D3DFILL_SOLID)) );
+
+			if( SUCCEEDED( this->dx9data->d3ddevice->BeginScene() ) )
 			{
-				this->dx9data->d3d9device->EndScene();
+				m->render();
+				this->dx9data->d3ddevice->EndScene();
 			}
 
 			// Present the backbuffer contents to the display
-			this->dx9data->d3d9device->Present( NULL, NULL, NULL, NULL );
+			this->dx9data->d3ddevice->Present( NULL, NULL, NULL, NULL );
 			return true;
 		}
 		return false;
@@ -78,7 +142,7 @@ namespace atom { namespace zoom {
 
 	mesh_ptr
 	dx9render::create_mesh() {
-		return ( dx9mesh::create( this->get_logger(), this->get_stream() ) );
+		return ( dx9mesh::create( this->get_logger(), this->get_stream(), this->dx9data ) );
 	}
 
 

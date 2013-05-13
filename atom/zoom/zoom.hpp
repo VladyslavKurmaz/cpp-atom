@@ -29,6 +29,15 @@
 
 namespace atom { namespace zoom {
 
+	typedef int
+		int_t;
+
+	typedef unsigned int
+		uint_t;
+
+	typedef float
+		float_t;
+
 	ATOM_ZOOM_DEF_PTR( stream )
 
 	class stream {

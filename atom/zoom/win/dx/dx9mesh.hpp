@@ -15,24 +15,33 @@
 
 namespace atom { namespace zoom {
 
-	class dx9mesh : public mesh {
+	class dx9mesh : public mesh, protected dx9holder {
 
 	public:
 		///
-		static dx9mesh_ptr create( logger_ptr l, stream_ptr s ) {
-			return dx9mesh_ptr( new dx9mesh( l, s ) );
+		static dx9mesh_ptr create( logger_ptr l, stream_ptr s, dx9_ptr d ) {
+			return dx9mesh_ptr( new dx9mesh( l, s, d ) );
 		}
 		///
 		virtual ~dx9mesh();
+		///
+		virtual bool
+		build_sphere( float_t radius, uint_t slices, uint_t stacks );
+		///
+		virtual void
+		render();
 		///
 		virtual void
 		clear();
 
 	protected:
 		///
-		dx9mesh( logger_ptr l, stream_ptr s );
+		dx9mesh( logger_ptr l, stream_ptr s, dx9_ptr d );
 
 	private:
+		///
+		ID3DXMesh*
+			dxmesh;	
 	};
 
 } }
