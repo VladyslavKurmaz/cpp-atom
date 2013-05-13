@@ -21,9 +21,11 @@ namespace atom { namespace zoom {
 	class dx9render : public render {
 	public:
 		///
-		static render_ptr create( logger_ptr l, stream_ptr s, canvas_ptr c ) {
-			return render_ptr( new dx9render( l, s, c ) );
+		static dx9render_ptr create( logger_ptr l, stream_ptr s, canvas_ptr c ) {
+			return dx9render_ptr( new dx9render( l, s, c ) );
 		}
+		///
+		virtual ~dx9render();
 		///
 		virtual bool
 		init();
@@ -34,7 +36,8 @@ namespace atom { namespace zoom {
 		virtual void
 		clear();
 		///
-		virtual ~dx9render();
+		virtual mesh_ptr
+		create_mesh();
 
 	protected:
 		///

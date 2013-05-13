@@ -6,9 +6,6 @@
 |-----------------------------------------------------------------------------|
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
-| HISTORY:     2013.05.09 - initial structure                                 |
-|-----------------------------------------------------------------------------|
-| TODO:                                                                       |
 \-----------------------------------------------------------------------------/
 */
 
@@ -17,6 +14,22 @@
 #pragma once
 
 namespace atom { namespace zoom {
+
+	class mesh : public wo {
+
+	public:
+		///
+		virtual void
+		clear();
+
+	protected:
+		///
+		mesh( logger_ptr l, stream_ptr s );
+		///
+		virtual ~mesh();
+
+	private:
+	};
 
 } }
 

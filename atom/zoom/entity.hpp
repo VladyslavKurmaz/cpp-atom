@@ -29,11 +29,11 @@ namespace atom { namespace zoom {
 			typedef atom::node< LOKI_TYPELIST_2( entity2logger, entity2stream ) >
 				base_node_t;
 	public:
-		logger_ptr&
-		get_logger() { return ( get_slot<render2logger>().item() ); }
+		logger_ptr
+		get_logger() { return ( get_slot<entity2logger>().item() ); }
 		///
-		stream_ptr&
-		get_stream() { return ( get_slot<render2stream>().item() ); }
+		stream_ptr
+		get_stream() { return ( get_slot<entity2stream>().item() ); }
 
 		///
 		virtual void

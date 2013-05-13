@@ -9,52 +9,32 @@
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef ATOM_ZOOM_RENDER_HPP
-#define ATOM_ZOOM_RENDER_HPP
+#ifndef ATOM_ZOOM_DX9MESH_HPP
+#define ATOM_ZOOM_DX9MESH_HPP
 #pragma once
 
 namespace atom { namespace zoom {
 
-	typedef atom::nstorage< canvas, boost::shared_ptr, atom::narray1 > render2canvas;
+	class dx9mesh : public mesh {
 
-	class render : public entity< render > {
-		typedef entity< render >
-			base_entity_t;
 	public:
 		///
-		virtual bool
-		init() = 0;
+		static dx9mesh_ptr create( logger_ptr l, stream_ptr s ) {
+			return dx9mesh_ptr( new dx9mesh( l, s ) );
+		}
 		///
-		virtual bool
-		frame() = 0;
+		virtual ~dx9mesh();
 		///
 		virtual void
-		clear() = 0;
-		///
-		virtual mesh_ptr
-		create_mesh() = 0;
+		clear();
 
 	protected:
 		///
-		typedef boost::lock_guard< atom::lock_t >
-			guard_t;
-		atom::lock_t
-			lock;
-		///
-		///
-		canvas_ptr&
-		get_canvas() { return ( this->canvas ); }
-		///
-		render( logger_ptr l, stream_ptr s, canvas_ptr c );
-		///
-		virtual ~render();
+		dx9mesh( logger_ptr l, stream_ptr s );
 
 	private:
-		///
-		canvas_ptr
-			canvas;
 	};
 
 } }
 
-#endif//ATOM_ZOOM_RENDER_HPP
+#endif //ATOM_ZOOM_DX9MESH_HPP

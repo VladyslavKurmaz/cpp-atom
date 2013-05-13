@@ -29,11 +29,6 @@
 
 namespace atom { namespace zoom {
 
-	ATOM_ZOOM_DEF_PTR( logger )
-	ATOM_ZOOM_DEF_PTR( canvas )
-	ATOM_ZOOM_DEF_PTR( render )
-
-
 	ATOM_ZOOM_DEF_PTR( stream )
 
 	class stream {
@@ -42,11 +37,22 @@ namespace atom { namespace zoom {
 			return stream_ptr( new stream() );
 		}
 	};
+
+	struct matrix {
+	};
+
+	ATOM_ZOOM_DEF_PTR( logger )
+	ATOM_ZOOM_DEF_PTR( canvas )
+	ATOM_ZOOM_DEF_PTR( render )
+	ATOM_ZOOM_DEF_PTR( mesh )
+
 } }
 
 #include "./logger.hpp"
 #include "./entity.hpp"
+#include "./wo.hpp"
 #include "./canvas.hpp"
 #include "./render.hpp"
+#include "./mesh.hpp"
 
 #endif//ATOM_ZOOM_ZOOM_HPP

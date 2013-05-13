@@ -23,8 +23,12 @@
 
 namespace atom { namespace zoom {
 
+	ATOM_ZOOM_DEF_PTR( dx9render )
+	ATOM_ZOOM_DEF_PTR( dx9mesh )
+
 } }
 
 #include "./dx9render.hpp"
+#include "./dx9mesh.hpp"
 
 #endif //ATOM_ZOOM_WIN_DX_DX9_HPP

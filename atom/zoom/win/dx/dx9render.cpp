@@ -78,4 +78,10 @@ namespace atom { namespace zoom {
 		render::clear();
 	}
 
+	mesh_ptr
+	dx9render::create_mesh() {
+		return ( dx9mesh::create( this->get_logger(), this->get_stream() ) );
+	}
+
+
 } }
