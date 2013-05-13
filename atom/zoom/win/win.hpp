@@ -18,6 +18,17 @@
 #include "./../zoom.hpp"
 
 namespace atom { namespace zoom {
+	struct win {
+		///
+		win() : wnd( NULL ) {
+		}
+		///
+		~win() {
+		}
+		///
+		HWND
+			wnd;
+	};
 
 } }
 

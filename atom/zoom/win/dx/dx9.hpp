@@ -25,6 +25,38 @@ namespace atom { namespace zoom {
 
 	ATOM_ZOOM_DEF_PTR( dx9render )
 	ATOM_ZOOM_DEF_PTR( dx9mesh )
+	
+	class dx9 : public win {
+	public:	
+		///
+		dx9() : win(), d3d9( NULL ), d3d9device( NULL ) {
+			memset( &d3dpp, 0, sizeof( d3dpp ) );
+		}
+		///
+		~dx9() {
+		}
+		///
+		D3DPRESENT_PARAMETERS
+			d3dpp;
+		///
+		IDirect3D9*
+			d3d9;
+		///
+		IDirect3DDevice9*
+			d3d9device;
+	};
+
+	ATOM_ZOOM_DEF_PTR( dx9 )
+
+	class dx9_holder {
+	public:
+		dx9_holder( dx9_ptr d ) : dx9data( d ) {
+		}
+	protected:
+		dx9_ptr
+			dx9data;
+	};
+
 
 } }
 

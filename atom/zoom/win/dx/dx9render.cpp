@@ -4,9 +4,7 @@ namespace atom { namespace zoom {
 
 	dx9render::dx9render( logger_ptr l, stream_ptr s, canvas_ptr c ) :
 			render( l, s, c )
-		,	d3dpp()
-		,	d3d()
-		,	device()
+		,	dx9_holder( dx9_ptr( new dx9() ) )
 	{
 	}
 
@@ -18,8 +16,8 @@ namespace atom { namespace zoom {
 		guard_t l( this->lock );
 		if ( render::init() ) {
 			//
-			if ( this->d3d = d3d_t( Direct3DCreate9( D3D_SDK_VERSION ) ) ) {
-				memset( &(this->d3dpp), 0, sizeof( this->d3dpp ) );
+			if ( this->dx9data->d3d9 = Direct3DCreate9( D3D_SDK_VERSION ) ) {
+				D3DPRESENT_PARAMETERS& d3dpp = this->dx9data->d3dpp;
 				//
 				d3dpp.BackBufferWidth			=	800;
 				d3dpp.BackBufferHeight			=	600;
@@ -40,15 +38,15 @@ namespace atom { namespace zoom {
 				d3dpp.PresentationInterval		=	D3DPRESENT_INTERVAL_DEFAULT;
 				//
 				IDirect3DDevice9* d = NULL;
-				if( SUCCEEDED( this->d3d->CreateDevice(
+				if( SUCCEEDED( this->dx9data->d3d9->CreateDevice(
 											D3DADAPTER_DEFAULT,
 											D3DDEVTYPE_HAL,
 											d3dpp.hDeviceWindow,
 											D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-											&this->d3dpp,
+											&d3dpp,
 											&d ) ) )
 				{
-					this->device = device_t( d );
+					this->dx9data->d3d9device = d;
 					return true;
 				}
 			}
@@ -59,14 +57,14 @@ namespace atom { namespace zoom {
 	bool
 	dx9render::frame() {
 		if ( render::frame() ) {
-			this->device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 92, 92, 92 ), 1.0f, 0 );
-			if( SUCCEEDED( this->device->BeginScene() ) )
+			this->dx9data->d3d9device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 92, 92, 92 ), 1.0f, 0 );
+			if( SUCCEEDED( this->dx9data->d3d9device->BeginScene() ) )
 			{
-				this->device->EndScene();
+				this->dx9data->d3d9device->EndScene();
 			}
 
 			// Present the backbuffer contents to the display
-			this->device->Present( NULL, NULL, NULL, NULL );
+			this->dx9data->d3d9device->Present( NULL, NULL, NULL, NULL );
 			return true;
 		}
 		return false;
