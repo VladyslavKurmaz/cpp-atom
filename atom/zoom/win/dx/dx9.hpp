@@ -25,6 +25,7 @@ namespace atom { namespace zoom {
 
 	ATOM_ZOOM_DEF_PTR( dx9render )
 	ATOM_ZOOM_DEF_PTR( dx9mesh )
+	ATOM_ZOOM_DEF_PTR( dx9texture )
 	
 	class dx9 : public win {
 	public:	
@@ -68,5 +69,6 @@ namespace atom { namespace zoom {
 
 #include "./dx9render.hpp"
 #include "./dx9mesh.hpp"
+#include "./dx9texture.hpp"
 
 #endif //ATOM_ZOOM_WIN_DX_DX9_HPP

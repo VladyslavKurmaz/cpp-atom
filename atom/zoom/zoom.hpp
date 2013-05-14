@@ -10,6 +10,7 @@
 |-----------------------------------------------------------------------------|
 | TODO:                                                                       |
 \-----------------------------------------------------------------------------/
+remove stream as required constructor parameter
 */
 
 #ifndef ATOM_ZOOM_ZOOM_HPP
@@ -38,6 +39,9 @@ namespace atom { namespace zoom {
 	typedef float
 		float_t;
 
+	typedef std::string
+		string_t;
+
 	ATOM_ZOOM_DEF_PTR( stream )
 
 	class stream {
@@ -63,5 +67,6 @@ namespace atom { namespace zoom {
 #include "./canvas.hpp"
 #include "./render.hpp"
 #include "./mesh.hpp"
+#include "./texture.hpp"
 
 #endif//ATOM_ZOOM_ZOOM_HPP
