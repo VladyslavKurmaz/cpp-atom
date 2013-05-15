@@ -14,9 +14,9 @@ namespace atom { namespace zoom {
 	}
 
 	bool
-	dx9render::init() {
+	dx9render::init( camera_ptr c ) {
 		guard_t l( this->lock );
-		if ( render::init() ) {
+		if ( render::init( c ) ) {
 			//
 			if ( this->dx9data->d3d = Direct3DCreate9( D3D_SDK_VERSION ) ) {
 				D3DPRESENT_PARAMETERS& d3dpp = this->dx9data->d3dpp;

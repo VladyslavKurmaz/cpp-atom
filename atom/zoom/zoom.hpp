@@ -64,6 +64,7 @@ namespace atom { namespace zoom {
 	ATOM_ZOOM_DEF_PTR( render )
 	ATOM_ZOOM_DEF_PTR( mesh )
 	ATOM_ZOOM_DEF_PTR( texture )
+	ATOM_ZOOM_DEF_PTR( camera )
 
 } }
 
@@ -74,5 +75,6 @@ namespace atom { namespace zoom {
 #include "./render.hpp"
 #include "./mesh.hpp"
 #include "./texture.hpp"
+#include "./camera.hpp"
 
 #endif//ATOM_ZOOM_ZOOM_HPP

@@ -6,59 +6,40 @@
 |-----------------------------------------------------------------------------|
 | DESCRIPTION:                                                                |
 | AUTHOR:      Vladislav Kurmaz                                               |
+| HISTORY:     2013.05.15 - initial structure                                 |
+|-----------------------------------------------------------------------------|
+| TODO:                                                                       |
 \-----------------------------------------------------------------------------/
 */
 
-#ifndef ATOM_ZOOM_RENDER_HPP
-#define ATOM_ZOOM_RENDER_HPP
+#ifndef ATOM_ZOOM_CAMERA_HPP
+#define ATOM_ZOOM_CAMERA_HPP
 #pragma once
 
 namespace atom { namespace zoom {
 
-	class render : public entity< render > {
-		typedef entity< render >
-			base_entity_t;
+	class camera : public entity< camera > {
+
 	public:
 		///
-		virtual bool
-		init( camera_ptr c ) = 0;
+		static camera_ptr create( logger_ptr l, stream_ptr s ) {
+			return camera_ptr( new camera( l, s ) );
+		}
 		///
-		virtual bool
-		frame() = 0;
+		virtual ~camera();
+		///
+		void input( input_ptr i );
 		///
 		virtual void
-		clear() = 0;
-		///
-		virtual mesh_ptr
-		create_mesh() = 0;
-		///
-		virtual texture_ptr
-		create_texture() = 0;
+		clear();
 
 	protected:
 		///
-		typedef boost::lock_guard< atom::lock_t >
-			guard_t;
-		atom::lock_t
-			lock;
-		///
-		///
-		canvas_ptr&
-		get_canvas() { return ( this->canvas ); }
-		///
-		render( logger_ptr l, stream_ptr s, canvas_ptr c );
-		///
-		virtual ~render();
+		camera( logger_ptr l, stream_ptr s );
 
 	private:
-		///
-		canvas_ptr
-			canvas;
-		///
-		camera_ptr
-			camera;
 	};
 
 } }
 
-#endif//ATOM_ZOOM_RENDER_HPP
+#endif //ATOM_ZOOM_CAMERA_HPP

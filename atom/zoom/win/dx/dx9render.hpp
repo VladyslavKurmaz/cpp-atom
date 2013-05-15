@@ -28,7 +28,7 @@ namespace atom { namespace zoom {
 		virtual ~dx9render();
 		///
 		virtual bool
-		init();
+		init( camera_ptr c );
 		///
 		virtual bool
 		frame();

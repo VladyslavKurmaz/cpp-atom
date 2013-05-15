@@ -27,7 +27,7 @@ namespace atom { namespace zoom {
 	public:
 		///
 		static logger_ptr create() {
-			return logger_ptr( new logger );
+			return logger_ptr( new logger() );
 		}
 
 		~logger() {
