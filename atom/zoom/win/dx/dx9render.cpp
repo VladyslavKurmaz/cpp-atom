@@ -6,6 +6,7 @@ namespace atom { namespace zoom {
 			render( l, s, c )
 		,	dx9holder( dx9_ptr( new dx9() ) )
 		,	m()
+		,	t()
 	{
 	}
 
@@ -50,6 +51,9 @@ namespace atom { namespace zoom {
 					this->dx9data->d3ddevice = d;
 					m = this->create_mesh();
 					m->build_sphere( 1.f, 100, 100 );
+
+					t = this->create_texture();
+					t->build( string_t( "D:\\work\\env\\bmc\\env\\centers\\src\\data\\14-contour.dds" ) );
 					return true;
 				}
 			}
@@ -145,5 +149,9 @@ namespace atom { namespace zoom {
 		return ( dx9mesh::create( this->get_logger(), this->get_stream(), this->dx9data ) );
 	}
 
+	texture_ptr
+	dx9render::create_texture() {
+		return ( dx9texture::create( this->get_logger(), this->get_stream(), this->dx9data ) );
+	}
 
 } }

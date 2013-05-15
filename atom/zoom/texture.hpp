@@ -17,6 +17,8 @@ namespace atom { namespace zoom {
 	class texture : public entity< texture > {
 
 	public:
+		virtual bool
+		build( string_t const& s ) = 0;
 		///
 		virtual void
 		clear() = 0 {

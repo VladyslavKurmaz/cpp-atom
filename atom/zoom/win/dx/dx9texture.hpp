@@ -15,8 +15,9 @@
 
 namespace atom { namespace zoom {
 
-	class dx9texture : public texture, protected dx9holder {
-
+	class dx9texture :
+		public texture,
+		protected dx9holder {
 	public:
 		///
 		static dx9texture_ptr create( logger_ptr l, stream_ptr s, dx9_ptr d ) {
@@ -27,9 +28,6 @@ namespace atom { namespace zoom {
 		///
 		virtual bool
 		build( string_t const& s );
-		///
-		virtual void
-		render();
 		///
 		virtual void
 		clear();

@@ -58,6 +58,7 @@ namespace atom { namespace zoom {
 	ATOM_ZOOM_DEF_PTR( canvas )
 	ATOM_ZOOM_DEF_PTR( render )
 	ATOM_ZOOM_DEF_PTR( mesh )
+	ATOM_ZOOM_DEF_PTR( texture )
 
 } }
 

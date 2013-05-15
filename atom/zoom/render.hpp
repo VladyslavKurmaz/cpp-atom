@@ -33,6 +33,9 @@ namespace atom { namespace zoom {
 		///
 		virtual mesh_ptr
 		create_mesh() = 0;
+		///
+		virtual texture_ptr
+		create_texture() = 0;
 
 	protected:
 		///
