@@ -20,7 +20,9 @@ namespace atom { namespace zoom {
 
 	typedef atom::nstorage< stream, boost::shared_ptr, atom::narray1 > canvas2stream;
 
-	class canvas : public entity< canvas > {
+	class canvas : 
+					public entity< canvas >,
+					public input {
 
 			typedef entity< canvas >
 				base_entity_t;
@@ -34,7 +36,7 @@ namespace atom { namespace zoom {
 		get_handle() = 0;
 		///
 		virtual void
-		run( boost::function< bool() > ) = 0;
+		run( boost::function< bool() >, boost::function< void( input_ptr ) > ) = 0;
 		///
 		virtual void
 		clear() = 0;

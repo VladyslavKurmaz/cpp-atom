@@ -49,7 +49,7 @@ namespace atom { namespace zoom {
 		get_handle();
 		///
 		virtual void
-		run( boost::function< bool() > tick );
+		run( boost::function< bool() > tick, boost::function< void( input_ptr ) > handler );
 		///
 		virtual void
 		clear();
@@ -73,6 +73,9 @@ namespace atom { namespace zoom {
 		onclose( HWND hWnd );
 
 	private:
+		///
+		boost::function< void( input_ptr ) >
+			input_handler;
 	};
 
 } }

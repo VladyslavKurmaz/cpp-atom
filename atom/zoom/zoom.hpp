@@ -51,6 +51,11 @@ namespace atom { namespace zoom {
 		}
 	};
 
+	ATOM_ZOOM_DEF_PTR( input )
+
+	class input {
+	};
+
 	struct matrix {
 	};
 

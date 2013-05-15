@@ -4,7 +4,8 @@ namespace atom { namespace zoom {
 
 	win_canvas::win_canvas( logger_ptr l, stream_ptr s ) : 
 			canvas( l, s )
-		,	wwindow( *this, INITLIST_4( &win_canvas::onlbuttondown, &win_canvas::onlbuttonup, &win_canvas::onmousemove, &win_canvas::onclose ) ) {
+		,	wwindow( *this, INITLIST_4( &win_canvas::onlbuttondown, &win_canvas::onlbuttonup, &win_canvas::onmousemove, &win_canvas::onclose ) )
+		,	input_handler() {
 	}
 
 	win_canvas::~win_canvas(){
@@ -65,8 +66,10 @@ namespace atom { namespace zoom {
 	}
 
 	void
-	win_canvas::run( boost::function< bool() > tick ) {
+	win_canvas::run( boost::function< bool() > tick, boost::function< void( input_ptr ) > handler ) {
+		this->input_handler = handler;
 		wwindow_base_t::run( tick, 0 );
+		this->input_handler = boost::function< void( input_ptr ) >();
 	}
 		
 	void
@@ -88,12 +91,14 @@ namespace atom { namespace zoom {
 		//mouse_dy = 0;
 		////
 		//SetCursorPos( c_pt.x, c_pt.y );
+		this->input_handler( input_ptr( this->shared_from_this() ) );
 	}
 
 	void
 	win_canvas::onlbuttonup(HWND hWnd, int x, int y, UINT keyFlags){
 		//if ( GetCapture() == hWnd )
 		//	ReleaseCapture();
+		this->input_handler( input_ptr( this->shared_from_this() ) );
 	}
 
 	void
@@ -114,6 +119,7 @@ namespace atom { namespace zoom {
 		//		SetCursorPos( c_pt.x, c_pt.y );
 		//	SetCursor( NULL );
 		//}
+		this->input_handler( input_ptr( this->shared_from_this() ) );
 	}
 
 	void
