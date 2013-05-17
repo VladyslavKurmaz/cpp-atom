@@ -24,6 +24,7 @@ namespace atom { namespace zoom {
 
 	void
 	render::clear() {
+		this->camera->clear();
 		this->camera.reset();
 		this->canvas.reset();
 		base_entity_t::clear();

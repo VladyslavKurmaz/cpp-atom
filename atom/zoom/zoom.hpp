@@ -60,14 +60,17 @@ namespace atom { namespace zoom {
 	};
 
 	ATOM_ZOOM_DEF_PTR( logger )
+	ATOM_ZOOM_DEF_PTR( context )
 	ATOM_ZOOM_DEF_PTR( canvas )
 	ATOM_ZOOM_DEF_PTR( render )
 	ATOM_ZOOM_DEF_PTR( mesh )
 	ATOM_ZOOM_DEF_PTR( texture )
 	ATOM_ZOOM_DEF_PTR( camera )
 
+
 } }
 
+#include "./context.hpp"
 #include "./logger.hpp"
 #include "./entity.hpp"
 #include "./wo.hpp"

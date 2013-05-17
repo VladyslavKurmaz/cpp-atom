@@ -18,20 +18,12 @@
 #include "./../zoom.hpp"
 
 namespace atom { namespace zoom {
-	struct win {
-		///
-		win() : wnd( NULL ) {
-		}
-		///
-		~win() {
-		}
-		///
-		HWND
-			wnd;
-	};
+
+	ATOM_ZOOM_DEF_PTR( wincontext )
 
 } }
 
+#include "./wincontext.hpp"
 #include "./win_canvas.hpp"
 
 #endif //ATOM_ZOOM_WIN_WIN_HPP

@@ -27,48 +27,12 @@ namespace atom { namespace zoom {
 	ATOM_ZOOM_DEF_PTR( dx9mesh )
 	ATOM_ZOOM_DEF_PTR( dx9texture )
 	
-	class dx9 : public win {
-	public:	
-		///
-		dx9() : win(), d3dpp(), d3d( NULL ), d3ddevice( NULL ) {
-			memset( &d3dpp, 0, sizeof( d3dpp ) );
-		}
-		///
-		~dx9() {
-			if ( d3ddevice != NULL ) {
-				d3ddevice->Release();
-			}
-			if ( d3d != NULL ) {
-				d3d->Release();
-			}
-		}
-		///
-		D3DPRESENT_PARAMETERS
-			d3dpp;
-		///
-		IDirect3D9*
-			d3d;
-		///
-		IDirect3DDevice9*
-			d3ddevice;
-	};
-
-	ATOM_ZOOM_DEF_PTR( dx9 )
-
-	class dx9holder {
-	public:
-		dx9holder( dx9_ptr d ) : dx9data( d ) {
-		}
-	protected:
-		dx9_ptr
-			dx9data;
-	};
-
 
 } }
 
+#include "./dx9wincontext.hpp"
 #include "./dx9render.hpp"
 #include "./dx9mesh.hpp"
 #include "./dx9texture.hpp"
 
-#endif //ATOM_ZOOM_WIN_DX_DX9_HPP
+#endif // ATOM_ZOOM_WIN_DX_DX9_HPP

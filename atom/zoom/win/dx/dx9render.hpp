@@ -48,8 +48,8 @@ namespace atom { namespace zoom {
 
 	private:
 		///
-		dx9_ptr
-			dx9platform;
+		dx9wincontext_ptr
+			context;
 		///
 		mesh_ptr
 			m;

@@ -4,7 +4,7 @@ namespace atom { namespace zoom {
 
 	dx9render::dx9render( logger_ptr l, stream_ptr s, canvas_ptr c ) :
 			render( l, s, c )
-		,	dx9holder( dx9_ptr( new dx9() ) )
+		,	dx9holder( dx9wincontext_ptr ( new dx9wincontext() ) )
 		,	m()
 		,	t()
 	{

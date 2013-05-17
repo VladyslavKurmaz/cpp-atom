@@ -5,45 +5,27 @@
 | vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
 | DESCRIPTION:                                                                |
-| AUTHOR:      Vladislav Kurmaz                                               |
 \-----------------------------------------------------------------------------/
 */
-
-#ifndef ATOM_ZOOM_DX9MESH_HPP
-#define ATOM_ZOOM_DX9MESH_HPP
+#ifndef ATOM_ZOOM_WINCONTEXT_HPP
+#define ATOM_ZOOM_WINCONTEXT_HPP
 #pragma once
 
 namespace atom { namespace zoom {
 
-	class dx9mesh : public mesh, protected dx9holder {
-
+	class wincontext : public context {
 	public:
 		///
-		static dx9mesh_ptr create( logger_ptr l, stream_ptr s, dx9wincontext_ptr c ) {
-			return dx9mesh_ptr( new dx9mesh( l, s, c ) );
+		wincontext() : context(), wnd( NULL ) {
 		}
 		///
-		virtual ~dx9mesh();
+		~wincontext() {
+		}
 		///
-		virtual bool
-		build_sphere( float_t radius, uint_t slices, uint_t stacks );
-		///
-		virtual void
-		render();
-		///
-		virtual void
-		clear();
-
-	protected:
-		///
-		dx9mesh( logger_ptr l, stream_ptr s, dx9wincontext_ptr c );
-
-	private:
-		///
-		ID3DXMesh*
-			dxmesh;	
+		HWND
+			wnd;
 	};
 
 } }
 
-#endif //ATOM_ZOOM_DX9MESH_HPP
+#endif //ATOM_ZOOM_WINCONTEXT_HPP
