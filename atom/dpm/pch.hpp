@@ -39,7 +39,7 @@ typedef std::basic_string< TCHAR >
 static atom::po::id_t const po_none					=	0;
 // help
 static atom::po::id_t const po_desc1				=	po_none + 1;
-// interactive, home
+// interactive, home, dpmdir
 static atom::po::id_t const po_desc2				=	po_desc1 + 1;
 // stages, components, recursive, tree
 static atom::po::id_t const po_desc3				=	po_desc2 + 1;
@@ -53,13 +53,10 @@ static atom::po::id_t const po_desc_console			=	po_desc_cmdline + 1;
 static atom::po::id_t const po_help					=	po_desc_console + 1;
 static atom::po::id_t const po_interactive			=	po_help + 1;
 static atom::po::id_t const po_home					=	po_interactive + 1;
-static atom::po::id_t const po_stages				=	po_home + 1;
+static atom::po::id_t const po_dpmdir				=	po_home + 1;
+static atom::po::id_t const po_stages				=	po_dpmdir + 1;
 static atom::po::id_t const po_components			=	po_stages + 1;
 static atom::po::id_t const po_recursive			=	po_components + 1;
 static atom::po::id_t const po_tree					=	po_recursive + 1;
 static atom::po::id_t const po_switch				=	po_tree + 1;
 static atom::po::id_t const po_exit					=	po_switch + 1;
-
-
-
-

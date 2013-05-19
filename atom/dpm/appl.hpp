@@ -52,10 +52,4 @@ private:
 	///
 	atom::po
 		po;
-	///
-	bool
-		interactive;
-	///
-	string_t
-		home;
 };

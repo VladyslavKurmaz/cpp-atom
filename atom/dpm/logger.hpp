@@ -6,10 +6,8 @@ class logger :
 {
 public:
 	///
-	typedef boost::shared_ptr<logger> shared_ptr;
-	///
-	static shared_ptr create() {
-		return shared_ptr( new logger );
+	static logger_ptr create() {
+		return logger_ptr( new logger );
 	}
 
 	~logger() {

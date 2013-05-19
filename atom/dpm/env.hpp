@@ -13,9 +13,16 @@ class env :
 		base_node_t;
 
 public:
+	struct names {
+		string_t name;
+		string_t root;
+		string_t dpm;
+		string_t dl;
+		string_t env;
+	};
 	///
-	static env_ptr create( logger_ptr l, appl_ptr a, env_ptr e ) {
-		return env_ptr( new env( l, a, e ) );
+	static env_ptr create( logger_ptr l, appl_ptr a, env_ptr e, names const& n ) {
+		return env_ptr( new env( l, a, e, n ) );
 	}
 	///
 	~env();
@@ -23,10 +30,20 @@ public:
 protected:
 	//
 	logger_ptr get_logger() {
-		return ( get_value( boost::mpl::identity< env2logger >() ).item() );
+		return ( get_slot<env2logger>().item() );
 	}
 
 private:
+	string_t
+		pname;
+	string_t
+		proot;
+	string_t
+		pdpm;
+	string_t
+		pdl;
+	string_t
+		penv;
 	///
-	env( logger_ptr l, appl_ptr a, env_ptr e );
+	env( logger_ptr l, appl_ptr a, env_ptr e, names const& n );
 };

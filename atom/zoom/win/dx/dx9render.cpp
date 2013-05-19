@@ -53,7 +53,7 @@ namespace atom { namespace zoom {
 					m->build_sphere( 1.f, 100, 100 );
 
 					t = this->create_texture();
-					t->build( string_t( "D:\\work\\env\\bmc\\env\\centers\\src\\data\\14-contour.dds" ) );
+					t->build( string_t( "C:\\work\\env\\bmc\\env\\centers\\src\\data\\14-contour.dds" ) );
 					return true;
 				}
 			}

@@ -4,12 +4,11 @@
 #include "./appl.hpp"
 
 appl::appl( logger_ptr l ) : 
-		po()
-	,	interactive( false )
-	,	home() {
+		po() {
 	atom::mount<appl2logger>( this, l );
 	//
-	string_t h( getenv( "DPM_HOME" ) );
+	char const* root = getenv( "DPM_HOME" ); 
+	string_t h( ( root !=NULL )?( root ):( "" ) );
 	//
 	atom::po::options_description_t& desc1 = this->po.add_desc( po_desc1, "" );
 	this->po.
@@ -19,7 +18,9 @@ appl::appl( logger_ptr l ) :
 	this->po.
 		add_option( po_interactive,				"interactive,i",									"(i)nteractive mode", desc2 ).
 		add_option( po_home,					"home,o",
-			boost::program_options::value<std::string>()->default_value( h ),						"define dpm h(o)me directory,override %DPM_HOME% env var", desc2 );
+			boost::program_options::value<std::string>()->default_value( h ),						"define dpm h(o)me directory,override %DPM_HOME% env var", desc2 ).
+		add_option( po_dpmdir,					"dir,d",
+			boost::program_options::value<std::string>()->default_value( ".dpm" ),					"define dpm system (d)ir name", desc2 );
 	
 	atom::po::options_description_t& desc3 = this->po.add_desc( po_desc3, "" );
 	this->po.
@@ -32,7 +33,7 @@ appl::appl( logger_ptr l ) :
 	//
 	atom::po::options_description_t& desc4 = this->po.add_desc( po_desc4, "" );
 	this->po.
-		add_option( po_switch,					"switch,s",
+		add_option( po_switch,					"switch,w",
 			boost::program_options::value<std::string>()->default_value( "" ),						"s(w)itch to new environment", desc4 ).
 		add_option( po_exit,					"exit,e",											"(e)xit from interactive mode", desc4 );
 	//
@@ -51,7 +52,6 @@ appl::init( int argc, char const * const argv[] ) {
 	atom::po::options_description_t& desc = this->po.get_desc( po_desc_cmdline );
 	try {
 		this->po.parse_arg( argc, argv, desc, true );
-		this->interactive = this->po.count( po_interactive ) > 0;
 		this->process_command();
 		//
 	} catch( std::exception& exc ) {
@@ -65,9 +65,10 @@ void
 appl::run( std::ostream& os, std::istream& is ) {
 	atom::po::options_description_t const& desc = this->po.get_desc( po_desc_console );
 	bool l = true;
-	while( l && this->interactive ) {
+	bool const i = ( this->po.count( po_interactive ) > 0 );
+	while( l && i ) {
 		std::string s;
-		os << "dpm [" << this->home << "] > ";
+		os << "dpm [" << this->po.as< string_t >( po_home ) << "] > ";
 		std::getline( is, s );
 		//
 		try {
@@ -86,7 +87,49 @@ appl::clear(){
 }
 
 void
-appl::scan( ) {
+appl::scan() {
+	//
+	struct _ {
+		static env_ptr find_env( logger_ptr l, appl_ptr a, env_ptr e, env::names const& n ) {
+			env_ptr result;
+			//
+			WIN32_FIND_DATA fdt;
+			string_t s = n.root + n.dpm;
+			HANDLE hf = FindFirstFile( s.c_str(), &fdt );
+			if ( hf != INVALID_HANDLE_VALUE ) {
+				if ( fdt.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
+					result = env::create( l, a, e, n );
+				}
+				FindClose( hf );
+			}
+			// scan subfolders
+			if ( result ) {
+				WIN32_FIND_DATA fdt;
+				string_t s = n.root + n.env + string_t( "\\*" );
+				HANDLE hf = FindFirstFile( s.c_str(), &fdt );
+				if ( hf != INVALID_HANDLE_VALUE ) {
+					do {
+						if ( ( fdt.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) && strcmp( fdt.cFileName, "." ) && strcmp( fdt.cFileName, ".." ) ) {
+							env::names nn = n;
+							nn.root += n.env + string_t( "\\" ) + string_t( fdt.cFileName ) + string_t( "\\" );
+							nn.name += string_t( fdt.cFileName );
+							find_env( l, a, result, nn );
+						}
+					} while( FindNextFile( hf, &fdt ) );
+					FindClose( hf );
+				}
+			}
+
+			return ( result );
+		}
+	};
+	env::names n;
+	n.name	=	"/";
+	n.root	=	this->po.as< string_t >( po_home );
+	n.dpm	=	this->po.as< string_t >( po_dpmdir );
+	n.dl	=	"dl";
+	n.env	=	"env";
+	atom::mount<appl2env>( this, _::find_env( this->get_logger(), this->shared_from_this(), env_ptr(), n ) );
 }
 
 bool
@@ -97,7 +140,6 @@ appl::process_command() {
 	//
 	if ( this->po.count( po_home ) ) {
 		// rescan dpm structure
-		this->home = this->po.as< string_t >( po_home );
 		this->scan();
 	}
 	//
