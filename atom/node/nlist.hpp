@@ -51,7 +51,9 @@ namespace atom {
 			base_type::const_iterator it 	= base_type::begin();
 			base_type::const_iterator eit 	= base_type::end();
 			for( ; it != eit; ++it ) {
-				pred( (*it) );
+				if ( !pred( (*it) ) ) {
+					break;
+				}
 			}
 		}
 		///

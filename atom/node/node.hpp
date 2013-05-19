@@ -66,7 +66,7 @@ namespace atom {
 	//
 	//-------------------------------------------------------------------------
 	template < class L, size_t I = 0 >
-	class node : protected scope< L, I >
+	class node : public scope< L, I >
 	{
 	protected:
 		//---------------------------------------------------------------------
@@ -167,5 +167,18 @@ namespace atom {
 	template < class T >
 	void clear( T & p ) {
 		if ( p ) { p->clear(); } }
+	/// recursive cleare node via smart pointer
+	template < class U, class P, class T >
+	void clear_r( T & p ) {
+		if ( p ) { 
+			struct _ {
+				static bool __( U u ) {
+					u->clear();
+					return true;
+				};
+			};
+			p->get_slot<P>().for_each( boost::bind( _::__, _1 ) );
+		}
+	}
 }
 #endif//ATOM_NODE_NODE_HPP

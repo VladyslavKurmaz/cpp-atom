@@ -4,7 +4,9 @@
 #include "./appl.hpp"
 
 appl::appl( logger_ptr l ) : 
-		po() {
+		po()
+	,	home()
+	,	cenv() {
 	atom::mount<appl2logger>( this, l );
 	//
 	char const* root = getenv( "DPM_HOME" ); 
@@ -52,6 +54,10 @@ appl::init( int argc, char const * const argv[] ) {
 	atom::po::options_description_t& desc = this->po.get_desc( po_desc_cmdline );
 	try {
 		this->po.parse_arg( argc, argv, desc, true );
+		this->home = this->po.as< string_t >( po_home );
+		// rescan dpm structure
+		this->scan();
+		//
 		this->process_command();
 		//
 	} catch( std::exception& exc ) {
@@ -68,7 +74,7 @@ appl::run( std::ostream& os, std::istream& is ) {
 	bool const i = ( this->po.count( po_interactive ) > 0 );
 	while( l && i ) {
 		std::string s;
-		os << "dpm [" << this->po.as< string_t >( po_home ) << "] > ";
+		os << "dpm [" << this->cenv->get_caption() << "] > ";
 		std::getline( is, s );
 		//
 		try {
@@ -82,6 +88,7 @@ appl::run( std::ostream& os, std::istream& is ) {
 
 void
 appl::clear(){
+	this->cenv.reset();
 	atom::clear( this->get_env() );
 	base_node_t::clear();
 }
@@ -105,14 +112,14 @@ appl::scan() {
 			// scan subfolders
 			if ( result ) {
 				WIN32_FIND_DATA fdt;
-				string_t s = n.root + n.env + string_t( "\\*" );
+				string_t s = n.root + n.env + string_t( bslash ) + string_t( "*" );
 				HANDLE hf = FindFirstFile( s.c_str(), &fdt );
 				if ( hf != INVALID_HANDLE_VALUE ) {
 					do {
 						if ( ( fdt.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) && strcmp( fdt.cFileName, "." ) && strcmp( fdt.cFileName, ".." ) ) {
 							env::names nn = n;
-							nn.root += n.env + string_t( "\\" ) + string_t( fdt.cFileName ) + string_t( "\\" );
-							nn.name += string_t( fdt.cFileName );
+							nn.root += n.env + string_t( bslash ) + string_t( fdt.cFileName ) + string_t( bslash );
+							nn.name += ( ( nn.name == string_t( fslash ) )?( string_t() ):( string_t( fslash ) ) ) + string_t( fdt.cFileName );
 							find_env( l, a, result, nn );
 						}
 					} while( FindNextFile( hf, &fdt ) );
@@ -124,12 +131,13 @@ appl::scan() {
 		}
 	};
 	env::names n;
-	n.name	=	"/";
-	n.root	=	this->po.as< string_t >( po_home );
+	n.name	=	string_t( fslash );
+	n.root	=	this->home;
 	n.dpm	=	this->po.as< string_t >( po_dpmdir );
 	n.dl	=	"dl";
 	n.env	=	"env";
-	atom::mount<appl2env>( this, _::find_env( this->get_logger(), this->shared_from_this(), env_ptr(), n ) );
+	this->cenv = _::find_env( this->get_logger(), this->shared_from_this(), env_ptr(), n );
+	atom::mount<appl2env>( this, this->cenv );
 }
 
 bool
@@ -138,16 +146,16 @@ appl::process_command() {
 	if ( po.count( po_help ) )
 		throw std::exception( "dpm command line parameters:" );
 	//
-	if ( this->po.count( po_home ) ) {
-		// rescan dpm structure
-		this->scan();
-	}
 	//
 	string_t s = this->po.as< string_t >( po_stages );
 	string_t c = this->po.as< string_t >( po_components );
 	if ( s.length() && c.length() ) {
-		// 
-		*(this->get_logger()) << s << std::endl << c << std::endl;
+	} else if ( po.count( po_tree ) ) {
+		std::cout << std::endl << "environments' structure:" << std::endl << std::endl;
+		this->get_env()->print( std::cout, string_t() );
+		std::cout << std::endl << std::endl;
+	} else if ( po.count( po_switch ) ) {
+		this->get_env()->find( this->po.as< string_t >( po_switch ), this->cenv );
 	}
 	//
 	return ( this->po.count( po_exit ) == 0 );

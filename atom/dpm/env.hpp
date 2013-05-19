@@ -22,10 +22,34 @@ public:
 	};
 	///
 	static env_ptr create( logger_ptr l, appl_ptr a, env_ptr e, names const& n ) {
-		return env_ptr( new env( l, a, e, n ) );
+		env_ptr result = env_ptr( new env( l, a, n ) );
+		if ( e ) {
+			atom::mount<env2env>( result, e );
+			atom::mount<env2envs>( e, result );
+		}
+		return result;
 	}
 	///
 	~env();
+	///
+	void
+	clear();
+	///
+	string_t
+	get_name() const {
+		return ( this->pname );
+	}
+	///
+	string_t
+	get_caption() const {
+		return ( this->get_name() );
+	}
+	///
+	void
+	print( std::ostream& os, string_t const& offs );
+	///
+	bool
+	find( string_t const& n, env_ptr& ce );
 
 protected:
 	//
@@ -45,5 +69,5 @@ private:
 	string_t
 		penv;
 	///
-	env( logger_ptr l, appl_ptr a, env_ptr e, names const& n );
+	env( logger_ptr l, appl_ptr a, names const& n );
 };

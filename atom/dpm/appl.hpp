@@ -52,4 +52,10 @@ private:
 	///
 	atom::po
 		po;
+	///
+	string_t
+		home;
+	///
+	env_ptr
+		cenv;
 };

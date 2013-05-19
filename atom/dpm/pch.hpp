@@ -60,3 +60,6 @@ static atom::po::id_t const po_recursive			=	po_components + 1;
 static atom::po::id_t const po_tree					=	po_recursive + 1;
 static atom::po::id_t const po_switch				=	po_tree + 1;
 static atom::po::id_t const po_exit					=	po_switch + 1;
+
+static char const* fslash = "/";
+static char const* bslash = "\\";
