@@ -22,8 +22,8 @@ namespace atom { namespace zoom {
 
 	public:
 		///
-		static camera_ptr create( logger_ptr l, stream_ptr s ) {
-			return camera_ptr( new camera( l, s ) );
+		static camera_ptr create( logger_ptr l ) {
+			return camera_ptr( new camera( l ) );
 		}
 		///
 		virtual ~camera();
@@ -35,7 +35,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		camera( logger_ptr l, stream_ptr s );
+		camera( logger_ptr l );
 
 	private:
 	};

@@ -2,8 +2,8 @@
 
 namespace atom { namespace zoom {
 
-	dx9render::dx9render( logger_ptr l, stream_ptr s, canvas_ptr c ) :
-			render( l, s, c )
+	dx9render::dx9render( logger_ptr l, canvas_ptr c ) :
+			render( l, c )
 		,	dx9holder( dx9wincontext_ptr ( new dx9wincontext() ) )
 		,	m()
 		,	t()
@@ -113,7 +113,7 @@ namespace atom { namespace zoom {
 			D3DXMATRIXA16 matProj;
 			D3DXMatrixPerspectiveFovLH( &matProj, fovy, r, 0.1f, 200.0f );
 			this->dx9data->d3ddevice->SetTransform( D3DTS_PROJECTION, &matProj );
-			//
+			//                           
 			D3DXMATRIX matView;
 			float_t const angle_x = 0.f;
 			float_t const angle_y = 0.f;
@@ -146,12 +146,12 @@ namespace atom { namespace zoom {
 
 	mesh_ptr
 	dx9render::create_mesh() {
-		return ( dx9mesh::create( this->get_logger(), this->get_stream(), this->dx9data ) );
+		return ( dx9mesh::create( this->get_logger(), this->dx9data ) );
 	}
 
 	texture_ptr
 	dx9render::create_texture() {
-		return ( dx9texture::create( this->get_logger(), this->get_stream(), this->dx9data ) );
+		return ( dx9texture::create( this->get_logger(), this->dx9data ) );
 	}
 
 } }

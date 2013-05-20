@@ -1,8 +1,8 @@
 
 namespace atom { namespace zoom {
 
-	render::render( logger_ptr l, stream_ptr s, canvas_ptr c ) :
-			base_entity_t( l, s )
+	render::render( logger_ptr l, canvas_ptr c ) :
+			base_entity_t( l )
 		,	lock()
 		,	canvas( c )
 		,	camera() {
@@ -25,8 +25,7 @@ namespace atom { namespace zoom {
 	void
 	render::clear() {
 		this->camera->clear();
-		this->camera.reset();
-		this->canvas.reset();
+		this->canvas->clear();
 		base_entity_t::clear();
 	}
 

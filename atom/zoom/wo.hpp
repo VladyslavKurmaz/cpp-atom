@@ -37,7 +37,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		wo( logger_ptr l, stream_ptr s ) : entity< wo >( l, s ) {
+		wo( logger_ptr l ) : entity< wo >( l ) {
 		}
 		///
 		virtual ~wo() {

@@ -43,9 +43,8 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		entity( logger_ptr l, stream_ptr s ) {
+		entity( logger_ptr l ) {
 			atom::mount<entity2logger>( this, l );
-			atom::mount<entity2stream>( this, s );
 		}
 		///
 		virtual ~entity() = 0 {

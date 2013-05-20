@@ -1,8 +1,8 @@
 
 namespace atom { namespace zoom {
 
-	dx9mesh::dx9mesh( logger_ptr l, stream_ptr s, dx9wincontext_ptr c ) : 
-			mesh( l, s )
+	dx9mesh::dx9mesh( logger_ptr l, dx9wincontext_ptr c ) : 
+			mesh( l )
 		,	dx9holder( c )
 		,	dxmesh( NULL ) {
 	}

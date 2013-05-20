@@ -27,7 +27,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		texture( logger_ptr l, stream_ptr s ) : entity< texture >( l, s ) {
+		texture( logger_ptr l ) : entity< texture >( l ) {
 		}
 		///
 		virtual ~texture() {

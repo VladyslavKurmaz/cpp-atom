@@ -20,8 +20,8 @@ namespace atom { namespace zoom {
 		protected dx9holder {
 	public:
 		///
-		static dx9texture_ptr create( logger_ptr l, stream_ptr s, dx9wincontext_ptr c ) {
-			return dx9texture_ptr( new dx9texture( l, s, c ) );
+		static dx9texture_ptr create( logger_ptr l, dx9wincontext_ptr c ) {
+			return dx9texture_ptr( new dx9texture( l, c ) );
 		}
 		///
 		virtual ~dx9texture();
@@ -34,7 +34,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		dx9texture( logger_ptr l, stream_ptr s, dx9wincontext_ptr c );
+		dx9texture( logger_ptr l, dx9wincontext_ptr c );
 
 	private:
 		///

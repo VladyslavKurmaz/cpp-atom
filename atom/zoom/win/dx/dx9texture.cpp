@@ -1,7 +1,7 @@
 namespace atom { namespace zoom {
 
-	dx9texture::dx9texture( logger_ptr l, stream_ptr s, dx9wincontext_ptr c ) : 
-			texture( l, s )
+	dx9texture::dx9texture( logger_ptr l, dx9wincontext_ptr c ) : 
+			texture( l )
 		,	dx9holder( c )
 		,	tex( NULL ) {
 	}

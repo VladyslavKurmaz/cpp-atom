@@ -43,7 +43,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		canvas( logger_ptr l, stream_ptr s );
+		canvas( logger_ptr l );
 		///
 		virtual ~canvas();
 

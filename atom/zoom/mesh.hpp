@@ -30,7 +30,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		mesh( logger_ptr l, stream_ptr s );
+		mesh( logger_ptr l );
 		///
 		virtual ~mesh();
 

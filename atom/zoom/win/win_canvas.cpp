@@ -2,8 +2,8 @@
 
 namespace atom { namespace zoom {
 
-	win_canvas::win_canvas( logger_ptr l, stream_ptr s ) : 
-			canvas( l, s )
+	win_canvas::win_canvas( logger_ptr l ) : 
+			canvas( l )
 		,	wwindow( *this, INITLIST_4( &win_canvas::onlbuttondown, &win_canvas::onlbuttonup, &win_canvas::onmousemove, &win_canvas::onclose ) )
 		,	input_handler() {
 	}

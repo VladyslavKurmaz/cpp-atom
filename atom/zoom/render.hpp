@@ -46,7 +46,7 @@ namespace atom { namespace zoom {
 		canvas_ptr&
 		get_canvas() { return ( this->canvas ); }
 		///
-		render( logger_ptr l, stream_ptr s, canvas_ptr c );
+		render( logger_ptr l, canvas_ptr c );
 		///
 		virtual ~render();
 

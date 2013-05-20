@@ -38,8 +38,8 @@ namespace atom { namespace zoom {
 
 	public:
 		///
-		static canvas_ptr create( logger_ptr l, stream_ptr s ) {
-			return canvas_ptr( new win_canvas( l, s ) );
+		static canvas_ptr create( logger_ptr l ) {
+			return canvas_ptr( new win_canvas( l ) );
 		}
 		///
 		virtual bool
@@ -58,7 +58,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		win_canvas( logger_ptr l, stream_ptr s );
+		win_canvas( logger_ptr l );
 		///
 		void
 		onlbuttondown( HWND hWnd, BOOL fDoubleClick, int x, int y, UINT keyFlags );

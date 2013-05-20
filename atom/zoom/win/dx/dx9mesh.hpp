@@ -19,8 +19,8 @@ namespace atom { namespace zoom {
 
 	public:
 		///
-		static dx9mesh_ptr create( logger_ptr l, stream_ptr s, dx9wincontext_ptr c ) {
-			return dx9mesh_ptr( new dx9mesh( l, s, c ) );
+		static dx9mesh_ptr create( logger_ptr l, dx9wincontext_ptr c ) {
+			return dx9mesh_ptr( new dx9mesh( l, c ) );
 		}
 		///
 		virtual ~dx9mesh();
@@ -36,7 +36,7 @@ namespace atom { namespace zoom {
 
 	protected:
 		///
-		dx9mesh( logger_ptr l, stream_ptr s, dx9wincontext_ptr c );
+		dx9mesh( logger_ptr l, dx9wincontext_ptr c );
 
 	private:
 		///

@@ -1,7 +1,7 @@
 
 namespace atom { namespace zoom {
 
-	camera::camera( logger_ptr l, stream_ptr s ) : entity< camera >( l, s ) {
+	camera::camera( logger_ptr l ) : entity< camera >( l ) {
 	}
 
 	camera::~camera() {
