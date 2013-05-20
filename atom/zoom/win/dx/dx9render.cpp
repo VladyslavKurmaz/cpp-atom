@@ -26,7 +26,7 @@ namespace atom { namespace zoom {
 				d3dpp.BackBufferFormat			=	D3DFMT_UNKNOWN;//D3DFMT_A8R8G8B8;
 				d3dpp.BackBufferCount			=	1;
 
-				d3dpp.MultiSampleType			=	D3DMULTISAMPLE_8_SAMPLES;//D3DMULTISAMPLE_NONE;;
+				d3dpp.MultiSampleType			=	/*D3DMULTISAMPLE_8_SAMPLES*/D3DMULTISAMPLE_NONE;
 				d3dpp.MultiSampleQuality		=	0;
 
 				d3dpp.SwapEffect				=	D3DSWAPEFFECT_DISCARD;
