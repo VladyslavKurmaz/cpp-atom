@@ -1,4 +1,5 @@
 #include "./pch.hpp"
+#include "./logger.hpp"
 #include "./env.hpp"
 
 env::env( logger_ptr l, appl_ptr a, names const& n ) :
@@ -22,17 +23,17 @@ env::clear() {
 }
 
 void
-env::print( std::ostream& os, string_t const& offs ) {
-	os << offs << "[" << this->pname << "] " << this->proot << "" << std::endl;
+env::print( logger_ptr l, string_t const& offs ) {
+	*l << offs << "[" << this->pname << "] " << this->proot << "" << std::endl;
 	//
 	struct _ {
-		static bool __( env_ptr e, std::ostream& os, string_t const& offs ) {
-			e->print( os, offs );
+		static bool __( env_ptr e, logger_ptr l, string_t const& offs ) {
+			e->print( l, offs );
 			return true;
 		};
 	};
 	string_t s = offs + string_t( " " );
-	this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, boost::ref( os ), boost::ref( s ) ) );
+	this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, l, boost::ref( s ) ) );
 }
 
 bool

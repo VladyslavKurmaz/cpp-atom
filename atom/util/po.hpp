@@ -44,6 +44,8 @@ namespace atom {
 			id_t;
 		typedef boost::program_options::options_description
 			options_description_t;
+		typedef boost::program_options::positional_options_description
+			positional_options_description_t;
 		typedef boost::program_options::variables_map
 			variables_map_t;
 	private:
@@ -55,9 +57,13 @@ namespace atom {
 			names_id_string_mmap_t;
 		typedef std::map< id_t, boost::shared_ptr< options_description_t > >
 			options_descriptions_map_t;
+		typedef std::map< id_t, boost::shared_ptr< positional_options_description_t > >
+			positional_options_description_map_t;
 		///
 		options_descriptions_map_t
 			descs;
+		positional_options_description_map_t
+			pdescs;
 		///
 		variables_map_t
 			vm;
@@ -68,6 +74,20 @@ namespace atom {
 			is_names;
 
 	protected:
+		///
+		class helper {
+			po&
+				p;
+			bool
+				n;
+		public:
+			//
+			helper( po& _p, bool _n ) : p( _p ), n( _n ) {
+				p.vm.clear(); }
+			//
+			~helper() {
+				p.notify( this->n ); }
+		};
 		///
 		void
 		reg_name( id_t const id, string_t const& name ) {
@@ -103,24 +123,35 @@ namespace atom {
 	public:
 		///
 		po() : 
-		  descs()
-			  ,	vm()
-			  ,	si_names()
-			  ,	is_names() {
+				descs()
+			,	pdescs()
+			,	vm()
+			,	si_names()
+			,	is_names() {
 		  }
 		  ///
 		  options_description_t& 
 		  add_desc( id_t const id, string_t const& name ) {
 			  reg_name( id, name );
-			  return ( *( ( descs[ id ] = boost::shared_ptr< options_description_t >( new options_description_t( name ) ) ).get() ) );
+			  return ( *( ( this->descs[ id ] = boost::shared_ptr< options_description_t >( new options_description_t( name ) ) ).get() ) );
 		  }
 		  ///
 		  options_description_t&
 		  get_desc( id_t const id ) {
-			  return ( *( descs[ id ] ) ); }
+			  return ( *( this->descs[ id ] ) ); }
+		  ///
+		  positional_options_description_t& 
+		  add_pdesc( id_t const id, string_t const& name ) {
+			  reg_name( id, name );
+			  return ( *( ( this->pdescs[ id ] = boost::shared_ptr< positional_options_description_t >( new positional_options_description_t() ) ).get() ) );
+		  }
+		  ///
+		  positional_options_description_t&
+		  get_pdesc( id_t const id ) {
+			  return ( *( this->pdescs[ id ] ) ); }
 		  ///
 		  options_description_t&
-		  get_desc( string_t const& name ) {
+		  get_pdesc( string_t const& name ) {
 			  return ( get_desc( get_id( name ) ) ); }
 		  ///
 		  template< class T >
@@ -138,44 +169,58 @@ namespace atom {
 			  return ( *this );
 		  }
 		  ///
+		  this_type_t&
+		  add_option( id_t const option_id, string_t const& option_name, int const pos, positional_options_description_t& pdesc ) {
+			  reg_name( option_id, option_name );
+			  pdesc.add( option_name.c_str(), pos );
+			  return ( *this );
+		  }
+		  ///
 		  void
 		  parse_config( string_t const& file_name, options_description_t const& desc, bool const ntf ) {
-			  vm.clear();
+			  helper h( *this, ntf );
 			  std::ifstream ifs( file_name.c_str() );
-			  store( parse_config_file( ifs, desc ), vm );
-			  notify( ntf );
+			  store( parse_config_file( ifs, desc ), this->vm );
 		  }
 #ifdef _WINDOWS
 		  ///
 		  void
 		  parse_cmd_line( std::string const& cmd_line, options_description_t const& desc, bool const ntf ) {
-			  vm.clear();
+			  helper h( *this, ntf );
 			  std::vector< std::string > args = boost::program_options::split_winmain( cmd_line );
-			  boost::program_options::store( boost::program_options::command_line_parser( args ).options( desc ).run(), vm );
-			  notify( ntf );
+			  boost::program_options::store( boost::program_options::command_line_parser( args ).options( desc ).run(), this->vm );
+		  }
+		  ///
+		  void
+		  parse_cmd_line( std::string const& cmd_line, options_description_t const& desc, positional_options_description_t const& pdesc, bool const ntf ) {
+			  helper h( *this, ntf );
+			  std::vector< std::string > args = boost::program_options::split_winmain( cmd_line );
+			  boost::program_options::store( boost::program_options::command_line_parser( args ).options( desc ).positional( pdesc ).run(), this->vm );
 		  }
 		  ///
 		  void
 		  parse_cmd_line( std::wstring const& cmd_line, options_description_t const& desc, bool const ntf ) {
-			  vm.clear();
+			  helper h( *this, ntf );
 			  std::vector< std::wstring > args = boost::program_options::split_winmain( cmd_line );
-			  boost::program_options::store( boost::program_options::wcommand_line_parser( args ).options( desc ).run(), vm );
-			  notify( ntf );
+			  boost::program_options::store( boost::program_options::wcommand_line_parser( args ).options( desc ).run(), this->vm );
 		  }
 #endif
 		  ///
 		  void
 		  parse_arg( int argc, char const * const argv[], options_description_t const& desc, bool const ntf ) {
-			  vm.clear();
-			  boost::program_options::store( boost::program_options::parse_command_line( argc, argv, desc ), vm );
-			  notify( ntf );
+			  helper h( *this, ntf );
+			  boost::program_options::store( boost::program_options::command_line_parser( argc, argv ).options( desc ).run(), this->vm );
 		  }
 		  ///
-		  void parse_arg( int argc , wchar_t * argv[], options_description_t const& desc, bool const ntf )
-		  {
-			  vm.clear();
-			  boost::program_options::store( boost::program_options::parse_command_line( argc, argv, desc ), vm );
-			  notify( ntf );
+		  void
+		  parse_arg( int argc, char const * const argv[], options_description_t const& desc, positional_options_description_t const& pdesc, bool const ntf ) {
+			  helper h( *this, ntf );
+			  boost::program_options::store( boost::program_options::command_line_parser( argc, argv ).options( desc ).positional( pdesc ).run(), this->vm );
+		  }
+		  ///
+		  void parse_arg( int argc , wchar_t * argv[], options_description_t const& desc, bool const ntf ) {
+			  helper h( *this, ntf );
+			  boost::program_options::store( boost::program_options::wcommand_line_parser( argc, argv ).options( desc ).run(), this->vm );
 		  }
 		  ///
 		  template< class T >

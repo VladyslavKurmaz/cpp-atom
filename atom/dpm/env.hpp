@@ -46,7 +46,7 @@ public:
 	}
 	///
 	void
-	print( std::ostream& os, string_t const& offs );
+	print( logger_ptr l, string_t const& offs );
 	///
 	bool
 	find( string_t const& n, env_ptr& ce );
