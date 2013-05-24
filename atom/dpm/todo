@@ -1,2 +1,3 @@
 - add positional parameters
 - add cmd line parameter for current environment
+- add msbuild version

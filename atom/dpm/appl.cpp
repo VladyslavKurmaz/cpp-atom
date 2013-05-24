@@ -6,6 +6,7 @@
 appl::appl( logger_ptr l ) : 
 		po()
 	,	home()
+	,	msbuild()
 	,	cenv() {
 	atom::mount<appl2logger>( this, l );
 	//
@@ -20,6 +21,8 @@ appl::appl( logger_ptr l ) :
 			boost::program_options::value<std::string>()->default_value( h ),						"define dpm h(o)me directory, override %DPM_HOME% env var", desc1 ).
 		add_option( po_env,						"env,e",
 			boost::program_options::value<std::string>()->default_value( fslash ),					"define current (e)nvironment", desc1 ).
+		add_option( po_msbuild,					"msbuild,m",
+			boost::program_options::value<std::string>()->default_value( "4.0" ),					"(m)sbuild version to use", desc1 ).
 		add_option( po_dpmdir,					"dpmdir",
 			boost::program_options::value<std::string>()->default_value( ".dpm" ),					"define dpm system dir name", desc1 ).
 		add_option( po_dldir,					"dldir",
@@ -69,6 +72,7 @@ appl::init( int argc, char const * const argv[] ) {
 	try {
 		this->po.parse_arg( argc, argv, desc, pdesc, true );
 		this->home = this->po.as< string_t >( po_home );
+		this->msbuild = string_t ( "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\" ) + this->po.as< string_t >( po_msbuild );
 		// rescan dpm structure
 		this->scan();
 		//set currrent environment
@@ -178,11 +182,24 @@ appl::process_command() {
 		//
 		this->get_env()->find( pos2, this->cenv );
 	} else if ( pos1.length() && pos2.length() ) {
+		HKEY key;
+		string_t path;
+		if ( ERROR_SUCCESS == RegOpenKeyEx( HKEY_LOCAL_MACHINE, this->msbuild.c_str(), 0, KEY_READ, &key ) ) {
+		    TCHAR buf[ MAX_PATH ] = { 0 };
+		    DWORD bufsz = MAX_PATH;
+    		if ( ERROR_SUCCESS == RegQueryValueEx( key, _T( "MSBuildToolsPath" ), 0, NULL, (LPBYTE)buf, &bufsz ) ) {
+				path = buf;
+		    }
+			RegCloseKey( key );
+		}
 		// run msbuild
-		*(this->get_logger())
+		stringstream_t ss;
+		ss	<< path
 			<< "msbuild /p:stages=\"" << pos1 << "\""
 			<< " /p:components=\"" << pos2 << "\""
 			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" )) << std::endl;
+		*(this->get_logger()) << ss.str() << std::endl;
+		atom::exec( ss.str() );
 	}
 	*(this->get_logger()) << std::endl;
 	return ( true );

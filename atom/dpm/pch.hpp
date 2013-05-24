@@ -3,6 +3,7 @@
 //#pragma warning(disable : 4355)
 
 #include <windows.h>
+#include <tchar.h>
 
 #include <boost/function.hpp>
 #include <boost/smart_ptr.hpp>
@@ -15,6 +16,7 @@
 #include <atom/util/po.hpp>
 #include <atom/util/ptr.hpp>
 #include <atom/util/cast.hpp>
+#include <atom/util/proc.hpp>
 
 
 class logger;
@@ -36,8 +38,11 @@ typedef boost::shared_ptr< comp >
 typedef std::basic_string< TCHAR >
 	string_t;
 
+typedef std::basic_stringstream< TCHAR >
+	stringstream_t;
+
 static atom::po::id_t const po_none					=	0;
-// help, interactive, home, env, dpmdir, dldir, envdir
+// help, interactive, home, env, msbuild, dpmdir, dldir, envdir
 static atom::po::id_t const po_desc1				=	po_none + 1;
 // recursive
 static atom::po::id_t const po_desc2				=	po_desc1 + 1;
@@ -55,7 +60,8 @@ static atom::po::id_t const po_help					=	po_desc_interactive + 1;
 static atom::po::id_t const po_interactive			=	po_help + 1;
 static atom::po::id_t const po_home					=	po_interactive + 1;
 static atom::po::id_t const po_env					=	po_home + 1;
-static atom::po::id_t const po_dpmdir				=	po_env + 1;
+static atom::po::id_t const po_msbuild				=	po_env + 1;
+static atom::po::id_t const po_dpmdir				=	po_msbuild + 1;
 static atom::po::id_t const po_dldir				=	po_dpmdir + 1;
 static atom::po::id_t const po_envdir				=	po_dldir + 1;
 static atom::po::id_t const po_recursive			=	po_envdir + 1;

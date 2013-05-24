@@ -56,6 +56,9 @@ private:
 	string_t
 		home;
 	///
+	string_t
+		msbuild;
+	///
 	env_ptr
 		cenv;
 };
