@@ -195,11 +195,12 @@ appl::process_command() {
 		// run msbuild
 		stringstream_t ss;
 		ss	<< path
-			<< "msbuild /p:stages=\"" << pos1 << "\""
+			<< "msbuild.exe" << " /p:stages=\"" << pos1 << "\""
 			<< " /p:components=\"" << pos2 << "\""
-			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" )) << std::endl;
+			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" )) << std::endl
+			;
 		*(this->get_logger()) << ss.str() << std::endl;
-		atom::exec( ss.str() );
+		atom::exec( ss.str(), this->cenv->get_root() + string_t( "cfg\\" ) );
 	}
 	*(this->get_logger()) << std::endl;
 	return ( true );

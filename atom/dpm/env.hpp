@@ -45,6 +45,11 @@ public:
 		return ( this->get_name() );
 	}
 	///
+	string_t
+	get_root() const {
+		return ( this->proot );
+	}
+	///
 	void
 	print( logger_ptr l, string_t const& offs );
 	///

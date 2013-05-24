@@ -18,7 +18,7 @@
 namespace atom {
 
 	template < typename T >
-	void exec( std::basic_string< T > const & path ) {
+	void exec( std::basic_string< T > const & path, std::basic_string< T > const & cdir ) {
 		STARTUPINFO si;
 	    PROCESS_INFORMATION pi;
 
@@ -35,7 +35,7 @@ namespace atom {
 	        FALSE,          // Set handle inheritance to FALSE
     	    0,              // No creation flags
 	        NULL,           // Use parent's environment block
-    	    NULL,           // Use parent's starting directory 
+    	    (( cdir.length() )?( cdir.c_str() ):( NULL )),           // Use parent's starting directory 
 	        &si,            // Pointer to STARTUPINFO structure
     	    &pi )           // Pointer to PROCESS_INFORMATION structure
 	    ) 
