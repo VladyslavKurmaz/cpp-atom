@@ -23,17 +23,17 @@ env::clear() {
 }
 
 void
-env::print( logger_ptr l, string_t const& offs ) {
-	*l << offs << "[" << this->pname << "] " << this->proot << "" << std::endl;
+env::print( logger_ptr l, env_ptr ce, string_t const& offs ) {
+	*l << (( ce.get() == this )?("> "):("  ")) << offs << "[" << this->pname << "] " << this->proot << "" << std::endl;
 	//
 	struct _ {
-		static bool __( env_ptr e, logger_ptr l, string_t const& offs ) {
-			e->print( l, offs );
+		static bool __( env_ptr e, logger_ptr l, env_ptr ce, string_t const& offs ) {
+			e->print( l, ce, offs );
 			return true;
 		};
 	};
 	string_t s = offs + string_t( " " );
-	this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, l, boost::ref( s ) ) );
+	this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, l, ce, boost::ref( s ) ) );
 }
 
 bool

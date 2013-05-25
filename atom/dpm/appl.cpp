@@ -41,11 +41,11 @@ appl::appl( logger_ptr l ) :
 		add_option( po_pos2,					"pos2",
 			boost::program_options::value<std::string>()->default_value( "" ),						"    | <env>|    |<components>", desc3 ).
 		add_option( po_pos3,					"pos3",
-			boost::program_options::value<std::string>()->default_value( "" ),						"    |      |    |<toolset>", desc3 ).
+			boost::program_options::value<std::string>()->default_value( "msvc10" ),				"    |      |    |<toolset>", desc3 ).
 		add_option( po_pos4,					"pos4",
-			boost::program_options::value<std::string>()->default_value( "" ),						"    |      |    |<configurations>", desc3 ).
+			boost::program_options::value<std::string>()->default_value( "x86" ),					"    |      |    |<architecture>", desc3 ).
 		add_option( po_pos5,					"pos5",
-			boost::program_options::value<std::string>()->default_value( "" ),						"    |      |    |<architecture>", desc3 );
+			boost::program_options::value<std::string>()->default_value( "debug" ),					"    |      |    |<configurations>", desc3 );
 	//
 	atom::po::options_description_t& desc_cmdline = this->po.add_desc( po_desc_cmdline, "" );
 	desc_cmdline.add( desc1 ).add( desc2 ).add( desc3 );
@@ -72,7 +72,34 @@ appl::init( int argc, char const * const argv[] ) {
 	try {
 		this->po.parse_arg( argc, argv, desc, pdesc, true );
 		this->home = this->po.as< string_t >( po_home );
-		this->msbuild = string_t ( "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\" ) + this->po.as< string_t >( po_msbuild );
+		// add path to msbuild into proccess env vars
+		string_t msbuild_reg = string_t ( "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\" ) + this->po.as< string_t >( po_msbuild );
+		HKEY key;
+		if ( ERROR_SUCCESS == RegOpenKeyEx( HKEY_LOCAL_MACHINE, msbuild_reg.c_str(), 0, KEY_READ, &key ) ) {
+		    TCHAR buf[ MAX_PATH ] = { 0 };
+		    DWORD bufsz = MAX_PATH;
+    		if ( ERROR_SUCCESS == RegQueryValueEx( key, _T( "MSBuildToolsPath" ), 0, NULL, (LPBYTE)buf, &bufsz ) ) {
+				this->msbuild = buf;
+		    }
+			RegCloseKey( key );
+		}
+		if ( !this->msbuild.length() ) {
+			throw std::exception( "[emerg] Couldn't locate msbuild" );
+		} else {
+			// update path environment variable
+			bool update_err = true;
+			TCHAR b[4096] = { 0 };
+			if ( GetEnvironmentVariable( _T( "path" ), b, 4096 ) ) {
+				strcat( b, _T( ";" ) );
+				strcat( b, this->msbuild.c_str() );
+				if ( SetEnvironmentVariable( _T( "path" ), b ) ) {
+					update_err = false;
+				}
+			}
+			if ( update_err ) {
+				throw std::exception( "[emerg] Couldn't update process env block" );
+			}
+		}
 		// rescan dpm structure
 		this->scan();
 		//set currrent environment
@@ -168,6 +195,7 @@ appl::process_command() {
 	string_t pos2 = this->po.as< string_t >( po_pos2 );
 	string_t pos3 = this->po.as< string_t >( po_pos3 );
 	string_t pos4 = this->po.as< string_t >( po_pos4 );
+	string_t pos5 = this->po.as< string_t >( po_pos5 );
 	//
 	if ( ( pos1 == string_t( cmd_help ) ) || this->po.count( po_help ) ) {
 		throw std::exception( "dpm command line parameters:" );
@@ -176,27 +204,20 @@ appl::process_command() {
 	} else if ( pos1 == string_t( cmd_tree ) ) {
 		//
 		*(this->get_logger()) << std::endl << "structure of environments:" << std::endl << std::endl;
-		this->get_env()->print( this->get_logger(), string_t() );
+		this->get_env()->print( this->get_logger(), this->cenv, string_t() );
 		*(this->get_logger()) << std::endl;
 	} else if ( pos1 == string_t( cmd_switch ) ) {
 		//
 		this->get_env()->find( pos2, this->cenv );
 	} else if ( pos1.length() && pos2.length() ) {
-		HKEY key;
-		string_t path;
-		if ( ERROR_SUCCESS == RegOpenKeyEx( HKEY_LOCAL_MACHINE, this->msbuild.c_str(), 0, KEY_READ, &key ) ) {
-		    TCHAR buf[ MAX_PATH ] = { 0 };
-		    DWORD bufsz = MAX_PATH;
-    		if ( ERROR_SUCCESS == RegQueryValueEx( key, _T( "MSBuildToolsPath" ), 0, NULL, (LPBYTE)buf, &bufsz ) ) {
-				path = buf;
-		    }
-			RegCloseKey( key );
-		}
 		// run msbuild
 		stringstream_t ss;
-		ss	<< path
-			<< "msbuild.exe" << " /p:stages=\"" << pos1 << "\""
-			<< " /p:components=\"" << pos2 << "\""
+		ss	<< this->msbuild << "msbuild.exe"
+			<< " /p:stage=\"" << pos1 << "\""
+			<< " /p:component=\"" << pos2 << "\""
+			<< " /p:toolset=\"" << pos3 << "\""
+			<< " /p:architecture=\"" << pos4 << "\""
+			<< " /p:configuration=\"" << pos5 << "\""
 			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" )) << std::endl
 			;
 		*(this->get_logger()) << ss.str() << std::endl;

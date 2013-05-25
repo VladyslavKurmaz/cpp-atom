@@ -51,7 +51,7 @@ public:
 	}
 	///
 	void
-	print( logger_ptr l, string_t const& offs );
+	print( logger_ptr l, env_ptr ce, string_t const& offs );
 	///
 	bool
 	find( string_t const& n, env_ptr& ce );
