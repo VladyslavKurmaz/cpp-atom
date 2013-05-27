@@ -2,3 +2,5 @@
 + add cmd line parameter for current environment
 + add msbuild version
 - add signal handler
+- add config repositories checks
++ implement publish for source codes and config repositories

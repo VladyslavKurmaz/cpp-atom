@@ -65,8 +65,9 @@ static atom::po::id_t const po_dpmdir				=	po_msbuild + 1;
 static atom::po::id_t const po_dldir				=	po_dpmdir + 1;
 static atom::po::id_t const po_envdir				=	po_dldir + 1;
 static atom::po::id_t const po_recursive			=	po_envdir + 1;
+static atom::po::id_t const po_subpart			=	po_recursive + 1;
 
-static atom::po::id_t const po_pos1					=	po_recursive + 1;
+static atom::po::id_t const po_pos1					=	po_subpart + 1;
 static atom::po::id_t const po_pos2					=	po_pos1 + 1;
 static atom::po::id_t const po_pos3					=	po_pos2 + 1;
 static atom::po::id_t const po_pos4					=	po_pos3 + 1;

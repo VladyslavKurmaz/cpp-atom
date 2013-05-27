@@ -32,14 +32,16 @@ appl::appl( logger_ptr l ) :
 
 	atom::po::options_description_t& desc2 = this->po.add_desc( po_desc2, "" );
 	this->po.
-		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc2 );
+		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc2 ).
+		add_option( po_subpart,					"subpart,s",
+			boost::program_options::value<std::string>()->default_value( "" ),					"define project (s)ubpart, empty value means whole project", desc2 );
 
 	atom::po::options_description_t& desc3 = this->po.add_desc( po_desc3, "Subcommands" );
 	this->po.
 		add_option( po_pos1,					"pos1",
-			boost::program_options::value<std::string>()->default_value( "" ),						"tree|switch|exit|<stages>", desc3 ).
+			boost::program_options::value<std::string>()->default_value( "" ),						"tree|switch|exit|<components>", desc3 ).
 		add_option( po_pos2,					"pos2",
-			boost::program_options::value<std::string>()->default_value( "" ),						"    | <env>|    |<components>", desc3 ).
+			boost::program_options::value<std::string>()->default_value( "" ),						"    | <env>|    |<stages>", desc3 ).
 		add_option( po_pos3,					"pos3",
 			boost::program_options::value<std::string>()->default_value( "msvc10" ),				"    |      |    |<toolset>", desc3 ).
 		add_option( po_pos4,					"pos4",
@@ -196,6 +198,7 @@ appl::process_command() {
 	string_t pos3 = this->po.as< string_t >( po_pos3 );
 	string_t pos4 = this->po.as< string_t >( po_pos4 );
 	string_t pos5 = this->po.as< string_t >( po_pos5 );
+	string_t sp = this->po.as< string_t >( po_subpart );
 	//
 	if ( ( pos1 == string_t( cmd_help ) ) || this->po.count( po_help ) ) {
 		throw std::exception( "dpm command line parameters:" );
@@ -212,14 +215,19 @@ appl::process_command() {
 	} else if ( pos1.length() && pos2.length() ) {
 		// run msbuild
 		stringstream_t ss;
-		ss	<< this->msbuild << "msbuild.exe"
-			<< " /p:stage=\"" << pos1 << "\""
-			<< " /p:component=\"" << pos2 << "\""
+		ss
+			<< this->msbuild << "msbuild.exe"
+			<< " /p:component=\"" << pos1 << "\""
+			<< " /p:stage=\"" << pos2 << "\""
 			<< " /p:toolset=\"" << pos3 << "\""
 			<< " /p:architecture=\"" << pos4 << "\""
 			<< " /p:configuration=\"" << pos5 << "\""
-			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" )) << std::endl
-			;
+			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" ));
+		if ( sp.length() ) {
+			ss	<< " /p:subpart=\"" << sp << "\"";
+		}
+		ss
+			<< std::endl;
 		*(this->get_logger()) << ss.str() << std::endl;
 		atom::exec( ss.str(), this->cenv->get_root() + string_t( "cfg\\" ) );
 	}
