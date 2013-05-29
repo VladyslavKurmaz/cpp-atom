@@ -13,6 +13,9 @@ appl::appl( logger_ptr l ) :
 	char const* root = getenv( "DPM_HOME" ); 
 	string_t h( ( root !=NULL )?( root ):( "" ) );
 	//
+	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
+	string_t a( ( arch !=NULL )?( arch ):( "" ) );
+	//
 	atom::po::options_description_t& desc1 = this->po.add_desc( po_desc1, "Init param" );
 	this->po.
 		add_option( po_help,					"help,h",											"show this (h)elp", desc1 ).
@@ -32,22 +35,22 @@ appl::appl( logger_ptr l ) :
 
 	atom::po::options_description_t& desc2 = this->po.add_desc( po_desc2, "" );
 	this->po.
-		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc2 ).
-		add_option( po_subpart,					"subpart,s",
-			boost::program_options::value<std::string>()->default_value( "" ),					"define project (s)ubpart, empty value means whole project", desc2 );
+		add_option( po_platform,					"platform,p",
+			boost::program_options::value<std::string>()->default_value( "" ),			"current (p)latform", desc2 ).
+		add_option( po_architecture,					"architecture,a",
+			boost::program_options::value<std::string>()->default_value( a ),					"current (a)rchitecture", desc2 ).
+		add_option( po_configuration,					"configuration,c",
+			boost::program_options::value<std::string>()->default_value( "debug" ),					"(c)onfiguration to build", desc2 ).
+		add_option( po_toolset,					"toolset,t",
+			boost::program_options::value<std::string>()->default_value( "msvc11" ),					"build (t)oolset", desc2 ).
+		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc2 );
 
 	atom::po::options_description_t& desc3 = this->po.add_desc( po_desc3, "Subcommands" );
 	this->po.
 		add_option( po_pos1,					"pos1",
-			boost::program_options::value<std::string>()->default_value( "" ),						"tree|switch|exit|<components>", desc3 ).
+			boost::program_options::value<std::string>()->default_value( "" ),						"<component>|switch|tree|exit|help", desc3 ).
 		add_option( po_pos2,					"pos2",
-			boost::program_options::value<std::string>()->default_value( "" ),						"    | <env>|    |<stages>", desc3 ).
-		add_option( po_pos3,					"pos3",
-			boost::program_options::value<std::string>()->default_value( "msvc10" ),				"    |      |    |<toolset>", desc3 ).
-		add_option( po_pos4,					"pos4",
-			boost::program_options::value<std::string>()->default_value( "x86" ),					"    |      |    |<architecture>", desc3 ).
-		add_option( po_pos5,					"pos5",
-			boost::program_options::value<std::string>()->default_value( "debug" ),					"    |      |    |<configurations>", desc3 );
+			boost::program_options::value<std::string>()->default_value( "" ),						"<stage>    |<env> |    |    |    ", desc3 );
 	//
 	atom::po::options_description_t& desc_cmdline = this->po.add_desc( po_desc_cmdline, "" );
 	desc_cmdline.add( desc1 ).add( desc2 ).add( desc3 );
@@ -58,10 +61,7 @@ appl::appl( logger_ptr l ) :
 	atom::po::positional_options_description_t& pdesc3 = this->po.add_pdesc( po_pdesc3, "" );
 	this->po.
 		add_option( po_pos1, "pos1", 1, pdesc3 ).
-		add_option( po_pos2, "pos2", 1, pdesc3 ).
-		add_option( po_pos3, "pos3", 1, pdesc3 ).
-		add_option( po_pos4, "pos4", 1, pdesc3 ).
-		add_option( po_pos5, "pos5", 1, pdesc3 );
+		add_option( po_pos2, "pos2", 1, pdesc3 );
 }
 
 appl::~appl() {
@@ -195,14 +195,12 @@ appl::process_command() {
 	//
 	string_t pos1 = this->po.as< string_t >( po_pos1 );
 	string_t pos2 = this->po.as< string_t >( po_pos2 );
-	string_t pos3 = this->po.as< string_t >( po_pos3 );
-	string_t pos4 = this->po.as< string_t >( po_pos4 );
-	string_t pos5 = this->po.as< string_t >( po_pos5 );
-	string_t sp = this->po.as< string_t >( po_subpart );
 	//
 	if ( ( pos1 == string_t( cmd_help ) ) || this->po.count( po_help ) ) {
+		//
 		throw std::exception( "dpm command line parameters:" );
 	} else if ( pos1 == string_t( cmd_exit ) ) {
+		//
 		return false;
 	} else if ( pos1 == string_t( cmd_tree ) ) {
 		//
@@ -219,15 +217,13 @@ appl::process_command() {
 			<< this->msbuild << "msbuild.exe"
 			<< " /p:component=\"" << pos1 << "\""
 			<< " /p:stage=\"" << pos2 << "\""
-			<< " /p:toolset=\"" << pos3 << "\""
-			<< " /p:architecture=\"" << pos4 << "\""
-			<< " /p:configuration=\"" << pos5 << "\""
-			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" ));
-		if ( sp.length() ) {
-			ss	<< " /p:subpart=\"" << sp << "\"";
-		}
-		ss
+			<< " /p:platform=\"" << this->po.as< string_t >( po_platform ) << "\""
+			<< " /p:architecture=\"" << this->po.as< string_t >( po_architecture ) << "\""
+			<< " /p:configuration=\"" << this->po.as< string_t >( po_configuration ) << "\""
+			<< " /p:toolset=\"" << this->po.as< string_t >( po_toolset ) << "\""
+			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" ))
 			<< std::endl;
+		//
 		*(this->get_logger()) << ss.str() << std::endl;
 		atom::exec( ss.str(), this->cenv->get_root() + string_t( "cfg\\" ) );
 	}

@@ -44,12 +44,12 @@ typedef std::basic_stringstream< TCHAR >
 static atom::po::id_t const po_none					=	0;
 // help, interactive, home, env, msbuild, dpmdir, dldir, envdir
 static atom::po::id_t const po_desc1				=	po_none + 1;
-// recursive
+// platform, architecture, configuration, toolset, recursive
 static atom::po::id_t const po_desc2				=	po_desc1 + 1;
-// pos1, pos2, pos3, pos4
+// pos1, pos2
 static atom::po::id_t const po_desc3				=	po_desc2 + 1;
 
-// positional desc stages|switch|tree|exit, components|env, debug|release, x86|x64
+// positional desc component|switch|tree|exit, stage|env
 static atom::po::id_t const po_pdesc3				=	po_desc3 + 1;
 // desc1 + desc2 + desc3 + pdesc3
 static atom::po::id_t const po_desc_cmdline			=	po_pdesc3 + 1;
@@ -64,14 +64,15 @@ static atom::po::id_t const po_msbuild				=	po_env + 1;
 static atom::po::id_t const po_dpmdir				=	po_msbuild + 1;
 static atom::po::id_t const po_dldir				=	po_dpmdir + 1;
 static atom::po::id_t const po_envdir				=	po_dldir + 1;
-static atom::po::id_t const po_recursive			=	po_envdir + 1;
-static atom::po::id_t const po_subpart			=	po_recursive + 1;
 
-static atom::po::id_t const po_pos1					=	po_subpart + 1;
+static atom::po::id_t const po_platform			=	po_envdir + 1;
+static atom::po::id_t const po_architecture	=	po_platform + 1;
+static atom::po::id_t const po_configuration	=	po_architecture + 1;
+static atom::po::id_t const po_toolset			=	po_configuration + 1;
+static atom::po::id_t const po_recursive			=	po_toolset + 1;
+
+static atom::po::id_t const po_pos1					=	po_recursive + 1;
 static atom::po::id_t const po_pos2					=	po_pos1 + 1;
-static atom::po::id_t const po_pos3					=	po_pos2 + 1;
-static atom::po::id_t const po_pos4					=	po_pos3 + 1;
-static atom::po::id_t const po_pos5					=	po_pos4 + 1;
 
 static char const* fslash				= "/";
 static char const* bslash				= "\\";
