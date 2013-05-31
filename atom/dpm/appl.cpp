@@ -14,7 +14,7 @@ appl::appl( logger_ptr l ) :
 	string_t h( ( root !=NULL )?( root ):( "" ) );
 	//
 	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
-	string_t a( ( arch !=NULL )?( arch ):( "" ) );
+	string_t am( ( arch !=NULL )?( ( !strcmp( arch, "x86" ) )?( "32" ):( "64" ) ):( "" ) );
 	//
 	atom::po::options_description_t& desc1 = this->po.add_desc( po_desc1, "Init param" );
 	this->po.
@@ -35,10 +35,10 @@ appl::appl( logger_ptr l ) :
 
 	atom::po::options_description_t& desc2 = this->po.add_desc( po_desc2, "" );
 	this->po.
-		add_option( po_platform,					"platform,p",
-			boost::program_options::value<std::string>()->default_value( "" ),			"current (p)latform", desc2 ).
-		add_option( po_architecture,					"architecture,a",
-			boost::program_options::value<std::string>()->default_value( a ),					"current (a)rchitecture", desc2 ).
+		add_option( po_osystem,					"osystem,s",
+			boost::program_options::value<std::string>()->default_value( "" ),			"operation (s)ystem", desc2 ).
+		add_option( po_address_model,					"address_model,a",
+			boost::program_options::value<std::string>()->default_value( am ),					"(a)ddress_model", desc2 ).
 		add_option( po_configuration,					"configuration,c",
 			boost::program_options::value<std::string>()->default_value( "debug" ),					"(c)onfiguration to build", desc2 ).
 		add_option( po_toolset,					"toolset,t",
@@ -217,8 +217,8 @@ appl::process_command() {
 			<< this->msbuild << "msbuild.exe"
 			<< " /p:component=\"" << pos1 << "\""
 			<< " /p:stage=\"" << pos2 << "\""
-			<< " /p:platform=\"" << this->po.as< string_t >( po_platform ) << "\""
-			<< " /p:architecture=\"" << this->po.as< string_t >( po_architecture ) << "\""
+			<< " /p:osystem=\"" << this->po.as< string_t >( po_osystem ) << "\""
+			<< " /p:address_model=\"" << this->po.as< string_t >( po_address_model ) << "\""
 			<< " /p:configuration=\"" << this->po.as< string_t >( po_configuration ) << "\""
 			<< " /p:toolset=\"" << this->po.as< string_t >( po_toolset ) << "\""
 			<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" ))
