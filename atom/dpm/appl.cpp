@@ -36,7 +36,9 @@ appl::appl( logger_ptr l ) :
 	atom::po::options_description_t& desc2 = this->po.add_desc( po_desc2, "" );
 	this->po.
 		add_option( po_osystem,					"osystem,s",
-			boost::program_options::value<std::string>()->default_value( "" ),			"operation (s)ystem", desc2 ).
+			boost::program_options::value<std::string>()->default_value( "windows" ),			"operation (s)ystem", desc2 ).
+		add_option( po_instruction_set,					"instruction_set,n",
+			boost::program_options::value<std::string>()->default_value( "i386" ),					"i(n)struction set", desc2 ).
 		add_option( po_address_model,					"address_model,a",
 			boost::program_options::value<std::string>()->default_value( am ),					"(a)ddress_model", desc2 ).
 		add_option( po_configuration,					"configuration,c",
@@ -218,6 +220,7 @@ appl::process_command() {
 			<< " /p:component=\"" << pos1 << "\""
 			<< " /p:stage=\"" << pos2 << "\""
 			<< " /p:osystem=\"" << this->po.as< string_t >( po_osystem ) << "\""
+			<< " /p:instruction_set=\"" << this->po.as< string_t >( po_instruction_set ) << "\""
 			<< " /p:address_model=\"" << this->po.as< string_t >( po_address_model ) << "\""
 			<< " /p:configuration=\"" << this->po.as< string_t >( po_configuration ) << "\""
 			<< " /p:toolset=\"" << this->po.as< string_t >( po_toolset ) << "\""

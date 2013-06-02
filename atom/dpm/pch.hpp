@@ -66,7 +66,8 @@ static atom::po::id_t const po_dldir				=	po_dpmdir + 1;
 static atom::po::id_t const po_envdir				=	po_dldir + 1;
 
 static atom::po::id_t const po_osystem			=	po_envdir + 1;
-static atom::po::id_t const po_address_model	=	po_osystem + 1;
+static atom::po::id_t const po_instruction_set	=	po_osystem + 1;
+static atom::po::id_t const po_address_model	=	po_instruction_set + 1;
 static atom::po::id_t const po_configuration	=	po_address_model + 1;
 static atom::po::id_t const po_toolset			=	po_configuration + 1;
 static atom::po::id_t const po_recursive			=	po_toolset + 1;
