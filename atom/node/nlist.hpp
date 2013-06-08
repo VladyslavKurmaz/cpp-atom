@@ -47,24 +47,26 @@ namespace atom {
 		void clear( N const& ) {
 			base_type::clear(); }
 		///
-		void for_each( boost::function< bool( T const& ) > pred  ) const {
+		bool for_each( boost::function< bool( T const& ) > pred  ) const {
 			base_type::const_iterator it 	= base_type::begin();
 			base_type::const_iterator eit 	= base_type::end();
 			for( ; it != eit; ++it ) {
 				if ( !pred( (*it) ) ) {
-					break;
+					return false;
 				}
 			}
+			return true;
 		}
 		///
-		void for_each( boost::function< bool( T& ) > pred  ) {
+		bool for_each( boost::function< bool( T& ) > pred  ) {
 			base_type::iterator it 	= base_type::begin();
 			base_type::iterator eit = base_type::end();
 			for( ; it != eit; ++it ) {
 				if ( !pred( (*it) ) ) {
-					break;
+					return false;
 				}
 			}
+			return true;
 		}
 		///
 		size_t size() const {

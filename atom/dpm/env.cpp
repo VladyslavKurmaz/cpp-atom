@@ -38,17 +38,21 @@ env::print( logger_ptr l, env_ptr ce, string_t const& offs ) {
 
 bool
 env::find( string_t const& n, env_ptr& ce ) {
-	bool result = false;
 	if ( this->pname == n ) {
 		ce = this->shared_from_this();
 		return true;
 	}
 	struct _ {
-		static bool __( env_ptr e, string_t const& n, env_ptr& ce, bool& r ) {
-			r = e->find( n, ce );
-			return ( !r );
+		static bool __( env_ptr e, string_t const& n, env_ptr& ce ) {
+			return ( !( e->find( n, ce ) ) );
 		};
 	};
-	this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, boost::cref( n ), boost::ref( ce ), boost::ref( result ) ) );
-	return result;
+	return ( this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, boost::cref( n ), boost::ref( ce ) ) ) );
+}
+
+void
+env::for_each( boost::function< bool( env_ptr ) > p ) {
+	if ( p( this->shared_from_this() ) ) {
+		this->get_slot<env2envs>().for_each( p );
+	}
 }

@@ -50,9 +50,9 @@ appl::appl( logger_ptr l ) :
 	atom::po::options_description_t& desc3 = this->po.add_desc( po_desc3, "Subcommands" );
 	this->po.
 		add_option( po_pos1,					"pos1",
-			boost::program_options::value<std::string>()->default_value( "" ),						"<component>|switch|tree|exit|help", desc3 ).
+			boost::program_options::value<std::string>()->default_value( "" ),						"<component>|switch|tree|sync|exit|help", desc3 ).
 		add_option( po_pos2,					"pos2",
-			boost::program_options::value<std::string>()->default_value( "" ),						"<stage>    |<env> |    |    |    ", desc3 );
+			boost::program_options::value<std::string>()->default_value( "" ),						"<stage>    |<env> |    |    |    |    ", desc3 );
 	//
 	atom::po::options_description_t& desc_cmdline = this->po.add_desc( po_desc_cmdline, "" );
 	desc_cmdline.add( desc1 ).add( desc2 ).add( desc3 );
@@ -206,12 +206,24 @@ appl::process_command() {
 		return false;
 	} else if ( pos1 == string_t( cmd_tree ) ) {
 		//
-		*(this->get_logger()) << std::endl << "structure of environments:" << std::endl << std::endl;
+		*(this->get_logger()) << "structure of environments:" << std::endl << std::endl;
 		this->get_env()->print( this->get_logger(), this->cenv, string_t() );
 		*(this->get_logger()) << std::endl;
 	} else if ( pos1 == string_t( cmd_switch ) ) {
 		//
 		this->get_env()->find( pos2, this->cenv );
+	} else if ( pos1 == string_t( cmd_sync ) ) {
+		//
+		struct _ {
+			static bool __( env_ptr e, logger_ptr l ) {
+				*l << e->get_root() << std::endl;
+				atom::exec( string_t( "svn update" ), e->get_root() + string_t( "cfg\\" ) );
+				atom::exec( string_t( "svn update" ), e->get_root() + string_t( ".dpm\\" ) );
+				*l << std::endl;
+				return true;
+			};
+		};
+		this->get_env()->for_each( boost::bind( _::__, _1, this->get_logger() ) );
 	} else if ( pos1.length() && pos2.length() ) {
 		// run msbuild
 		stringstream_t ss;
