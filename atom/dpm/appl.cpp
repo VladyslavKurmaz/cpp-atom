@@ -220,7 +220,7 @@ appl::process_command() {
 				atom::exec( string_t( "svn update" ), e->get_root() + string_t( "cfg\\" ) );
 				atom::exec( string_t( "svn update" ), e->get_root() + string_t( ".dpm\\" ) );
 				*l << std::endl;
-				return true;
+				return false;
 			};
 		};
 		this->get_env()->for_each( boost::bind( _::__, _1, this->get_logger() ) );

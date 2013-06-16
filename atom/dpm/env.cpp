@@ -29,7 +29,7 @@ env::print( logger_ptr l, env_ptr ce, string_t const& offs ) {
 	struct _ {
 		static bool __( env_ptr e, logger_ptr l, env_ptr ce, string_t const& offs ) {
 			e->print( l, ce, offs );
-			return true;
+			return false;
 		};
 	};
 	string_t s = offs + string_t( " " );
@@ -44,7 +44,7 @@ env::find( string_t const& n, env_ptr& ce ) {
 	}
 	struct _ {
 		static bool __( env_ptr e, string_t const& n, env_ptr& ce ) {
-			return ( !( e->find( n, ce ) ) );
+			return ( e->find( n, ce ) );
 		};
 	};
 	return ( this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, boost::cref( n ), boost::ref( ce ) ) ) );
@@ -52,7 +52,7 @@ env::find( string_t const& n, env_ptr& ce ) {
 
 void
 env::for_each( boost::function< bool( env_ptr ) > p ) {
-	if ( p( this->shared_from_this() ) ) {
+	if ( !p( this->shared_from_this() ) ) {
 		this->get_slot<env2envs>().for_each( p );
 	}
 }

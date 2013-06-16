@@ -8,10 +8,10 @@ project( cpp-atom )
 # Inc/Lib
 include_directories( "./" )
 
-include_directories( "$ENV{DPM_BOOST_1_53_0_INC}" )
-link_directories( "$ENV{DPM_BOOST_1_53_0_LIB}" )
+include_directories( "$ENV{DPM_BOOST-1.53.0_INC}" )
+link_directories( "$ENV{DPM_BOOST-1.53.0_LIB}" )
 
-include_directories( "$ENV{DPM_LOKI_0_1_7_INC}" )
+include_directories( "$ENV{DPM_LOKI-0.1.7_INC}" )
 
 # Real stuff
 #add_subdirectory ( "./libs" )

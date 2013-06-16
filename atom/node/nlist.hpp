@@ -51,22 +51,22 @@ namespace atom {
 			base_type::const_iterator it 	= base_type::begin();
 			base_type::const_iterator eit 	= base_type::end();
 			for( ; it != eit; ++it ) {
-				if ( !pred( (*it) ) ) {
-					return false;
+				if ( pred( (*it) ) ) {
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
 		///
 		bool for_each( boost::function< bool( T& ) > pred  ) {
 			base_type::iterator it 	= base_type::begin();
 			base_type::iterator eit = base_type::end();
 			for( ; it != eit; ++it ) {
-				if ( !pred( (*it) ) ) {
-					return false;
+				if ( pred( (*it) ) ) {
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
 		///
 		size_t size() const {
