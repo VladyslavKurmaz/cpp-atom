@@ -50,6 +50,11 @@ public:
 		return ( this->proot );
 	}
 	///
+	string_t
+	get_dpm() const {
+		return ( this->pdpm );
+	}
+	///
 	void
 	print( logger_ptr l, env_ptr ce, string_t const& offs );
 	///

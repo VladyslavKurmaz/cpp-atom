@@ -11,10 +11,10 @@ appl::appl( logger_ptr l ) :
 	atom::mount<appl2logger>( this, l );
 	//
 	char const* root = getenv( "DPM_HOME" ); 
-	string_t h( ( root !=NULL )?( root ):( "" ) );
+	string_t h( ( root != NULL )?( root ):( "" ) );
 	//
 	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
-	string_t am( ( arch !=NULL )?( ( !strcmp( arch, "x86" ) )?( "32" ):( "64" ) ):( "" ) );
+	string_t am( ( arch != NULL )?( ( !strcmp( arch, "x86" ) )?( "32" ):( "64" ) ):( "" ) );
 	//
 	atom::po::options_description_t& desc1 = this->po.add_desc( po_desc1, "Init param" );
 	this->po.
@@ -36,15 +36,15 @@ appl::appl( logger_ptr l ) :
 	atom::po::options_description_t& desc2 = this->po.add_desc( po_desc2, "" );
 	this->po.
 		add_option( po_osystem,					"osystem,s",
-			boost::program_options::value<std::string>()->default_value( "windows" ),			"operation (s)ystem", desc2 ).
+			boost::program_options::value<std::string>()->default_value( "windows" ),				"operation (s)ystem", desc2 ).
 		add_option( po_instruction_set,					"instruction_set,n",
 			boost::program_options::value<std::string>()->default_value( "i386" ),					"i(n)struction set", desc2 ).
 		add_option( po_address_model,					"address_model,a",
-			boost::program_options::value<std::string>()->default_value( am ),					"(a)ddress_model", desc2 ).
+			boost::program_options::value<std::string>()->default_value( am ),						"(a)ddress_model", desc2 ).
 		add_option( po_configuration,					"configuration,c",
-			boost::program_options::value<std::string>()->default_value( "debug" ),					"(c)onfiguration to build", desc2 ).
+			boost::program_options::value<std::string>()->default_value( "debug" ),					"(c)onfiguration", desc2 ).
 		add_option( po_toolset,					"toolset,t",
-			boost::program_options::value<std::string>()->default_value( "msvc11" ),					"build (t)oolset", desc2 ).
+			boost::program_options::value<std::string>()->default_value( "msvc11" ),				"build (t)oolset", desc2 ).
 		add_option( po_recursive,				"recursive,r",										"(r)ecursive", desc2 );
 
 	atom::po::options_description_t& desc3 = this->po.add_desc( po_desc3, "Subcommands" );
@@ -217,8 +217,7 @@ appl::process_command() {
 		struct _ {
 			static bool __( env_ptr e, logger_ptr l ) {
 				*l << e->get_root() << std::endl;
-				atom::exec( string_t( "svn update" ), e->get_root() + string_t( "cfg\\" ) );
-				atom::exec( string_t( "svn update" ), e->get_root() + string_t( ".dpm\\" ) );
+				atom::exec( string_t( "svn update" ), e->get_dpm() );
 				*l << std::endl;
 				return false;
 			};
@@ -240,7 +239,7 @@ appl::process_command() {
 			<< std::endl;
 		//
 		*(this->get_logger()) << ss.str() << std::endl;
-		atom::exec( ss.str(), this->cenv->get_root() + string_t( "cfg\\" ) );
+		atom::exec( ss.str(), this->cenv->get_dpm() );
 	}
 	*(this->get_logger()) << std::endl;
 	return ( true );
