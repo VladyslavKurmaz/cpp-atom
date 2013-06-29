@@ -5,3 +5,4 @@
 - add config repositories checks
 + implement publish for source codes and config repositories
 - add update for cfg dpm-system folders
+- add static link for crt libraries
