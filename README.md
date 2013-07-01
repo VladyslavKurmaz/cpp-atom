@@ -25,7 +25,7 @@ external dependencies
 todo
 ========
 - restore CInt build and samples
-- build tests with msvc10|msvc12, x32|x64
+- build tests with msvc10|msvc11, x32|x64
 
 cons:
 - hotkey definition with char (not only vk codes)

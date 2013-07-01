@@ -15,5 +15,5 @@ include_directories( "$ENV{DPM_LOKI-0.1.7_INC}" )
 
 # Real stuff
 #add_subdirectory ( "./libs" )
-#add_subdirectory ( "./atom/cons" )
+add_subdirectory ( "./atom/cons" )
 add_subdirectory ( "./atom/dpm" )
