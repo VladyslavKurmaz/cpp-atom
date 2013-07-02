@@ -19,7 +19,7 @@
 
 namespace atom {
 
-#ifdef _WINDOWS
+#if defined(_WIN32)
 	class wcs {
 		CRITICAL_SECTION
 		cs;
@@ -49,7 +49,7 @@ namespace atom {
 	};
 
 #ifdef ATOM_MT
-	#ifdef _WINDOWS
+	#if defined(_WIN32)
 	typedef	wcs
 		lock_t; 
 	#endif

@@ -182,7 +182,7 @@ namespace atom {
 			  std::ifstream ifs( file_name.c_str() );
 			  store( parse_config_file( ifs, desc ), this->vm );
 		  }
-#ifdef _WINDOWS
+#if defined(_WIN32)
 		  ///
 		  void
 		  parse_cmd_line( std::string const& cmd_line, options_description_t const& desc, bool const ntf ) {

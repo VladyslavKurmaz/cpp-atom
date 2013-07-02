@@ -110,7 +110,7 @@ namespace atom {
 	}
 }
 
-#ifdef _WINDOWS
+#if defined(_WIN32)
 namespace std {
 	inline std::ostream& operator << ( std::ostream& os, GUID const& guid ) {
 		OLECHAR* bstr;

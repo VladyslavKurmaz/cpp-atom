@@ -15,7 +15,7 @@
 
 #ifndef ATOM_UTIL_PIPE_HPP
 #define ATOM_UTIL_PIPE_HPP
-#ifdef _WINDOWS
+#if defined(_WIN32)
 
 #include <windows.h>
 #include <sstream>

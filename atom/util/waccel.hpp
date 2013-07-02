@@ -15,7 +15,7 @@
 
 #ifndef ATOM_UTIL_WACCEL_HPP
 #define ATOM_UTIL_WACCEL_HPP
-#ifdef _WINDOWS
+#if defined(_WIN32)
 //
 #include <windows.h>
 //
