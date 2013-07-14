@@ -3,15 +3,16 @@ cpp-atom
 
 structure
 ========
-* atom
- cint   integration with CInt
- cons   Windows consoles integrator
- dpm    Development package management
- node   headers-only libraries for cross-ref smart pointers
- util
- zoom   cross-palform 2d/3d/ag engine  
-* doc
-* libs
+ /
+ |- atom
+ |  |- cint   integration with CInt
+ |  |- cons   Windows consoles integrator
+ |  |- dpm    Development package management
+ |  |- node   headers-only libraries for cross-ref smart pointers
+ |  |- util
+ |  |- zoom   cross-palform 2d/3d/ag engine  
+ |- doc
+ |- libs
 
 portability
 ========
