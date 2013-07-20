@@ -4,7 +4,6 @@
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > window2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > window2pref;
-typedef atom::nstorage< frame, boost::shared_ptr, atom::nlist > window2frame;
 //
 class window;
 
@@ -46,11 +45,11 @@ typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, oncommand_t >::t
 
 
 class window :	public atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_type_t, onkeyup_pair_type_t, onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >,
-				public atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >,
+				public atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >,
 				public boost::enable_shared_from_this< window > {
 	typedef atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_type_t, onkeyup_pair_type_t, onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >
 		base_window_t;
-	typedef atom::node< LOKI_TYPELIST_3( window2logger, window2pref, window2frame ) >
+	typedef atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >
 		base_node_t;
 public:
 	///
@@ -61,13 +60,16 @@ public:
 	~window();
 	///
 	bool
-		init();
+	init();
 	///
 	void
-		run();
+	run();
+	//
+	void
+	frame_close( frame_ptr f, frame_ptr n );
 	///
 	void
-		clear();
+	clear();
 	///
 	void onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags );
 	//
@@ -89,17 +91,11 @@ public:
 
 protected:
 	//
-	logger&
-	get_logger() { return ( *( get_value( boost::mpl::identity< window2logger >() ).item() ) ); }
+	logger_ptr
+	get_logger() { return ( get_slot< window2logger >().item() ); }
 	//
-	pref& get_pref()
-	{ return ( *( get_value( boost::mpl::identity< window2pref >() ).item() ) ); }
-	//
-	void
-	frame_split();
-	//
-	void
-	frame_close();
+	pref_ptr
+	get_pref() { return ( get_slot< window2pref >().item() ); }
 	//
 	void
 	update_hotkeys();
@@ -114,14 +110,114 @@ protected:
 	update_accel( WORD const cmd, atom::po::id_t const opt );
 
 private:
+	class area;
+	typedef boost::shared_ptr< area >
+		area_ptr;
+	///
+	typedef std::vector< frame_ptr >
+		frames_t;
 	///
 	window( logger_ptr l, pref_ptr p );
+	///
+	class area : public boost::enable_shared_from_this< area > {
+	public:
+		static area_ptr create( area_ptr p, frame_ptr f ) {
+			return ( area_ptr( new area( p, f ) ) );
+		};
+		///
+		~area() {
+		}
+		//
+		void close() {
+			if ( this->parent ){
+				area_ptr a = area_ptr(); 
+				if ( this->parent->left && this->parent->left != this->shared_from_this() ) { a = this->parent->left; }
+				if ( this->parent->top && this->parent->top != this->shared_from_this() ) { a = this->parent->top; }
+				if ( this->parent->right && this->parent->right != this->shared_from_this() ) { a = this->parent->right; }
+				if ( this->parent->bottom && this->parent->bottom != this->shared_from_this() ) { a = this->parent->bottom; }
+				//
+				this->parent->left = a->left; if ( this->parent->left ) { this->parent->left->parent = this->parent; }
+				this->parent->top = a->top; if ( this->parent->top ) { this->parent->top->parent = this->parent; }
+				this->parent->right = a->right; if ( this->parent->right ) { this->parent->right->parent = this->parent; }
+				this->parent->bottom = a->bottom; if ( this->parent->bottom ) { this->parent->bottom->parent = this->parent; }
+				this->parent->frame = a->frame;
+				//
+				a->clear();
+			}
+			this->clear();
+		}
+		//
+		area_ptr find( frame_ptr f ) {
+			area_ptr result = area_ptr();
+			if ( this->frame == f ) { result = this->shared_from_this(); }
+			if ( !result && this->left ) { result = this->left->find( f ); }
+			if ( !result && this->top ) { result = this->top->find( f ); }
+			if ( !result && this->right ) { result = this->right->find( f ); }
+			if ( !result && this->bottom ) { result = this->bottom->find( f ); }
+			return ( result );
+		}
+		//
+		void collect( frames_t& fs ) {
+			if ( this->frame ) {
+				fs.push_back( this->frame );
+			} else {
+				if ( this->left ) { this->left->collect( fs ); }
+				if ( this->top ) { this->top->collect( fs ); }
+				if ( this->right ) { this->right->collect( fs ); }
+				if ( this->bottom ) { this->bottom->collect( fs ); }
+			}
+		}
+		void split( frame_ptr f ) {
+			this->left = create( this->shared_from_this(), this->frame );
+			this->right = create( this->shared_from_this(), f );
+			this->frame = frame_ptr();
+		}
+		void rotate( bool const cw ) {
+			if ( this->parent ) {
+				area_ptr b = area_ptr();
+				std::swap( b, this->parent->left );
+				std::swap( b, this->parent->top );
+				std::swap( b, this->parent->right );
+				std::swap( b, this->parent->bottom );
+				std::swap( b, this->parent->left );
+			}
+		}
+
+	protected:
+	private:
+		area_ptr
+			parent;
+		area_ptr
+			left;
+		area_ptr
+			top;
+		area_ptr
+			right;
+		area_ptr
+			bottom;
+		frame_ptr
+			frame;
+		///
+		area( area_ptr p, frame_ptr f ) :
+				parent( p )
+			,	left()
+			,	top()
+			,	right()
+			,	bottom()
+			,	frame( f ) {
+		}
+		///
+		void clear() {
+			this->parent = this->left = this->top = this->right = this->bottom = area_ptr();
+			this->frame = frame_ptr();
+		}
+	};
+	//
+	area_ptr
+		head_area;
 	//
 	frame_ptr
 		current_frame;
-	//
-	frame_ptr
-		head_frame;
 	//
 	bool
 		expand_mode;

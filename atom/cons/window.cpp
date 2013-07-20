@@ -18,9 +18,9 @@
 			//	);
 
 window::window( logger_ptr l, pref_ptr p ) :
-wwindow( *this, INITLIST_9( &window::onkey, &window::onkey, &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
+		wwindow( *this, INITLIST_9( &window::onkey, &window::onkey, &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
+	,	head_area()
 	,	current_frame()
-	,	head_frame()
 	,	expand_mode( false )
 	,	appear_hk()
 	,	accel()
@@ -73,7 +73,7 @@ bool window::init() {
 	};
 	this->update_placement();
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
-		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref().get< unsigned int >( po_ui_alpha ) );
+		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref()->get< unsigned int >( po_ui_alpha ) );
 		//
 		(*this)
 		( preferences::pre, po_none )
@@ -86,7 +86,6 @@ bool window::init() {
 			( preferences::update, po_hk_prev )
 			( preferences::update, po_hk_ctrl_break )
 			( preferences::update, po_hk_ctrl_c )
-			( preferences::update, po_hk_terminate )
 			( preferences::update, po_hk_close )
 			( preferences::update, po_hk_tty1 )
 			( preferences::update, po_hk_tty2 )
@@ -109,8 +108,8 @@ bool window::init() {
 			( preferences::update, po_ui_scroll )
 		( preferences::post, po_none );
 		//
-		atom::mount<window2frame>( this, this->head_frame = this->current_frame = frame::create( get_slot<window2logger>().item(), get_slot<window2pref>().item(), this->shared_from_this(), frame::frame_coord( 0, 1, 0, 1, 1, 1 ) ) );
-		//
+		this->current_frame = frame::create( this->get_logger(), this->get_pref(), this->shared_from_this() );
+		this->head_area = area::create( area_ptr(), this->current_frame );
 		return true;
 	}
 	return false;
@@ -126,10 +125,8 @@ void window::run() {
 }
 
 void window::clear() {
-	while ( get_slot<window2frame>().size() ) {
-		this->frame_close();
-	}
-	this->current_frame = this->head_frame = frame_ptr();
+	this->head_area = area_ptr();
+	this->current_frame = frame_ptr();
 	base_node_t::clear();
 }
 
@@ -175,7 +172,7 @@ void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 	if ( idHotKey == this->appear_hk.id ) {
 		if ( slide_dir ) {
 			slide_dir *= -1;
-			slide_start_time += 2 * ( timeGetTime() - slide_start_time ) - get_pref().get< unsigned int >( po_ui_timeout );
+			slide_start_time += 2 * ( timeGetTime() - slide_start_time ) - get_pref()->get< unsigned int >( po_ui_timeout );
 		} else {
 			slide_dir = ((this->is_visible())?(-1):(1));
 			slide_start_time = timeGetTime();
@@ -217,6 +214,7 @@ void window::onpaint( HWND hWnd ){
 		}
 	} c( hWnd, *this );
 	//
+#if 0
 	window2frame const & l = this->get_slot< window2frame >();
 	struct _{
 		static bool __( frame_ptr const& f, context const& cntx, bool const expand ) {
@@ -254,7 +252,7 @@ void window::onpaint( HWND hWnd ){
 				f->draw( dc, rt );
 			}
 			SelectClipRgn( dc, NULL );
-			return true;
+			return false;
 		}
 	};
 	if ( this->expand_mode ) {
@@ -262,10 +260,14 @@ void window::onpaint( HWND hWnd ){
 	} else {
 		l.for_each( boost::bind( &_::__, _1, boost::ref( c ), false ) );
 	}
+#endif
 }
 
 void window::onclose( HWND ) {
-	PostQuitMessage( 0 );
+	//??????? lock mutex
+	frames_t fs;
+	this->head_area->collect( fs );
+	BOOST_FOREACH( frame_ptr f, fs ) { f->close(); }
 }
 
 void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
@@ -283,7 +285,7 @@ void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
 void window::ontimer( HWND hWnd, UINT id ){
 	if ( id == slide_timer_id ) {
 		DWORD const dt = timeGetTime() - slide_start_time;
-		DWORD const total = get_pref().get< unsigned int >( po_ui_timeout );
+		DWORD const total = get_pref()->get< unsigned int >( po_ui_timeout );
 		bool const in_dir = ( slide_dir > 0 );
 		float mult = 1.f;
 		if ( dt > total ) {
@@ -300,12 +302,15 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
-		frame_split();
+#ifndef STANDALONE
+		this->head_area->find( this->current_frame )->split( this->current_frame = this->current_frame->split() );
+#endif
 		break;
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
 		break;
 	case CMDID_ROTATE:
+		this->head_area->find( this->current_frame )->rotate( true );
 		break;
 	case CMDID_NEXT:
 		this->current_frame = this->current_frame->get_next();
@@ -319,11 +324,8 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_CTRL_C:
 		this->current_frame->process( command::cmdCtrlC, NULL );
 		break;
-	case CMDID_TERMINATE:
-		this->current_frame->process( command::cmdTerminate, NULL );
-		break;
 	case CMDID_CLOSE:
-		frame_close();
+		this->current_frame->close();
 		break;
 	case CMDID_TTY1:
 	case CMDID_TTY2:
@@ -331,7 +333,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_TTY4:
 	case CMDID_TTY5:
 	case CMDID_TTY6:
-		this->current_frame = this->current_frame->get_by_index( id - CMDID_TTY1 );
+		//this->current_frame = this->current_frame->get_by_index( id - CMDID_TTY1 );
 		break;
 	default:
 		return;
@@ -340,27 +342,17 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 }
 
 void
-window::frame_split() {
-#ifndef STANDALONE
-	atom::mount<window2frame>( this, this->current_frame = this->current_frame->split( RECT_WIDTH( this->in_rect ) > RECT_HEIGHT( this->in_rect ) ) );
-	this->head_frame->reorder();
-#endif
-}
-
-void
-window::frame_close() {
-	frame_ptr f = this->current_frame;
-	bool update_head =  ( this->head_frame == f );
-	this->current_frame = f->close();
-	atom::unmount<window2frame>( this, f );
-	//
-	if ( update_head ) {
-		this->head_frame = this->current_frame;
+window::frame_close( frame_ptr f, frame_ptr n ) {
+	//??? lock mutex
+	if ( this->current_frame == f ) {
+		this->current_frame = n;
 	}
-	if ( get_slot<window2frame>().size() ) {
-		this->head_frame->reorder();
-	} else {
-		this->onclose( this->get_hwnd() );
+	//
+	this->head_area->find( f )->close();
+	//
+	// exit application
+	if ( !this->current_frame ) {
+		PostQuitMessage( 0 );
 	}
 }
 
@@ -387,7 +379,7 @@ size_t hotkey_tags_count = sizeof( hotkey_tags ) / sizeof( hotkey_tags[0] );
 
 void
 window::update_hotkeys() {
-	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( get_pref().get< uni_string >( po_hk_appear ), hotkey_tags, hotkey_tags_count, uni_string( "+" ) );
+	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( get_pref()->get< uni_string >( po_hk_appear ), hotkey_tags, hotkey_tags_count, uni_string( "+" ) );
 	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 1 ) ) {
 		hotkey_t new_hk;
 		new_hk.mods = MOD_NOREPEAT | result.result;
@@ -405,16 +397,16 @@ window::update_hotkeys() {
 				new_hk.id++;
 				if ( RegisterHotKey( this->get_hwnd(), new_hk.id, new_hk.mods, new_hk.vk )) {
 					if ( this->appear_hk.id && !UnregisterHotKey( this->get_hwnd(), this->appear_hk.id ) ) {
-						this->get_logger() << "Hotkey unregister error" << std::endl;
+						*(this->get_logger()) << "Hotkey unregister error" << std::endl;
 					}
 					this->appear_hk = new_hk; 
 				} else {
-					this->get_logger() << "Hotkey register error" << std::endl;
+					*(this->get_logger()) << "Hotkey register error" << std::endl;
 				}
 			}
 		}
 		catch( std::exception& e ){
-			this->get_logger() << "Invalid hotkey format " << e.what()<< std::endl;
+			*(this->get_logger()) << "Invalid hotkey format " << e.what()<< std::endl;
 		}
 	}
 }
@@ -432,10 +424,10 @@ atom::parse_tag< TCHAR, alignment::type > alignment_tags[] = {
 size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
 
 void window::update_placement(){
-	uni_string const alig_str	= get_pref().get< uni_string >( po_ui_alignment );
-	unsigned int const width	= get_pref().get< unsigned int >( po_ui_width );
-	unsigned int const height	= get_pref().get< unsigned int >( po_ui_height );
-	bool const clip				= get_pref().get< bool >( po_ui_clip );
+	uni_string const alig_str	= get_pref()->get< uni_string >( po_ui_alignment );
+	unsigned int const width	= get_pref()->get< unsigned int >( po_ui_width );
+	unsigned int const height	= get_pref()->get< unsigned int >( po_ui_height );
+	bool const clip				= get_pref()->get< bool >( po_ui_clip );
 	//
 	alignment::type align = alignment::client;
 	atom::parse_result< TCHAR, alignment::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, uni_string( "+" ) );
@@ -443,7 +435,7 @@ void window::update_placement(){
 	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
 		align = result.result;
 	} else {
-		this->get_logger() << "Invalid alignment format " << alig_str << std::endl;
+		*(this->get_logger()) << "Invalid alignment format " << alig_str << std::endl;
 		align = alignment::top;
 	}
 	//
@@ -520,7 +512,7 @@ void window::update_position( HWND hWnd, bool dir, float mult ) {
 	int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
 	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
 	//
-	this->set_alpha( (BYTE)( (float)get_pref().get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
+	this->set_alpha( (BYTE)( (float)get_pref()->get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 }
 
 atom::parse_tag< TCHAR, BYTE > accel_tags[] = {
@@ -547,7 +539,7 @@ atom::parse_tag< TCHAR, WORD > vk_tags[] = {
 size_t vk_tags_count = sizeof( vk_tags ) / sizeof( vk_tags[0] );
 
 void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
-	uni_string s = get_pref().get< uni_string >( opt );
+	uni_string s = get_pref()->get< uni_string >( opt );
 	atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, uni_string( "+" ) );
 	//
 	if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
@@ -559,7 +551,7 @@ void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
 		this->accel.add_accel( cmd, mods.result | FVIRTKEY, vk.result );
 
 	} else {
-		this->get_logger() << "Invalid accelerator format format " << s << std::endl;
+		*(this->get_logger()) << "Invalid accelerator format format " << s << std::endl;
 	}
 }
 
@@ -584,7 +576,6 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 		case po_hk_prev:
 		case po_hk_ctrl_break:
 		case po_hk_ctrl_c:
-		case po_hk_terminate:
 		case po_hk_close:
 		case po_hk_tty1:
 		case po_hk_tty2:
@@ -601,7 +592,6 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 					CMDID_PREV,
 					CMDID_CTRL_BREAK,
 					CMDID_CTRL_C,
-					CMDID_TERMINATE,
 					CMDID_CLOSE,
 					CMDID_TTY1,
 					CMDID_TTY2,
@@ -614,12 +604,12 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 				break;
 			}
 		case po_ui_bk_color:
-			this->paint_param.bk_brush = CreateSolidBrush( get_pref().get< unsigned int >( opt ) );
+			this->paint_param.bk_brush = CreateSolidBrush( get_pref()->get< unsigned int >( opt ) );
 			break;
 		case po_ui_font_text:
 		case po_ui_font_sys:
 			{
-				uni_string s = get_pref().get< uni_string >( opt );
+				uni_string s = get_pref()->get< uni_string >( opt );
 				atom::attributes< TCHAR > a( s, d1, d2 );
 				HFONT f = CreateFont(
 					a.as<unsigned int>(_T("height") ),
@@ -651,7 +641,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 						break;
 					};
 				} else {
-					this->get_logger() << "Text font creation error: " << s << std::endl;
+					*(this->get_logger()) << "Text font creation error: " << s << std::endl;
 				}
 				break;
 			}
@@ -660,7 +650,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 			break;
 		case po_ui_border:
 			{
-				atom::attributes< TCHAR > a( get_pref().get< uni_string >( opt ), d1, d2 );
+				atom::attributes< TCHAR > a( get_pref()->get< uni_string >( opt ), d1, d2 );
 				this->paint_param.border_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
 				this->paint_param.border_brush_inactive	= CreateSolidBrush( a.as_color( _T("inactive") ) );
 				this->paint_param.border_size			= a.as<unsigned int>(_T("size") );
@@ -668,13 +658,13 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 			}
 		case po_ui_padding:
 			{
-				atom::attributes< TCHAR > a( get_pref().get< uni_string >( opt ), d1, d2 );
+				atom::attributes< TCHAR > a( get_pref()->get< uni_string >( opt ), d1, d2 );
 				this->paint_param.padding_size			= a.as<unsigned int>(_T("size") );
 				break;
 			}
 		case po_ui_scroll:
 			{
-				atom::attributes< TCHAR > a( get_pref().get< uni_string >( opt ), d1, d2 );
+				atom::attributes< TCHAR > a( get_pref()->get< uni_string >( opt ), d1, d2 );
 				this->paint_param.scroll_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
 				this->paint_param.scroll_size			= a.as<unsigned int>(_T("size") );
 				break;

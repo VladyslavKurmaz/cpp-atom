@@ -35,11 +35,11 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		boost::program_options::value<bool>()->default_value( false ),							"Start on Windows startup", desc ).
 		//[hk.*]
 		add_option( po_hk_appear,				"hk.appear",
-		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+][vk]", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+0xC0"),				"[win+][ctrl+][alt+][shift+]vk", desc ).
 		add_option( po_hk_split,				"hk.split",
 		boost::program_options::value<std::string>()->default_value("ctrl+S"),					"", desc ).
 		add_option( po_hk_expand,				"hk.expand",
-		boost::program_options::value<std::string>()->default_value("ctrl+Q"),					"", desc ).
+		boost::program_options::value<std::string>()->default_value("ctrl+W"),					"", desc ).
 		add_option( po_hk_rotate,				"hk.rotate",
 		boost::program_options::value<std::string>()->default_value("ctrl+A"),					"", desc ).
 		add_option( po_hk_next,					"hk.next",
@@ -50,8 +50,6 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		boost::program_options::value<std::string>()->default_value("ctrl+break"),				"", desc ).
 		add_option( po_hk_ctrl_c,				"hk.ctrl_c",
 		boost::program_options::value<std::string>()->default_value("ctrl+C"),					"", desc ).
-		add_option( po_hk_terminate,			"hk.terminate",
-		boost::program_options::value<std::string>()->default_value("ctrl+T"),					"", desc ).
 		add_option( po_hk_close,				"hk.close",
 		boost::program_options::value<std::string>()->default_value("ctrl+f4"),					"", desc ).
 		add_option( po_hk_tty1,					"hk.tty1",

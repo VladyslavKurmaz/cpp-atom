@@ -33,24 +33,6 @@ todo
 - restore CInt build and samples
 - build tests with msvc10|msvc11, x32|x64
 
-cons:
-- hotkey definition with char (not only vk codes)
-+ parse hotkey strings
-- commands' history
-- CLI for cons configuration
-- states
-- self test on start - check hotkeys
-- close frame
-- rotate frame
-- console mapping between two processes
-- share keyboard state between main application andchild console
-- ctrl+break, ctr+c, correct exit after pressing prev combinations
-- close from all processes in chain
-- languages other than english
-- run param +caption, +prefix, +nocolor
-- hide consd inside cons resource
-- ctrl+c, ctrl+v, ctrl+ins, shift+ins
-- process mouse events
 
 
 build
