@@ -33,9 +33,6 @@ public:
 	///
 	void
 	draw( HDC dc, RECT const& rt );
-	///
-	uni_string
-	get_caption() const;
 
 protected:
 	//

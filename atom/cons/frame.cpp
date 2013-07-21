@@ -59,10 +59,3 @@ void frame::draw( HDC dc, RECT const& rt ) {
 	DrawText( dc, "A", 1, &rect, DT_LEFT | DT_TOP | DT_CALCRECT );
 	//this->cmpp.draw( dc, rt, rect.right, rect.bottom );
 }
-
-uni_string frame::get_caption() const {
-	std::stringstream ss;
-	ss << /*this->process_caption << */" #";
-	return ( ss.str() );
-}
-

@@ -242,7 +242,9 @@ void window::onpaint( HWND hWnd ){
 			{
 				SelectObject( dc, cntx.pp.font_sys );
 				SetTextColor( dc, cntx.pp.font_sys_color );
-				DrawText( dc, f->get_caption().c_str(), -1, &rt, DT_RIGHT | DT_TOP | DT_SINGLELINE );
+				std::stringstream ss;
+				ss << " #" << 1;
+				DrawText( dc, ss.str().c_str(), -1, &rt, DT_RIGHT | DT_TOP | DT_SINGLELINE );
 				//
 				SelectObject( dc, cntx.pp.font_text );
 				SetTextColor( dc, cntx.pp.font_text_color );
