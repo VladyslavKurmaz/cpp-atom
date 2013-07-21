@@ -324,8 +324,12 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame->process( command::cmdCtrlC, NULL );
 		break;
 	case CMDID_CLOSE:
-		this->current_frame->close();
-		break;
+		{
+			//??? looks like workaround, needs improvements
+			frame_ptr f = this->current_frame;
+			f->close();
+			break;
+		}
 	case CMDID_TTY1:
 	case CMDID_TTY2:
 	case CMDID_TTY3:

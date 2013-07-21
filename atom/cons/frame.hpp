@@ -50,12 +50,6 @@ private:
 	uni_string
 		buffer;
 	///
-	frame_ptr
-		next;
-	///
-	frame_ptr
-		prev;
-	///
 	//cons_mpp
 	//	cmpp;
 	///
