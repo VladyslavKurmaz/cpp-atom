@@ -11,8 +11,6 @@
 
 frame::frame( logger_ptr l, pref_ptr p, window_ptr w ) :
 		buffer()
-	,	next()
-	,	prev()
 	//,	cmpp()
 	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
@@ -31,29 +29,9 @@ frame::frame( logger_ptr l, pref_ptr p, window_ptr w ) :
 frame::~frame() {
 }
 
-	//frame_coord fc = this->coord;
-	//if ( ( this->coord.width < this->coord.height) || ( ( this->coord.width == this->coord.height ) && pref_h ) ) {
-	//	// split vertical
-	//	this->coord.width *= 2;
-	//	fc.width *= 2;
-	//	fc.left = fc.left + fraction( 1, fc.width );
-	//} else if ( ( this->coord.width > this->coord.height) || ( ( this->coord.width == this->coord.height ) && !pref_h ) ) {
-	//	// split horizontal
-	//	this->coord.height *= 2;
-	//	fc.height *= 2;
-	//	fc.top = fc.top + fraction( 1, fc.height );
-	//}
-
 frame_ptr frame::split(){
 #ifndef STANDALONE
 	frame_ptr f = create( get_slot<frame2logger>().item(), get_slot<frame2pref>().item(), get_slot<frame2window>().item() );
-	//
-	frame_ptr l = this->shared_from_this();
-	frame_ptr r = l->get_next();
-	//
-	std::swap( l->next, f->next );
-	std::swap( r->prev, f->prev );
-	//
 	return f;
 #else
 	return ( this->shared_from_this() );
@@ -66,14 +44,7 @@ void frame::close() {
 	//this->cmpp.close();
 
 	// ??? move code below to the async close notification from console
-	frame_ptr f = frame_ptr();
-	if ( ( this->get_next() != this->shared_from_this() ) && ( this->get_prev() != this->shared_from_this() ) ) {
-		f = this->get_next();
-		this->next->prev = this->get_prev();
-		this->prev->next = this->get_next();
-	}
-	this->next = this->prev = frame_ptr();
-	get_slot<frame2window>().item()->frame_close( this->shared_from_this(), f );
+	get_slot<frame2window>().item()->frame_close( this->shared_from_this() );
 	base_node_t::clear();
 }
 

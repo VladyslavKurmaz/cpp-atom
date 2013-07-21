@@ -66,7 +66,7 @@ public:
 	run();
 	//
 	void
-	frame_close( frame_ptr f, frame_ptr n );
+	frame_close( frame_ptr f );
 	///
 	void
 	clear();
@@ -182,8 +182,68 @@ private:
 				std::swap( b, this->parent->left );
 			}
 		}
+		frame_ptr next() {
+			if ( this->parent ) {
+				return ( this->parent->search( this->shared_from_this(), true, true ) );
+			}
+			return ( this->frame );
+		}
+		frame_ptr prev() {
+			if ( this->parent ) {
+				return ( this->parent->search( this->shared_from_this(), true, false) );
+			}
+			return ( this->frame );
+		}
+		void draw( boost::function< void( frame_ptr const&, frame_coord const& ) > func, frame_coord const& c ) {
+			if ( this->frame ) {
+				func( this->frame, c );
+			} else {
+				fraction l = c.left + fraction( 1, c.width * 2 );
+				fraction t = c.top + fraction( 1, c.height * 2 );
+
+				if ( this->left )	{ this->left->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), c.width * 2, c.height ) ); }
+				if ( this->top )	{ this->top->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), c.width, c.height * 2 ) ); }
+				if ( this->right )	{ this->right->draw( func, frame_coord( l.get_n(), l.get_d(), c.top.get_n(), c.top.get_d(), c.width * 2, c.height ) ); }
+				if ( this->bottom ) { this->bottom->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), t.get_n(), t.get_d(), c.width, c.height * 2 ) ); }
+			}
+		}
 
 	protected:
+		///
+		area_ptr get( bool const f ) {
+			if ( f ) {
+				if ( this->left ) {
+					return ( this->left );
+				} else if ( this->top ) {
+					return ( this->top );
+				}
+			} else {
+				if ( this->right ) {
+					return ( this->right );
+				} else if ( this->bottom ) {
+					return ( this->bottom );
+				}
+			}
+			assert( false );
+			return ( area_ptr() );
+		}
+
+		frame_ptr search( area_ptr a, bool const up, bool const n ) {
+			if ( this->frame ) {
+				return ( this->frame );
+			} else {
+				if ( up ) {
+					// moving up
+					if ( ( this->parent ) && ( this->get( !n ) == a ) ) {
+						return ( this->parent->search( this->shared_from_this(), up, n ) );
+					}
+					return ( this->get( !( this->get( true ) == a ) )->search( area_ptr(), false, n ) );
+				} else {
+					// moving down
+					return ( this->get( n )->search( area_ptr(), up, n ) );
+				}
+			}
+		}
 	private:
 		area_ptr
 			parent;

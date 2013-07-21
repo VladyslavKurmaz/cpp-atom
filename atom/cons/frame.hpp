@@ -17,18 +17,10 @@ class frame :
 public:
 	///
 	static frame_ptr create( logger_ptr l, pref_ptr p, window_ptr w ) {
-		frame_ptr f = frame_ptr( new frame( l, p, w ) );
-		f->next = f->prev = f;
-		return ( f );
+		return ( frame_ptr( new frame( l, p, w ) ) );
 	}
 	///
 	~frame();
-	///
-	frame_ptr
-	get_prev() const { return ( this->prev ); }
-	///
-	frame_ptr
-	get_next() const { return ( this->next ); }
 	///
  	frame_ptr
 	split();

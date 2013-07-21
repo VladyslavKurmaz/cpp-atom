@@ -214,15 +214,12 @@ void window::onpaint( HWND hWnd ){
 		}
 	} c( hWnd, *this );
 	//
-#if 0
-	window2frame const & l = this->get_slot< window2frame >();
 	struct _{
-		static bool __( frame_ptr const& f, context const& cntx, bool const expand ) {
+		static void __( frame_ptr const& f, frame_coord const& coord, context const& cntx ) {
 			HDC dc = cntx.pp.mem_dc;
 			RECT rt;
 			int const rw = cntx.rect.right - cntx.rect.left;
 			int const rh = cntx.rect.bottom - cntx.rect.top;
-			frame::frame_coord const& coord = ((expand)?(frame::frame_coord( 0, 1, 0, 1, 1, 1 )):(f->get_coord()));
 			rt.left 	= cntx.rect.left + coord.left.get_n() * rw / coord.left.get_d();
 			rt.top 		= cntx.rect.top + coord.top.get_n() * rh / coord.top.get_d();
 			rt.right	= rt.left + rw / coord.width;
@@ -252,15 +249,14 @@ void window::onpaint( HWND hWnd ){
 				f->draw( dc, rt );
 			}
 			SelectClipRgn( dc, NULL );
-			return false;
 		}
 	};
+	frame_coord coord( 0, 1, 0, 1, 1, 1 );
 	if ( this->expand_mode ) {
-		_::__( this->current_frame, c, true );
+		_::__( this->current_frame, coord, c );
 	} else {
-		l.for_each( boost::bind( &_::__, _1, boost::ref( c ), false ) );
+		this->head_area->draw( boost::bind( &_::__, _1, _2, boost::ref( c ) ), coord );
 	}
-#endif
 }
 
 void window::onclose( HWND ) {
@@ -302,10 +298,13 @@ void window::ontimer( HWND hWnd, UINT id ){
 void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case CMDID_SPLIT:
+		{
 #ifndef STANDALONE
-		this->head_area->find( this->current_frame )->split( this->current_frame = this->current_frame->split() );
+			area_ptr a = this->head_area->find( this->current_frame );
+			a->split( this->current_frame = this->current_frame->split() );
 #endif
-		break;
+			break;
+		}
 	case CMDID_EXPAND:
 		this->expand_mode = !this->expand_mode;
 		break;
@@ -313,10 +312,10 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->head_area->find( this->current_frame )->rotate( true );
 		break;
 	case CMDID_NEXT:
-		this->current_frame = this->current_frame->get_next();
+		this->current_frame = this->head_area->find( this->current_frame )->next();
 		break;
 	case CMDID_PREV:
-		this->current_frame = this->current_frame->get_prev();
+		this->current_frame = this->head_area->find( this->current_frame )->prev();
 		break;
 	case CMDID_CTRL_BREAK:
 		this->current_frame->process( command::cmdCtrlBreak, NULL );
@@ -342,10 +341,13 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 }
 
 void
-window::frame_close( frame_ptr f, frame_ptr n ) {
+window::frame_close( frame_ptr f ) {
 	//??? lock mutex
 	if ( this->current_frame == f ) {
-		this->current_frame = n;
+		this->current_frame = this->head_area->find( this->current_frame )->next();
+		if ( this->current_frame == f ) {
+			this->current_frame = frame_ptr();
+		}
 	}
 	//
 	this->head_area->find( f )->close();
