@@ -311,7 +311,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->expand_mode = !this->expand_mode;
 		break;
 	case CMDID_ROTATE:
-		this->head_area->find( this->current_frame )->rotate( true );
+		this->head_area->find( this->current_frame )->rotate();
 		break;
 	case CMDID_NEXT:
 		this->current_frame = this->head_area->find( this->current_frame )->next();

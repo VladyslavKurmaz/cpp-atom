@@ -1,7 +1,6 @@
 #pragma once
 #include "./classes.hpp"
 
-
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > window2logger;
 typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > window2pref;
 //
@@ -131,15 +130,12 @@ private:
 		void close() {
 			if ( this->parent ){
 				area_ptr a = area_ptr(); 
-				if ( this->parent->left && this->parent->left != this->shared_from_this() ) { a = this->parent->left; }
-				if ( this->parent->top && this->parent->top != this->shared_from_this() ) { a = this->parent->top; }
-				if ( this->parent->right && this->parent->right != this->shared_from_this() ) { a = this->parent->right; }
-				if ( this->parent->bottom && this->parent->bottom != this->shared_from_this() ) { a = this->parent->bottom; }
+				if ( this->parent->first != this->shared_from_this() ) { a = this->parent->first; }
+				if ( this->parent->second != this->shared_from_this() ) { a = this->parent->second; }
 				//
-				this->parent->left = a->left; if ( this->parent->left ) { this->parent->left->parent = this->parent; }
-				this->parent->top = a->top; if ( this->parent->top ) { this->parent->top->parent = this->parent; }
-				this->parent->right = a->right; if ( this->parent->right ) { this->parent->right->parent = this->parent; }
-				this->parent->bottom = a->bottom; if ( this->parent->bottom ) { this->parent->bottom->parent = this->parent; }
+				this->parent->vert = a->vert;
+				this->parent->first = a->first; if ( this->parent->first ) { this->parent->first->parent = this->parent; }
+				this->parent->second = a->second; if ( this->parent->second ) { this->parent->second->parent = this->parent; }
 				this->parent->frame = a->frame;
 				//
 				a->clear();
@@ -150,10 +146,8 @@ private:
 		area_ptr find( frame_ptr f ) {
 			area_ptr result = area_ptr();
 			if ( this->frame == f ) { result = this->shared_from_this(); }
-			if ( !result && this->left ) { result = this->left->find( f ); }
-			if ( !result && this->top ) { result = this->top->find( f ); }
-			if ( !result && this->right ) { result = this->right->find( f ); }
-			if ( !result && this->bottom ) { result = this->bottom->find( f ); }
+			if ( !result && this->first ) { result = this->first->find( f ); }
+			if ( !result && this->second ) { result = this->second->find( f ); }
 			return ( result );
 		}
 		//
@@ -161,25 +155,22 @@ private:
 			if ( this->frame ) {
 				fs.push_back( this->frame );
 			} else {
-				if ( this->left ) { this->left->collect( fs ); }
-				if ( this->top ) { this->top->collect( fs ); }
-				if ( this->right ) { this->right->collect( fs ); }
-				if ( this->bottom ) { this->bottom->collect( fs ); }
+				this->first->collect( fs );
+				this->second->collect( fs );
 			}
 		}
 		void split( frame_ptr f ) {
-			this->left = create( this->shared_from_this(), this->frame );
-			this->right = create( this->shared_from_this(), f );
+			this->vert = true;
+			this->first = create( this->shared_from_this(), this->frame );
+			this->second = create( this->shared_from_this(), f );
 			this->frame = frame_ptr();
 		}
-		void rotate( bool const cw ) {
+		void rotate() {
 			if ( this->parent ) {
-				area_ptr b = area_ptr();
-				std::swap( b, this->parent->left );
-				std::swap( b, this->parent->top );
-				std::swap( b, this->parent->right );
-				std::swap( b, this->parent->bottom );
-				std::swap( b, this->parent->left );
+				this->parent->vert = !this->parent->vert;  
+				if ( this->parent->vert ) {
+					std::swap( this->parent->first, this->parent->second );
+				}
 			}
 		}
 		frame_ptr next() {
@@ -198,13 +189,13 @@ private:
 			if ( this->frame ) {
 				func( this->frame, c );
 			} else {
-				fraction l = c.left + fraction( 1, c.width * 2 );
-				fraction t = c.top + fraction( 1, c.height * 2 );
-
-				if ( this->left )	{ this->left->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), c.width * 2, c.height ) ); }
-				if ( this->top )	{ this->top->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), c.width, c.height * 2 ) ); }
-				if ( this->right )	{ this->right->draw( func, frame_coord( l.get_n(), l.get_d(), c.top.get_n(), c.top.get_d(), c.width * 2, c.height ) ); }
-				if ( this->bottom ) { this->bottom->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), t.get_n(), t.get_d(), c.width, c.height * 2 ) ); }
+				fraction const l = ((this->vert)?( c.left + fraction( 1, c.width * 2 ) ):( c.left ) );
+				fraction const t = ((this->vert)?( c.top ):( c.top + fraction( 1, c.height * 2 ) ) );
+				unsigned int const w = ((this->vert)?(c.width * 2):(c.width));
+				unsigned int const h = ((this->vert)?(c.height):(c.height * 2));
+				//
+				this->first->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), w, h ) );
+				this->second->draw( func, frame_coord( l.get_n(), l.get_d(), t.get_n(), t.get_d(), w, h ) );
 			}
 		}
 
@@ -212,20 +203,9 @@ private:
 		///
 		area_ptr get( bool const f ) {
 			if ( f ) {
-				if ( this->left ) {
-					return ( this->left );
-				} else if ( this->top ) {
-					return ( this->top );
-				}
-			} else {
-				if ( this->right ) {
-					return ( this->right );
-				} else if ( this->bottom ) {
-					return ( this->bottom );
-				}
+				return ( this->first );
 			}
-			assert( false );
-			return ( area_ptr() );
+			return ( this->second );
 		}
 
 		frame_ptr search( area_ptr a, bool const up, bool const n ) {
@@ -247,28 +227,25 @@ private:
 	private:
 		area_ptr
 			parent;
+		bool
+			vert;
 		area_ptr
-			left;
+			first;
 		area_ptr
-			top;
-		area_ptr
-			right;
-		area_ptr
-			bottom;
+			second;
 		frame_ptr
 			frame;
 		///
 		area( area_ptr p, frame_ptr f ) :
 				parent( p )
-			,	left()
-			,	top()
-			,	right()
-			,	bottom()
+			,	vert( false )
+			,	first()
+			,	second()
 			,	frame( f ) {
 		}
 		///
 		void clear() {
-			this->parent = this->left = this->top = this->right = this->bottom = area_ptr();
+			this->parent = this->first = this->second = area_ptr();
 			this->frame = frame_ptr();
 		}
 	};
