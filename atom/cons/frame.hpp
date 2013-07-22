@@ -22,6 +22,12 @@ public:
 	///
 	~frame();
 	///
+	void
+	set_index( unsigned int const i ) { this->index = i; }
+	///
+	unsigned int
+	get_index() const { return ( this->index ); }
+	///
  	frame_ptr
 	split();
 	///
@@ -43,6 +49,9 @@ protected:
 	get_pref() { return ( *( get_slot<frame2pref>().item() ) ); }
 
 private:
+	///
+	unsigned int
+		index;
 	//
 	uni_string
 		buffer;

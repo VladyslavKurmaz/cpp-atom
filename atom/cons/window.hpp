@@ -120,8 +120,12 @@ private:
 	///
 	class area : public boost::enable_shared_from_this< area > {
 	public:
-		static area_ptr create( area_ptr p, frame_ptr f ) {
-			return ( area_ptr( new area( p, f ) ) );
+		static area_ptr create( area_ptr p, frame_ptr f, bool const r ) {
+			area_ptr a = area_ptr( new area( p, f ) );
+			if ( a ) {
+				a->reorder();
+			} 
+			return ( a );
 		};
 		///
 		~area() {
@@ -139,6 +143,7 @@ private:
 				this->parent->frame = a->frame;
 				//
 				a->clear();
+				this->parent->reorder();
 			}
 			this->clear();
 		}
@@ -151,7 +156,15 @@ private:
 			return ( result );
 		}
 		//
-		void collect( frames_t& fs ) {
+		frame_ptr find( unsigned int const i ) {
+			frame_ptr result = frame_ptr();
+			if ( this->frame && ( this->frame->get_index() == i ) ) { result = this->frame; }
+			if ( !result && this->first ) { result = this->first->find( i ); }
+			if ( !result && this->second ) { result = this->second->find( i ); }
+			return ( result );
+		}
+		//
+		void collect( frames_t& fs ) const {
 			if ( this->frame ) {
 				fs.push_back( this->frame );
 			} else {
@@ -161,9 +174,10 @@ private:
 		}
 		void split( frame_ptr f ) {
 			this->vert = true;
-			this->first = create( this->shared_from_this(), this->frame );
-			this->second = create( this->shared_from_this(), f );
+			this->first = create( this->shared_from_this(), this->frame, false );
+			this->second = create( this->shared_from_this(), f, false );
 			this->frame = frame_ptr();
+			this->reorder();
 		}
 		void rotate() {
 			if ( this->parent ) {
@@ -172,6 +186,7 @@ private:
 					std::swap( this->parent->first, this->parent->second );
 				}
 			}
+			this->reorder();
 		}
 		frame_ptr next() {
 			if ( this->parent ) {
@@ -185,7 +200,7 @@ private:
 			}
 			return ( this->frame );
 		}
-		void draw( boost::function< void( frame_ptr const&, frame_coord const& ) > func, frame_coord const& c ) {
+		void draw( boost::function< void( frame_ptr const&, frame_coord const& ) > func, frame_coord const& c ) const {
 			if ( this->frame ) {
 				func( this->frame, c );
 			} else {
@@ -201,13 +216,13 @@ private:
 
 	protected:
 		///
-		area_ptr get( bool const f ) {
+		area_ptr get( bool const f ) const {
 			if ( f ) {
 				return ( this->first );
 			}
 			return ( this->second );
 		}
-
+		///
 		frame_ptr search( area_ptr a, bool const up, bool const n ) {
 			if ( this->frame ) {
 				return ( this->frame );
@@ -222,6 +237,24 @@ private:
 					// moving down
 					return ( this->get( n )->search( area_ptr(), up, n ) );
 				}
+			}
+		}
+		///
+		void reorder() {
+			unsigned int i = 0;
+			area_ptr a = this->shared_from_this();
+			while( a->parent ) {
+				a = a->parent;
+			}
+			a->reorder( i );
+		}
+		///
+		void reorder( unsigned int& i ) const {
+			if ( this->frame ) {
+				this->frame->set_index( ++i );
+			} else {
+				this->first->reorder( i );
+				this->second->reorder( i );
 			}
 		}
 	private:

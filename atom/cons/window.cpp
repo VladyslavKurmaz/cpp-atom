@@ -109,7 +109,7 @@ bool window::init() {
 		( preferences::post, po_none );
 		//
 		this->current_frame = frame::create( this->get_logger(), this->get_pref(), this->shared_from_this() );
-		this->head_area = area::create( area_ptr(), this->current_frame );
+		this->head_area = area::create( area_ptr(), this->current_frame, true );
 		return true;
 	}
 	return false;
@@ -243,7 +243,7 @@ void window::onpaint( HWND hWnd ){
 				SelectObject( dc, cntx.pp.font_sys );
 				SetTextColor( dc, cntx.pp.font_sys_color );
 				std::stringstream ss;
-				ss << " #" << 1;
+				ss << " #" << f->get_index();
 				DrawText( dc, ss.str().c_str(), -1, &rt, DT_RIGHT | DT_TOP | DT_SINGLELINE );
 				//
 				SelectObject( dc, cntx.pp.font_text );
@@ -311,7 +311,9 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->expand_mode = !this->expand_mode;
 		break;
 	case CMDID_ROTATE:
-		this->head_area->find( this->current_frame )->rotate();
+		if ( !this->expand_mode ) {
+			this->head_area->find( this->current_frame )->rotate();
+		}
 		break;
 	case CMDID_NEXT:
 		this->current_frame = this->head_area->find( this->current_frame )->next();
@@ -330,6 +332,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 			//??? looks like workaround, needs improvements
 			frame_ptr f = this->current_frame;
 			f->close();
+			this->expand_mode = false;
 			break;
 		}
 	case CMDID_TTY1:
@@ -338,8 +341,13 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_TTY4:
 	case CMDID_TTY5:
 	case CMDID_TTY6:
-		//this->current_frame = this->current_frame->get_by_index( id - CMDID_TTY1 );
-		break;
+		{
+			frame_ptr f = this->head_area->find( id - CMDID_TTY1 + 1 );
+			if ( f ) {
+				this->current_frame = f;
+			}
+			break;
+		}
 	default:
 		return;
 	}
