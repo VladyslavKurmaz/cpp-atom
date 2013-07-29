@@ -33,12 +33,12 @@
 #	define ATOM_DBG_MARK_END( _1, _2, _3, _4 )	} _CrtMemState _2, _3; _CrtMemCheckpoint( &_2 ); if ( _CrtMemDifference( &_3, &_1, &_2 ) ) { _CrtMemDumpStatistics( &_3 ); _CrtDumpMemoryLeaks(); assert( _4 ); }
 #endif
 
-namespace z3d { namespace dbg {
+namespace atom {
 	//-------------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------------
 
-} }
+}
 
 #else
 #	define ATOM_DBG_MARK_BEGIN( _1, _Br )

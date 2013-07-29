@@ -1,6 +1,6 @@
 #pragma once
 #include "./classes.hpp"
-#include "./cons_mpp.hpp"
+#include "./bridge.hpp"
 
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > frame2logger;
@@ -35,31 +35,34 @@ public:
 	close();
 	///
 	void
-	process( command::type const id, void const* param );
+	process( bridge_msg::type const id, void const* param );
 	///
 	void
 	draw( HDC dc, RECT const& rt );
 
 protected:
 	//
-	logger&
-	get_logger() { return ( *( get_slot<frame2logger>().item() ) ); }
+	logger_ptr
+	get_logger() { return ( get_slot<frame2logger>().item() ); }
 	//
-	pref&
-	get_pref() { return ( *( get_slot<frame2pref>().item() ) ); }
+	pref_ptr
+	get_pref() { return ( get_slot<frame2pref>().item() ); }
+	///
+	window_ptr
+	get_window() { return ( get_slot<frame2window>().item() ); }
 
 private:
 	///
 	unsigned int
 		index;
-	//
-	uni_string
+	///
+	string_t
 		buffer;
 	///
-	//cons_mpp
-	//	cmpp;
+	bridge
+		brdg;
 	///
-	uni_string
+	string_t
 		process_caption;
 	///
 	frame( logger_ptr l, pref_ptr p, window_ptr w );

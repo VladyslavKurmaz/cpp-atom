@@ -10,7 +10,7 @@
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
-			//uni_string s(
+			//::string_t s(
 			//	"cmd.exe"
 			//	//"d:\\work\\env\\cygwin\\bin\\bash.exe --login -i"
 			//	//"powershell.exe"
@@ -160,7 +160,7 @@ void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
 		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 	//this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
-	this->current_frame->process( command::cmdKbrd, &key );
+	this->current_frame->process( bridge_msg::bmKbrd, &key );
 	this->invalidate();
 
 }
@@ -322,10 +322,10 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame = this->head_area->find( this->current_frame )->prev();
 		break;
 	case CMDID_CTRL_BREAK:
-		this->current_frame->process( command::cmdCtrlBreak, NULL );
+		this->current_frame->process( bridge_msg::bmCtrlBreak, NULL );
 		break;
 	case CMDID_CTRL_C:
-		this->current_frame->process( command::cmdCtrlC, NULL );
+		this->current_frame->process( bridge_msg::bmCtrlC, NULL );
 		break;
 	case CMDID_CLOSE:
 		{
@@ -395,7 +395,7 @@ size_t hotkey_tags_count = sizeof( hotkey_tags ) / sizeof( hotkey_tags[0] );
 
 void
 window::update_hotkeys() {
-	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( get_pref()->get< uni_string >( po_hk_appear ), hotkey_tags, hotkey_tags_count, uni_string( "+" ) );
+	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( get_pref()->get< ::string_t >( po_hk_appear ), hotkey_tags, hotkey_tags_count, ::string_t( "+" ) );
 	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 1 ) ) {
 		hotkey_t new_hk;
 		new_hk.mods = MOD_NOREPEAT | result.result;
@@ -440,13 +440,13 @@ atom::parse_tag< TCHAR, alignment::type > alignment_tags[] = {
 size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
 
 void window::update_placement(){
-	uni_string const alig_str	= get_pref()->get< uni_string >( po_ui_alignment );
+	::string_t const alig_str	= get_pref()->get< ::string_t >( po_ui_alignment );
 	unsigned int const width	= get_pref()->get< unsigned int >( po_ui_width );
 	unsigned int const height	= get_pref()->get< unsigned int >( po_ui_height );
 	bool const clip				= get_pref()->get< bool >( po_ui_clip );
 	//
 	alignment::type align = alignment::client;
-	atom::parse_result< TCHAR, alignment::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, uni_string( "+" ) );
+	atom::parse_result< TCHAR, alignment::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, ::string_t( "+" ) );
 	//
 	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
 		align = result.result;
@@ -555,8 +555,8 @@ atom::parse_tag< TCHAR, WORD > vk_tags[] = {
 size_t vk_tags_count = sizeof( vk_tags ) / sizeof( vk_tags[0] );
 
 void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
-	uni_string s = get_pref()->get< uni_string >( opt );
-	atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, uni_string( "+" ) );
+	::string_t s = get_pref()->get< ::string_t >( opt );
+	atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, ::string_t( "+" ) );
 	//
 	if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
 		atom::parse_result< TCHAR, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
@@ -575,8 +575,8 @@ void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
 window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
 	if ( mode == preferences::pre ) {
 	} else if ( mode == preferences::update ) {
-		uni_string const d1( _T( ";" ) );
-		uni_string const d2( _T( ":" ) );
+		::string_t const d1( _T( ";" ) );
+		::string_t const d2( _T( ":" ) );
 		//
 		switch( opt ) {
 		case po_autostart:
@@ -625,7 +625,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 		case po_ui_font_text:
 		case po_ui_font_sys:
 			{
-				uni_string s = get_pref()->get< uni_string >( opt );
+				::string_t s = get_pref()->get< ::string_t >( opt );
 				atom::attributes< TCHAR > a( s, d1, d2 );
 				HFONT f = CreateFont(
 					a.as<unsigned int>(_T("height") ),
@@ -641,7 +641,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 					CLIP_DEFAULT_PRECIS,
 					DEFAULT_QUALITY,
 					FIXED_PITCH,
-					a.as<uni_string>(_T("name") ).c_str()
+					a.as<::string_t>(_T("name") ).c_str()
 					);
 				unsigned int color = a.as_color( _T("color") );
 				//
@@ -666,7 +666,7 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 			break;
 		case po_ui_border:
 			{
-				atom::attributes< TCHAR > a( get_pref()->get< uni_string >( opt ), d1, d2 );
+				atom::attributes< TCHAR > a( get_pref()->get< ::string_t >( opt ), d1, d2 );
 				this->paint_param.border_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
 				this->paint_param.border_brush_inactive	= CreateSolidBrush( a.as_color( _T("inactive") ) );
 				this->paint_param.border_size			= a.as<unsigned int>(_T("size") );
@@ -674,13 +674,13 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 			}
 		case po_ui_padding:
 			{
-				atom::attributes< TCHAR > a( get_pref()->get< uni_string >( opt ), d1, d2 );
+				atom::attributes< TCHAR > a( get_pref()->get< ::string_t >( opt ), d1, d2 );
 				this->paint_param.padding_size			= a.as<unsigned int>(_T("size") );
 				break;
 			}
 		case po_ui_scroll:
 			{
-				atom::attributes< TCHAR > a( get_pref()->get< uni_string >( opt ), d1, d2 );
+				atom::attributes< TCHAR > a( get_pref()->get< ::string_t >( opt ), d1, d2 );
 				this->paint_param.scroll_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
 				this->paint_param.scroll_size			= a.as<unsigned int>(_T("size") );
 				break;

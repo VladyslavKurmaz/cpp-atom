@@ -1,52 +1,6 @@
 #pragma once
+#include "./classes.hpp"
 
-namespace atom {
-	class mutex : public boost::noncopyable {
-		typedef std::basic_string< TCHAR >
-			string_t;
-	public:
-		///
-		mutex() :
-				m( NULL )
-			,	timeout( INFINITE ) {
-		}
-		///
-		~mutex() {
-		}
-		///
-		bool
-		create( string_t const& name, bool owner ) {
-			return ( NULL != ( this->m = CreateMutex( NULL, owner, name.c_str() ) ) );
-		}
-		///
-		void
-		lock() const {
-			switch ( WaitForSingleObject( this->m, this->timeout ) ) {
-			case WAIT_ABANDONED:
-				break;
-			case WAIT_OBJECT_0:
-				break;
-			case WAIT_TIMEOUT:
-				break;
-			case WAIT_FAILED:
-				break;
-			}
-		}
-		///
-		void
-		unlock() const {
-			ReleaseMutex( this->m );
-		}
-	protected:
-	private:
-		///
-		HANDLE
-			m;
-		///
-		DWORD
-			timeout;
-	};
-}
 
 class cons_mpp : public boost::noncopyable {
 	///

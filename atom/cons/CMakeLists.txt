@@ -10,6 +10,7 @@ add_executable(
 	"./pref.cpp"
 	"./window.cpp"
 	"./cons_mpp.cpp"
+	"./bridge.cpp"
 )
 
 add_executable( 
@@ -17,4 +18,5 @@ add_executable(
 	"./pch.cpp"
 	"./consd.cpp"
 	"./cons_mpp.cpp"
+	"./bridge.cpp"
 )

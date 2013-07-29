@@ -2,7 +2,7 @@
 #pragma warning(disable : 4996)
 #pragma warning(disable : 4355)
 
-//#define STANDALONE
+#define STANDALONE
 
 #include <windows.h>
 
@@ -13,6 +13,7 @@
 #include <boost/interprocess/windows_shared_memory.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/thread.hpp>
 
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
@@ -36,7 +37,9 @@
 #endif
 
 typedef std::basic_string<TCHAR>
-	uni_string;
+	string_t;
+typedef std::basic_stringstream<TCHAR>
+	stringstream_t;
 ///
 static atom::po::id_t const po_none					=	0;
 static atom::po::id_t const po_help					=	po_none + 1;

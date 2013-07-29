@@ -176,7 +176,7 @@ bool cons_mpp::server_init( HWND hWnd, unsigned int const width, unsigned int co
 					//EnumWindows( _::__, reinterpret_cast<LPARAM>( &ep ) );
 					//TCHAR caption[ MAX_PATH ] = { 0 };
 					//GetWindowText( ep.cons_wnd, caption, MAX_PATH );
-					//this->process_caption = uni_string( caption );
+					//this->process_caption = string_t( caption );
 					this->child = this->pi.hProcess;
 					return true;
 				}
