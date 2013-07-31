@@ -36,19 +36,10 @@ bridge& bridge::init(){
 				throw std::exception( "Pipe opening failed" );
 			}
 		}
-		// start read thread
-		this->read_thread = boost::thread( boost::bind( &bridge::read_from_pipe, this ) );
 		// 
 		if ( server ) {
-#ifdef STANDALONE
-			// start debug bridge client
-			this->emul_thread = boost::thread( boost::bind( &bridge::emul_cons, this ) );
-#else
-			// start child console process
-#endif
+			this->guard_thread = boost::thread( boost::bind( &bridge::guard, this ) );
 		} else {
-			// collect console info
-			// build shmem and send shmem notification to the server
 		}
 	} else {
 		throw std::exception( "Mutex initialisation failed" );
@@ -60,7 +51,11 @@ bridge& bridge::bind(){
 	if ( server ) {
 		this->pipe.connect();
 	} else {
+		// collect console info
+		// build shmem and send shmem notification to the server
 	}
+	// start read thread
+	this->read_thread = boost::thread( boost::bind( &bridge::read, this ) );
 	return ( *this );
 }
 
@@ -142,7 +137,7 @@ void exit2cons() {
 	vk2cons( VK_RETURN );
 }
 
-void bridge::read_from_pipe() {
+void bridge::read() {
 	bool cont = true;
 	while ( cont ) {
 		bridge_msg bm;
@@ -188,27 +183,22 @@ void bridge::read_from_pipe() {
 	}
 }
 
-
+void bridge::guard(){
 #ifdef STANDALONE
-void bridge::emul_cons() {
 	try {
 		bridge e( this->mutex_name, this->pipe_name, this->shmem_name );
 		e.init().bind().run();
 	}
 	catch( std::exception& ){
 	}
-}
+#else
+	// start child console process
+	// wait for process
 #endif
+	// send end notofication
+}
 
 void bridge::close(){
 	write_to_pipe( bridge_msg::bmExit, NULL );
-	this->pipe.close();
-	//this->cmpp.process( command::cmdExit, NULL );
-	//this->cmpp.process( command::cmdQuit, NULL );
-#ifdef STANDALONE
-	this->emul_thread.join();
-#endif
-	this->read_thread.join();
-	//this->cmpp.close();
 }
 

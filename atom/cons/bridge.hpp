@@ -15,10 +15,7 @@ public:
 		,	mutex()
 		,	pipe()
 		,	read_thread()
-#ifdef STANDALONE
-		,	emul_thread()
-#endif
-
+		,	guard_thread()
 	{}
 	///
 	bridge( string_t const& mn, string_t const& pn, string_t const& sn ) :
@@ -29,12 +26,14 @@ public:
 		,	mutex()
 		,	pipe()
 		,	read_thread()
-#ifdef STANDALONE
-		,	emul_thread()
-#endif
+		,	guard_thread()
 	{}
 	///
 	~bridge(){
+		//??????????
+		this->pipe.close();
+		this->read_thread.join();
+		this->guard_thread.join();
 		SetConsoleCtrlHandler( handler, FALSE );
 	}
 	///
@@ -62,11 +61,9 @@ protected:
 		return ( gss.str() );
 	}
 	///
-	void read_from_pipe();
+	void read();
 	///
-#ifdef STANDALONE
-	void emul_cons();
-#endif
+	void guard();
 
 private:
 	///
@@ -85,9 +82,7 @@ private:
 		pipe;
 	boost::thread
 		read_thread;
-#ifdef STANDALONE
 	boost::thread
-		emul_thread;
-#endif
+		guard_thread;
 
 };
