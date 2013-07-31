@@ -49,10 +49,3 @@ env::find( string_t const& n, env_ptr& ce ) {
 	};
 	return ( this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, boost::cref( n ), boost::ref( ce ) ) ) );
 }
-
-void
-env::for_each( boost::function< bool( env_ptr ) > p ) {
-	if ( !p( this->shared_from_this() ) ) {
-		this->get_slot<env2envs>().for_each( p );
-	}
-}

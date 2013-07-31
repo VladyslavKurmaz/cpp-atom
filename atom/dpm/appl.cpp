@@ -211,20 +211,32 @@ appl::process_command() {
 		*(this->get_logger()) << std::endl;
 	} else if ( pos1 == string_t( cmd_switch ) ) {
 		//
+		// switch command
+		//
 		this->get_env()->find( pos2, this->cenv );
+		//
 	} else if ( pos1 == string_t( cmd_sync ) ) {
 		//
+		// sync command
+		//
 		struct _ {
-			static bool __( env_ptr e, logger_ptr l ) {
+			static bool __( env_ptr e, bool const r, string_t const& cmd, logger_ptr l ) {
 				*l << e->get_root() << std::endl;
-				atom::exec( string_t( "svn update" ), e->get_dpm() );
+				atom::exec( cmd, e->get_dpm() );
 				*l << std::endl;
-				return false;
+				//
+				if ( r ) {
+					e->get_slot<env2envs>().for_each( boost::bind( _::__, _1, r, boost::cref( cmd ), l ) );
+				}
+				return (!r);
 			};
 		};
-		this->get_env()->for_each( boost::bind( _::__, _1, this->get_logger() ) );
+		_::__( this->cenv, ( this->po.count( po_recursive ) > 0 ), string_t( "svn update" ), this->get_logger() );
+		//
 	} else if ( pos1.length() && pos2.length() ) {
+		//
 		// run msbuild
+		//
 		stringstream_t ss;
 		ss
 			<< this->msbuild << "msbuild.exe"

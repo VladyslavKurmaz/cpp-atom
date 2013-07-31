@@ -6,3 +6,6 @@
 + implement publish for source codes and config repositories
 - add update for cfg dpm-system folders
 - add static link for crt libraries
++ make sync command local with -r modifier
+- send svn & git command to the component
+- add CRT dynamic & static as parameter

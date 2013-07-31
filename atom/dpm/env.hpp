@@ -60,9 +60,6 @@ public:
 	///
 	bool
 	find( string_t const& n, env_ptr& ce );
-	///
-	void
-	for_each( boost::function< bool( env_ptr ) > p );
 
 protected:
 	//
