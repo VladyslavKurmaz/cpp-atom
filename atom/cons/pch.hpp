@@ -2,7 +2,6 @@
 #pragma warning(disable : 4996)
 #pragma warning(disable : 4355)
 
-#define STANDALONE
 
 #include <windows.h>
 
@@ -35,6 +34,14 @@
 #else
 #define TXT( x )  x
 #endif
+
+
+#define STANDALONE
+#define WM_FRAMEEXIT	WM_USER+1
+
+typedef unsigned int
+	frame_id_t;
+
 
 typedef std::basic_string<TCHAR>
 	string_t;

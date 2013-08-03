@@ -7,20 +7,27 @@
 #include "./frame.hpp"
 #include "./window.hpp"
 
-frame::frame( logger_ptr l, pref_ptr p, window_ptr w ) :
-		buffer()
+frame_ptr frame::create( logger_ptr l, pref_ptr p, window_ptr w ) {
+	static frame_id_t id = 0;
+	frame_ptr f = frame_ptr( new frame( ++id, l, p, w ) );
+	struct notify {
+		unsigned long tid;
+		notify() : tid( GetCurrentThreadId() ){}
+		void operator()() { PostThreadMessage( this->tid, WM_FRAMEEXIT, id, 0 ); }
+	} n;
+	f->brdg.run( boost::bind<void>( n ) );
+	return ( f );
+}
+
+frame::frame( frame_id_t const i, logger_ptr l, pref_ptr p, window_ptr w ) :
+		id( i )
+	,	index( 0 )
+	,	buffer()
 	,	brdg()
 	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
 	atom::mount<frame2pref>( this, p );
 	atom::mount<frame2window>( this, w );
-	//
-	try {
-		this->brdg.init().bind().run();
-	}
-	catch( std::exception& e ){
-		*(this->get_logger()) << e.what() << std::endl;
-	}
 }
 
 frame::~frame() {
@@ -35,17 +42,14 @@ frame_ptr frame::split(){
 #endif
 }
 
-void frame::close() {
-	this->brdg.close();
-
-	// ??? move code below to the async close notification from console
-	this->get_window()->frame_close( this->shared_from_this() );
+void frame::clear(){
+	this->brdg.join();
 	base_node_t::clear();
 }
 
 void
 frame::process( bridge_msg::type const id, void const* param ) {
-	this->brdg.write_to_pipe( id, param );
+	this->brdg.write( id, param );
 }
 
 void frame::draw( HDC dc, RECT const& rt ) {

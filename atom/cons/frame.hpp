@@ -16,9 +16,7 @@ class frame :
 		base_node_t;
 public:
 	///
-	static frame_ptr create( logger_ptr l, pref_ptr p, window_ptr w ) {
-		return ( frame_ptr( new frame( l, p, w ) ) );
-	}
+	static frame_ptr create( logger_ptr l, pref_ptr p, window_ptr w );
 	///
 	~frame();
 	///
@@ -32,7 +30,7 @@ public:
 	split();
 	///
 	void
-	close();
+	clear();
 	///
 	void
 	process( bridge_msg::type const id, void const* param );
@@ -53,6 +51,9 @@ protected:
 
 private:
 	///
+	frame_id_t
+		id;
+	///
 	unsigned int
 		index;
 	///
@@ -65,5 +66,5 @@ private:
 	string_t
 		process_caption;
 	///
-	frame( logger_ptr l, pref_ptr p, window_ptr w );
+	frame( frame_id_t const i, logger_ptr l, pref_ptr p, window_ptr w );
 };

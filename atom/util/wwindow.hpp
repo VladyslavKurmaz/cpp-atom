@@ -112,9 +112,7 @@ namespace atom {
 	template < UINT, typename, typename >
 	struct handle_msg;
 
-	//typedef void(_1::* onsettingchange_t)( HWND, UINT, LPCTSTR );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_SETTINGCHANGE >::type, onsettingchange_t >::type
-	//	onsettingchange_pair_type_t;
+#define	ATOM_DEF_ONSETTINGCHANGE( c ) typedef void( c::* onsettingchange_t )( HWND, UINT, LPCTSTR ); typedef boost::mpl::pair< boost::mpl::int_< WM_SETTINGCHANGE >::type, onsettingchange_t >::type onsettingchange_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_SETTINGCHANGE, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -122,9 +120,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* ontimer_t)( HWND, UINT );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_TIMER >::type, ontimer_t >::type
-	//	ontimer_pair_type_t;
+#define	ATOM_DEF_ONTIMER( c ) typedef void( c::* ontimer_t )( HWND, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_TIMER >::type, ontimer_t >::type ontimer_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_TIMER, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -139,9 +135,8 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onkeydown_t)( HWND, UINT, BOOL, int, UINT );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_KEYDOWN >::type, onkeydown_t >::type
-	//	onkeydown_pair_type_t;
+
+#define	ATOM_DEF_ONKEYDOWN( c ) typedef void( c::* onkeydown_t )( HWND, UINT, BOOL, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_KEYDOWN >::type, onkeydown_t >::type onkeydown_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_KEYDOWN, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -149,9 +144,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onkeyup_t)( HWND, UINT, BOOL, int, UINT );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_KEYUP >::type, onkeyup_t >::type
-	//	onkeyup_pair_type_t;
+#define	ATOM_DEF_ONKEYUP( c ) typedef void( c::* onkeyup_t )( HWND, UINT, BOOL, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_KEYUP >::type, onkeyup_t >::type onkeyup_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_KEYUP, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -160,9 +153,7 @@ namespace atom {
 	};
 
 
-	//typedef void(_1::* onchar_t)( HWND, TCHAR, int );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type
-	//	onchar_pair_type_t;
+#define	ATOM_DEF_ONCHAR( c ) typedef void( c::* onchar_t )( HWND, TCHAR, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type onchar_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_CHAR, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -194,9 +185,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* onhotkey_t)( HWND, int, UINT, UINT);
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_HOTKEY >::type, onhotkey_t >::type
-	//	onhotkey_pair_type_t;
+#define	ATOM_DEF_ONHOTKEY( c )	typedef void( c::* onhotkey_t )( HWND, int, UINT, UINT); typedef boost::mpl::pair< boost::mpl::int_< WM_HOTKEY >::type, onhotkey_t >::type onhotkey_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_HOTKEY, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -204,9 +193,7 @@ namespace atom {
 		}
 	};
 	
-	//typedef void(_1::* onpaint_t)( HWND );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_PAINT >::type, onpaint_t >::type
-	//	onpaint_pair_type_t;
+#define	ATOM_DEF_ONPAINT( c )	typedef void( c::* onpaint_t)( HWND ); typedef boost::mpl::pair< boost::mpl::int_< WM_PAINT >::type, onpaint_t >::type onpaint_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_PAINT, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -214,9 +201,7 @@ namespace atom {
 		}
 	};
 
-	//typedef void(_1::* oncommand_t)( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
-	//typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, oncommand_t >::type
-	//	oncommand_pair_type_t;
+#define	ATOM_DEF_ONCOMMAND( c )	typedef void( c::* oncommand_t )( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ); typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, oncommand_t >::type oncommand_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_COMMAND, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
@@ -236,6 +221,14 @@ namespace atom {
 	struct handle_msg< WM_DESTROY, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
 			return ((t.*u)(hWnd), 0L);
+		}
+	};
+
+#define	ATOM_DEF_ONWMUSER( c, p, n ) typedef void( c::* on ## p ## _t )( HWND, WPARAM, LPARAM ); typedef boost::mpl::pair< boost::mpl::int_< WM_USER + n >::type, on ## p ## _t >::type on ## p ## _pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_USER + 1, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)(hWnd, wParam, lParam), 0L);
 		}
 	};
 

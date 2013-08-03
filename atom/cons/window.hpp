@@ -6,47 +6,20 @@ typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > window2pref;
 //
 class window;
 
-typedef void(window::* onkeydown_t)( HWND, UINT, BOOL, int, UINT );
-typedef boost::mpl::pair< boost::mpl::int_< WM_KEYDOWN >::type, onkeydown_t >::type
-	onkeydown_pair_type_t;
+ATOM_DEF_ONKEYDOWN( window )
+ATOM_DEF_ONKEYUP( window )
+ATOM_DEF_ONCHAR( window )
+ATOM_DEF_ONHOTKEY( window )
+ATOM_DEF_ONPAINT( window )
+ATOM_DEF_ONCLOSE( window )
+ATOM_DEF_ONSETTINGCHANGE( window )
+ATOM_DEF_ONTIMER( window )
+ATOM_DEF_ONCOMMAND( window )
 
-typedef void(window::* onkeyup_t)( HWND, UINT, BOOL, int, UINT );
-typedef boost::mpl::pair< boost::mpl::int_< WM_KEYUP >::type, onkeyup_t >::type
-	onkeyup_pair_type_t;
-
-typedef void(window::* onchar_t)( HWND, TCHAR, int );
-typedef boost::mpl::pair< boost::mpl::int_< WM_CHAR >::type, onchar_t >::type
-	onchar_pair_type_t;
-
-typedef void(window::* onhotkey_t)( HWND, int, UINT, UINT);
-typedef boost::mpl::pair< boost::mpl::int_< WM_HOTKEY >::type, onhotkey_t >::type
-	onhotkey_pair_type_t;
-
-typedef void(window::* onpaint_t)( HWND );
-typedef boost::mpl::pair< boost::mpl::int_< WM_PAINT >::type, onpaint_t >::type
-	onpaint_pair_type_t;
-
-typedef void(window::* onclose_t)( HWND );
-typedef boost::mpl::pair< boost::mpl::int_< WM_CLOSE >::type, onclose_t >::type
-	onclose_pair_type_t;
-
-typedef void(window::* onsettingchange_t)( HWND, UINT, LPCTSTR );
-typedef boost::mpl::pair< boost::mpl::int_< WM_SETTINGCHANGE >::type, onsettingchange_t >::type
-	onsettingchange_pair_type_t;
-
-typedef void(window::* ontimer_t)( HWND, UINT );
-typedef boost::mpl::pair< boost::mpl::int_< WM_TIMER >::type, ontimer_t >::type
-	ontimer_pair_type_t;
-
-typedef void(window::* oncommand_t)( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
-typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, oncommand_t >::type
-	oncommand_pair_type_t;
-
-
-class window :	public atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_type_t, onkeyup_pair_type_t, onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >,
+class window :	public atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t ) >,
 				public atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >,
 				public boost::enable_shared_from_this< window > {
-	typedef atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_type_t, onkeyup_pair_type_t, onchar_pair_type_t, onhotkey_pair_type_t, onpaint_pair_type_t, onclose_pair_type_t, onsettingchange_pair_type_t, ontimer_pair_type_t, oncommand_pair_type_t ) >
+	typedef atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t ) >
 		base_window_t;
 	typedef atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >
 		base_node_t;
@@ -64,9 +37,6 @@ public:
 	void
 	run();
 	//
-	void
-	frame_close( frame_ptr f );
-	///
 	void
 	clear();
 	///
@@ -95,6 +65,9 @@ protected:
 	//
 	pref_ptr
 	get_pref() { return ( get_slot< window2pref >().item() ); }
+	//
+	void
+	close_frame( frame_id_t const id );
 	//
 	void
 	update_hotkeys();
@@ -209,8 +182,12 @@ private:
 				unsigned int const w = ((this->vert)?(c.width * 2):(c.width));
 				unsigned int const h = ((this->vert)?(c.height):(c.height * 2));
 				//
-				this->first->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), w, h ) );
-				this->second->draw( func, frame_coord( l.get_n(), l.get_d(), t.get_n(), t.get_d(), w, h ) );
+				if ( this->first ) {
+					this->first->draw( func, frame_coord( c.left.get_n(), c.left.get_d(), c.top.get_n(), c.top.get_d(), w, h ) );
+				}
+				if ( this->second ) {
+					this->second->draw( func, frame_coord( l.get_n(), l.get_d(), t.get_n(), t.get_d(), w, h ) );
+				}
 			}
 		}
 

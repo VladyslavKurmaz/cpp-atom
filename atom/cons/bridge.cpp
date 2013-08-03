@@ -22,55 +22,25 @@ BOOL WINAPI bridge::handler( DWORD dwCtrlType ) {
 	return FALSE;
 }
 
-bridge& bridge::init(){
-	SetConsoleCtrlHandler( handler, TRUE );
-	//
-	if ( this->mutex.create( this->mutex_name, false ) ) {
-		// configure pipe
-		if ( server ) {
-			if ( !this->pipe.create( this->pipe_name ) ) {
-				throw std::exception( "Pipe creation failed" );
-			}
-		} else {
-			if ( !this->pipe.open( this->pipe_name ) ) {
-				throw std::exception( "Pipe opening failed" );
-			}
-		}
-		// 
-		if ( server ) {
-			this->guard_thread = boost::thread( boost::bind( &bridge::guard, this ) );
-		} else {
-		}
-	} else {
-		throw std::exception( "Mutex initialisation failed" );
-	}
-	return ( *this );
+void bridge::run( on_exit_t oe ) {
+	this->on_exit = oe;
+	this->guard_thread = boost::thread( boost::bind( &bridge::guard, this ) );
 }
 
-bridge& bridge::bind(){
-	if ( server ) {
-		this->pipe.connect();
-	} else {
-		// collect console info
-		// build shmem and send shmem notification to the server
-	}
-	// start read thread
-	this->read_thread = boost::thread( boost::bind( &bridge::read, this ) );
-	return ( *this );
+void bridge::run( on_exit_t oe, string_t const& mn, string_t const& wpn, string_t const& rpn ) {
+	this->server = false;
+	this->mutex_name = mn;
+	this->wpipe_name = wpn;
+	this->rpipe_name = rpn;
+	this->run( oe );
 }
 
-bridge& bridge::run(){
-	if ( server ) {
-	} else {
-		//
-		atom::tty< TCHAR > tty1( std::cin, std::cout );
-		// add console command: help, conf, exit 
-		tty1.run();
-	}
-	return ( *this );
+void bridge::join() {
+	this->on_exit.clear();
+	this->guard_thread.join();
 }
 
-void bridge::write_to_pipe( bridge_msg::type const id, void const* param ) {
+void bridge::write( bridge_msg::type const id, void const* param ){
 	bridge_msg m;
 	m.id = id;
 	//
@@ -78,8 +48,64 @@ void bridge::write_to_pipe( bridge_msg::type const id, void const* param ) {
 		m.key = *( static_cast< KEY_EVENT_RECORD const* >( param ) );
 	}
 	//
-	this->pipe.write( &m, sizeof( m ) );
+	this->wpipe.write( &m, sizeof( m ) );
 }
+
+void bridge::guard(){
+	if ( this->mutex.create( this->mutex_name, false ) ) {
+		//
+		if ( this->wpipe.create( this->wpipe_name ) ) {
+			struct ntf {
+				bridge* b;
+				ntf() : b( NULL ){}
+				~ntf(){ if ( b ) b->on_exit(); }
+			} n;
+			//
+			boost::thread read_thread;
+			//
+			if ( this->server ){
+				n.b = this;
+#ifdef STANDALONE
+				struct _{
+					static void __() {
+					}
+				};
+				bridge e;
+				e.run( boost::bind( _::__ ), this->mutex_name, this->rpipe_name, this->wpipe_name );
+#else
+				// start child console process
+#endif
+				this->wpipe.connect();
+				read_thread = boost::thread( boost::bind( &bridge::read, this ) );
+#ifdef STANDALONE
+				e.join();
+#else
+				// wait for process
+#endif
+			} else {
+				//
+				// start read
+				read_thread = boost::thread( boost::bind( &bridge::read, this ) );
+				this->wpipe.connect();
+				//
+				atom::tty< TCHAR > tty1( std::cin, std::cout );
+				// add console command: help, conf, exit
+				struct _ {
+					static void exit( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param ) {
+						t.exit();
+					}
+				};
+				tty1.add( "exit", _::exit );
+				tty1.run();
+			}
+			//
+			this->wpipe.close();
+			this->rpipe.close();
+			read_thread.join();
+		}
+	}
+}
+
 
 void vk2cons( WORD const vk ) {
 	//SHORT vk1 = VkKeyScanEx( 'a', GetKeyboardLayout( GetCurrentThreadId() ) );
@@ -137,68 +163,53 @@ void exit2cons() {
 	vk2cons( VK_RETURN );
 }
 
+
 void bridge::read() {
-	bool cont = true;
-	while ( cont ) {
-		bridge_msg bm;
-		memset( &bm, 0, sizeof( bm ) );
-		if ( cont = this->pipe.read( &bm, sizeof( bm )  ) ) {
-			switch( bm.id ) {
-			case bridge_msg::bmNone:
-				{
-					break;
-				}
-			case bridge_msg::bmSize:
-				{
-					break;
-				}
-			case bridge_msg::bmKbrd:
-				{
-					INPUT_RECORD ir;
-					ir.EventType = KEY_EVENT;
-					ir.Event.KeyEvent = bm.key;
-					DWORD wr = 0;
-					WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
-					break;
-				}
-			case bridge_msg::bmCtrlBreak:
-				{
-					break;
-				}
-			case bridge_msg::bmCtrlC:
-				{
-					break;
-				}
-			case bridge_msg::bmExit:
-				{
-					exit2cons();
-					break;
-				}
-			case bridge_msg::bmTerminate:
-				{
-					break;
+	if ( this->rpipe.open( this->rpipe_name ) ) {
+		bool cont = true;
+		while ( cont ) {
+			bridge_msg bm;
+			memset( &bm, 0, sizeof( bm ) );
+			if ( cont = this->rpipe.read( &bm, sizeof( bm )  ) ) {
+				switch( bm.id ) {
+				case bridge_msg::bmNone:
+					{
+						break;
+					}
+				case bridge_msg::bmSize:
+					{
+						break;
+					}
+				case bridge_msg::bmKbrd:
+					{
+						INPUT_RECORD ir;
+						ir.EventType = KEY_EVENT;
+						ir.Event.KeyEvent = bm.key;
+						DWORD wr = 0;
+						WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+						break;
+					}
+				case bridge_msg::bmCtrlBreak:
+					{
+						break;
+					}
+				case bridge_msg::bmCtrlC:
+					{
+						break;
+					}
+				case bridge_msg::bmExit:
+					{
+						exit2cons();
+						break;
+					}
+				case bridge_msg::bmTerminate:
+					{
+						break;
+					}
 				}
 			}
 		}
 	}
 }
 
-void bridge::guard(){
-#ifdef STANDALONE
-	try {
-		bridge e( this->mutex_name, this->pipe_name, this->shmem_name );
-		e.init().bind().run();
-	}
-	catch( std::exception& ){
-	}
-#else
-	// start child console process
-	// wait for process
-#endif
-	// send end notofication
-}
-
-void bridge::close(){
-	write_to_pipe( bridge_msg::bmExit, NULL );
-}
 

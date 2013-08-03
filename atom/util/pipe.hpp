@@ -29,7 +29,8 @@ namespace atom {
 		///
 		pipe() : 
 				p( INVALID_HANDLE_VALUE )
-			,	name() {
+			,	name()
+			,	server( false ){
 		}
 		///
 		~pipe() {
@@ -41,6 +42,7 @@ namespace atom {
 		///
 		bool create( std::string const & name ) {
 			if ( !this->is_valid() ) {
+				server = true;
 				this->name = name;
 				std::stringstream ss;
 				ss << "\\\\.\\pipe\\" << this->name;
@@ -120,6 +122,9 @@ namespace atom {
 		///
 		void close() {
 			if ( this->is_valid() ) {
+				if ( server ) {
+					DisconnectNamedPipe( this->p );
+				}
 				CloseHandle( this->p );
 				this->p = INVALID_HANDLE_VALUE;
 			}
@@ -136,6 +141,9 @@ namespace atom {
 		///
 		std::string
 			name;
+		///
+		bool
+			server;
 	};
 }
 

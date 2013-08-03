@@ -23,8 +23,8 @@ namespace atom {
 		typedef tty< T >
 			this_t;
 	public:
-		typedef boost::function< bool( this_t&, std::string const& ) >
-			pred_t;
+		typedef boost::function< void( this_t&, std::string const& ) >
+			func_t;
 		typedef std::basic_istream< T, std::char_traits< T > >
 			istream_t;
 		typedef std::basic_ostream< T, std::char_traits< T > >
@@ -49,7 +49,7 @@ namespace atom {
 		string_t
 			prompt;
 		///
-		typedef std::map< std::string, pred_t >
+		typedef std::map< std::string, func_t >
 			descs_t;
 		descs_t
 			descs;
@@ -74,44 +74,47 @@ namespace atom {
 			,	banner()
 			,	prompt()
 			,	descs() {
-		  }
-		  ///
-		  bool process( string_t const& cmd, string_t const& param ) {
-			  try {
-				  descs_t::const_iterator it = this->descs.find( cmd );
-				  if ( it != this->descs.end() ) {
-					  return ( (*it ).second( *this, param ) );
-				  } else {
-					  throw std::exception( "Invalid command" );
-				  }
-			  }
-			  catch ( std::exception& s ) {
-				  this->os << s.what() << std::endl << std::endl;
-			  }
-			  return false;
-		  }
-		  ///
-		  void exit() {
-			  this->loop = false;
-		  }
-		  ///
-		  void run() {
-			  this->show_banner();
-			  while( this->loop ) {
-				  this->show_prompt();
-				  string_t s;
-				  std::getline( this->is, s );
-				  //
-				  stringstream_t ss;
-				  ss << s;
-				  string_t cmd;
-				  ss >> cmd;
-				  //
-				  string_t const param = &( s.c_str()[ cmd.length() ] );
-				  this->process( cmd, param );
-				  this->os << std::endl;
-			  }
-		  }
+			}
+		///
+		void add( string_t const& cmd, func_t func ) {
+			this->descs[ cmd ] = func;
+		}
+		///
+		void process( string_t const& cmd, string_t const& param ) {
+			try {
+				descs_t::const_iterator it = this->descs.find( cmd );
+				if ( it != this->descs.end() ) {
+					( (*it ).second( *this, param ) );
+				} else {
+					throw std::exception( "Invalid command" );
+				}
+			}
+			catch ( std::exception& s ) {
+				this->os << s.what() << std::endl << std::endl;
+			}
+		}
+		///
+		void exit() {
+			this->loop = false;
+		}
+		///
+		void run() {
+			this->show_banner();
+			while( this->loop ) {
+				this->show_prompt();
+				string_t s;
+				std::getline( this->is, s );
+				//
+				stringstream_t ss;
+				ss << s;
+				string_t cmd;
+				ss >> cmd;
+				//
+				string_t const param = &( s.c_str()[ cmd.length() ] );
+				this->process( cmd, param );
+				this->os << std::endl;
+			}
+		}
 	};
 
 

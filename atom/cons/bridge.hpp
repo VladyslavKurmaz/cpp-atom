@@ -6,50 +6,36 @@
 class bridge : public boost::noncopyable {
 
 public:
+	typedef boost::function< void() >
+		on_exit_t;
 	///
 	bridge() :
 			server( true )
+		,	on_exit()
 		,	mutex_name( gen_guid() )
-		,	pipe_name( gen_guid() )
-		,	shmem_name( gen_guid() )
+		,	wpipe_name( gen_guid() )
+		,	rpipe_name( gen_guid() )
 		,	mutex()
-		,	pipe()
-		,	read_thread()
-		,	guard_thread()
-	{}
-	///
-	bridge( string_t const& mn, string_t const& pn, string_t const& sn ) :
-			server( false )
-		,	mutex_name( mn )
-		,	pipe_name( pn )
-		,	shmem_name( sn )
-		,	mutex()
-		,	pipe()
-		,	read_thread()
-		,	guard_thread()
-	{}
+		,	wpipe()
+		,	rpipe()
+		,	guard_thread() {
+		SetConsoleCtrlHandler( handler, TRUE );
+	}
 	///
 	~bridge(){
-		//??????????
-		this->pipe.close();
-		this->read_thread.join();
-		this->guard_thread.join();
 		SetConsoleCtrlHandler( handler, FALSE );
 	}
 	///
 	static BOOL WINAPI
 	handler( DWORD dwCtrlType );
 	///
-	bridge& init();
+	void run( on_exit_t oe );
 	///
-	bridge& bind();
+	void run( on_exit_t oe, string_t const& mn, string_t const& wpn, string_t const& rpn );
 	///
-	bridge& run();
+	void join();
 	///
-	void write_to_pipe( bridge_msg::type const id, void const* param );
-	///
-	void
-	close();
+	void write( bridge_msg::type const id, void const* param );
 
 protected:
 	///
@@ -61,27 +47,28 @@ protected:
 		return ( gss.str() );
 	}
 	///
-	void read();
-	///
 	void guard();
+	///
+	void read();
 
 private:
-	///
 	bool
 		server;
+	on_exit_t
+		on_exit;
 	string_t
 		mutex_name;
 	string_t
-		pipe_name;
+		wpipe_name;
 	string_t
-		shmem_name;
+		rpipe_name;
 	///
 	atom::mutex
 		mutex;
 	atom::pipe
-		pipe;
-	boost::thread
-		read_thread;
+		wpipe;
+	atom::pipe
+		rpipe;
 	boost::thread
 		guard_thread;
 

@@ -17,6 +17,7 @@
 			//	//"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\msbuild.exe"
 			//	);
 
+DWORD thread_id = 0;
 window::window( logger_ptr l, pref_ptr p ) :
 		wwindow( *this, INITLIST_9( &window::onkey, &window::onkey, &window::onchar, &window::onhotkey, &window::onpaint, &window::onclose, &window::onsettingchange, &window::ontimer, &window::oncommand ) )
 	,	head_area()
@@ -33,6 +34,8 @@ window::window( logger_ptr l, pref_ptr p ) :
 	//
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
+	//???????? workaround
+	thread_id = GetCurrentThreadId();
 }
 
 window::~window() {
@@ -117,11 +120,15 @@ bool window::init() {
   
 void window::run() {
 	struct _ {
-		static bool __( HWND hWnd, MSG* msg, atom::accel& accel ) {
+		static bool __( HWND hWnd, MSG* msg, atom::accel& accel, window& w ) {
+			if ( msg->message == WM_FRAMEEXIT ) {
+				w.close_frame( (frame_id_t)msg->wParam );
+				return true;
+			}
 			return accel.translate( hWnd, msg );
 		}
 	};
-	base_window_t::run( boost::bind( _::__, _1, _2, boost::ref( this->accel ) ) );
+	base_window_t::run( boost::bind( _::__, _1, _2, boost::ref( this->accel ), boost::ref( *this ) ) );
 }
 
 void window::clear() {
@@ -160,7 +167,9 @@ void window::onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
 		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 	//this->get_logger() << vk << ((down)?(" down"):(" up")) << std::endl;
-	this->current_frame->process( bridge_msg::bmKbrd, &key );
+	if ( this->current_frame ) {
+		this->current_frame->process( bridge_msg::bmKbrd, &key );
+	}
 	this->invalidate();
 
 }
@@ -262,10 +271,11 @@ void window::onpaint( HWND hWnd ){
 }
 
 void window::onclose( HWND ) {
+	assert( false );
 	//??????? lock mutex
-	frames_t fs;
-	this->head_area->collect( fs );
-	BOOST_FOREACH( frame_ptr f, fs ) { f->close(); }
+	//frames_t fs;
+	//this->head_area->collect( fs );
+	//BOOST_FOREACH( frame_ptr f, fs ) { f->close(); }
 }
 
 void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
@@ -328,13 +338,8 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		this->current_frame->process( bridge_msg::bmCtrlC, NULL );
 		break;
 	case CMDID_CLOSE:
-		{
-			//??? looks like workaround, needs improvements
-			frame_ptr f = this->current_frame;
-			f->close();
-			this->expand_mode = false;
-			break;
-		}
+		this->current_frame->process( bridge_msg::bmExit, NULL );
+		break;
 	case CMDID_TTY1:
 	case CMDID_TTY2:
 	case CMDID_TTY3:
@@ -355,35 +360,27 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 }
 
 void
-window::frame_close( frame_ptr f ) {
+window::close_frame( frame_id_t const id ) {
 	//??? lock mutex
-	if ( this->current_frame == f ) {
-		this->current_frame = this->head_area->find( this->current_frame )->next();
+	frame_ptr f = this->head_area->find( id );
+	if ( f ) {
+		//
 		if ( this->current_frame == f ) {
-			this->current_frame = frame_ptr();
+			this->expand_mode = false;
+			this->current_frame = this->head_area->find( f )->next();
+			if ( this->current_frame == f ) {
+				this->current_frame = frame_ptr();
+			}
+		}
+		//
+		f->clear();
+		//
+		// exit application
+		if ( !this->current_frame ) {
+			PostThreadMessage( thread_id, WM_QUIT, 0, 0 );
 		}
 	}
-	//
-	this->head_area->find( f )->close();
-	//
-	// exit application
-	if ( !this->current_frame ) {
-		PostQuitMessage( 0 );
-	}
 }
-
-/*
-       template<class T>
-       T& as() {
-           return boost::any_cast<T&>(v);
-       }
-
-	          template<class T>
-       const T& as() const {
-           return boost::any_cast<const T&>(v);
-       }
-
-	   */
 
 atom::parse_tag< TCHAR, UINT > hotkey_tags[] = {
 	{ "win",	MOD_WIN },
