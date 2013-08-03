@@ -26,6 +26,9 @@ public:
 	unsigned int
 	get_index() const { return ( this->index ); }
 	///
+	frame_id_t
+	get_id() const { return ( this->id ); }
+	///
  	frame_ptr
 	split();
 	///

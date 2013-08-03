@@ -1,15 +1,11 @@
 #include "./pch.hpp"
-#include "./consd_tty.hpp"
 #include "./cmds.hpp"
-#include "./cons_mpp.hpp"
+#include "./bridge.hpp"
 
 void wait_please() {
 	std::string s;
 	std::getline( std::cin, s );
 }
-
-
-
 
 int main( int argc, char *argv[] )
 {
@@ -19,21 +15,21 @@ int main( int argc, char *argv[] )
 	//}
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		atom::po po;
-		atom::po::options_description_t& desc = po.add_desc( 0, "program options" );
-		std::string pipe_name;
+		atom::po::options_description_t& desc = po.add_desc( 0, "consd options" );
 		std::string mutex_name;
-		std::string header_name;
+		std::string wpipe_name;
+		std::string rpipe_name;
 		unsigned int csb_width = 0;
 		unsigned int csb_height = 0;
 		//
-		po.add_option( 1, "pipe,p", boost::program_options::value<std::string>( &pipe_name ), "pipe name", desc );
-		po.add_option( 2, "mutex,m", boost::program_options::value<std::string>( &mutex_name ), "mutex name", desc );
-		po.add_option( 3, "header,h", boost::program_options::value<std::string>( &header_name ), "header name", desc );
+		po.add_option( 1, "mutex,m", boost::program_options::value<std::string>( &mutex_name ), "mutex name", desc );
+		po.add_option( 2, "wpipe,w", boost::program_options::value<std::string>( &wpipe_name ), "write pipe name", desc );
+		po.add_option( 3, "rpipe,r", boost::program_options::value<std::string>( &rpipe_name ), "read pipe name", desc );
 		try {
 			po.parse_arg( argc, argv, desc, true );
 			//
 			if ( !( po.count( 1 ) && po.count( 2 ) && po.count( 3 ) ) ) {
-				throw std::exception( "[ERROR] Pipe's name and/or Shered memory's name wasn't defined" );
+				throw std::exception( "[ERROR] Pipe's name and/or Shered memory's name are not defined" );
 			}
 			//
 		} catch( std::exception& excpt ) {
@@ -44,9 +40,14 @@ int main( int argc, char *argv[] )
 			wait_please();
 			return -1;
 		}
-		cons_mpp cmpp;
-		cmpp.client_run( po.as< std::string >( 1 ), po.as< std::string >( 2 ), po.as< std::string >( 3 ) );
-		cmpp.close();
+		//
+		struct _{
+			static void __() {
+			}
+		};
+		bridge e;
+		e.run( boost::bind( _::__ ), mutex_name, wpipe_name, rpipe_name );
+		e.join();
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;

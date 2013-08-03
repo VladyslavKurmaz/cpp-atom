@@ -129,11 +129,19 @@ private:
 			return ( result );
 		}
 		//
-		frame_ptr find( unsigned int const i ) {
+		frame_ptr get_by_index( unsigned int const i ) {
 			frame_ptr result = frame_ptr();
 			if ( this->frame && ( this->frame->get_index() == i ) ) { result = this->frame; }
-			if ( !result && this->first ) { result = this->first->find( i ); }
-			if ( !result && this->second ) { result = this->second->find( i ); }
+			if ( !result && this->first ) { result = this->first->get_by_index( i ); }
+			if ( !result && this->second ) { result = this->second->get_by_index( i ); }
+			return ( result );
+		}
+		//
+		frame_ptr get_by_id( frame_id_t const id ) {
+			frame_ptr result = frame_ptr();
+			if ( this->frame && ( this->frame->get_id() == id ) ) { result = this->frame; }
+			if ( !result && this->first ) { result = this->first->get_by_id( id ); }
+			if ( !result && this->second ) { result = this->second->get_by_id( id ); }
 			return ( result );
 		}
 		//

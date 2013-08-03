@@ -347,7 +347,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	case CMDID_TTY5:
 	case CMDID_TTY6:
 		{
-			frame_ptr f = this->head_area->find( id - CMDID_TTY1 + 1 );
+			frame_ptr f = this->head_area->get_by_index( id - CMDID_TTY1 + 1 );
 			if ( f ) {
 				this->current_frame = f;
 			}
@@ -362,7 +362,7 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 void
 window::close_frame( frame_id_t const id ) {
 	//??? lock mutex
-	frame_ptr f = this->head_area->find( id );
+	frame_ptr f = this->head_area->get_by_id( id );
 	if ( f ) {
 		//
 		if ( this->current_frame == f ) {
@@ -373,6 +373,7 @@ window::close_frame( frame_id_t const id ) {
 			}
 		}
 		//
+		this->head_area->find( f )->close();
 		f->clear();
 		//
 		// exit application
@@ -380,6 +381,7 @@ window::close_frame( frame_id_t const id ) {
 			PostThreadMessage( thread_id, WM_QUIT, 0, 0 );
 		}
 	}
+	this->invalidate();
 }
 
 atom::parse_tag< TCHAR, UINT > hotkey_tags[] = {

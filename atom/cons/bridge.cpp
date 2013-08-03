@@ -74,6 +74,25 @@ void bridge::guard(){
 				e.run( boost::bind( _::__ ), this->mutex_name, this->rpipe_name, this->wpipe_name );
 #else
 				// start child console process
+				atom::proc<TCHAR> p;
+				//
+				TCHAR path[MAX_PATH] = { 0 };
+				TCHAR drive[MAX_PATH] = { 0 };
+				TCHAR dir[MAX_PATH] = { 0 };
+				TCHAR filename[MAX_PATH] = { 0 };
+				TCHAR ext[MAX_PATH] = { 0 };
+				GetModuleFileName( NULL, path, MAX_PATH );
+				_tsplitpath_s( path, drive, dir, filename, ext );
+				_tmakepath_s( path, drive, dir, _T("consd"), ext );
+				std::stringstream ss;
+				ss 
+					<< path
+					<< " -m " << this->mutex_name
+					<< " -w " << this->rpipe_name
+					<< " -r " << this->wpipe_name
+					;
+				//
+				p.run( ss.str(), 80, 25, true );
 #endif
 				this->wpipe.connect();
 				read_thread = boost::thread( boost::bind( &bridge::read, this ) );
@@ -81,6 +100,7 @@ void bridge::guard(){
 				e.join();
 #else
 				// wait for process
+				p.join();
 #endif
 			} else {
 				//

@@ -8,13 +8,14 @@
 #include "./window.hpp"
 
 frame_ptr frame::create( logger_ptr l, pref_ptr p, window_ptr w ) {
-	static frame_id_t id = 0;
-	frame_ptr f = frame_ptr( new frame( ++id, l, p, w ) );
+	static frame_id_t gid = 0;
+	frame_ptr f = frame_ptr( new frame( ++gid, l, p, w ) );
 	struct notify {
+		frame_id_t id;
 		unsigned long tid;
-		notify() : tid( GetCurrentThreadId() ){}
-		void operator()() { PostThreadMessage( this->tid, WM_FRAMEEXIT, id, 0 ); }
-	} n;
+		notify( frame_id_t const i ) : id( i ), tid( GetCurrentThreadId() ){}
+		void operator()() { PostThreadMessage( this->tid, WM_FRAMEEXIT, this->id, 0 ); }
+	} n( gid );
 	f->brdg.run( boost::bind<void>( n ) );
 	return ( f );
 }

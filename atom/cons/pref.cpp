@@ -72,7 +72,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 		add_option( po_ui_width,				"ui.width",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_height,				"ui.height",
-		boost::program_options::value<unsigned int>()->default_value( 5 ),						"", desc ).
+		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_clip,					"ui.clip",
 		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
 		add_option( po_ui_alpha,				"ui.alpha",
