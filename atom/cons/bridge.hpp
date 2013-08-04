@@ -50,6 +50,8 @@ protected:
 	void guard();
 	///
 	void read();
+	///
+	void tty();
 
 private:
 	bool

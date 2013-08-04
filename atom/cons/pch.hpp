@@ -37,7 +37,7 @@
 #endif
 
 
-#define STANDALONE
+//#define STANDALONE
 #define WM_FRAMEEXIT	WM_USER+1
 
 typedef unsigned int

@@ -44,39 +44,22 @@ namespace atom {
 		bool
 			loop;
 		///
-		string_t
-			banner;
-		string_t
-			prompt;
-		///
 		typedef std::map< std::string, func_t >
 			descs_t;
 		descs_t
 			descs;
 
 	protected:
-		///
-		void show_banner() {
-			this->os<< std::endl << this->banner << std::endl;
-			this->os << std::endl;
-		}
-		///
-		void show_prompt() {
-			this->os << this->prompt;
-		}
-
 	public:
 		///
 		tty( istream_t& i, ostream_t& o ) :
 				is( i )
 			,	os( o )
 			,	loop( true )
-			,	banner()
-			,	prompt()
 			,	descs() {
 			}
 		///
-		void add( string_t const& cmd, func_t func ) {
+		void add_cmd( string_t const& cmd, func_t func ) {
 			this->descs[ cmd ] = func;
 		}
 		///
@@ -86,22 +69,29 @@ namespace atom {
 				if ( it != this->descs.end() ) {
 					( (*it ).second( *this, param ) );
 				} else {
-					throw std::exception( "Invalid command" );
+					throw std::exception( ( std::string( "unknown command: " ) + cmd ).c_str() );
 				}
 			}
 			catch ( std::exception& s ) {
 				this->os << s.what() << std::endl << std::endl;
 			}
 		}
+		//
+		ostream_t& out() const {
+			return ( this->os );
+		}
 		///
 		void exit() {
 			this->loop = false;
 		}
 		///
-		void run() {
-			this->show_banner();
+		void run( string_t const& banner, string_t const& prompt ) {
+			this->os<< std::endl << banner << std::endl;
+			this->os << std::endl;
+			//
 			while( this->loop ) {
-				this->show_prompt();
+				this->os << prompt;
+				//
 				string_t s;
 				std::getline( this->is, s );
 				//
@@ -110,7 +100,7 @@ namespace atom {
 				string_t cmd;
 				ss >> cmd;
 				//
-				string_t const param = &( s.c_str()[ cmd.length() ] );
+				string_t const param = &( s.c_str()[ cmd.length() + 1 ] );
 				this->process( cmd, param );
 				this->os << std::endl;
 			}

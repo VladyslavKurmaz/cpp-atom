@@ -19,12 +19,11 @@ namespace atom {
 
 	template < typename T >
 	void exec( std::basic_string< T > const & path, std::basic_string< T > const & cdir ) {
-		STARTUPINFO si;
-	    PROCESS_INFORMATION pi;
-
-	    ZeroMemory( &si, sizeof(si) );
+		STARTUPINFO si = { 0 };
+		PROCESS_INFORMATION pi = { 0 };
+		//
     	si.cb = sizeof(si);
-	    ZeroMemory( &pi, sizeof(pi) );
+		//
 		TCHAR cmd[ MAX_PATH ] = { 0 };
 		strcpy( cmd, path.c_str() );
 	    // Start the child process. 

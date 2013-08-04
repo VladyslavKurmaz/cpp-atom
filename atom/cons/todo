@@ -4,8 +4,8 @@
 - CLI for cons configuration
 - states
 - self test on start - check hotkeys
-- close frame
-- rotate frame
++ close frame
++ rotate frame
 - console mapping between two processes
 - share keyboard state between main application andchild console
 - ctrl+break, ctr+c, correct exit after pressing prev combinations
@@ -17,4 +17,4 @@
 - process mouse events
 - configure cons from consd console
 - command to check cons internal status - self check: hotkeys, etc.
-- command line parameter which deny sliding
+- deny sliding - command line parameter

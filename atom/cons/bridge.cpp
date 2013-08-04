@@ -66,10 +66,7 @@ void bridge::guard(){
 			if ( this->server ){
 				n.b = this;
 #ifdef STANDALONE
-				struct _{
-					static void __() {
-					}
-				};
+				struct _{ static void __() { } };
 				bridge e;
 				e.run( boost::bind( _::__ ), this->mutex_name, this->rpipe_name, this->wpipe_name );
 #else
@@ -108,15 +105,7 @@ void bridge::guard(){
 				read_thread = boost::thread( boost::bind( &bridge::read, this ) );
 				this->wpipe.connect();
 				//
-				atom::tty< TCHAR > tty1( std::cin, std::cout );
-				// add console command: help, conf, exit
-				struct _ {
-					static void exit( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param ) {
-						t.exit();
-					}
-				};
-				tty1.add( "exit", _::exit );
-				tty1.run();
+				this->tty();
 			}
 			//
 			this->wpipe.close();
@@ -200,6 +189,10 @@ void bridge::read() {
 					{
 						break;
 					}
+				case bridge_msg::bmCmd:
+					{
+						break;
+					}
 				case bridge_msg::bmKbrd:
 					{
 						INPUT_RECORD ir;
@@ -230,6 +223,66 @@ void bridge::read() {
 			}
 		}
 	}
+}
+
+#include <strsafe.h>
+void ErrorExit(LPTSTR lpszFunction) 
+{ 
+    // Retrieve the system error message for the last-error code
+
+    LPVOID lpMsgBuf;
+    LPVOID lpDisplayBuf;
+    DWORD dw = GetLastError(); 
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
+
+    // Display the error message and exit the process
+
+    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
+        (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
+    StringCchPrintf((LPTSTR)lpDisplayBuf, 
+        LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+        TEXT("%s failed with error %d: %s"), 
+        lpszFunction, dw, lpMsgBuf); 
+    MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+
+    LocalFree(lpMsgBuf);
+    LocalFree(lpDisplayBuf);
+}
+
+void bridge::tty() {
+
+	atom::tty< TCHAR > tty1( std::cin, std::cout );
+	struct _ {
+		//
+		static void help( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param ) {
+		}
+		//
+		static void conf( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param, bridge& b ) {
+			//b.write()
+		}
+		//
+		static void exec( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param ) {
+			atom::exec( param, atom::tty< TCHAR >::string_t() );
+		}
+		//
+		static void exit( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param ) {
+			t.exit();
+		}
+	};
+	tty1.add_cmd( "help", _::help );
+	tty1.add_cmd( "conf", boost::bind( _::conf, _1, _2, boost::ref( *this ) ) );
+	tty1.add_cmd( "exec", boost::bind( _::exec, _1, _2 ) );
+	tty1.add_cmd( "exit", _::exit );
+	tty1.run( "cons v0.9.0 [/github/cpp-atom/cons]", "cons : " );
 }
 
 
