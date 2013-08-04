@@ -117,10 +117,15 @@ struct preferences {
 
 ///
 static WORD	const CMDID_SPLIT		= 1000;
+extern const TCHAR CMDID_SPLIT_NAME[];
 static WORD	const CMDID_EXPAND		= CMDID_SPLIT + 1;
+extern const TCHAR CMDID_EXPAND_NAME[];
 static WORD	const CMDID_ROTATE		= CMDID_EXPAND + 1;
+extern const TCHAR CMDID_ROTATE_NAME[];
 static WORD	const CMDID_NEXT		= CMDID_ROTATE + 1;
+extern const TCHAR CMDID_NEXT_NAME[];
 static WORD	const CMDID_PREV		= CMDID_NEXT + 1;
+extern const TCHAR CMDID_PREV_NAME[];
 static WORD	const CMDID_CTRL_BREAK	= CMDID_PREV + 1;
 static WORD	const CMDID_CTRL_C		= CMDID_CTRL_BREAK + 1;
 static WORD	const CMDID_CLOSE		= CMDID_CTRL_C + 1;
@@ -130,3 +135,11 @@ static WORD	const CMDID_TTY3		= CMDID_TTY2 + 1;
 static WORD	const CMDID_TTY4		= CMDID_TTY3 + 1;
 static WORD	const CMDID_TTY5		= CMDID_TTY4 + 1;
 static WORD	const CMDID_TTY6		= CMDID_TTY5 + 1;
+//
+extern const struct conf_cmd_t {
+	TCHAR const *	cmd;
+	WORD			id;
+	TCHAR const *	desc;
+}  conf_cmds[];
+extern const size_t conf_cmds_cnt;
+

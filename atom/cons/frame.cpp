@@ -16,7 +16,7 @@ frame_ptr frame::create( logger_ptr l, pref_ptr p, window_ptr w ) {
 		notify( frame_id_t const i ) : id( i ), tid( GetCurrentThreadId() ){}
 		void operator()() { PostThreadMessage( this->tid, WM_FRAMEEXIT, this->id, 0 ); }
 	} n( gid );
-	f->brdg.run( boost::bind<void>( n ) );
+	f->brdg.run( boost::bind<void>( n ), boost::bind( &window::parse_conf, w, _1 ) );
 	return ( f );
 }
 

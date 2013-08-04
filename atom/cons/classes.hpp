@@ -28,16 +28,16 @@ struct bridge_msg {
 	enum type {
 		bmNone			= 0,
 		bmSize			= 1,
-		bmCmd			= 2,
+		bmConf			= 2,
 		bmKbrd			= 3,
 		bmCtrlBreak		= 4,
 		bmCtrlC			= 5,
-		bmExit			= 6,
-		bmTerminate		= 7
+		bmText			= 6,
+		bmExit			= 7
 	} id;
 	union {
-		//TCHAR				name[MAX_PATH];
-		//COORD				size;
+		TCHAR				text[MAX_PATH];
+		COORD				size;
 		KEY_EVENT_RECORD	key;
 	};
 };

@@ -22,17 +22,18 @@ BOOL WINAPI bridge::handler( DWORD dwCtrlType ) {
 	return FALSE;
 }
 
-void bridge::run( on_exit_t oe ) {
+void bridge::run( on_exit_t oe, on_parse_t op ) {
 	this->on_exit = oe;
+	this->on_parse = op;
 	this->guard_thread = boost::thread( boost::bind( &bridge::guard, this ) );
 }
 
-void bridge::run( on_exit_t oe, string_t const& mn, string_t const& wpn, string_t const& rpn ) {
+void bridge::run( on_exit_t oe, on_parse_t op, string_t const& mn, string_t const& wpn, string_t const& rpn ) {
 	this->server = false;
 	this->mutex_name = mn;
 	this->wpipe_name = wpn;
 	this->rpipe_name = rpn;
-	this->run( oe );
+	this->run( oe, op );
 }
 
 void bridge::join() {
@@ -44,8 +45,16 @@ void bridge::write( bridge_msg::type const id, void const* param ){
 	bridge_msg m;
 	m.id = id;
 	//
-	if ( id  == bridge_msg::bmKbrd ) {
+	if ( id == bridge_msg::bmSize ) {
+	} else if ( id == bridge_msg::bmConf ) {
+		strcpy_s( m.text, static_cast< TCHAR const* >( param ) );
+	} else if ( id == bridge_msg::bmKbrd ) {
 		m.key = *( static_cast< KEY_EVENT_RECORD const* >( param ) );
+	} else if ( id == bridge_msg::bmCtrlBreak ) {
+	} else if ( id == bridge_msg::bmCtrlC ) {
+	} else if ( id == bridge_msg::bmText ) {
+		strcpy_s( m.text, static_cast< TCHAR const* >( param ) );
+	} else if ( id == bridge_msg::bmExit ) {
 	}
 	//
 	this->wpipe.write( &m, sizeof( m ) );
@@ -66,13 +75,11 @@ void bridge::guard(){
 			if ( this->server ){
 				n.b = this;
 #ifdef STANDALONE
-				struct _{ static void __() { } };
+				struct _{ static void _1() { } static void _2( TCHAR const* ) {} };
 				bridge e;
-				e.run( boost::bind( _::__ ), this->mutex_name, this->rpipe_name, this->wpipe_name );
+				e.run( boost::bind( _::_1 ), boost::bind( _::_2, _1 ), this->mutex_name, this->rpipe_name, this->wpipe_name );
 #else
 				// start child console process
-				atom::proc<TCHAR> p;
-				//
 				TCHAR path[MAX_PATH] = { 0 };
 				TCHAR drive[MAX_PATH] = { 0 };
 				TCHAR dir[MAX_PATH] = { 0 };
@@ -82,13 +89,10 @@ void bridge::guard(){
 				_tsplitpath_s( path, drive, dir, filename, ext );
 				_tmakepath_s( path, drive, dir, _T("consd"), ext );
 				std::stringstream ss;
-				ss 
-					<< path
-					<< " -m " << this->mutex_name
-					<< " -w " << this->rpipe_name
-					<< " -r " << this->wpipe_name
-					;
+				ss << "\"" << path << "\" -m " << this->mutex_name << " -w " << this->rpipe_name << " -r " << this->wpipe_name;
 				//
+				atom::proc<TCHAR> p;
+				//???????? w & h
 				p.run( ss.str(), 80, 25, true );
 #endif
 				this->wpipe.connect();
@@ -111,6 +115,13 @@ void bridge::guard(){
 			this->wpipe.close();
 			this->rpipe.close();
 			read_thread.join();
+
+			//if ( this->server ) {
+			//	OutputDebugString( "Server guard thread exit\n" );
+			//} else {
+			//	OutputDebugString( "Client guard thread exit\n" );
+			//}
+
 		}
 	}
 }
@@ -180,49 +191,32 @@ void bridge::read() {
 			bridge_msg bm;
 			memset( &bm, 0, sizeof( bm ) );
 			if ( cont = this->rpipe.read( &bm, sizeof( bm )  ) ) {
-				switch( bm.id ) {
-				case bridge_msg::bmNone:
-					{
-						break;
-					}
-				case bridge_msg::bmSize:
-					{
-						break;
-					}
-				case bridge_msg::bmCmd:
-					{
-						break;
-					}
-				case bridge_msg::bmKbrd:
-					{
-						INPUT_RECORD ir;
-						ir.EventType = KEY_EVENT;
-						ir.Event.KeyEvent = bm.key;
-						DWORD wr = 0;
-						WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
-						break;
-					}
-				case bridge_msg::bmCtrlBreak:
-					{
-						break;
-					}
-				case bridge_msg::bmCtrlC:
-					{
-						break;
-					}
-				case bridge_msg::bmExit:
-					{
-						exit2cons();
-						break;
-					}
-				case bridge_msg::bmTerminate:
-					{
-						break;
-					}
+				if ( bm.id == bridge_msg::bmSize ) {
+				} else if ( bm.id == bridge_msg::bmConf ) {
+					this->on_parse( bm.text );
+				} else if ( bm.id == bridge_msg::bmKbrd ) {
+					INPUT_RECORD ir;
+					ir.EventType = KEY_EVENT;
+					ir.Event.KeyEvent = bm.key;
+					DWORD wr = 0;
+					WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &ir, sizeof( ir ), &wr );
+				} else if ( bm.id == bridge_msg::bmCtrlBreak ) {
+					GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, 0 );
+				} else if ( bm.id == bridge_msg::bmCtrlC ) {
+					GenerateConsoleCtrlEvent( CTRL_C_EVENT, 0 );
+				} else if ( bm.id == bridge_msg::bmText ) {
+					std::cout << std::endl << bm.text << std::endl;
+				} else if ( bm.id == bridge_msg::bmExit ) {
+					exit2cons();
 				}
 			}
 		}
 	}
+	//if ( this->server ) {
+	//	OutputDebugString( "Server read thread exit\n" );
+	//} else {
+	//	OutputDebugString( "Client read thread exit\n" );
+	//}
 }
 
 #include <strsafe.h>
@@ -258,6 +252,8 @@ void ErrorExit(LPTSTR lpszFunction)
     LocalFree(lpDisplayBuf);
 }
 
+
+// split expand rotate next prev tt1 - tt6
 void bridge::tty() {
 
 	atom::tty< TCHAR > tty1( std::cin, std::cout );
@@ -267,7 +263,7 @@ void bridge::tty() {
 		}
 		//
 		static void conf( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param, bridge& b ) {
-			//b.write()
+			b.write( bridge_msg::bmConf, param.c_str() );
 		}
 		//
 		static void exec( atom::tty< TCHAR >& t, atom::tty< TCHAR >::string_t const& param ) {

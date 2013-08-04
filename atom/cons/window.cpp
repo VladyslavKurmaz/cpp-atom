@@ -360,6 +360,19 @@ void window::oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 }
 
 void
+window::parse_conf( TCHAR const* conf ) {
+	::string_t s( conf );
+	//
+	for( size_t i = 0; i < conf_cmds_cnt; ++i ) {
+		if ( ( s == conf_cmds[i].cmd ) && ( conf_cmds[i].id ) ) {
+			SendMessage( this->get_hwnd(), WM_COMMAND, MAKEWPARAM( conf_cmds[i].id, 0 ), 0 );
+			return;
+		}
+	}
+	// check command line options
+}
+
+void
 window::close_frame( frame_id_t const id ) {
 	//??? lock mutex
 	frame_ptr f = this->head_area->get_by_id( id );

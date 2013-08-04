@@ -41,12 +41,9 @@ int main( int argc, char *argv[] )
 			return -1;
 		}
 		//
-		struct _{
-			static void __() {
-			}
-		};
+		struct _{ static void _1() { } static void _2( TCHAR const* ) {} };
 		bridge e;
-		e.run( boost::bind( _::__ ), mutex_name, wpipe_name, rpipe_name );
+		e.run( boost::bind( _::_1 ), boost::bind( _::_2, _1 ), mutex_name, wpipe_name, rpipe_name );
 		e.join();
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );

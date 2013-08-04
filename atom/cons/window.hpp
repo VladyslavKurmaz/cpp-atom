@@ -55,6 +55,8 @@ public:
 	void ontimer( HWND hWnd, UINT id );
 	///
 	void oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
+	//
+	void parse_conf( TCHAR const* conf );
 	///
 	window& operator()( preferences::type const mode, atom::po::id_t const opt );
 
