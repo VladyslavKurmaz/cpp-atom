@@ -272,7 +272,6 @@ void window::onpaint( HWND hWnd ){
 
 void window::onclose( HWND ) {
 	assert( false );
-	//??????? lock mutex
 	//frames_t fs;
 	//this->head_area->collect( fs );
 	//BOOST_FOREACH( frame_ptr f, fs ) { f->close(); }
@@ -370,11 +369,11 @@ window::parse_conf( TCHAR const* conf ) {
 		}
 	}
 	// check command line options
+	this->get_pref()->parse( ::string_t( conf ) );
 }
 
 void
 window::close_frame( frame_id_t const id ) {
-	//??? lock mutex
 	frame_ptr f = this->head_area->get_by_id( id );
 	if ( f ) {
 		//

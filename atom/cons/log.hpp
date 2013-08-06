@@ -11,13 +11,11 @@ public:
 	}
 
 	~logger() {
-		*this << "free log" << std::endl;
 	}
 
 
 private:
 	///
 	logger() : atom::log() {
-		*this << "create log" << std::endl;
 	}
 };

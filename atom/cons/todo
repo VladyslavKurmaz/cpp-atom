@@ -17,4 +17,5 @@
 - process mouse events
 - configure cons from consd console
 - command to check cons internal status - self check: hotkeys, etc.
-- deny sliding - command line parameter
++ deny sliding - command line parameter
+- autostart

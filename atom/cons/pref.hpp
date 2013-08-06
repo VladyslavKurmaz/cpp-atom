@@ -19,6 +19,9 @@ public:
 	bool
 	init( int argc, char const * const argv[] );
 	///
+	bool
+	parse( string_t const& s );
+	///
 	template <typename T >
 	T get( atom::po::id_t const id ) {
 		return ( this->po.as<T>( id ) );

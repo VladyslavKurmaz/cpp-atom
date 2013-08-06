@@ -30,7 +30,7 @@ pref::pref( logger_ptr l ) : base_t(), po() {
 	atom::po::options_description_t& desc = this->po.add_desc( 0, "program options" );
 	//
 	po.
-		add_option( po_help,					"help",											"Show this help", desc ).
+		add_option( po_help,					"help",										"Show this help", desc ).
 		add_option( po_autostart,				"autostart",
 		boost::program_options::value<bool>()->default_value( false ),							"Start on Windows startup", desc ).
 		//[hk.*]
@@ -123,4 +123,21 @@ bool pref::init( int argc, char const * const argv[] ) {
 	return true;
 }
 
+bool pref::parse( string_t const& s ) {
+	atom::po npo = this->po;
+	//
+	atom::po::options_description_t& desc = npo.get_desc( 0 );
+	try {
+		npo.parse_cmd_line( s, desc, true );
+		//
+		unsigned int const height1	= this->po.as< unsigned int >( po_ui_height );
+		unsigned int const height2	= npo.as< unsigned int >( po_ui_height );
+		Sleep(0);
+
+	} catch( std::exception& e ) {
+		this->get_logger() << e.what() << std::endl;
+		return false;
+	}
+	return true;
+}
 
