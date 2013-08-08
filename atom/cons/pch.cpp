@@ -22,3 +22,6 @@ const conf_cmd_t conf_cmds[] = {
 	{ CMDID_PREV_NAME,		CMDID_PREV,		_T("focus prev frame") },
 };
 const size_t conf_cmds_cnt = sizeof( conf_cmds ) / sizeof( conf_cmds[0] );
+
+const TCHAR DELIM1[] = _T( ";" );
+const TCHAR DELIM2[] = _T( ":" );

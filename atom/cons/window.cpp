@@ -344,7 +344,7 @@ window::parse_conf( TCHAR const* conf ) {
 	try {
 		this->get_pref()->parse( ::string_t( conf ) );
 	}
-	catch ( std::exception& e ) {
+	catch ( std::exception& /*e*/ ) {
 		//send exception description back to the console process
 	}
 }
@@ -542,163 +542,124 @@ atom::parse_tag< TCHAR, WORD > vk_tags[] = {
 };
 size_t vk_tags_count = sizeof( vk_tags ) / sizeof( vk_tags[0] );
 
-void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
-	::string_t s = get_pref()->get< ::string_t >( opt );
-	atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, ::string_t( "+" ) );
-	//
-	if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
-		atom::parse_result< TCHAR, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
-		if ( ( vk.total_found = 1 ) && ( vk.unparsed.size() == 0 ) ) {
-		} else {
-			vk.result = (WORD)mods.unparsed[0].c_str()[0];
-		}
-		this->accel.add_accel( cmd, mods.result | FVIRTKEY, vk.result );
-
-	} else {
-		*(this->get_logger()) << "Invalid accelerator format format " << s << std::endl;
-	}
-}
-
 void window::process_autostart() {
-#if 0
-		case po_autostart:
-			//Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
-			//          "MyStartUp",
-			//          @"C:\StartUpApp.exe");
-			break;
-#endif
+	//Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+	//          "MyStartUp",
+	//          @"C:\StartUpApp.exe");
 }
 
 void window::process_hotkeys() {
-#if 0
-		case po_hk_split:
-		case po_hk_expand:
-		case po_hk_rotate:
-		case po_hk_next:
-		case po_hk_prev:
-		case po_hk_ctrl_break:
-		case po_hk_ctrl_c:
-		case po_hk_close:
-		case po_hk_tty1:
-		case po_hk_tty2:
-		case po_hk_tty3:
-		case po_hk_tty4:
-		case po_hk_tty5:
-		case po_hk_tty6:
-			{
-				WORD cmds[] = { 
-					CMDID_SPLIT,
-					CMDID_EXPAND,
-					CMDID_ROTATE,
-					CMDID_NEXT,
-					CMDID_PREV,
-					CMDID_CTRL_BREAK,
-					CMDID_CTRL_C,
-					CMDID_CLOSE,
-					CMDID_TTY1,
-					CMDID_TTY2,
-					CMDID_TTY3,
-					CMDID_TTY4,
-					CMDID_TTY5,
-					CMDID_TTY6
-				};
-				update_accel( cmds[ opt - po_hk_split ], opt );
-				break;
+	static const struct hk_tags_t {
+		atom::po::id_t	opt;
+		WORD			cmd;
+	} hk_tags[] = {
+		{ po_hk_split, CMDID_SPLIT },
+		{ po_hk_expand, CMDID_EXPAND },
+		{ po_hk_rotate, CMDID_ROTATE },
+		{ po_hk_next, CMDID_NEXT },
+		{ po_hk_prev, CMDID_PREV },
+		{ po_hk_ctrl_break, CMDID_CTRL_BREAK },
+		{ po_hk_ctrl_c, CMDID_CTRL_C },
+		{ po_hk_close, CMDID_CLOSE },
+		{ po_hk_tty1, CMDID_TTY1 },
+		{ po_hk_tty2, CMDID_TTY2 },
+		{ po_hk_tty3, CMDID_TTY3 },
+		{ po_hk_tty4, CMDID_TTY4 },
+		{ po_hk_tty5, CMDID_TTY5 },
+		{ po_hk_tty6, CMDID_TTY6 }
+	};
+	//
+	BOOST_FOREACH( hk_tags_t const& tag, hk_tags )
+	{
+		::string_t s = get_pref()->get< ::string_t >( tag.opt );
+		atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, ::string_t( "+" ) );
+		//
+		if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
+			atom::parse_result< TCHAR, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
+			if ( ( vk.total_found = 1 ) && ( vk.unparsed.size() == 0 ) ) {
+			} else {
+				vk.result = (WORD)mods.unparsed[0].c_str()[0];
 			}
+			this->accel.add_accel( tag.cmd, mods.result | FVIRTKEY, vk.result );
 
-		this->accel.build();
-		this->update_hotkeys();
-#endif
+		} else {
+			// throw exception
+			*(this->get_logger()) << "Invalid accelerator format format " << s << std::endl;
+		}
+	}
+	//
+	this->accel.build();
+	this->update_hotkeys();
 }
 
 void window::process_fonts() {
-#if 0
-		case po_ui_font_text:
-		case po_ui_font_sys:
-			{
-				::string_t s = get_pref()->get< ::string_t >( opt );
-				atom::attributes< TCHAR > a( s, d1, d2 );
-				HFONT f = CreateFont(
-					a.as<unsigned int>(_T("height") ),
-					0,
-					0,
-					0,
-					FW_NORMAL,
-					FALSE,
-					FALSE,
-					FALSE,
-					OEM_CHARSET,
-					OUT_OUTLINE_PRECIS,
-					CLIP_DEFAULT_PRECIS,
-					DEFAULT_QUALITY,
-					FIXED_PITCH,
-					a.as<::string_t>(_T("name") ).c_str()
-					);
-				unsigned int color = a.as_color( _T("color") );
-				//
-				if ( f != NULL ) {
-					switch( opt ) {
-					case po_ui_font_text:
-						this->paint_param.font_text = f;
-						this->paint_param.font_text_color = color;
-						break;
-					case po_ui_font_sys:
-						this->paint_param.font_sys = f; 
-						this->paint_param.font_sys_color = color;
-						break;
-					};
-				} else {
-					*(this->get_logger()) << "Text font creation error: " << s << std::endl;
-				}
+	static const struct fonts_t {
+		atom::po::id_t	opt;
+	} fonts[] = {
+		po_ui_font_text,
+		po_ui_font_sys
+	};
+	//
+	::string_t const d1( DELIM1 );
+	::string_t const d2( DELIM2 );
+	//
+	BOOST_FOREACH( fonts_t const& font, fonts )
+	{
+		::string_t s = get_pref()->get< ::string_t >( font.opt );
+		atom::attributes< TCHAR > a( s, d1, d2 );
+		HFONT f = CreateFont(
+			a.as<unsigned int>(_T("height") ),
+			0,
+			0,
+			0,
+			FW_NORMAL,
+			FALSE,
+			FALSE,
+			FALSE,
+			OEM_CHARSET,
+			OUT_OUTLINE_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			DEFAULT_QUALITY,
+			FIXED_PITCH,
+			a.as<::string_t>(_T("name") ).c_str()
+			);
+		unsigned int color = a.as_color( _T("color") );
+		//
+		if ( f != NULL ) {
+			switch( font.opt ) {
+			case po_ui_font_text:
+				this->paint_param.font_text = f;
+				this->paint_param.font_text_color = color;
 				break;
-			}
-#endif
+			case po_ui_font_sys:
+				this->paint_param.font_sys = f; 
+				this->paint_param.font_sys_color = color;
+				break;
+			};
+		} else {
+			*(this->get_logger()) << "Text font creation error: " << s << std::endl;
+		}
+	}
 }
+
 
 void window::process_ui() {
-#if 0
-		case po_ui_bk_color:
-			this->paint_param.bk_brush = CreateSolidBrush( get_pref()->get< unsigned int >( opt ) );
-			break;
-		case po_ui_margin:
-			this->paint_param.margin_size			= 0;
-			break;
-		case po_ui_border:
-			{
-				atom::attributes< TCHAR > a( get_pref()->get< ::string_t >( opt ), d1, d2 );
-				this->paint_param.border_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
-				this->paint_param.border_brush_inactive	= CreateSolidBrush( a.as_color( _T("inactive") ) );
-				this->paint_param.border_size			= a.as<unsigned int>(_T("size") );
-				break;
-			}
-		case po_ui_padding:
-			{
-				atom::attributes< TCHAR > a( get_pref()->get< ::string_t >( opt ), d1, d2 );
-				this->paint_param.padding_size			= a.as<unsigned int>(_T("size") );
-				break;
-			}
-		case po_ui_scroll:
-			{
-				atom::attributes< TCHAR > a( get_pref()->get< ::string_t >( opt ), d1, d2 );
-				this->paint_param.scroll_brush			= CreateSolidBrush( a.as_color( _T("color") ) );
-				this->paint_param.scroll_size			= a.as<unsigned int>(_T("size") );
-				break;
-			}
-		}
-#endif
+	::string_t const d1( DELIM1 );
+	::string_t const d2( DELIM2 );
+	//
+	this->paint_param.bk_brush = CreateSolidBrush( get_pref()->get< unsigned int >( po_ui_bk_color ) );
+	// po_ui_margin
+	this->paint_param.margin_size			= 0;
+	//
+	atom::attributes< TCHAR > border( get_pref()->get< ::string_t >( po_ui_border ), d1, d2 );
+	this->paint_param.border_brush			= CreateSolidBrush( border.as_color( _T("color") ) );
+	this->paint_param.border_brush_inactive	= CreateSolidBrush( border.as_color( _T("inactive") ) );
+	this->paint_param.border_size			= border.as<unsigned int>(_T("size") );
+	//
+	atom::attributes< TCHAR > padding( get_pref()->get< ::string_t >( po_ui_padding ), d1, d2 );
+	this->paint_param.padding_size			= padding.as<unsigned int>(_T("size") );
+	//
+	atom::attributes< TCHAR > scroll( get_pref()->get< ::string_t >( po_ui_scroll ), d1, d2 );
+	this->paint_param.scroll_brush			= CreateSolidBrush( scroll.as_color( _T("color") ) );
+	this->paint_param.scroll_size			= scroll.as<unsigned int>(_T("size") );
 }
-
-#if 0
-window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
-	if ( mode == preferences::pre ) {
-	} else if ( mode == preferences::update ) {
-		::string_t const d1( _T( ";" ) );
-		::string_t const d2( _T( ":" ) );
-		//
-		switch( opt ) {
-		//
-	} else if ( mode == preferences::post ) {
-	}
-	return (*this);
-}
-#endif

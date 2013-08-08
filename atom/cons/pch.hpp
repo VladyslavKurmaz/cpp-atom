@@ -144,4 +144,6 @@ extern const struct conf_cmd_t {
 	TCHAR const *	desc;
 }  conf_cmds[];
 extern const size_t conf_cmds_cnt;
-
+//
+extern const TCHAR DELIM1[];
+extern const TCHAR DELIM2[];
