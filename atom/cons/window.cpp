@@ -78,38 +78,10 @@ bool window::init() {
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref()->get< unsigned int >( po_ui_alpha ) );
 		//
-		(*this)
-		( preferences::pre, po_none )
-			( preferences::update, po_autostart )
-			( preferences::update, po_hk_appear )
-			( preferences::update, po_hk_split )
-			( preferences::update, po_hk_expand )
-			( preferences::update, po_hk_rotate )
-			( preferences::update, po_hk_next )
-			( preferences::update, po_hk_prev )
-			( preferences::update, po_hk_ctrl_break )
-			( preferences::update, po_hk_ctrl_c )
-			( preferences::update, po_hk_close )
-			( preferences::update, po_hk_tty1 )
-			( preferences::update, po_hk_tty2 )
-			( preferences::update, po_hk_tty3 )
-			( preferences::update, po_hk_tty4 )
-			( preferences::update, po_hk_tty5 )
-			( preferences::update, po_hk_tty6 )
-			( preferences::update, po_ui_timeout )
-			( preferences::update, po_ui_alignment )
-			( preferences::update, po_ui_width )
-			( preferences::update, po_ui_height )
-			( preferences::update, po_ui_clip )
-			( preferences::update, po_ui_alpha )
-			( preferences::update, po_ui_bk_color )
-			( preferences::update, po_ui_font_text )
-			( preferences::update, po_ui_font_sys )
-			( preferences::update, po_ui_margin )
-			( preferences::update, po_ui_border )
-			( preferences::update, po_ui_padding )
-			( preferences::update, po_ui_scroll )
-		( preferences::post, po_none );
+		this->process_autostart();
+		this->process_hotkeys();
+		this->process_fonts();
+		this->process_ui();
 		//
 		this->current_frame = frame::create( this->get_logger(), this->get_pref(), this->shared_from_this() );
 		this->head_area = area::create( area_ptr(), this->current_frame, true );
@@ -369,7 +341,12 @@ window::parse_conf( TCHAR const* conf ) {
 		}
 	}
 	// check command line options
-	this->get_pref()->parse( ::string_t( conf ) );
+	try {
+		this->get_pref()->parse( ::string_t( conf ) );
+	}
+	catch ( std::exception& e ) {
+		//send exception description back to the console process
+	}
 }
 
 void
@@ -582,20 +559,18 @@ void window::update_accel( WORD const cmd, atom::po::id_t const opt ) {
 	}
 }
 
-
-window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
-	if ( mode == preferences::pre ) {
-	} else if ( mode == preferences::update ) {
-		::string_t const d1( _T( ";" ) );
-		::string_t const d2( _T( ":" ) );
-		//
-		switch( opt ) {
+void window::process_autostart() {
+#if 0
 		case po_autostart:
 			//Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
 			//          "MyStartUp",
 			//          @"C:\StartUpApp.exe");
 			break;
-		//
+#endif
+}
+
+void window::process_hotkeys() {
+#if 0
 		case po_hk_split:
 		case po_hk_expand:
 		case po_hk_rotate:
@@ -630,9 +605,14 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 				update_accel( cmds[ opt - po_hk_split ], opt );
 				break;
 			}
-		case po_ui_bk_color:
-			this->paint_param.bk_brush = CreateSolidBrush( get_pref()->get< unsigned int >( opt ) );
-			break;
+
+		this->accel.build();
+		this->update_hotkeys();
+#endif
+}
+
+void window::process_fonts() {
+#if 0
 		case po_ui_font_text:
 		case po_ui_font_sys:
 			{
@@ -672,6 +652,14 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 				}
 				break;
 			}
+#endif
+}
+
+void window::process_ui() {
+#if 0
+		case po_ui_bk_color:
+			this->paint_param.bk_brush = CreateSolidBrush( get_pref()->get< unsigned int >( opt ) );
+			break;
 		case po_ui_margin:
 			this->paint_param.margin_size			= 0;
 			break;
@@ -697,9 +685,20 @@ window& window::operator()( preferences::type const mode, atom::po::id_t const o
 				break;
 			}
 		}
+#endif
+}
+
+#if 0
+window& window::operator()( preferences::type const mode, atom::po::id_t const opt ) {
+	if ( mode == preferences::pre ) {
+	} else if ( mode == preferences::update ) {
+		::string_t const d1( _T( ";" ) );
+		::string_t const d2( _T( ":" ) );
+		//
+		switch( opt ) {
+		//
 	} else if ( mode == preferences::post ) {
-		this->accel.build();
-		this->update_hotkeys();
 	}
 	return (*this);
 }
+#endif

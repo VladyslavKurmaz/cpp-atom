@@ -25,7 +25,12 @@ child process interaption hotket ctrl+c|ctrl+break
 #endif
 
 
-pref::pref( logger_ptr l ) : base_t(), po() {
+pref::pref( logger_ptr l ) :
+		base_t()
+	,	po()
+	,	pref_groups()
+	,	process_callbacks()
+{
 	atom::mount<pref2logger>( this, l );
 	atom::po::options_description_t& desc = this->po.add_desc( 0, "program options" );
 	//
@@ -121,6 +126,10 @@ bool pref::init( int argc, char const * const argv[] ) {
 		return false;
 	}
 	return true;
+}
+
+void pref::register_process_callback( pref_group_t const g, callback_t c ){
+	this->process_callbacks[ g ] = std::make_pair( false, c );
 }
 
 bool pref::parse( string_t const& s ) {

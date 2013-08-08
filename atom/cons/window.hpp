@@ -58,7 +58,13 @@ public:
 	//
 	void parse_conf( TCHAR const* conf );
 	///
-	window& operator()( preferences::type const mode, atom::po::id_t const opt );
+	void process_autostart();
+	///
+	void process_hotkeys();
+	///
+	void process_fonts();
+	//
+	void process_ui();
 
 protected:
 	//

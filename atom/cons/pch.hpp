@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <algorithm>
+#include <map>
+#include <vector>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>
