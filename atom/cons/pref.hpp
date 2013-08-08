@@ -8,6 +8,7 @@ class pref :
 	public boost::enable_shared_from_this< pref > {
 	typedef atom::node< LOKI_TYPELIST_1( pref2logger ) >
 		base_t;
+public:
 	enum pref_group_t {
 		pgAutostart,
 		pgHotkeys,
@@ -16,8 +17,6 @@ class pref :
 	};
 	typedef boost::function< void() >
 		callback_t;
-
-public:
 	///
 	static pref_ptr create( logger_ptr l ) {
 		return pref_ptr( new pref( l ) );

@@ -78,6 +78,7 @@ bool window::init() {
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref()->get< unsigned int >( po_ui_alpha ) );
 		//
+		get_pref()->register_process_callback( pref::pgAutostart, boost::bind( &window::process_autostart, this->shared_from_this() ) );
 		this->process_autostart();
 		this->process_hotkeys();
 		this->process_fonts();
