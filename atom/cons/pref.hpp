@@ -10,6 +10,7 @@ class pref :
 		base_t;
 public:
 	enum pref_group_t {
+		pgEmpty,
 		pgAutostart,
 		pgHotkeys,
 		pgFonts,
@@ -43,6 +44,10 @@ protected:
 	//
 	logger& get_logger() {
 		return ( *( get_value( boost::mpl::identity< pref2logger >() ).item() ) );
+	}
+	//
+	void id2gr( atom::po::id_t const id, pref_group_t const g ) {
+		this->pref_groups.insert( std::pair<atom::po::id_t, pref_group_t >( id, g ) );
 	}
 
 private:

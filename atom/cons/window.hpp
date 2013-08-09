@@ -58,6 +58,8 @@ public:
 	//
 	void parse_conf( TCHAR const* conf );
 	///
+	void process_empty() {}
+	///
 	void process_autostart();
 	///
 	void process_hotkeys();

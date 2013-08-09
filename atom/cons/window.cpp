@@ -78,6 +78,8 @@ bool window::init() {
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref()->get< unsigned int >( po_ui_alpha ) );
 		//
+		get_pref()->register_process_callback( pref::pgEmpty, boost::bind( &window::process_empty, this->shared_from_this() ) );
+		//
 		get_pref()->register_process_callback( pref::pgAutostart, boost::bind( &window::process_autostart, this->shared_from_this() ) );
 		this->process_autostart();
 		get_pref()->register_process_callback( pref::pgHotkeys, boost::bind( &window::process_hotkeys, this->shared_from_this() ) );
@@ -649,6 +651,9 @@ void window::process_fonts() {
 }
 
 void window::process_window(){
+	update_placement();
+	this->update_position( this->get_hwnd(), this->is_visible(), 1.f );
+	this->invalidate();
 }
 
 void window::process_ui() {

@@ -179,6 +179,12 @@ namespace atom {
 				return ( *this );
 		}
 		///
+		template < typename T >
+		this_type_t&
+			operator()( T const ) {
+				return ( *this );
+		}
+		///
 		void
 			parse_config( string_t const& file_name, options_description_t const& desc, bool const ntf ) {
 				helper h( *this, ntf );
