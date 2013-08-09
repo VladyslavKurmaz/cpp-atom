@@ -77,7 +77,7 @@ pref::pref( logger_ptr l ) :
 		add_option( po_ui_width,				"ui.width",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
 		add_option( po_ui_height,				"ui.height",
-		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc ).
+		boost::program_options::value<unsigned int>()->default_value( 5 ),						"", desc ).
 		add_option( po_ui_clip,					"ui.clip",
 		boost::program_options::value<bool>()->default_value( true ),							"", desc ).
 		add_option( po_ui_alpha,				"ui.alpha",
@@ -132,15 +132,57 @@ void pref::register_process_callback( pref_group_t const g, callback_t c ){
 	this->process_callbacks[ g ] = std::make_pair( false, c );
 }
 
+bool operator==( const boost::any & lhs, const boost::any & rhs ){
+	const type_info& lt = lhs.type();
+	const type_info& rt = rhs.type();
+	//
+	if ( lt == rt ) {
+		if ( lt == typeid( bool ) ) {
+			return ( ( boost::any_cast<bool>( lhs ) ) == ( boost::any_cast<bool>( rhs ) ) );
+		}
+		if ( lt == typeid( int ) ) {
+			return ( ( boost::any_cast<int>( lhs ) ) == ( boost::any_cast<int>( rhs ) ) );
+		}
+		if ( lt == typeid( std::string ) ) {
+			return ( ( boost::any_cast<std::string>( lhs ) ) == ( boost::any_cast<std::string>( rhs ) ) );
+		}
+	}
+	return false;
+}
+
+bool operator!=( const boost::any & lhs, const boost::any & rhs ){
+	return ( !( lhs == rhs ) );
+}
+
 bool pref::parse( string_t const& s ) {
 	atom::po npo = this->po;
 	//
 	atom::po::options_description_t& desc = npo.get_desc( 0 );
 	try {
+		typedef std::map<std::string, boost::program_options::variable_value>
+			map_t;
 		npo.parse_cmd_line( s, desc, true );
 		//
-		unsigned int const height1	= this->po.as< unsigned int >( po_ui_height );
-		unsigned int const height2	= npo.as< unsigned int >( po_ui_height );
+		atom::po::variables_map_t& vm = this->po.get_vm();
+		atom::po::variables_map_t& nvm = npo.get_vm();
+		//
+		map_t::iterator it = nvm.begin();
+		//
+		BOOST_FOREACH(map_t::value_type& pair, vm )
+		{
+			if ( pair.second.value() == (*it).second.value() ) {
+				const std::type_info & t = pair.second.value().type();
+				const std::type_info & nt = (*it).second.value().type();
+				std::string s = t.name();
+				std::string ns = nt.name();
+			}
+			//
+			++it;
+		}
+
+		//
+		std::string const height1	= this->po.cast< std::string, unsigned int >( po_ui_height );
+		std::string const height2	= npo.cast< std::string, unsigned int >( po_ui_height );
 		Sleep(0);
 
 	} catch( std::exception& e ) {

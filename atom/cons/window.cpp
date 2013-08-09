@@ -80,8 +80,13 @@ bool window::init() {
 		//
 		get_pref()->register_process_callback( pref::pgAutostart, boost::bind( &window::process_autostart, this->shared_from_this() ) );
 		this->process_autostart();
+		get_pref()->register_process_callback( pref::pgHotkeys, boost::bind( &window::process_hotkeys, this->shared_from_this() ) );
 		this->process_hotkeys();
+		get_pref()->register_process_callback( pref::pgFonts, boost::bind( &window::process_fonts, this->shared_from_this() ) );
 		this->process_fonts();
+		get_pref()->register_process_callback( pref::pgWindow, boost::bind( &window::process_window, this->shared_from_this() ) );
+		this->process_window();
+		get_pref()->register_process_callback( pref::pgUI, boost::bind( &window::process_ui, this->shared_from_this() ) );
 		this->process_ui();
 		//
 		this->current_frame = frame::create( this->get_logger(), this->get_pref(), this->shared_from_this() );
@@ -643,6 +648,8 @@ void window::process_fonts() {
 	}
 }
 
+void window::process_window(){
+}
 
 void window::process_ui() {
 	::string_t const d1( DELIM1 );

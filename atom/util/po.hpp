@@ -48,6 +48,9 @@ namespace atom {
 			positional_options_description_t;
 		typedef boost::program_options::variables_map
 			variables_map_t;
+
+		variables_map_t& get_vm() { return this->vm; }
+
 	private:
 		typedef po
 			this_type_t;

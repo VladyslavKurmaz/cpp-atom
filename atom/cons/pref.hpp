@@ -13,6 +13,7 @@ public:
 		pgAutostart,
 		pgHotkeys,
 		pgFonts,
+		pgWindow,
 		pgUI
 	};
 	typedef boost::function< void() >

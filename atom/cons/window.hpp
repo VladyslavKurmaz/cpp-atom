@@ -64,6 +64,8 @@ public:
 	///
 	void process_fonts();
 	//
+	void process_window();
+	//
 	void process_ui();
 
 protected:
