@@ -47,7 +47,7 @@ protected:
 
 private:
 	///
-	typedef std::multimap< atom::po::id_t, pref_group_t >
+	typedef std::map< atom::po::id_t, pref_group_t >
 		pref_groups_t;
 	typedef std::map< pref_group_t, std::pair< bool, callback_t > >
 		process_callbacks_t;

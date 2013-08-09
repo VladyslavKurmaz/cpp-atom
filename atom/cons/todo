@@ -19,3 +19,4 @@
 - command to check cons internal status - self check: hotkeys, etc.
 + deny sliding - command line parameter
 - autostart
+- scale font ctrl+/-, bubble frames

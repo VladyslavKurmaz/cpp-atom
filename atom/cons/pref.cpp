@@ -103,6 +103,9 @@ pref::pref( logger_ptr l ) :
 		//[ui.scroll.*]
 		add_option( po_ui_scroll,				"ui.scroll",
 		boost::program_options::value<std::string>()->default_value( "size:2;color:008000" ),	"", desc );
+	//
+	//
+	this->pref_groups.insert( std::pair<atom::po::id_t, pref_group_t >( po_ui_alpha, pgUI ) );
 }
 
 pref::~pref() {
@@ -138,13 +141,13 @@ bool operator==( const boost::any & lhs, const boost::any & rhs ){
 	//
 	if ( lt == rt ) {
 		if ( lt == typeid( bool ) ) {
-			return ( ( boost::any_cast<bool>( lhs ) ) == ( boost::any_cast<bool>( rhs ) ) );
-		}
-		if ( lt == typeid( int ) ) {
-			return ( ( boost::any_cast<int>( lhs ) ) == ( boost::any_cast<int>( rhs ) ) );
-		}
-		if ( lt == typeid( std::string ) ) {
-			return ( ( boost::any_cast<std::string>( lhs ) ) == ( boost::any_cast<std::string>( rhs ) ) );
+			return ( ( boost::any_cast< bool >( lhs ) ) == ( boost::any_cast< bool >( rhs ) ) );
+		} else if ( lt == typeid( int ) ) {
+			return ( ( boost::any_cast< int >( lhs ) ) == ( boost::any_cast< int >( rhs ) ) );
+		} else if ( lt == typeid( unsigned int ) ) {
+			return ( ( boost::any_cast< unsigned int >( lhs ) ) == ( boost::any_cast< unsigned int >( rhs ) ) );
+		} else if ( lt == typeid( std::string ) ) {
+			return ( ( boost::any_cast< std::string >( lhs ) ) == ( boost::any_cast< std::string >( rhs ) ) );
 		}
 	}
 	return false;
@@ -159,6 +162,11 @@ bool pref::parse( string_t const& s ) {
 	//
 	atom::po::options_description_t& desc = npo.get_desc( 0 );
 	try {
+
+		BOOST_FOREACH(process_callbacks_t::value_type& pair, this->process_callbacks ) {
+			pair.second.first = false;
+		}
+
 		typedef std::map<std::string, boost::program_options::variable_value>
 			map_t;
 		npo.parse_cmd_line( s, desc, true );
@@ -170,20 +178,20 @@ bool pref::parse( string_t const& s ) {
 		//
 		BOOST_FOREACH(map_t::value_type& pair, vm )
 		{
-			if ( pair.second.value() == (*it).second.value() ) {
-				const std::type_info & t = pair.second.value().type();
-				const std::type_info & nt = (*it).second.value().type();
-				std::string s = t.name();
-				std::string ns = nt.name();
+			if ( pair.second.value() != (*it).second.value() ) {
+				(*(this->process_callbacks.find( (*(this->pref_groups.find( this->po.get_id( pair.first ) ))).second ))).second.first = true;
 			}
 			//
 			++it;
 		}
-
 		//
-		std::string const height1	= this->po.cast< std::string, unsigned int >( po_ui_height );
-		std::string const height2	= npo.cast< std::string, unsigned int >( po_ui_height );
-		Sleep(0);
+		this->po = npo;
+		//
+		BOOST_FOREACH(process_callbacks_t::value_type& pair, this->process_callbacks ) {
+			if ( pair.second.first ) {
+				pair.second.second();
+			}
+		}
 
 	} catch( std::exception& e ) {
 		this->get_logger() << e.what() << std::endl;
