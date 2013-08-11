@@ -675,7 +675,6 @@ void window::process_ui() {
 	atom::attributes< TCHAR > scroll( get_pref()->get< ::string_t >( po_ui_scroll ), d1, d2 );
 	this->paint_param.scroll_brush			= CreateSolidBrush( scroll.as_color( _T("color") ) );
 	this->paint_param.scroll_size			= scroll.as<unsigned int>(_T("size") );
-
-	this->update_position( this->get_hwnd(), this->is_visible(), 1.f );
+	//
 	this->invalidate();
 }
