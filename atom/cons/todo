@@ -19,4 +19,8 @@
 - command to check cons internal status - self check: hotkeys, etc.
 + deny sliding - command line parameter
 - autostart
-- scale font ctrl+/-, bubble frames
+- scale font ctrl+/-
+- frames' bubble
+- show/hide frame's console process
+- min/max frame's pair
+- select current monitor
