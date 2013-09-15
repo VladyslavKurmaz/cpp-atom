@@ -85,10 +85,16 @@ protected:
 	update_hotkeys();
 	//
 	void
-	update_placement();
+	calculate_docks();
 	//
 	void
-	update_position( HWND hWnd, bool dir, float mult );
+	slide_begin();
+	//
+	void
+	slide_update( float mult );
+	//
+	void
+	slide_end();
 
 private:
 	class area;
@@ -297,17 +303,20 @@ private:
 	atom::accel
 		accel;
 	//
-	POINT
-		anchor;
 	RECT
-		in_rect;
-	///
-	int
-		slide_dir;
+		rect_active;
+	RECT
+		rect_inactive;
+	bool
+		sliding;
 	DWORD
 		slide_start_time;
 	UINT_PTR
 		slide_timer_id;
+	RECT
+		slide_rect_src;
+	RECT
+		slide_rect_dest;
 	//
 	struct paint_param_t {
 		atom::shared_dc

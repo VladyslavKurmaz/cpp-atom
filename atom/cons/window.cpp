@@ -25,11 +25,13 @@ window::window( logger_ptr l, pref_ptr p ) :
 	,	expand_mode( false )
 	,	appear_hk()
 	,	accel()
-	,	anchor()
-	,	in_rect()
-	,	slide_dir( 0 )
+	,	rect_active()
+	,	rect_inactive()
+	,	sliding( false )
 	,	slide_start_time()
 	,	slide_timer_id( 1 )
+	,	slide_rect_src()
+	,	slide_rect_dest()
 	,	paint_param() {
 	//
 	atom::mount<window2logger>( this, l );
@@ -74,8 +76,8 @@ bool window::init() {
 			return true;
 		}
 	};
-	this->update_placement();
-	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->in_rect ), style, ex_style ), true ) ) {
+	this->calculate_docks();
+	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->rect_inactive ), style, ex_style ), true ) ) {
 		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( get_pref()->get< unsigned int >( po_ui_alpha ) );
 		//
 		get_pref()->register_process_callback( pref::pgEmpty, boost::bind( &window::process_empty, this->shared_from_this() ) );
@@ -159,15 +161,7 @@ void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 
 void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 	if ( idHotKey == this->appear_hk.id ) {
-		if ( slide_dir ) {
-			slide_dir *= -1;
-			slide_start_time += 2 * ( timeGetTime() - slide_start_time ) - get_pref()->get< unsigned int >( po_ui_timeout );
-		} else {
-			slide_dir = ((this->is_visible())?(-1):(1));
-			slide_start_time = timeGetTime();
-			SetTimer( hWnd, slide_timer_id, USER_TIMER_MINIMUM, NULL );
-			this->show( true ).activate();
-		}
+		slide_begin();
 	}
 }
 
@@ -261,10 +255,8 @@ void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
 	switch( uiAction ) {
 	case SPI_SETWORKAREA:
 	case SPI_ICONVERTICALSPACING:
-		update_placement();
-		if ( !slide_dir ) {
-			update_position( hWnd, this->is_visible(), 1.f );
-		}
+		this->calculate_docks();
+		this->slide_begin();
 		break;
 	}
 }
@@ -273,16 +265,7 @@ void window::ontimer( HWND hWnd, UINT id ){
 	if ( id == slide_timer_id ) {
 		DWORD const dt = timeGetTime() - slide_start_time;
 		DWORD const total = get_pref()->get< unsigned int >( po_ui_timeout );
-		bool const in_dir = ( slide_dir > 0 );
-		float mult = 1.f;
-		if ( dt > total ) {
-			this->show( in_dir );
-			slide_dir = 0;
-			KillTimer( hWnd, id );
-		} else {
-			mult = (float)dt / (float)total;
-		}
-		update_position( hWnd, in_dir, mult );
+		slide_update( ( dt < total ) ? ( (float)dt / (float)total ) : ( 1.f ) );
 	};
 }
 
@@ -424,18 +407,22 @@ window::update_hotkeys() {
 }
 //
 atom::parse_tag< TCHAR, alignment::type > alignment_tags[] = {
-	{ "client",		alignment::client },
-	{ "top",		alignment::top },
-	{ "bottom",		alignment::bottom },
-	{ "vcenter",	alignment::vcenter },
+	{ "hcenter",	alignment::hcenter },
 	{ "left",		alignment::left },
 	{ "right",		alignment::right },
-	{ "hcenter",	alignment::hcenter },
+	{ "hclient",	alignment::hclient },
+	{ "hmask",		alignment::hmask },
+	{ "vcenter",	alignment::vcenter },
+	{ "top",		alignment::top },
+	{ "bottom",		alignment::bottom },
+	{ "vclient",	alignment::vclient },
+	{ "vmask",		alignment::vmask },
+	{ "client",		alignment::client },
 	{ "center",		alignment::center }
 };
 size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
 
-void window::update_placement(){
+void window::calculate_docks(){
 	::string_t const alig_str	= get_pref()->get< ::string_t >( po_ui_alignment );
 	unsigned int const width	= get_pref()->get< unsigned int >( po_ui_width );
 	unsigned int const height	= get_pref()->get< unsigned int >( po_ui_height );
@@ -448,7 +435,7 @@ void window::update_placement(){
 		align = result.result;
 	} else {
 		*(this->get_logger()) << "Invalid alignment format " << alig_str << std::endl;
-		align = alignment::top;
+		align = alignment::hcenter | alignment::top;
 	}
 	//
 	RECT rt;
@@ -459,73 +446,79 @@ void window::update_placement(){
 		SystemParametersInfo( SPI_GETWORKAREA, 0, &rt, 0 );
 	}
 	//
-	alignment::type const h_align = align & alignment::hcenter;
-	alignment::type const v_align = align & alignment::vcenter;
+	alignment::type const h_align = align & alignment::hmask;
+	alignment::type const v_align = align & alignment::vmask;
 	//
 	int const rt_w = rt.right - rt.left;
 	int const rt_h = rt.bottom - rt.top;
-	int const wnd_rt_w = ((h_align)?(rt_w * width / 100):(rt_w));
-	int const wnd_rt_h = ((v_align)?(rt_h * height / 100):(rt_h));
-	SetRect( &wnd_rt, rt.left, rt.top, rt.left + wnd_rt_w, rt.top + wnd_rt_h );
+	int const wnd_rt_w = ((h_align == alignment::hclient )?(rt_w):(rt_w * width / 100));
+	int const wnd_rt_h = ((v_align == alignment::vclient )?(rt_h):(rt_h * height / 100));
 	//
-	int offs_dx = 0;
-	int offs_dy = 0;
-	if ( h_align == alignment::hcenter ) {
-		offs_dx = ( rt_w - wnd_rt_w ) / 2;
-	} else if ( h_align == alignment::right ) {
-		offs_dx = ( rt_w - wnd_rt_w );
-	}
-	if ( v_align == alignment::vcenter ) {
-		offs_dy = ( rt_h - wnd_rt_h ) / 2;
-	} else if ( v_align == alignment::bottom ) {
-		offs_dy = ( rt_h - wnd_rt_h );
-	}
-	OffsetRect( &wnd_rt, offs_dx, offs_dy );
-	//
-	this->in_rect = wnd_rt;
-	//
-	int anchor_dx = 0;
-	int anchor_dy = 0;
-	this->anchor.x = wnd_rt.left;
-	this->anchor.y = wnd_rt.top;
-	//
-	if ( h_align ) {
-		if ( ( h_align & alignment::left ) == h_align ) {
-			anchor_dx = -wnd_rt_w;
-		} else if ( ( h_align & alignment::right ) == h_align ) {
-			anchor_dx = wnd_rt_w;
-		}
-	}
-	if ( v_align ) {
-		if ( ( v_align & alignment::top ) == v_align ) {
-			anchor_dy = -wnd_rt_h;
-		} else if ( ( v_align & alignment::bottom ) == v_align ) {
-			anchor_dy = wnd_rt_h;
-		}
-	}
-	//
-	this->anchor.x += anchor_dx;
-	this->anchor.y += anchor_dy;
+	SetRect( &rect_active, 0, 0, wnd_rt_w, wnd_rt_h );
+	rect_inactive = rect_active;
+	OffsetRect( &rect_inactive, 0, -wnd_rt_h );
 	//
 	HDC dc = GetDC( NULL );
 	{
 		this->paint_param.mem_dc		= CreateCompatibleDC( dc );
-		this->paint_param.mem_bitmap	= CreateCompatibleBitmap( dc, RECT_WIDTH( this->in_rect ), RECT_HEIGHT( this->in_rect ) );
+		this->paint_param.mem_bitmap	= CreateCompatibleBitmap( dc, RECT_WIDTH( this->rect_active ), RECT_HEIGHT( this->rect_active ) );
 		SelectObject( this->paint_param.mem_dc, this->paint_param.mem_bitmap );
 	}
 	ReleaseDC( NULL, dc );
 }
 
-void window::update_position( HWND hWnd, bool dir, float mult ) {
-	if ( dir ) {
-		mult = 1.f - mult;
-	};
-	int x = in_rect.left + (int)( (float)( this->anchor.x - in_rect.left ) * mult );
-	int y = in_rect.top + (int)( (float)( this->anchor.y - in_rect.top ) * mult );
-	MoveWindow( hWnd, x, y, in_rect.right - in_rect.left, in_rect.bottom - in_rect.top, TRUE );
-	//
-	this->set_alpha( (BYTE)( (float)get_pref()->get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
+void window::slide_begin() {
+	if ( sliding ) {
+		slide_start_time += get_pref()->get< unsigned int >( po_ui_timeout ) - ( timeGetTime() - slide_start_time );
+	} else {
+		slide_start_time = timeGetTime();
+		SetTimer( this->get_hwnd(), slide_timer_id, USER_TIMER_MINIMUM, NULL );
+		this->show( true ).activate();
+	}
+	sliding = true;
 }
+
+void window::slide_update( float mult ) {
+	mult = 1.f - mult;
+	//
+	RECT rt;
+	struct val {
+		val const& operator()( LONG &r, int const v1, LONG const v2, float const f ) const {
+			r = v1 - (LONG)( (float)( v1 - v2 ) * f );
+			return (*this);
+		}
+	} v;
+	v	( rt.left, slide_rect_dest.left, slide_rect_src.left, mult )
+		( rt.top, slide_rect_dest.top, slide_rect_src.top, mult )
+		( rt.right, slide_rect_dest.right, slide_rect_src.right, mult )
+		( rt.bottom, slide_rect_dest.bottom, slide_rect_src.bottom, mult );
+	MoveWindow( this->get_hwnd(), rt.left, rt.top, RECT_WIDTH( rt ), RECT_HEIGHT( rt ), TRUE );
+	//
+	// this->set_alpha( (BYTE)( (float)get_pref()->get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
+	//
+	if ( mult == 1.f ) {
+		slide_end();
+	}
+}
+
+bool operator==( RECT const& l, RECT const& r ) {
+	return ( ( l.left == r.left ) && ( l.top == r.top ) &&  ( l.right == r.right ) &&  ( l.bottom == r.bottom ) );
+}
+
+bool operator!=( RECT const& l, RECT const& r ) {
+	return ( !( l == r ) );
+}
+
+void window::slide_end() {
+	bool const s = ( rect_inactive != slide_rect_dest );
+	this->show( s );
+	if ( s ) {
+		this->activate();
+	}
+	KillTimer( this->get_hwnd(), slide_timer_id );
+	sliding = false;
+}
+
 
 atom::parse_tag< TCHAR, BYTE > accel_tags[] = {
 	{ "alt",		FALT },
@@ -651,9 +644,8 @@ void window::process_fonts() {
 }
 
 void window::process_window(){
-	update_placement();
-	this->update_position( this->get_hwnd(), this->is_visible(), 1.f );
-	this->invalidate();
+	this->calculate_docks();
+	this->slide_begin();
 }
 
 void window::process_ui() {

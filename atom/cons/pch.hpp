@@ -96,14 +96,20 @@ struct alignment {
 	typedef int
 		type;
 	enum {
-		client	= 0x00,
+		hcenter = 0x00,
 		left	= 0x01,
 		right	= 0x02,
-		hcenter	= left | right,
+		hclient	= left | right,
+		hmask	= left | right,
+		//
+		vcenter	= 0x00,
 		top		= 0x04,
 		bottom	= 0x08,
-		vcenter	= top | bottom,  
-		center	= vcenter | hcenter
+		vclient	= top | bottom,
+		vmask	= top | bottom,
+		//
+		client	= hclient | vclient,
+		center	= hcenter | vcenter
 	};
 };
 ///

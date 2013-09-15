@@ -76,7 +76,7 @@ pref::pref( logger_ptr l ) :
 		add_option( po_ui_timeout,				"ui.timeout",
 		boost::program_options::value<unsigned int>()->default_value( 250 ),					"", desc )( ( id2gr( po_ui_timeout, pgEmpty ), 0 ) ).
 		add_option( po_ui_alignment,			"ui.alignment",
-		boost::program_options::value<std::string>()->default_value("top"),						"[top|bottom|vcenter+][left|right|center+][client]",
+		boost::program_options::value<std::string>()->default_value("hclient+top"),				"[left|right|hcenter|hclient+][top|bottom|vcenter|vclient+][client][center]",
 																									desc )( ( id2gr( po_ui_alignment, pgWindow ), 0 ) ).
 		add_option( po_ui_width,				"ui.width",
 		boost::program_options::value<unsigned int>()->default_value( 50 ),						"", desc )( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
