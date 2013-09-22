@@ -27,11 +27,10 @@ window::window( logger_ptr l, pref_ptr p ) :
 	,	accel()
 	,	rect_active()
 	,	rect_inactive()
-	,	sliding( false )
+	,	sliding( 0 )
 	,	slide_start_time()
+	,	slide_last_time()
 	,	slide_timer_id( 1 )
-	,	slide_rect_src()
-	,	slide_rect_dest()
 	,	paint_param() {
 	//
 	atom::mount<window2logger>( this, l );
@@ -95,6 +94,8 @@ bool window::init() {
 		//
 		this->current_frame = frame::create( this->get_logger(), this->get_pref(), this->shared_from_this() );
 		this->head_area = area::create( area_ptr(), this->current_frame, true );
+		//
+
 		return true;
 	}
 	return false;
@@ -263,9 +264,7 @@ void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
 
 void window::ontimer( HWND hWnd, UINT id ){
 	if ( id == slide_timer_id ) {
-		DWORD const dt = timeGetTime() - slide_start_time;
-		DWORD const total = get_pref()->get< unsigned int >( po_ui_timeout );
-		slide_update( ( dt < total ) ? ( (float)dt / (float)total ) : ( 1.f ) );
+		slide_update();
 	};
 }
 
@@ -467,19 +466,67 @@ void window::calculate_docks(){
 	ReleaseDC( NULL, dc );
 }
 
-void window::slide_begin() {
+void window::slide_begin( bool const update ) {
 	if ( sliding ) {
 		slide_start_time += get_pref()->get< unsigned int >( po_ui_timeout ) - ( timeGetTime() - slide_start_time );
+		slide_last_time = slide_start_time;
+		sliding *= -1;
 	} else {
-		slide_start_time = timeGetTime();
+		sliding = ((this->is_visible())?(-1):(1));
+		if ( update ) {
+			sliding *= -1;
+		}
+		//
+		slide_start_time = slide_start_time = timeGetTime();
 		SetTimer( this->get_hwnd(), slide_timer_id, USER_TIMER_MINIMUM, NULL );
 		this->show( true ).activate();
 	}
-	sliding = true;
 }
 
-void window::slide_update( float mult ) {
-	mult = 1.f - mult;
+bool operator==( RECT const& l, RECT const& r ) {
+	return ( ( l.left == r.left ) && ( l.top == r.top ) &&  ( l.right == r.right ) &&  ( l.bottom == r.bottom ) );
+}
+
+bool operator!=( RECT const& l, RECT const& r ) {
+	return ( !( l == r ) );
+}
+
+void window::slide_update() {
+	if ( this->sliding ) {
+		DWORD const t = timeGetTime();
+		DWORD const total = get_pref()->get< unsigned int >( po_ui_timeout );
+		RECT srect;
+		RECT drect;
+		//
+		GetWindowRect( this->get_hwnd(), &srect );
+		drect = ( this->sliding > 0 )?( this->rect_active ):( this->rect_inactive );
+		//
+		if ( ( t - slide_start_time ) < total ) {
+			float const mult = (float)dt / (float)total );
+			//
+			slide_start_time = t;
+
+
+		} else
+		{
+			// stop
+			bool const s = ( rect_inactive != slide_rect_dest );
+			this->show( s );
+			if ( s ) {
+				this->activate();
+			}
+			KillTimer( this->get_hwnd(), slide_timer_id );
+			sliding = false;
+		}
+	}
+
+
+
+ - 
+slide_start_time
+
+
+		mult = 1.f - mult;
 	//
 	RECT rt;
 	struct val {
@@ -497,27 +544,10 @@ void window::slide_update( float mult ) {
 	// this->set_alpha( (BYTE)( (float)get_pref()->get< unsigned int >( po_ui_alpha ) * ( 1.f - mult ) ) );
 	//
 	if ( mult == 1.f ) {
-		slide_end();
 	}
 }
 
-bool operator==( RECT const& l, RECT const& r ) {
-	return ( ( l.left == r.left ) && ( l.top == r.top ) &&  ( l.right == r.right ) &&  ( l.bottom == r.bottom ) );
-}
 
-bool operator!=( RECT const& l, RECT const& r ) {
-	return ( !( l == r ) );
-}
-
-void window::slide_end() {
-	bool const s = ( rect_inactive != slide_rect_dest );
-	this->show( s );
-	if ( s ) {
-		this->activate();
-	}
-	KillTimer( this->get_hwnd(), slide_timer_id );
-	sliding = false;
-}
 
 
 atom::parse_tag< TCHAR, BYTE > accel_tags[] = {

@@ -88,13 +88,10 @@ protected:
 	calculate_docks();
 	//
 	void
-	slide_begin();
+	slide_begin( bool const update );
 	//
 	void
-	slide_update( float mult );
-	//
-	void
-	slide_end();
+	slide_update();
 
 private:
 	class area;
@@ -307,16 +304,14 @@ private:
 		rect_active;
 	RECT
 		rect_inactive;
-	bool
+	int
 		sliding;
 	DWORD
 		slide_start_time;
+	DWORD
+		slide_last_time;
 	UINT_PTR
 		slide_timer_id;
-	RECT
-		slide_rect_src;
-	RECT
-		slide_rect_dest;
 	//
 	struct paint_param_t {
 		atom::shared_dc
