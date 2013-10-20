@@ -159,7 +159,7 @@ namespace atom {
 		///
 		template< class T >
 		this_type_t&
-			add_option( id_t const option_id, string_t const& option_name, T option_value, string_t const& option_desc, options_description_t& desc ) {
+			add_option( id_t const option_id, string_t const& option_name, string_t const& option_desc, options_description_t& desc, T option_value ) {
 				reg_name( option_id, option_name );
 				desc.add_options()( option_name.c_str(), option_value, option_desc.c_str() );
 				return ( *this );
@@ -173,7 +173,7 @@ namespace atom {
 		}
 		///
 		this_type_t&
-			add_option( id_t const option_id, string_t const& option_name, int const pos, positional_options_description_t& pdesc ) {
+			add_option( id_t const option_id, string_t const& option_name, string_t const& option_desc, positional_options_description_t& pdesc, int const pos ) {
 				reg_name( option_id, option_name );
 				pdesc.add( option_name.c_str(), pos );
 				return ( *this );

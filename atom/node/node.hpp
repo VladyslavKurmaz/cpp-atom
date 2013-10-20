@@ -173,7 +173,7 @@ namespace atom {
 		if ( p ) { 
 			struct _ {
 				static bool __( U u ) {
-					u->clear();
+					clear( u );
 					return true;
 				};
 			};
