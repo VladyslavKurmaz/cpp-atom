@@ -4,12 +4,13 @@ typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > env2logger;
 typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > env2appl;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > env2env;
 typedef atom::nstorage< env, boost::shared_ptr, atom::nlist > env2envs;
+typedef atom::nstorage< comp, boost::shared_ptr, atom::nlist > env2comps;
 
 class env :
-	public atom::node< LOKI_TYPELIST_4( env2logger, env2appl, env2env, env2envs ) >,
+	public atom::node< LOKI_TYPELIST_5( env2logger, env2appl, env2env, env2envs, env2comps ) >,
 	public boost::enable_shared_from_this< env > {
 
-	typedef atom::node< LOKI_TYPELIST_4( env2logger, env2appl, env2env, env2envs ) >
+	typedef atom::node< LOKI_TYPELIST_5( env2logger, env2appl, env2env, env2envs, env2comps ) >
 		base_node_t;
 
 public:
@@ -21,11 +22,11 @@ public:
 		string_t env;
 	};
 	///
-	static env_ptr create( logger_ptr l, appl_ptr a, env_ptr e, names const& n ) {
-		env_ptr result = env_ptr( new env( l, a, n ) );
-		if ( e ) {
-			atom::mount<env2env>( result, e );
-			atom::mount<env2envs>( e, result );
+	static env_ptr create( logger_ptr l, appl_ptr a, env_ptr p, string_t const & n, string_t const & h ) {
+		env_ptr result = env_ptr( new env( l, a, n, h ) );
+		if ( p ) {
+			atom::mount<env2env>( result, p );
+			atom::mount<env2envs>( p, result );
 		}
 		return result;
 	}
@@ -35,49 +36,45 @@ public:
 	void
 	clear();
 	///
-	string_t
-	get_name() const {
-		return ( this->pname );
-	}
-	///
-	string_t
-	get_caption() const {
-		return ( this->get_name() );
-	}
-	///
-	string_t
-	get_root() const {
-		return ( this->proot );
-	}
-	///
-	string_t
-	get_dpm() const {
-		return ( this->pdpm );
-	}
+	void
+	scan();
 	///
 	void
-	print( logger_ptr l, env_ptr ce, string_t const& offs );
+	print( logger_ptr l, env_ptr ce, string_t const& offs, bool const pc );
+	///
+	void
+	print_c( logger_ptr l, string_t const& offs );
 	///
 	bool
 	find( string_t const& n, env_ptr& ce );
+	///
+	static boost::filesystem::path
+	get_dpm_folder( boost::filesystem::path const& h );
+	///
+	static boost::filesystem::path
+	get_dl_folder( boost::filesystem::path const& h );
+	///
+	static boost::filesystem::path
+	get_env_folder( boost::filesystem::path const& h );
+	///
+	static boost::filesystem::path
+	get_config_file( boost::filesystem::path const& h );
 
 protected:
 	//
 	logger_ptr get_logger() {
 		return ( get_slot<env2logger>().item() );
 	}
+	//
+	appl_ptr get_appl() {
+		return ( get_slot<env2appl>().item() );
+	}
 
 private:
 	string_t
-		pname;
-	string_t
-		proot;
-	string_t
-		pdpm;
-	string_t
-		pdl;
-	string_t
-		penv;
+		name;
+	boost::filesystem::path
+		home;
 	///
-	env( logger_ptr l, appl_ptr a, names const& n );
+	env( logger_ptr l, appl_ptr a, string_t const & n, string_t const & h );
 };

@@ -2,11 +2,17 @@
 #pragma warning(disable : 4996)
 //#pragma warning(disable : 4355)
 
+#include <iostream>
+
 #include <windows.h>
 #include <tchar.h>
 
 #include <boost/function.hpp>
 #include <boost/smart_ptr.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
 #include <atom/util/po.hpp>
 #include <atom/util/log.hpp>
@@ -77,7 +83,7 @@ static atom::po::id_t const po_cmdline_desc			=	po_subcommand2 + 1;
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_shell_desc			=	po_cmdline_desc + 1;
 
-static char_t const* fslash							= "/";
+static char_t const* slash							= "/";
 static char_t const* bslash							= "\\";
 
 static char_t const* cmd_help						= "help";
@@ -85,4 +91,10 @@ static char_t const* cmd_change						= "cd";
 static char_t const* cmd_list						= "ls";
 static char_t const* cmd_sync						= "sync";
 static char_t const* cmd_exit						= "exit";
+
+static char_t const* folder_dpm						= ".dpm";
+static char_t const* folder_dl						= "dl";
+static char_t const* folder_env						= "env";
+
+static char_t const* file_config					= "catalog.json";
 

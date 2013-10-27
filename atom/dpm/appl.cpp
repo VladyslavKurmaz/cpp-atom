@@ -17,7 +17,7 @@ appl::appl( logger_ptr l ) :
 	,	cenv() {
 	atom::mount<appl2logger>( this, l );
 	//
-	char const* root = getenv( "DPM_HOME" ); 
+	char const* root = getenv( "DPM_HOME2" ); 
 	string_t h( ( root != NULL )?( root ):( "" ) );
 	//
 	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
@@ -32,7 +32,7 @@ appl::appl( logger_ptr l ) :
 	this->po.
 		add_option( po_shell,			"shell,s",			"(s)hell mode", startup_desc ).
 		add_option( po_home,			"home,o",			"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
-		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( fslash ) ).
+		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( slash ) ).
 		add_option( po_msbuild_ver,		"msbuild,m",		"(m)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
@@ -50,8 +50,8 @@ appl::appl( logger_ptr l ) :
 
 	atom::po::positional_options_description_t& subcommands_posdesc = this->po.add_pdesc( po_subcommands_posdesc, "" );
 	this->po.
-		add_option( po_subcommand1,		"pos1",				"", subcommands_posdesc, 1 ).
-		add_option( po_subcommand2,		"pos2",				"", subcommands_posdesc, 1 );
+		add_option( po_subcommand1,		"sc1",				"", subcommands_posdesc, 1 ).
+		add_option( po_subcommand2,		"sc2",				"", subcommands_posdesc, 1 );
 	//
 	atom::po::options_description_t& cmdline_desc = this->po.add_desc( po_cmdline_desc, "" );
 	cmdline_desc.add( util_desc ).add( startup_desc ).add( conf_desc ).add( subcommands_desc );
@@ -70,7 +70,11 @@ appl::init( int argc, char const * const argv[] ) {
 	atom::po::positional_options_description_t& pdesc = this->po.get_pdesc( po_subcommands_posdesc );
 	try {
 		this->po.parse_arg( argc, argv, desc, pdesc, true );
+		//
 		this->home = this->po.as< string_t >( po_home );
+		if ( !this->home.length() ) {
+			throw ( "[err] dpm home wasn't definedm, set environment variable DPM_HOME2 or use command line argument --env" );
+		}
 		// add path to msbuild into proccess env vars
 		string_t msbuild_reg = string_t ( "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\" ) + this->po.as< string_t >( po_msbuild_ver );
 		HKEY key;
@@ -99,10 +103,17 @@ appl::init( int argc, char const * const argv[] ) {
 				throw std::exception( "[emerg] Couldn't update process env block" );
 			}
 		}
+		// create root environment
+		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), slash, this->home ) );
+		this->cenv->scan();
+		this->cenv->print( this->get_logger(), this->cenv, string_t( "" ), true ); 
+		this->get_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
+
+		
+
 		//// rescan dpm structure
 		//this->scan();
 		////set currrent environment
-		//this->get_env()->find( this->po.as< string_t >( po_env ), this->cenv );
 		////
 		//this->process_command();
 		//
