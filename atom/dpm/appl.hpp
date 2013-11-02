@@ -1,7 +1,5 @@
 #pragma once
 
-typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
-typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
 
 class appl :
 	public atom::node< LOKI_TYPELIST_2( appl2logger, appl2env ) >,

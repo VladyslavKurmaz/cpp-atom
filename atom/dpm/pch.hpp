@@ -28,6 +28,13 @@
 typedef TCHAR
 	char_t;
 
+typedef std::basic_string< char_t >
+	string_t;
+
+typedef std::basic_stringstream< char_t >
+	stringstream_t;
+
+
 class logger;
 typedef boost::shared_ptr< logger >
 	logger_ptr;
@@ -44,11 +51,23 @@ class comp;
 typedef boost::shared_ptr< comp >
 	comp_ptr;
 
-typedef std::basic_string< char_t >
-	string_t;
+// appl
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
+typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
 
-typedef std::basic_stringstream< char_t >
-	stringstream_t;
+// env
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > env2logger;
+typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > env2appl;
+typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > env2env;
+typedef atom::nstorage< env, boost::shared_ptr, atom::nlist > env2envs;
+typedef atom::nstorage< comp, boost::shared_ptr, atom::nlist > env2comps;
+
+//comp
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > comp2logger;
+typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > comp2appl;
+typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > comp2env;
+
+
 
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_none					=	0;

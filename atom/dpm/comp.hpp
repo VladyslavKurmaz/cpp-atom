@@ -1,9 +1,5 @@
 #pragma once
 
-typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > comp2logger;
-typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > comp2appl;
-typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > comp2env;
-
 class comp :
 	public atom::node< LOKI_TYPELIST_3( comp2logger, comp2appl, comp2env ) >,
 	public boost::enable_shared_from_this< comp > {

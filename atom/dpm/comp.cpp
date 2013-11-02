@@ -1,6 +1,7 @@
 #include "./pch.hpp"
 #include "./logger.hpp"
 #include "./comp.hpp"
+#include "./env.hpp"
 
 comp::comp( logger_ptr l, appl_ptr a, string_t const & id, boost::filesystem::path const & h ) :
 		id( id )
