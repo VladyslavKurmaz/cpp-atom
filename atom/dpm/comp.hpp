@@ -21,8 +21,16 @@ public:
 	void
 	clear();
 	///
+	string_t const&
+	get_id() const {
+		return ( this->id );
+	}
+	///
 	void
 	print( logger_ptr l, string_t const& offs );
+	///
+	void
+	execute( string_t const& cmd );
 
 protected:
 	//

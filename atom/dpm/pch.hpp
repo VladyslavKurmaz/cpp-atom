@@ -76,15 +76,17 @@ static atom::po::id_t const po_util_desc			=	po_none + 1;
 //
 static atom::po::id_t const po_help					=	po_util_desc + 1;
 static atom::po::id_t const po_recursive			=	po_help + 1;
+static atom::po::id_t const po_verbose				=	po_recursive + 1;
 //-----------------------------------------------------------------------------
-static atom::po::id_t const po_startup_desc			=	po_recursive + 1;
+static atom::po::id_t const po_startup_desc			=	po_verbose + 1;
 //
 static atom::po::id_t const po_shell				=	po_startup_desc + 1;
 static atom::po::id_t const po_home					=	po_shell + 1;
 static atom::po::id_t const po_init_env				=	po_home + 1;
 static atom::po::id_t const po_msbuild_ver			=	po_init_env + 1;
+static atom::po::id_t const po_update_cmd			=	po_msbuild_ver + 1;
 //-----------------------------------------------------------------------------
-static atom::po::id_t const po_conf_desc			=	po_msbuild_ver + 1;
+static atom::po::id_t const po_conf_desc			=	po_update_cmd + 1;
 //
 static atom::po::id_t const po_osystem				=	po_conf_desc + 1;
 static atom::po::id_t const po_toolset				=	po_osystem + 1;
@@ -110,10 +112,3 @@ static char_t const* cmd_change						= "cd";
 static char_t const* cmd_list						= "ls";
 static char_t const* cmd_sync						= "sync";
 static char_t const* cmd_exit						= "exit";
-
-static char_t const* folder_dpm						= ".dpm";
-static char_t const* folder_dl						= "dl";
-static char_t const* folder_env						= "env";
-
-static char_t const* file_config					= "catalog.json";
-

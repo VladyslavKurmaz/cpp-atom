@@ -1,6 +1,5 @@
 #pragma once
 
-
 class appl :
 	public atom::node< LOKI_TYPELIST_2( appl2logger, appl2env ) >,
 	public boost::enable_shared_from_this< appl > {
@@ -51,11 +50,17 @@ private:
 	atom::po
 		po;
 	///
+	bool
+		shell_mode;
+	///
 	string_t
 		home;
 	///
 	string_t
 		msbuild;
+	///
+	string_t
+		update_cmd;
 	///
 	env_ptr
 		cenv;
