@@ -133,7 +133,7 @@ appl::run( std::ostream& os, std::istream& is ) {
 	atom::po::positional_options_description_t& subcommands_posdesc = this->po.get_pdesc( po_subcommands_posdesc );
 	while( shell_mode ) {
 		std::string s;
-		os << "dpm [" << this->cenv->get_caption() << "] $ ";
+		os << "[" << this->cenv->get_caption() << "] $ ";
 		std::getline( is, s );
 		//
 		try {
@@ -152,53 +152,6 @@ appl::clear(){
 	this->cenv.reset();
 	atom::clear( this->get_env() );
 	base_node_t::clear();
-}
-
-void
-appl::scan() {
-	////
-	//struct _ {
-	//	static env_ptr find_env( logger_ptr l, appl_ptr a, env_ptr e, env::names const& n ) {
-	//		env_ptr result;
-	//		//
-	//		WIN32_FIND_DATA fdt;
-	//		string_t s = n.root + n.dpm;
-	//		HANDLE hf = FindFirstFile( s.c_str(), &fdt );
-	//		if ( hf != INVALID_HANDLE_VALUE ) {
-	//			if ( fdt.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
-	//				result = env::create( l, a, e, n );
-	//			}
-	//			FindClose( hf );
-	//		}
-	//		// scan subfolders
-	//		if ( result ) {
-	//			WIN32_FIND_DATA fdt;
-	//			string_t s = n.root + n.env + string_t( bslash ) + string_t( "*" );
-	//			HANDLE hf = FindFirstFile( s.c_str(), &fdt );
-	//			if ( hf != INVALID_HANDLE_VALUE ) {
-	//				do {
-	//					if ( ( fdt.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) && strcmp( fdt.cFileName, "." ) && strcmp( fdt.cFileName, ".." ) ) {
-	//						env::names nn = n;
-	//						nn.root += n.env + string_t( bslash ) + string_t( fdt.cFileName ) + string_t( bslash );
-	//						nn.name += ( ( nn.name == string_t( fslash ) )?( string_t() ):( string_t( fslash ) ) ) + string_t( fdt.cFileName );
-	//						find_env( l, a, result, nn );
-	//					}
-	//				} while( FindNextFile( hf, &fdt ) );
-	//				FindClose( hf );
-	//			}
-	//		}
-
-	//		return ( result );
-	//	}
-	//};
-	//env::names n;
-	//n.name	=	string_t( fslash );
-	//n.root	=	this->home;
-	//n.dpm	=	this->po.as< string_t >( po_dpmdir );
-	//n.dl	=	this->po.as< string_t >( po_dldir );
-	//n.env	=	this->po.as< string_t >( po_envdir );
-	//this->cenv = _::find_env( this->get_logger(), this->shared_from_this(), env_ptr(), n );
-	//atom::mount<appl2env>( this, this->cenv );
 }
 
 bool

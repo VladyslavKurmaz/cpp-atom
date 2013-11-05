@@ -50,9 +50,10 @@ env::scan() try {
 	for ( boost::filesystem::directory_iterator end, dir( this->get_paths().get_env() ); dir != end; ++dir ) {
 		env_paths p( *dir );
 		if ( boost::filesystem::exists( p.get_config_file() ) ) {
-			boost::filesystem::path id = (*dir).path();
-			id = id.leaf();
-			env::create( this->get_logger(), this->get_appl(), this->shared_from_this(), id.string(), p.get_home() )->scan();
+			boost::filesystem::path id = boost::filesystem::path( this->name ) / (*dir).path().leaf();
+			std::string sid = id.string();
+			std::replace( sid.begin(), sid.end(), '\\', '/');
+			env::create( this->get_logger(), this->get_appl(), this->shared_from_this(), sid, p.get_home() )->scan();
 		}
 	}
 }

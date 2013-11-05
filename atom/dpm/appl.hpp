@@ -34,9 +34,6 @@ protected:
 	get_env() {
 		return ( get_slot<appl2env>().item() ); }
 	///
-	void
-	scan();
-	///
 	bool
 	process_command();
 	///
