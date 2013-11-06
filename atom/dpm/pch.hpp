@@ -104,8 +104,8 @@ static atom::po::id_t const po_cmdline_desc			=	po_subcommand2 + 1;
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_shell_desc			=	po_cmdline_desc + 1;
 
-static char_t const* slash							= "/";
-static char_t const* bslash							= "\\";
+static char_t const slash							= '/';
+static char_t const bslash							= '\\';
 
 static char_t const* cmd_help						= "help";
 static char_t const* cmd_change						= "cd";

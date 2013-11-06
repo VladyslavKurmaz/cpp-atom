@@ -20,6 +20,10 @@ comp::clear() {
 }
 
 void
+comp::load( boost::property_tree::ptree const pt ) {
+}
+
+void
 comp::print( logger_ptr l, string_t const& offs ) {
 	*l << offs << this->id << std::endl;
 }

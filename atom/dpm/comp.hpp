@@ -27,6 +27,9 @@ public:
 	}
 	///
 	void
+	load( boost::property_tree::ptree const pt );
+	///
+	void
 	print( logger_ptr l, string_t const& offs );
 	///
 	void

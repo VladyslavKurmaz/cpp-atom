@@ -47,6 +47,9 @@ private:
 	atom::po
 		po;
 	///
+	std::string
+		def_env;
+	///
 	bool
 		shell_mode;
 	///

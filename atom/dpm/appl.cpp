@@ -13,12 +13,15 @@ environment_folder=env
 
 appl::appl( logger_ptr l ) : 
 		po()
+	,	def_env()
 	,	shell_mode( false )
 	,	home()
 	,	msbuild()
 	,	update_cmd()
 	,	cenv() {
 	atom::mount<appl2logger>( this, l );
+	//
+	def_env.push_back( slash );
 	//
 	char const* root = getenv( "DPM_HOME2" ); 
 	string_t h( ( root != NULL )?( root ):( "" ) );
@@ -36,7 +39,7 @@ appl::appl( logger_ptr l ) :
 	this->po.
 		add_option( po_shell,			"shell,s",			"(s)hell mode", startup_desc ).
 		add_option( po_home,			"home,o",			"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
-		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( slash ) ).
+		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
 		add_option( po_msbuild_ver,		"msbuild,m",		"(m)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) ).
 		add_option( po_update_cmd,		"update-cmd,u",		"(u)pdate command", startup_desc, boost::program_options::value<std::string>()->default_value( "svn update" ) );
 	//
@@ -112,7 +115,7 @@ appl::init( int argc, char const * const argv[] ) {
 		update_cmd = this->po.as< string_t >( po_update_cmd );
 
 		// create root environment
-		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), slash, this->home ) );
+		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), def_env, this->home ) );
 		//
 		this->cenv->scan();
 		//

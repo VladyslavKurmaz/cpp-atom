@@ -37,6 +37,7 @@ env::scan() try {
 			string_t id = child.second.get<string_t>("id");
 			ncp /= boost::filesystem::path( id );
 			comp_ptr nc = comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), id, ncp );
+			nc->load( child.second );
 			//??????? load info from json to component
 			//?????/ scan component folder
 		}
@@ -52,7 +53,7 @@ env::scan() try {
 		if ( boost::filesystem::exists( p.get_config_file() ) ) {
 			boost::filesystem::path id = boost::filesystem::path( this->name ) / (*dir).path().leaf();
 			std::string sid = id.string();
-			std::replace( sid.begin(), sid.end(), '\\', '/');
+			std::replace( sid.begin(), sid.end(), bslash, slash );
 			env::create( this->get_logger(), this->get_appl(), this->shared_from_this(), sid, p.get_home() )->scan();
 		}
 	}
