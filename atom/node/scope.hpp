@@ -86,6 +86,5 @@ namespace atom {
 		void assign( IL const& il )
 			{ assign( *this, il ); }
 	};
-
 }
 #endif//Z3D_NODE_HPP

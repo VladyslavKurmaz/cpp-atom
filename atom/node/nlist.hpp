@@ -69,6 +69,22 @@ namespace atom {
 			return false;
 		}
 		///
+		void for_each2( boost::function< void( T const & ) > pred  ) const {
+			base_type::const_iterator it 	= base_type::begin();
+			base_type::const_iterator eit = base_type::end();
+			for( ; it != eit; ++it ) {
+				pred( (*it) );
+			}
+		}
+		///
+		void for_each2( boost::function< void( T& ) > pred  ){
+			base_type::iterator it 	= base_type::begin();
+			base_type::iterator eit = base_type::end();
+			for( ; it != eit; ++it ) {
+				pred( (*it) );
+			}
+		}
+		///
 		size_t size() const {
 			return ( base_type::size() );
 		}

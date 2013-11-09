@@ -3,12 +3,14 @@
 #include "./comp.hpp"
 #include "./env.hpp"
 
-comp::comp( logger_ptr l, appl_ptr a, string_t const & id, boost::filesystem::path const & h ) :
-		id( id )
-	,	home( h )
+comp::comp( logger_ptr l, appl_ptr a, boost::property_tree::ptree const& pt ) :
+		props( pt )
 {
 	atom::mount<comp2logger>( this, l );
 	atom::mount<comp2appl>( this, a );
+			//boost::filesystem::path ncp = this->get_paths().get_env();
+			//string_t id = child.second.get<string_t>("id");
+			//ncp /= boost::filesystem::path( id );
 }
 
 comp::~comp() {
@@ -20,12 +22,12 @@ comp::clear() {
 }
 
 void
-comp::load( boost::property_tree::ptree const pt ) {
+comp::update() {
 }
 
 void
 comp::print( logger_ptr l, string_t const& offs ) {
-	*l << offs << this->id << std::endl;
+	*l << offs << this->get_id() << std::endl;
 }
 
 void

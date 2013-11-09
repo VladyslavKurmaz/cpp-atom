@@ -16,7 +16,8 @@ env::~env() {
 
 void
 env::clear() {
-	atom::clear_r< env_ptr, env2envs >( this->shared_from_this() );
+	atom::clear_slot< comp_ptr, env2comps >( this->shared_from_this() );
+	atom::clear_slot< env_ptr, env2envs >( this->shared_from_this() );
 	base_node_t::clear();
 }
 
@@ -33,13 +34,7 @@ env::scan() try {
 		boost::property_tree::read_json( cfg.string(), cfg_pt );
 		//
 		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, cfg_pt.get_child("components")) {
-			boost::filesystem::path ncp = this->get_paths().get_env();
-			string_t id = child.second.get<string_t>("id");
-			ncp /= boost::filesystem::path( id );
-			comp_ptr nc = comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), id, ncp );
-			nc->load( child.second );
-			//??????? load info from json to component
-			//?????/ scan component folder
+			comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), child.second )->update();
 		}
 	} else {
 		stringstream_t ss;

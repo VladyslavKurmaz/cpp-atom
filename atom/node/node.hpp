@@ -65,6 +65,8 @@ namespace atom {
 	//-------------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------------
+	extern int node_cnt;
+
 	template < class L, size_t I = 0 >
 	class node : public scope< L, I >
 	{
@@ -113,11 +115,14 @@ namespace atom {
 	public:
 		///
 		node() : scope< L, I >()
-			{}
+			{ ++node_cnt; }
 		///
 		template< class IL >
 		explicit node( IL const& il ) : scope< L, I >( il )
-			{}
+			{ ++node_cnt; }
+		///
+		~node() {
+			--node_cnt; }
 		///
 		void clear()
 			{ cleaner< node, Loki::TL::Length<L>::value > clean( *this ); }
@@ -165,19 +170,13 @@ namespace atom {
 		{ unmount< TT >( t, u ); u-> template detach< UT >( t ); }
 	/// cleare node via smart pointer
 	template < class T >
-	void clear( T & p ) {
+	void clear_node( T const & p ) {
 		if ( p ) { p->clear(); } }
 	/// recursive cleare node via smart pointer
-	template < class U, class P, class T >
-	void clear_r( T & p ) {
-		if ( p ) { 
-			struct _ {
-				static bool __( U u ) {
-					clear( u );
-					return true;
-				};
-			};
-			p->get_slot<P>().for_each( boost::bind( _::__, _1 ) );
+	template < class T, class S, class N >
+	void clear_slot( N & n ) {
+		if ( n ) { 
+			n->get_slot<S>().for_each2( boost::bind( &clear_node<T>, _1 ) );
 		}
 	}
 }

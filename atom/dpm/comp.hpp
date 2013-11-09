@@ -9,8 +9,8 @@ class comp :
 
 public:
 	///
-	static comp_ptr create( logger_ptr l, appl_ptr a, env_ptr e, string_t const & id, boost::filesystem::path const & h ) {
-		comp_ptr result = comp_ptr( new comp( l, a, id, h ) );
+	static comp_ptr create( logger_ptr l, appl_ptr a, env_ptr e, boost::property_tree::ptree const& pt ) {
+		comp_ptr result = comp_ptr( new comp( l, a, pt ) );
 		atom::mount<env2comps>( e, result );
 		atom::mount<comp2env>( result, e );
 		return result;
@@ -21,13 +21,13 @@ public:
 	void
 	clear();
 	///
-	string_t const&
+	string_t
 	get_id() const {
-		return ( this->id );
+		return ( this->props.get<string_t>("id") );
 	}
 	///
 	void
-	load( boost::property_tree::ptree const pt );
+	update();
 	///
 	void
 	print( logger_ptr l, string_t const& offs );
@@ -42,10 +42,8 @@ protected:
 	}
 
 private:
-	string_t
-		id;
-	boost::filesystem::path
-		home;
+	boost::property_tree::ptree
+		props;
 	///
-	comp( logger_ptr l, appl_ptr a, string_t const & id, boost::filesystem::path const & h );
+	comp( logger_ptr l, appl_ptr a, boost::property_tree::ptree const& pt );
 };

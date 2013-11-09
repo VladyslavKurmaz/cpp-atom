@@ -153,7 +153,7 @@ appl::run( std::ostream& os, std::istream& is ) {
 void
 appl::clear(){
 	this->cenv.reset();
-	atom::clear( this->get_env() );
+	atom::clear_node( this->get_env() );
 	base_node_t::clear();
 }
 
