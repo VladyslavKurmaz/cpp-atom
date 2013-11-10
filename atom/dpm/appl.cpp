@@ -3,6 +3,9 @@
 #include "./env.hpp"
 #include "./appl.hpp"
 
+// TODO
+// substitute for_each with for_each2
+
 /*
 .dpm folder should contain conf file with system folder names overloads 
 conf
@@ -17,7 +20,7 @@ appl::appl( logger_ptr l ) :
 	,	shell_mode( false )
 	,	home()
 	,	msbuild()
-	,	update_cmd()
+	,	update_cmds()
 	,	cenv() {
 	atom::mount<appl2logger>( this, l );
 	//
@@ -41,7 +44,7 @@ appl::appl( logger_ptr l ) :
 		add_option( po_home,			"home,o",			"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
 		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
 		add_option( po_msbuild_ver,		"msbuild,m",		"(m)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) ).
-		add_option( po_update_cmd,		"update-cmd,u",		"(u)pdate command", startup_desc, boost::program_options::value<std::string>()->default_value( "svn update" ) );
+		add_option( po_update_cmd,		"update-cmd,u",		"(u)pdate command", startup_desc, boost::program_options::value<std::string>()->default_value( "{\"id\":\".svn\",\"cmd\":\"svn update\"},{\"id\":\".git\",\"cmd\":\"git pull origin master\"}" ) );
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
 	this->po.
@@ -112,8 +115,9 @@ appl::init( int argc, char const * const argv[] ) {
 				throw std::exception( "[emerg] Couldn't update process env block" );
 			}
 		}
-		update_cmd = this->po.as< string_t >( po_update_cmd );
-
+		stringstream_t ss;
+		ss << "{\"" << cmd_sync << "\":[" << this->po.as< string_t >( po_update_cmd ) << "]}";
+		boost::property_tree::read_json( ss, update_cmds );
 		// create root environment
 		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), def_env, this->home ) );
 		//
@@ -184,18 +188,26 @@ appl::process_command() {
 		//
 		// sync command
 		struct _ {
-			static bool __( env_ptr e, bool const r, string_t const& cmd, logger_ptr l ) {
+			static bool __( env_ptr e, bool const r, boost::property_tree::ptree const& pt, logger_ptr l ) {
 				*l << e->get_paths().get_home() << std::endl;
-				atom::exec( cmd, e->get_paths().get_dpm().string() );
+				//
+				BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, pt.get_child( cmd_sync )) {
+					boost::filesystem::path p( e->get_paths().get_dpm() );
+					p /= boost::filesystem::path( child.second.get<string_t>("id") );
+					if ( boost::filesystem::exists( p ) ) {
+						atom::exec( child.second.get<string_t>("cmd"), e->get_paths().get_dpm().string() );
+						break;
+					}
+				}
 				*l << std::endl;
 				//
 				if ( r ) {
-					e->get_slot<env2envs>().for_each( boost::bind( _::__, _1, r, boost::cref( cmd ), l ) );
+					e->get_slot<env2envs>().for_each( boost::bind( _::__, _1, r, boost::cref( pt ), l ) );
 				}
 				return (!r);
 			};
 		};
-		_::__( this->cenv, ( this->po.count( po_recursive ) > 0 ), this->update_cmd, this->get_logger() );
+		_::__( this->cenv, ( this->po.count( po_recursive ) > 0 ), boost::cref( this->update_cmds ), this->get_logger() );
 		//
 	} else if ( pos1 == string_t( cmd_exit ) ) {
 		//

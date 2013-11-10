@@ -59,8 +59,8 @@ private:
 	string_t
 		msbuild;
 	///
-	string_t
-		update_cmd;
+	boost::property_tree::ptree
+		update_cmds;
 	///
 	env_ptr
 		cenv;

@@ -29,6 +29,7 @@
 |               - use boost::mpl::vector, boost::tuple                        |
 |               - move from gateway init template & get/set wrappers to node  |
 |               - add attach/detach functions by type                         |
+|               - add debug mode counter for node class instances             |
 \-----------------------------------------------------------------------------/
 */
 
