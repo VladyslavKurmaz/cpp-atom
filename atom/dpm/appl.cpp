@@ -188,7 +188,7 @@ appl::process_command() {
 		//
 		// sync command
 		struct _ {
-			static bool __( env_ptr e, bool const r, boost::property_tree::ptree const& pt, logger_ptr l ) {
+			static void __( env_ptr e, bool const r, boost::property_tree::ptree const& pt, logger_ptr l ) {
 				*l << e->get_paths().get_home() << std::endl;
 				//
 				BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, pt.get_child( cmd_sync )) {
@@ -204,7 +204,6 @@ appl::process_command() {
 				if ( r ) {
 					e->get_slot<env2envs>().for_each( boost::bind( _::__, _1, r, boost::cref( pt ), l ) );
 				}
-				return (!r);
 			};
 		};
 		_::__( this->cenv, ( this->po.count( po_recursive ) > 0 ), boost::cref( this->update_cmds ), this->get_logger() );

@@ -177,7 +177,7 @@ namespace atom {
 	template < class T, class S, class N >
 	void clear_slot( N & n ) {
 		if ( n ) { 
-			n->get_slot<S>().for_each2( boost::bind( &clear_node<T>, _1 ) );
+			n->get_slot<S>().for_each( boost::bind( &clear_node<T>, _1 ) );
 		}
 	}
 }

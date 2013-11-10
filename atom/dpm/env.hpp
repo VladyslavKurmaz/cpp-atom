@@ -61,7 +61,7 @@ public:
 	void
 	print_c( logger_ptr l, string_t const& offs );
 	///
-	bool
+	void
 	find( string_t const& n, env_ptr& ce );
 	///
 	string_t

@@ -47,29 +47,29 @@ namespace atom {
 		void clear( N const& ) {
 			base_type::clear(); }
 		///
-		bool for_each( boost::function< bool( T const& ) > pred  ) const {
-			base_type::const_iterator it 	= base_type::begin();
-			base_type::const_iterator eit 	= base_type::end();
-			for( ; it != eit; ++it ) {
-				if ( pred( (*it) ) ) {
-					return true;
-				}
-			}
-			return false;
-		}
+		//bool for_each( boost::function< bool( T const& ) > pred  ) const {
+		//	base_type::const_iterator it 	= base_type::begin();
+		//	base_type::const_iterator eit 	= base_type::end();
+		//	for( ; it != eit; ++it ) {
+		//		if ( pred( (*it) ) ) {
+		//			return true;
+		//		}
+		//	}
+		//	return false;
+		//}
+		/////
+		//bool for_each( boost::function< bool( T& ) > pred  ) {
+		//	base_type::iterator it 	= base_type::begin();
+		//	base_type::iterator eit = base_type::end();
+		//	for( ; it != eit; ++it ) {
+		//		if ( pred( (*it) ) ) {
+		//			return true;
+		//		}
+		//	}
+		//	return false;
+		//}
 		///
-		bool for_each( boost::function< bool( T& ) > pred  ) {
-			base_type::iterator it 	= base_type::begin();
-			base_type::iterator eit = base_type::end();
-			for( ; it != eit; ++it ) {
-				if ( pred( (*it) ) ) {
-					return true;
-				}
-			}
-			return false;
-		}
-		///
-		void for_each2( boost::function< void( T const & ) > pred  ) const {
+		void for_each( boost::function< void( T const & ) > pred  ) const {
 			base_type::const_iterator it 	= base_type::begin();
 			base_type::const_iterator eit = base_type::end();
 			for( ; it != eit; ++it ) {
@@ -77,7 +77,7 @@ namespace atom {
 			}
 		}
 		///
-		void for_each2( boost::function< void( T& ) > pred  ){
+		void for_each( boost::function< void( T& ) > pred  ){
 			base_type::iterator it 	= base_type::begin();
 			base_type::iterator eit = base_type::end();
 			for( ; it != eit; ++it ) {

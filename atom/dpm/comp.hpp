@@ -40,6 +40,9 @@ protected:
 	logger_ptr get_logger() {
 		return ( get_slot<comp2logger>().item() );
 	}
+	env_ptr get_env() {
+		return ( get_slot<comp2env>().item() );
+	}
 
 private:
 	boost::property_tree::ptree

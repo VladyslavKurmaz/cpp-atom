@@ -66,40 +66,23 @@ env::print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v ) {
 	}
 	*l << std::endl;
 	//
-	struct _ {
-		static bool __( env_ptr e, logger_ptr l, env_ptr ce, string_t const& offs, bool const v ) {
-			e->print( l, ce, offs, v );
-			return false;
-		};
-	};
 	string_t s = offs + string_t( "  " );
-	this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, l, ce, boost::cref( s ), v ) );
+	this->get_slot<env2envs>().for_each( boost::bind( &env::print, _1, l, ce, boost::cref( s ), v ) );
 }
 
 void
 env::print_c( logger_ptr l, string_t const& offs ){
-	struct _ {
-		static bool __( comp_ptr c, logger_ptr l, string_t const& offs ) {
-			c->print( l, offs );
-			return false;
-		};
-	};
-	this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, l, boost::cref( offs ) ) );
+	this->get_slot<env2comps>().for_each( boost::bind( &comp::print, _1, l, boost::cref( offs ) ) );
 }
 
 
-bool
+void
 env::find( string_t const& n, env_ptr& ce ) {
 	if ( this->name == n ) {
 		ce = this->shared_from_this();
-		return true;
+	} else {
+		return ( this->get_slot<env2envs>().for_each( boost::bind( &env::find, _1, boost::cref( n ), boost::ref( ce ) ) ) );
 	}
-	struct _ {
-		static bool __( env_ptr e, string_t const& n, env_ptr& ce ) {
-			return ( e->find( n, ce ) );
-		};
-	};
-	return ( this->get_slot<env2envs>().for_each( boost::bind( _::__, _1, boost::cref( n ), boost::ref( ce ) ) ) );
 }
 
 void
@@ -107,12 +90,10 @@ env::execute( string_t const& id, string_t const& cmd ) {
 	comp_ptr c;
 	//
 	struct _ {
-		static bool __( comp_ptr c, string_t const& id, comp_ptr& r ) {
+		static void __( comp_ptr c, string_t const& id, comp_ptr& r ) {
 			if ( c->get_id() == id ) {
 				r = c;
-				return true;
 			}
-			return ( false );
 		};
 	};
 	this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( id ), boost::ref( c ) ) );
