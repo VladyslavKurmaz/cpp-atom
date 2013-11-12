@@ -1,4 +1,5 @@
 #include "./pch.hpp"
+#include <boost/algorithm/string.hpp>
 #include "./logger.hpp"
 #include "./comp.hpp"
 #include "./env.hpp"
@@ -87,19 +88,23 @@ env::find( string_t const& n, env_ptr& ce ) {
 
 void
 env::execute( string_t const& id, string_t const& cmd ) {
-	comp_ptr c;
+	std::vector< string_t > ids;
+	boost::split( ids, id, boost::is_any_of( ";" ) );
+	std::vector< string_t > cmds;
+	boost::split( cmds, cmd, boost::is_any_of( ";" ) );
 	//
-	struct _ {
-		static void __( comp_ptr c, string_t const& id, comp_ptr& r ) {
-			if ( c->get_id() == id ) {
-				r = c;
+	BOOST_FOREACH( string_t const& i, ids ) {
+		comp_ptr component;
+		struct _ { static void __( comp_ptr component, string_t const& id, comp_ptr& r ) {
+			if ( component->get_id() == id ) { r = component; } }; };
+		//
+		this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( i ), boost::ref( component ) ) );
+		if ( component ) {
+			BOOST_FOREACH( string_t const& c, cmds ) {
+				component->execute( c );
 			}
-		};
-	};
-	this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( id ), boost::ref( c ) ) );
-	if ( c ) {
-		c->execute( cmd );
-	} else {
-		throw std::runtime_error( "[err] Unknown component" );
+		} else {
+			throw std::runtime_error( "[err] Unknown component" );
+		}
 	}
 }
