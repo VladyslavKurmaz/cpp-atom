@@ -54,7 +54,8 @@ env::scan() try {
 		}
 	}
 }
-catch( std::exception& ) {
+catch( std::exception& e ) {
+	*(this->get_logger()) << e.what() << std::endl;
 }
 
 void
@@ -86,25 +87,36 @@ env::find( string_t const& n, env_ptr& ce ) {
 	}
 }
 
-void
-env::execute( string_t const& id, string_t const& cmd ) {
-	std::vector< string_t > ids;
-	boost::split( ids, id, boost::is_any_of( ";" ) );
-	std::vector< string_t > cmds;
-	boost::split( cmds, cmd, boost::is_any_of( ";" ) );
+comp_ptr
+env::find_comp( string_t const& id ) {
+	comp_ptr c;
+	struct _ { static void __( comp_ptr component, string_t const& id, comp_ptr& r ) {
+		if ( component->get_id() == id ) { r = component; } }; };
 	//
-	BOOST_FOREACH( string_t const& i, ids ) {
-		comp_ptr component;
-		struct _ { static void __( comp_ptr component, string_t const& id, comp_ptr& r ) {
-			if ( component->get_id() == id ) { r = component; } }; };
-		//
-		this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( i ), boost::ref( component ) ) );
-		if ( component ) {
-			BOOST_FOREACH( string_t const& c, cmds ) {
-				component->execute( c );
-			}
+	this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( id ), boost::ref( c ) ) );
+	//
+	if ( !c ) {
+		env_ptr p = this->get_parent();
+		if ( p ) {
+			return ( p->find_comp( id ) );
 		} else {
 			throw std::runtime_error( "[err] Unknown component" );
+		}
+	}
+	return ( c );
+}
+
+void
+env::execute( string_t const& sids, string_t const& scmds, const bool r ) {
+	std::vector< string_t > cmds;
+	boost::split( cmds, scmds, boost::is_any_of( ";" ) );
+	// build components' list
+	comp_deq_t cs;
+	comp::parse_deps( sids, this->shared_from_this(), cs, r );
+	// execute 
+	BOOST_FOREACH( string_t const& cmd, cmds ) {
+		BOOST_FOREACH( comp_ptr c, cs ) {
+			c->execute( cmd );
 		}
 	}
 }

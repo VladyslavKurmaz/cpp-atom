@@ -50,6 +50,8 @@ typedef boost::shared_ptr< env >
 class comp;
 typedef boost::shared_ptr< comp >
 	comp_ptr;
+typedef std::deque< comp_ptr >
+	comp_deq_t;
 
 // appl
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;

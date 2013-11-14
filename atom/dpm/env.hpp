@@ -64,6 +64,9 @@ public:
 	void
 	find( string_t const& n, env_ptr& ce );
 	///
+	comp_ptr
+	find_comp( string_t const& id );
+	///
 	string_t
 	get_caption() const {
 		return ( this->name );
@@ -73,7 +76,7 @@ public:
 	get_paths() const { return ( this->paths ); }
 	///
 	void
-	execute( string_t const& id, string_t const& cmd );
+	execute( string_t const& sids, string_t const& scmds, const bool r );
 
 protected:
 	//
@@ -83,6 +86,10 @@ protected:
 	//
 	appl_ptr get_appl() {
 		return ( get_slot<env2appl>().item() );
+	}
+	//
+	env_ptr get_parent() {
+		return ( get_slot<env2env>().item() );
 	}
 
 private:

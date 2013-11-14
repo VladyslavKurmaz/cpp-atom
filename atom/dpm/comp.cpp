@@ -20,6 +20,7 @@ comp::clear() {
 
 void
 comp::update() {
+	// load additional json config from project folder
 }
 
 void
@@ -29,6 +30,9 @@ comp::print( logger_ptr l, string_t const& offs ) {
 
 void
 comp::execute( string_t const& cmd ) {
+	//
+	*(this->get_logger()) << this->get_id() << " run:" << cmd << std::endl;
+	//
 	// run msbuild
 	//stringstream_t ss;
 	//ss	<< "msbuild.exe";
@@ -42,6 +46,35 @@ comp::execute( string_t const& cmd ) {
 		//<< " /p:recursive=" << (( this->po.count( po_recursive ) )?( "true" ):( "false" ))
 		//<< std::endl;
 	//
-	*(this->get_logger()) << this->get_id() << " run:" << cmd << std::endl;
 	//atom::exec( ss.str(), this->get_env()->get_paths().get_dpm().string() );
 }
+
+void comp::parse_deps( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+	std::vector< string_t > ids;
+	boost::split( ids, sids, boost::is_any_of( ";" ) );
+	//
+	std::vector< comp_ptr > ncs;
+	BOOST_FOREACH( string_t const& id, ids ) {
+		if ( !id.empty() ) {
+			comp_ptr nc = e->find_comp( id );
+			comp_deq_t::iterator it = cs.begin();
+			comp_deq_t::iterator eit = cs.end();
+			for(; it != eit; ++it ) {
+				if ( id == (*it)->get_id() ) {
+					cs.erase( it );
+					break;
+				}
+			}
+			//
+			cs.push_front( nc );
+			ncs.push_back( nc );
+		}
+	}
+	//
+	if ( r ) {
+		BOOST_FOREACH( comp_ptr c, ncs ) {
+			parse_deps( c->props.get<string_t>("deps"), c->get_env(), cs, r );
+		}
+	}
+}
+

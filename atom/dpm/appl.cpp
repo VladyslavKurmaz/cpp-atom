@@ -215,7 +215,7 @@ appl::process_command() {
 		//
 	} else if ( pos1.length() && pos2.length() ){
 		try {
-			this->cenv->execute( pos1, pos2 );
+			this->cenv->execute( pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );
 		} catch( std::exception& e ) {
 			*(this->get_logger()) << e.what() << std::endl;
 		}

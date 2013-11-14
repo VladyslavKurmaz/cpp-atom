@@ -34,6 +34,9 @@ public:
 	///
 	void
 	execute( string_t const& cmd );
+	///
+	static void
+	parse_deps( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
 
 protected:
 	//
