@@ -114,3 +114,6 @@ static char_t const* cmd_change						= "cd";
 static char_t const* cmd_list						= "ls";
 static char_t const* cmd_sync						= "sync";
 static char_t const* cmd_exit						= "exit";
+
+static char_t const* pt_comp_depends				= "depends";
+static char_t const* pt_comp_inherits				= "inherits";

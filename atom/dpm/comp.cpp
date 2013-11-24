@@ -31,7 +31,12 @@ comp::print( logger_ptr l, string_t const& offs ) {
 void
 comp::execute( string_t const& cmd ) {
 	//
-	*(this->get_logger()) << this->get_id() << " run:" << cmd << std::endl;
+	*(this->get_logger()) << this->get_id() << " execute" << std::endl;
+	BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, this->props.get_child("stages")) {
+		//*(this->get_logger()) << this->get_id() << " run:" << child.second.get<string_t>("id") << std::endl;
+	}
+
+
 	//
 	// run msbuild
 	//stringstream_t ss;
@@ -49,7 +54,15 @@ comp::execute( string_t const& cmd ) {
 	//atom::exec( ss.str(), this->get_env()->get_paths().get_dpm().string() );
 }
 
-void comp::parse_deps( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+void comp::parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+	parse_hierarchy( pt_comp_depends, sids, e, cs, r );
+}
+
+void comp::parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+	parse_hierarchy( pt_comp_inherits, sids, e, cs, r );
+}
+
+void comp::parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
 	std::vector< string_t > ids;
 	boost::split( ids, sids, boost::is_any_of( ";" ) );
 	//
@@ -73,8 +86,7 @@ void comp::parse_deps( string_t const& sids, env_ptr e, comp_deq_t& cs, const bo
 	//
 	if ( r ) {
 		BOOST_FOREACH( comp_ptr c, ncs ) {
-			parse_deps( c->props.get<string_t>("deps"), c->get_env(), cs, r );
+			parse_hierarchy( key, c->props.get<string_t>( key ), c->get_env(), cs, r );
 		}
 	}
 }
-

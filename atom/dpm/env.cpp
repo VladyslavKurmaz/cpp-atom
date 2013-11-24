@@ -100,7 +100,7 @@ env::find_comp( string_t const& id ) {
 		if ( p ) {
 			return ( p->find_comp( id ) );
 		} else {
-			throw std::runtime_error( "[err] Unknown component" );
+			throw std::runtime_error( ( string_t( "[err] Unknown component:" ) + id ).c_str() );
 		}
 	}
 	return ( c );
@@ -112,7 +112,7 @@ env::execute( string_t const& sids, string_t const& scmds, const bool r ) {
 	boost::split( cmds, scmds, boost::is_any_of( ";" ) );
 	// build components' list
 	comp_deq_t cs;
-	comp::parse_deps( sids, this->shared_from_this(), cs, r );
+	comp::parse_depends( sids, this->shared_from_this(), cs, r );
 	// execute 
 	BOOST_FOREACH( string_t const& cmd, cmds ) {
 		BOOST_FOREACH( comp_ptr c, cs ) {
