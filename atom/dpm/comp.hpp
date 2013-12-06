@@ -37,9 +37,6 @@ public:
 	///
 	static void
 	parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
-	///
-	void
-	parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
 
 protected:
 	//
@@ -50,6 +47,9 @@ protected:
 		return ( get_slot<comp2env>().item() );
 	}
 	///
+	void
+	parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	///
 	static void
 	parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
 
@@ -58,4 +58,25 @@ private:
 		props;
 	///
 	comp( logger_ptr l, appl_ptr a, boost::property_tree::ptree const& pt );
+};
+
+
+/*
+var
+ name		value
+ name		gen_value
+ gen_name	value
+ gen_name	gen_value
+
+ mod: override | extend
+
+file
+* archive
+* executable
+* file to download
+*/
+class prop {
+public:
+protected:
+private:
 };
