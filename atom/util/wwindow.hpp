@@ -412,14 +412,26 @@ namespace atom {
 		  }
 		  ///
 		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const center ) {
+			  calc_rect( rect, style, ex_style, menu, center, center );
+		  }
+		  ///
+		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const vcenter, bool const hcenter ) {
 			  AdjustWindowRectEx( &rect, style, (menu)?(TRUE):(FALSE), ex_style );
-			  if ( center ) {
+			  if ( vcenter ) {
+				  OffsetRect( 
+				  &rect, 
+				  0,
+				  ( GetSystemMetrics( SM_CYFULLSCREEN ) - ( rect.bottom - rect.top ) ) /2 );
+			  } else {
+				  OffsetRect( &rect, 0, -rect.top );
+			  }
+			  if ( hcenter ) {
 				  OffsetRect( 
 				  &rect, 
 				  ( GetSystemMetrics( SM_CXFULLSCREEN ) - ( rect.right - rect.left ) ) / 2,
-				  ( GetSystemMetrics( SM_CYFULLSCREEN ) - ( rect.bottom - rect.left ) ) /2 );
+				  0 );
 			  } else {
-				  OffsetRect( &rect, -rect.left, -rect.top );
+				  OffsetRect( &rect, -rect.left, 0 );
 			  }
 		  }
 
