@@ -112,6 +112,14 @@ namespace atom {
 	template < UINT, typename, typename >
 	struct handle_msg;
 
+#define	ATOM_DEF_ONNCHITTEST( c ) typedef LRESULT( c::* onnchittest_t )( HWND, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCHITTEST >::type, onnchittest_t >::type onnchittest_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_NCHITTEST, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) ));
+		}
+	};
+
 #define	ATOM_DEF_ONSETTINGCHANGE( c ) typedef void( c::* onsettingchange_t )( HWND, UINT, LPCTSTR ); typedef boost::mpl::pair< boost::mpl::int_< WM_SETTINGCHANGE >::type, onsettingchange_t >::type onsettingchange_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_SETTINGCHANGE, T, U > {
@@ -404,14 +412,26 @@ namespace atom {
 		  }
 		  ///
 		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const center ) {
+			  calc_rect( rect, style, ex_style, menu, center, center );
+		  }
+		  ///
+		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const vcenter, bool const hcenter ) {
 			  AdjustWindowRectEx( &rect, style, (menu)?(TRUE):(FALSE), ex_style );
-			  if ( center ) {
+			  if ( vcenter ) {
+				  OffsetRect( 
+				  &rect, 
+				  0,
+				  ( GetSystemMetrics( SM_CYFULLSCREEN ) - ( rect.bottom - rect.top ) ) /2 );
+			  } else {
+				  OffsetRect( &rect, 0, -rect.top );
+			  }
+			  if ( hcenter ) {
 				  OffsetRect( 
 				  &rect, 
 				  ( GetSystemMetrics( SM_CXFULLSCREEN ) - ( rect.right - rect.left ) ) / 2,
-				  ( GetSystemMetrics( SM_CYFULLSCREEN ) - ( rect.bottom - rect.left ) ) /2 );
+				  0 );
 			  } else {
-				  OffsetRect( &rect, -rect.left, -rect.top );
+				  OffsetRect( &rect, -rect.left, 0 );
 			  }
 		  }
 
