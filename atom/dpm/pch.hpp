@@ -86,9 +86,8 @@ static atom::po::id_t const po_shell				=	po_startup_desc + 1;
 static atom::po::id_t const po_home					=	po_shell + 1;
 static atom::po::id_t const po_init_env				=	po_home + 1;
 static atom::po::id_t const po_msbuild_ver			=	po_init_env + 1;
-static atom::po::id_t const po_update_cmd			=	po_msbuild_ver + 1;
 //-----------------------------------------------------------------------------
-static atom::po::id_t const po_conf_desc			=	po_update_cmd + 1;
+static atom::po::id_t const po_conf_desc			=	po_msbuild_ver + 1;
 //
 static atom::po::id_t const po_osystem				=	po_conf_desc + 1;
 static atom::po::id_t const po_toolset				=	po_osystem + 1;

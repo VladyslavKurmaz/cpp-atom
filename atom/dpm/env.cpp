@@ -4,12 +4,14 @@
 #include "./comp.hpp"
 #include "./env.hpp"
 
-env::env( logger_ptr l, appl_ptr a, string_t const & n, boost::filesystem::path const & h ) :
+env::env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps ) :
 		name( n )
-	,	paths( h )
+	,	paths( ps )
 {
 	atom::mount<env2logger>( this, l );
 	atom::mount<env2appl>( this, a );
+	//
+	// open conf file
 }
 
 env::~env() {
@@ -28,34 +30,36 @@ env::scan() try {
 	// reset child envs and components
 
 	//
-	// open env json config file
-	boost::filesystem::path cfg( this->get_paths().get_config_file() );
-	if ( boost::filesystem::exists( cfg ) ) {
-		boost::property_tree::ptree cfg_pt;
-		boost::property_tree::read_json( cfg.string(), cfg_pt );
+	// open catalog file
+	boost::filesystem::path catalog( this->get_paths().get_dpm_file( boost::filesystem::path( "catalog.json" ) ) ); //????? get file name from dpm.conf json
+	if ( boost::filesystem::exists( catalog ) ) {
+		boost::property_tree::ptree catalog_pt;
+		boost::property_tree::read_json( catalog.string(), catalog_pt );
 		//
-		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, cfg_pt.get_child("components")) {
+		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, catalog_pt.get_child("components")) {
 			comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), child.second )->update();
 		}
 	} else {
-		stringstream_t ss;
-		ss << "configuration file doesn't exist: " << cfg << std::endl;
-		throw std::runtime_error( ss.str().c_str() );
 	}
 	//
 	// scan child environments
-	for ( boost::filesystem::directory_iterator end, dir( this->get_paths().get_env() ); dir != end; ++dir ) {
-		env_paths p( *dir );
-		if ( boost::filesystem::exists( p.get_config_file() ) ) {
-			boost::filesystem::path id = boost::filesystem::path( this->name ) / (*dir).path().leaf();
-			std::string sid = id.string();
-			std::replace( sid.begin(), sid.end(), bslash, slash );
-			env::create( this->get_logger(), this->get_appl(), this->shared_from_this(), sid, p.get_home() )->scan();
+	for ( boost::filesystem::directory_iterator end, dir( this->get_paths().get_home() ); dir != end; ++dir ) {
+		boost::filesystem::path id = boost::filesystem::path( this->name ) / (*dir).path().leaf();
+		std::string sid = id.string();
+		std::replace( sid.begin(), sid.end(), bslash, slash );
+		//
+		env_ptr e = env::create( this->get_logger(), this->get_appl(), this->shared_from_this(), sid, *dir );
+		if ( e ) {
+			e->scan();
 		}
 	}
 }
 catch( std::exception& e ) {
 	*(this->get_logger()) << e.what() << std::endl;
+}
+
+void
+env::sync( bool const r ) {
 }
 
 void

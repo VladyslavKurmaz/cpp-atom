@@ -20,17 +20,16 @@ appl::appl( logger_ptr l ) :
 	,	shell_mode( false )
 	,	home()
 	,	msbuild()
-	,	update_cmds()
 	,	cenv() {
 	atom::mount<appl2logger>( this, l );
 	//
 	def_env.push_back( slash );
 	//
-	char const* root = getenv( "DPM_HOME2" ); 
+	char const* root = getenv( "DPM2_HOME" ); 
 	string_t h( ( root != NULL )?( root ):( "" ) );
 	//
 	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
-	string_t am( ( arch != NULL )?( ( !strcmp( arch, "x86" ) )?( "32" ):( "64" ) ):( "" ) );
+	string_t am( ( arch != NULL )?( ( !strcmp( arch, "x86" ) )?( "x86" ):( "x64" ) ):( "" ) );
 	//
 	atom::po::options_description_t& util_desc = this->po.add_desc( po_util_desc, "" );
 	this->po.
@@ -43,8 +42,7 @@ appl::appl( logger_ptr l ) :
 		add_option( po_shell,			"shell,s",			"(s)hell mode", startup_desc ).
 		add_option( po_home,			"home,o",			"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
 		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
-		add_option( po_msbuild_ver,		"msbuild,m",		"(m)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) ).
-		add_option( po_update_cmd,		"update-cmd,u",		"(u)pdate command", startup_desc, boost::program_options::value<std::string>()->default_value( "{\"id\":\".svn\",\"cmd\":\"svn update\"},{\"id\":\".git\",\"cmd\":\"git pull origin master\"}" ) );
+		add_option( po_msbuild_ver,		"msbuild,m",		"(m)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
 	this->po.
@@ -84,7 +82,7 @@ appl::init( int argc, char const * const argv[] ) {
 		shell_mode = ( this->po.count( po_shell ) > 0 );
 		this->home = this->po.as< string_t >( po_home );
 		if ( !this->home.length() ) {
-			throw ( "[err] dpm home wasn't defined, set environment variable DPM_HOME2 or use command line argument --env" );
+			throw ( "[err] dpm home wasn't defined, set environment variable DPM2_HOME or use command line argument --env" );
 		}
 
 		// add path to msbuild into proccess env vars
@@ -115,18 +113,15 @@ appl::init( int argc, char const * const argv[] ) {
 				throw std::exception( "[emerg] Couldn't update process env block" );
 			}
 		}
-		stringstream_t ss;
-		ss << "{\"" << cmd_sync << "\":[" << this->po.as< string_t >( po_update_cmd ) << "]}";
-		boost::property_tree::read_json( ss, update_cmds );
 		// create root environment
 		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), def_env, this->home ) );
-		//
-		this->cenv->scan();
-		//
-		this->get_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
-		//
-		this->process_command();
-		//
+		if ( this->cenv ) {
+			this->cenv->scan();
+			this->get_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
+			this->process_command();
+		} else {
+			throw std::exception( "[emerg] Home folder doesn't contain dpm.conf" );
+		}
 	} catch( std::exception& exc ) {
 		this->print_error( desc, exc );
 		return false;
@@ -187,26 +182,7 @@ appl::process_command() {
 	} else if ( pos1 == string_t( cmd_sync ) ) {
 		//
 		// sync command
-		struct _ {
-			static void __( env_ptr e, bool const r, boost::property_tree::ptree const& pt, logger_ptr l ) {
-				*l << e->get_paths().get_home() << std::endl;
-				//
-				BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, pt.get_child( cmd_sync )) {
-					boost::filesystem::path p( e->get_paths().get_dpm() );
-					p /= boost::filesystem::path( child.second.get<string_t>("id") );
-					if ( boost::filesystem::exists( p ) ) {
-						atom::exec( child.second.get<string_t>("cmd"), e->get_paths().get_dpm().string() );
-						break;
-					}
-				}
-				*l << std::endl;
-				//
-				if ( r ) {
-					e->get_slot<env2envs>().for_each( boost::bind( _::__, _1, r, boost::cref( pt ), l ) );
-				}
-			};
-		};
-		_::__( this->cenv, ( this->po.count( po_recursive ) > 0 ), boost::cref( this->update_cmds ), this->get_logger() );
+		this->cenv->sync( ( this->po.count( po_recursive ) > 0 ) );
 		//
 	} else if ( pos1 == string_t( cmd_exit ) ) {
 		//
