@@ -64,15 +64,15 @@ env::sync( bool const r ) {
 
 void
 env::print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v ) {
-	*l << (( ce.get() == this )?("* "):("  ")) << offs << "[" << this->name << "] " << this->get_paths().get_home();
+	*l << (( ce.get() == this )?("*"):(" ")) << offs << "[" << this->name << "] " << this->get_paths().get_home();
 	if ( v ) {
-		*l << " {" << std::endl;
-		print_c( l, offs + string_t( "   " ) );
-		*l << offs << "  }";
+		*l << " {";
+		print_c( l, offs + string_t( "    " ) );
+		*l << " }";
 	}
 	*l << std::endl;
 	//
-	string_t s = offs + string_t( "  " );
+	string_t s = offs + string_t( " " );
 	this->get_slot<env2envs>().for_each( boost::bind( &env::print, _1, l, ce, boost::cref( s ), v ) );
 }
 

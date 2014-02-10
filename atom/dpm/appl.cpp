@@ -135,7 +135,7 @@ appl::run( std::ostream& os, std::istream& is ) {
 	atom::po::positional_options_description_t& subcommands_posdesc = this->po.get_pdesc( po_subcommands_posdesc );
 	while( shell_mode ) {
 		std::string s;
-		os << "[" << this->cenv->get_caption() << "] $ ";
+		os << "[" << this->cenv->get_caption() << "]> ";
 		std::getline( is, s );
 		//
 		try {

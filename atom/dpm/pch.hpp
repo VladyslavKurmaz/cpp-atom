@@ -1,3 +1,13 @@
+// http://yuml.me/diagram/scruffy/class/[appl]-1[logger],[appl]1-0..1[env],[env]-1[logger],[env]*-0..1[env],[env]1-*[comp],[comp]-1[logger],[comp]-1[appl]
+
+
+/*
+ /
+ |-/dpm
+ | |-* catalog.json - 
+ |-* dpm.conf - json file, that point to repository for environment, alse used as mark for environment folder, otherwise interprets as component
+ |
+ */
 #pragma once
 #pragma warning(disable : 4996)
 //#pragma warning(disable : 4355)
