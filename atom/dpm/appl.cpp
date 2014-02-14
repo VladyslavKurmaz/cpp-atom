@@ -28,6 +28,7 @@ appl::appl( logger_ptr l ) :
 	char const* root = getenv( "DPM2_HOME" ); 
 	string_t h( ( root != NULL )?( root ):( "" ) );
 	//
+	//[2]
 	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
 	string_t am( ( arch != NULL )?( ( !strcmp( arch, "x86" ) )?( "x86" ):( "x64" ) ):( "" ) );
 	//
