@@ -4,8 +4,16 @@
 /*
  /
  |-/dpm
- | |-* catalog.json - 
- |-* dpm.conf - json file, that point to repository for environment, alse used as mark for environment folder, otherwise interprets as component
+ | |-* catalog.conf - contains list of components including initial configuration for them: repository, user, pass, additional folder etc.
+ |
+ |-/boost-1.55.0
+ |
+ |-/cpp-atom
+ | |-/builds
+ | |-/src
+ |   |-* dpm.conf - additional component configuration script, act as clarification for catalog.json from embracing environment
+ |
+ |-* dpm.conf - json file, that points to repository for environment, also marks folder as environment not component
  |
  */
 #pragma once
