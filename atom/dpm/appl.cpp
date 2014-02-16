@@ -83,7 +83,7 @@ appl::init( int argc, char const * const argv[] ) {
 		shell_mode = ( this->po.count( po_shell ) > 0 );
 		this->home = this->po.as< string_t >( po_home );
 		if ( !this->home.length() ) {
-			throw ( "[err] dpm home wasn't defined, set environment variable DPM2_HOME or use command line argument --env" );
+			throw std::exception( "[err] dpm home wasn't defined, set environment variable DPM2_HOME or use command line argument --env" );
 		}
 
 		// add path to msbuild into proccess env vars

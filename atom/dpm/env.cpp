@@ -64,7 +64,7 @@ env::sync( bool const r ) {
 
 void
 env::print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v ) {
-	*l << (( ce.get() == this )?("*"):(" ")) << offs << "[" << this->name << "] " << this->get_paths().get_home();
+	*l << (( ce.get() == this )?("*"):(" ")) << offs << "[" << this->name << " @ " << this->get_paths().get_home() << "]";
 	if ( v ) {
 		*l << " {";
 		print_c( l, offs + string_t( "    " ) );
