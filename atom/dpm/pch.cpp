@@ -13,7 +13,19 @@ int atom::node_cnt = 0;
 //+[3] - change environmwnt output [/] "d:\work2" -> [/@d:\work2]
 //o[4] - remove constraints for root environment, add environment creation command
 
-/*
+/* commands
+help				print help message
+cd <env>			change current environment
+ls [-v]				print environment hierarchy, -v with components
+sync [-r]			update components system info, from .dpm folder
+status [-v] [-r]	print status about environment repository, [-r] recursive, [-v] - also check components repos
+<component> <stage> [-y][-t][-n][-a][-c]
+			sync
+			conf
+			build
+
+*/
+/* environment template
  /
  |-/dpm
  | |-* catalog.conf - contains list of components including initial configuration for them: repository, user, pass, additional folder etc.

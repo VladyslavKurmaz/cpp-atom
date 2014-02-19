@@ -52,6 +52,8 @@ appl::appl( logger_ptr l ) :
 		add_option( po_instruction_set,	"instruction_set,n","i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
 		add_option( po_address_model,	"address-model,a",	"(a)ddress-model", conf_desc, boost::program_options::value<std::string>()->default_value( am ) ).
 		add_option( po_configuration,	"configuration,c",	"(c)onfiguration", conf_desc, boost::program_options::value<std::string>()->default_value( "debug" ) );
+	// ori(g)in
+	// (b)ranch
 	//
 	atom::po::options_description_t& subcommands_desc = this->po.add_desc( po_subcommands_desc, "" );
 	this->po.
@@ -80,7 +82,7 @@ appl::init( int argc, char const * const argv[] ) {
 	try {
 		this->po.parse_arg( argc, argv, desc, pdesc, true );
 		//
-		shell_mode = ( this->po.count( po_shell ) > 0 );
+		this->shell_mode = ( this->po.count( po_shell ) > 0 );
 		this->home = this->po.as< string_t >( po_home );
 		if ( !this->home.length() ) {
 			throw std::exception( "[err] dpm home wasn't defined, set environment variable DPM2_HOME or use command line argument --env" );
@@ -121,7 +123,7 @@ appl::init( int argc, char const * const argv[] ) {
 			this->get_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
 			this->process_command();
 		} else {
-			throw std::exception( "[emerg] Home folder doesn't contain dpm.conf" );
+			throw std::exception( "[emerg] Home folder is not an environment, doesn't contain dpm.conf" );
 		}
 	} catch( std::exception& exc ) {
 		this->print_error( desc, exc );
@@ -134,7 +136,7 @@ void
 appl::run( std::ostream& os, std::istream& is ) {
 	atom::po::options_description_t& shell_desc = this->po.get_desc( po_shell_desc );
 	atom::po::positional_options_description_t& subcommands_posdesc = this->po.get_pdesc( po_subcommands_posdesc );
-	while( shell_mode ) {
+	while( this->shell_mode ) {
 		std::string s;
 		os << "[" << this->cenv->get_caption() << "]> ";
 		std::getline( is, s );
