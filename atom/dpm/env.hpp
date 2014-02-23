@@ -10,7 +10,7 @@ public:
 	boost::filesystem::path const & get_home() const { return ( this->home ); }
 	boost::filesystem::path const & get_conf_file() const { return ( this->conf_file ); }
 	boost::filesystem::path const & get_dpm() const { return ( this->dpm ); }
-	boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( dpm ).operator/= ( f ) ); }
+	boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( this->dpm ).operator/= ( f ) ); }
 
 protected:
 private:
@@ -98,6 +98,9 @@ private:
 		name;
 	env_paths
 		paths;
+	boost::property_tree::ptree
+		config;
+
 	///
 	env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps );
 };

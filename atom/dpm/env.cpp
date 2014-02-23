@@ -7,11 +7,16 @@
 env::env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps ) :
 		name( n )
 	,	paths( ps )
+	,	config()
 {
 	atom::mount<env2logger>( this, l );
 	atom::mount<env2appl>( this, a );
 	//
 	// open conf file
+	try {
+		boost::property_tree::read_json( this->get_paths().get_conf_file().string(), this->config );
+	} catch (std::exception& ){
+	}
 }
 
 env::~env() {
@@ -31,12 +36,12 @@ env::scan() try {
 
 	//
 	// open catalog file
-	boost::filesystem::path catalog( this->get_paths().get_dpm_file( boost::filesystem::path( "catalog.json" ) ) ); //????? get file name from dpm.conf json
+	boost::filesystem::path catalog( this->get_paths().get_dpm_file( boost::filesystem::path( this->config.get<string_t>( dpm_conf_prop_catalog_file ) ) ) );
 	if ( boost::filesystem::exists( catalog ) ) {
 		boost::property_tree::ptree catalog_pt;
 		boost::property_tree::read_json( catalog.string(), catalog_pt );
 		//
-		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, catalog_pt.get_child("components")) {
+		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, catalog_pt.get_child( catalog_conf_component )) {
 			comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), child.second )->update();
 		}
 	} else {

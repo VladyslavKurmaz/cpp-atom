@@ -14,15 +14,17 @@ int atom::node_cnt = 0;
 //o[4] - remove constraints for root environment, add environment creation command
 
 /* commands
-help				print help message
-cd <env>			change current environment
-ls [-v]				print environment hierarchy, -v with components
-sync [-r]			update components system info, from .dpm folder
-status [-v] [-r]	print status about environment repository, [-r] recursive, [-v] - also check components repos
-<component> <stage> [-y][-t][-n][-a][-c]
-			sync
-			conf
-			build
+help							print help message
+cd <env>						change current environment
+create <env> [-u] [-p] [-m]		create new environment as child of current
+ls [-v]							print environment hierarchy, -v with components
+sync [-r]						update components system info, from .dpm folder
+status [-v] [-r]				print status about environment repository, [-r] recursive, [-v] - also check components repos
+<component> <stage> [-r][-y][-t][-n][-a][-c]
+			sync				download, unpack, update repositories, 
+			conf				update relations between components (conf apache, etc.) 
+			build				build projects
+			<custom step>
 
 */
 /* environment template

@@ -43,10 +43,13 @@ appl::appl( logger_ptr l ) :
 		add_option( po_shell,			"shell,s",			"(s)hell mode", startup_desc ).
 		add_option( po_home,			"home,o",			"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
 		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
-		add_option( po_msbuild_ver,		"msbuild,m",		"(m)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
+		add_option( po_msbuild_ver,		"msbuild,b",		"(b)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
 	this->po.
+		add_option( po_user,			"user,u",		"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_password,		"password,p",	"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_email,			"email,p",		"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
 		add_option( po_osystem,			"osystem,y",		"operation s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value( "windows" ) ).
 		add_option( po_toolset,			"toolset,t",		"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value( "msvc11" ) ).
 		add_option( po_instruction_set,	"instruction_set,n","i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
