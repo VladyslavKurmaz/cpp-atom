@@ -122,7 +122,7 @@ static char_t const* pt_comp_depends				= "depends";
 static char_t const* pt_comp_inherits				= "inherits";
 
 // dpm.conf
-static char_t const* dpm_conf_prop_catalog_file		= "prop.catalog";
+static char_t const* dpm_conf_prop_catalog_file		= "prop.repo:catalog";
 
 // catalog_conf
 static char_t const* catalog_conf_component			= "component";
