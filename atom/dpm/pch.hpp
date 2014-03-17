@@ -109,20 +109,21 @@ static atom::po::id_t const po_cmdline_desc			=	po_subcommand2 + 1;
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_shell_desc			=	po_cmdline_desc + 1;
 
-static char_t const slash							= '/';
-static char_t const bslash							= '\\';
+static char_t const slash								= '/';
+static char_t const bslash								= '\\';
 
-static char_t const* cmd_help						= "help";
-static char_t const* cmd_change						= "cd";
-static char_t const* cmd_list						= "ls";
-static char_t const* cmd_sync						= "sync";
-static char_t const* cmd_exit						= "exit";
+static char_t const* CONST_CMD_HELP						= "help";
+static char_t const* CONST_CMD_CHANGE_ENV				= "cd";
+static char_t const* CONST_CMD_LIST						= "ls";
+static char_t const* CONST_CMD_SYNC						= "sync";
+static char_t const* CONST_CMD_EXIT						= "exit";
 
-static char_t const* pt_comp_depends				= "depends";
-static char_t const* pt_comp_inherits				= "inherits";
+static char_t const* CONST_PT_COMP_DEPENDS				= "depends";
+static char_t const* CONST_PT_COMP_INHERITS				= "inherits";
 
 // dpm.conf
-static char_t const* dpm_conf_prop_catalog_file		= "prop.repo:catalog";
+static char_t const* CONST_DPM_CONF_REPO_GIT			= "repo:git";
+static char_t const* CONST_DPM_CONF_CATALOG_FILE		= "repo:catalog";
 
 // catalog_conf
-static char_t const* catalog_conf_component			= "component";
+static char_t const* CONST_CATALOG_CONF_COMPONENT		= "component";

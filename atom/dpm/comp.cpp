@@ -124,11 +124,11 @@ comp::execute( string_t const& cmd ) {
 }
 
 void comp::parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
-	parse_hierarchy( pt_comp_depends, sids, e, cs, r );
+	parse_hierarchy( CONST_PT_COMP_DEPENDS, sids, e, cs, r );
 }
 
 void comp::parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
-	parse_hierarchy( pt_comp_inherits, sids, e, cs, r );
+	parse_hierarchy( CONST_PT_COMP_INHERITS, sids, e, cs, r );
 }
 
 void comp::parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {

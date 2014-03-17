@@ -47,9 +47,9 @@ appl::appl( logger_ptr l ) :
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
 	this->po.
-		add_option( po_user,			"user,u",		"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
-		add_option( po_password,		"password,p",	"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
-		add_option( po_email,			"email,p",		"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_user,			"user,u",			"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_password,		"password,p",		"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_email,			"email,p",			"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
 		add_option( po_osystem,			"osystem,y",		"operation s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value( "windows" ) ).
 		add_option( po_toolset,			"toolset,t",		"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value( "msvc11" ) ).
 		add_option( po_instruction_set,	"instruction_set,n","i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
@@ -168,29 +168,29 @@ appl::process_command() {
 	string_t pos1 = this->po.as< string_t >( po_subcommand1 );
 	string_t pos2 = this->po.as< string_t >( po_subcommand2 );
 	//
-	if ( ( pos1 == string_t( cmd_help ) ) || this->po.count( po_help ) ) {
+	if ( ( pos1 == CONST_CMD_HELP ) || this->po.count( po_help ) ) {
 		//
 		//
 		throw std::exception( "dpm command line parameters:" );
 		//
-	} else if ( pos1 == string_t( cmd_change ) ) {
+	} else if ( pos1 == CONST_CMD_CHANGE_ENV ) {
 		//
 		// change current environment
 		this->get_env()->find( pos2, this->cenv );
 		//
-	} else if ( pos1 == string_t( cmd_list ) ) {
+	} else if ( pos1 == CONST_CMD_LIST ) {
 		//
 		// show environments structure
 		*(this->get_logger()) << std::endl;
 		this->get_env()->print( this->get_logger(), this->cenv, string_t(), ( this->po.count( po_verbose ) > 0 ) );
 		*(this->get_logger()) << std::endl;
 		//
-	} else if ( pos1 == string_t( cmd_sync ) ) {
+	} else if ( pos1 == CONST_CMD_SYNC ) {
 		//
 		// sync command
 		this->cenv->sync( ( this->po.count( po_recursive ) > 0 ) );
 		//
-	} else if ( pos1 == string_t( cmd_exit ) ) {
+	} else if ( pos1 == CONST_CMD_EXIT ) {
 		//
 		//
 		return false;

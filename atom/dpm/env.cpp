@@ -37,12 +37,12 @@ env::scan() try {
 
 	//
 	// open catalog file
-	boost::filesystem::path catalog( this->get_paths().get_dpm_file( boost::filesystem::path( this->config.get<string_t>( dpm_conf_prop_catalog_file ) ) ) );
+	boost::filesystem::path catalog( this->get_paths().get_dpm_file( boost::filesystem::path( this->config.get<string_t>( CONST_DPM_CONF_CATALOG_FILE ) ) ) );
 	if ( boost::filesystem::exists( catalog ) ) {
 		boost::property_tree::ptree catalog_pt;
 		boost::property_tree::read_json( catalog.string(), catalog_pt );
 		//
-		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, catalog_pt.get_child( catalog_conf_component )) {
+		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, catalog_pt.get_child( CONST_CATALOG_CONF_COMPONENT )) {
 			comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), child.second )->update();
 		}
 	} else {
@@ -65,7 +65,22 @@ catch( std::exception& e ) {
 }
 
 void
-env::sync( bool const r ) {
+env::sync( bool const r ) try {
+	string_t rt;
+	//boost::property_tree::ptree::const_iterator it = this->config.find("pi");
+	if ( this->config.count( CONST_DPM_CONF_REPO_GIT ) ) {
+		// git repo
+		rt = this->config.get<string_t>( CONST_DPM_CONF_REPO_GIT );
+	} else {
+		throw std::exception( "no repo info in conf file" );
+	}
+	//
+	if ( r ) {
+		this->get_slot<env2envs>().for_each( boost::bind( &env::sync, _1, r ) );
+	}
+}
+catch( std::exception& e ) {
+	*(this->get_logger()) << e.what() << std::endl;
 }
 
 void
