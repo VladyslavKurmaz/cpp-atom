@@ -90,7 +90,10 @@ static atom::po::id_t const po_msbuild_ver			=	po_init_env + 1;
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_conf_desc			=	po_msbuild_ver + 1;
 //
-static atom::po::id_t const po_osystem				=	po_conf_desc + 1;
+static atom::po::id_t const po_user					=	po_conf_desc + 1;
+static atom::po::id_t const po_password				=	po_user + 1;
+static atom::po::id_t const po_email				=	po_password + 1;
+static atom::po::id_t const po_osystem				=	po_email + 1;
 static atom::po::id_t const po_toolset				=	po_osystem + 1;
 static atom::po::id_t const po_instruction_set		=	po_toolset + 1;
 static atom::po::id_t const po_address_model		=	po_instruction_set + 1;
@@ -117,3 +120,9 @@ static char_t const* cmd_exit						= "exit";
 
 static char_t const* pt_comp_depends				= "depends";
 static char_t const* pt_comp_inherits				= "inherits";
+
+// dpm.conf
+static char_t const* dpm_conf_prop_catalog_file		= "prop.catalog";
+
+// catalog_conf
+static char_t const* catalog_conf_component			= "component";
