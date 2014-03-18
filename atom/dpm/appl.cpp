@@ -185,10 +185,10 @@ appl::process_command() {
 		this->get_env()->print( this->get_logger(), this->cenv, string_t(), ( this->po.count( po_verbose ) > 0 ) );
 		*(this->get_logger()) << std::endl;
 		//
-	} else if ( pos1 == CONST_CMD_SYNC ) {
+	} else if ( pos1 == CONST_CMD_UPDATE ) {
 		//
 		// sync command
-		this->cenv->sync( ( this->po.count( po_recursive ) > 0 ) );
+		this->cenv->update( ( this->po.count( po_recursive ) > 0 ) );
 		//
 	} else if ( pos1 == CONST_CMD_EXIT ) {
 		//

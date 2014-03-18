@@ -54,7 +54,7 @@ public:
 	scan();
 	///
 	void
-	sync( bool const r );
+	update( bool const r );
 	///
 	void
 	print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v );

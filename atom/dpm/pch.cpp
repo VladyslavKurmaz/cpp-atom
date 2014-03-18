@@ -18,7 +18,7 @@ help							print help message
 cd <env>						change current environment
 create <env> [-u] [-p] [-m]		create new environment as child of current
 ls [-v]							print environment hierarchy, -v with components
-sync [-r]						update components system info, from .dpm folder (checkout, if there is no .dpm folder)
+update [-r]						update components system info, from .dpm folder (checkout, if there is no .dpm folder)
 status [-v] [-r]				print status about environment repository, [-r] recursive, [-v] - also check components repos
 <component> <stage> [-r][-y][-t][-n][-a][-c]
 			sync				download, unpack, update repositories, 

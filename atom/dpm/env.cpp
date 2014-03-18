@@ -46,6 +46,7 @@ env::scan() try {
 			comp::create( this->get_logger(), this->get_appl(), this->shared_from_this(), child.second )->update();
 		}
 	} else {
+		throw std::exception( "Environment catalog.conf file doesn't exist" );
 	}
 	//
 	// scan child environments
@@ -65,18 +66,38 @@ catch( std::exception& e ) {
 }
 
 void
-env::sync( bool const r ) try {
-	string_t rt;
+env::update( bool const r ) try {
 	//boost::property_tree::ptree::const_iterator it = this->config.find("pi");
-	if ( this->config.count( CONST_DPM_CONF_REPO_GIT ) ) {
-		// git repo
-		rt = this->config.get<string_t>( CONST_DPM_CONF_REPO_GIT );
+	boost::filesystem::path dpm = this->get_paths().get_dpm();
+	bool const checkout = !boost::filesystem::exists( dpm );
+	//
+	//string_t repo = this->config.get( CONST_DPM_CONF_REPO_GIT, string_t() );
+	string_t repo = this->config.get<string_t>( CONST_DPM_CONF_REPO_GIT );
+	if ( repo.length() ) {
+		string_t remote = this->config.get( CONST_DPM_CONF_REPO_REMOTE, string_t( CONST_DPM_CONF_REPO_REMOTE_DEF ) );
+		string_t branch = this->config.get( CONST_DPM_CONF_REPO_BRANCH, string_t( CONST_DPM_CONF_REPO_BRANCH_DEF ) );
+		//
+		if ( checkout ) {
+			if ( boost::filesystem::create_directory( dpm ) ) {
+				string_t cmd = string_t("git clone ") + repo + string_t(" ./");
+				atom::exec( cmd, dpm.string() );
+				// set user and email configuration
+			} else {
+				throw std::exception( ".dpm folder creation error" );
+			}
+
+		} else {
+		}
 	} else {
-		throw std::exception( "no repo info in conf file" );
+		string_t repo = this->config.get( CONST_DPM_CONF_REPO_SVN, string_t() );
+		if ( repo.length() ) {
+		} else {
+			throw std::exception( "There is no repository info at dpm.conf file" );
+		}
 	}
 	//
 	if ( r ) {
-		this->get_slot<env2envs>().for_each( boost::bind( &env::sync, _1, r ) );
+		this->get_slot<env2envs>().for_each( boost::bind( &env::update, _1, r ) );
 	}
 }
 catch( std::exception& e ) {
