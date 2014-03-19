@@ -88,6 +88,7 @@ env::update( bool const r ) try {
 				throw std::exception( ".dpm folder creation error" );
 			}
 		} else {
+			atom::exec( string_t("git checkout ") + branch, dpm.string() );
 			atom::exec( string_t("git pull ") + remote + string_t(" ") + branch, dpm.string() );
 		}
 	} else {
