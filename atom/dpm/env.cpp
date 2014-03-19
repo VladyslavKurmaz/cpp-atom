@@ -73,20 +73,22 @@ env::update( bool const r ) try {
 	//
 	//string_t repo = this->config.get( CONST_DPM_CONF_REPO_GIT, string_t() );
 	string_t repo = this->config.get<string_t>( CONST_DPM_CONF_REPO_GIT );
+	string_t remote = this->config.get<string_t>( CONST_DPM_CONF_REPO_REMOTE );
+	string_t branch = this->config.get<string_t>( CONST_DPM_CONF_REPO_BRANCH );
+	string_t user_name = this->config.get<string_t>( CONST_DPM_CONF_REPO_USER_NAME );
+	string_t user_email = this->config.get<string_t>( CONST_DPM_CONF_REPO_USER_EMAIL );
 	if ( repo.length() ) {
-		string_t remote = this->config.get( CONST_DPM_CONF_REPO_REMOTE, string_t( CONST_DPM_CONF_REPO_REMOTE_DEF ) );
-		string_t branch = this->config.get( CONST_DPM_CONF_REPO_BRANCH, string_t( CONST_DPM_CONF_REPO_BRANCH_DEF ) );
-		//
 		if ( checkout ) {
 			if ( boost::filesystem::create_directory( dpm ) ) {
-				string_t cmd = string_t("git clone ") + repo + string_t(" ./");
-				atom::exec( cmd, dpm.string() );
-				// set user and email configuration
+				atom::exec( string_t("git clone ") + repo + string_t(" ./"), dpm.string() );
+				atom::exec( string_t("git checkout ") + branch, dpm.string() );
+				atom::exec( string_t("git config --local user.name \"") + user_name + string_t("\""), dpm.string() );
+				atom::exec( string_t("git config --local user.email \"") + user_email + string_t("\""), dpm.string() );
 			} else {
 				throw std::exception( ".dpm folder creation error" );
 			}
-
 		} else {
+			atom::exec( string_t("git pull ") + remote + string_t(" ") + branch, dpm.string() );
 		}
 	} else {
 		string_t repo = this->config.get( CONST_DPM_CONF_REPO_SVN, string_t() );

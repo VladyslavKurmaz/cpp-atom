@@ -129,6 +129,8 @@ static char_t const* CONST_DPM_CONF_REPO_REMOTE			= "repo.remote";
 static char_t const* CONST_DPM_CONF_REPO_REMOTE_DEF		= "origin";
 static char_t const* CONST_DPM_CONF_REPO_BRANCH			= "repo.branch";
 static char_t const* CONST_DPM_CONF_REPO_BRANCH_DEF		= "master";
+static char_t const* CONST_DPM_CONF_REPO_USER_NAME		= "repo.user.name";
+static char_t const* CONST_DPM_CONF_REPO_USER_EMAIL		= "repo.user.email";
 
 // catalog_conf
 static char_t const* CONST_CATALOG_CONF_COMPONENT		= "component";
