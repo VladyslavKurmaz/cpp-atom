@@ -17,10 +17,12 @@ int atom::node_cnt = 0;
 help							print help message
 cd <env>						change current environment
 create <env> [-u] [-p] [-m]		create new environment as child of current
-ls [-v]							print environment hierarchy, -v with components
-update [-r]						update components system info, from .dpm folder (checkout, if there is no .dpm folder)
-status [-v] [-r]				print status about environment repository, [-r] recursive, [-v] - also check components repos
-<component> <stage> [-r][-y][-t][-n][-a][-c]
+.			<action> [-v] [-r]	apply named action to the environment [-r] recursive, [-v] - also apply action to the all nested components
+			info				print environment info
+			sync				sync components repository, from .dpm folder (checkout, if there is no .dpm folder)
+			status				print status about environment repository
+<component> <action> [-r][-y][-t][-n][-a][-c]
+			info
 			sync				download, unpack, update repositories, 
 			conf				update relations between components (conf apache, etc.) 
 			build				build projects

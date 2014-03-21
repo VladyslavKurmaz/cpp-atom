@@ -66,7 +66,18 @@ catch( std::exception& e ) {
 }
 
 void
-env::update( bool const r ) try {
+env::action( string_t const a, bool const r, bool const v ) {
+	if ( a == "sync" ) {
+		sync( r, v );
+	} else if ( a == "info" ){
+		info( string_t(), r, v );
+	} else if ( a == "status" ){
+		status( r, v );
+	}
+}
+
+void
+env::sync( bool const r, bool const v ) try {
 	//boost::property_tree::ptree::const_iterator it = this->config.find("pi");
 	boost::filesystem::path dpm = this->get_paths().get_dpm();
 	bool const checkout = !boost::filesystem::exists( dpm );
@@ -99,8 +110,12 @@ env::update( bool const r ) try {
 		}
 	}
 	//
+	if ( v ) {
+		// send sync command to the environment components
+	}
+	//
 	if ( r ) {
-		this->get_slot<env2envs>().for_each( boost::bind( &env::update, _1, r ) );
+		this->get_slot<env2envs>().for_each( boost::bind( &env::sync, _1, r, v ) );
 	}
 }
 catch( std::exception& e ) {
@@ -108,24 +123,53 @@ catch( std::exception& e ) {
 }
 
 void
-env::print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v ) {
-	*l << (( ce.get() == this )?("*"):(" ")) << offs << "[" << this->name << "@" << this->get_paths().get_home() << "]";
+env::info( string_t const& offs, bool const r, bool const v ) {
+	*(this->get_logger()) << offs << "[" << this->name << "@" << this->get_paths().get_home() << "]";
 	if ( v ) {
-		*l << " {";
-		print_c( l, offs + string_t( "    " ) );
-		*l << " }";
+		*(this->get_logger()) << " {";
+		this->get_slot<env2comps>().for_each( boost::bind( &comp::info, _1, boost::cref( offs + string_t( "   " ) ) ) );
+		*(this->get_logger()) << " }";
 	}
-	*l << std::endl;
+	*(this->get_logger()) << std::endl;
 	//
-	string_t s = offs + string_t( " " );
-	this->get_slot<env2envs>().for_each( boost::bind( &env::print, _1, l, ce, boost::cref( s ), v ) );
+	if ( r ) {
+		string_t s = offs + string_t( " " );
+		this->get_slot<env2envs>().for_each( boost::bind( &env::info, _1, boost::cref( s ), r, v ) );
+	}
 }
 
 void
-env::print_c( logger_ptr l, string_t const& offs ){
-	this->get_slot<env2comps>().for_each( boost::bind( &comp::print, _1, l, boost::cref( offs ) ) );
+env::status( bool const r, bool const v ) try {
+	boost::filesystem::path dpm = this->get_paths().get_dpm();
+	bool const checkout = !boost::filesystem::exists( dpm );
+	//
+	//string_t repo = this->config.get( CONST_DPM_CONF_REPO_GIT, string_t() );
+	string_t repo = this->config.get<string_t>( CONST_DPM_CONF_REPO_GIT );
+	if ( repo.length() ) {
+		if ( checkout ) {
+			throw std::exception( ".dpm folder doesn't exist" );
+		} else {
+			atom::exec( string_t("git status"), dpm.string() );
+		}
+	} else {
+		string_t repo = this->config.get( CONST_DPM_CONF_REPO_SVN, string_t() );
+		if ( repo.length() ) {
+		} else {
+			throw std::exception( "There is no repository info at dpm.conf file" );
+		}
+	}
+	//
+	if ( v ) {
+		// send sync command to the environment components
+	}
+	//
+	if ( r ) {
+		this->get_slot<env2envs>().for_each( boost::bind( &env::status, _1, r, v ) );
+	}
 }
-
+catch( std::exception& e ) {
+	*(this->get_logger()) << e.what() << std::endl;
+}
 
 void
 env::find( string_t const& n, env_ptr& ce ) {

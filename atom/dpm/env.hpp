@@ -54,13 +54,7 @@ public:
 	scan();
 	///
 	void
-	update( bool const r );
-	///
-	void
-	print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v );
-	///
-	void
-	print_c( logger_ptr l, string_t const& offs );
+	action( string_t const a, bool const r, bool const v );
 	///
 	void
 	find( string_t const& n, env_ptr& ce );
@@ -80,6 +74,15 @@ public:
 	execute( string_t const& sids, string_t const& scmds, const bool r );
 
 protected:
+	///
+	void
+	sync( bool const r, bool const v );
+	///
+	void
+	info( string_t const& offs, bool const r, bool const v );
+	///
+	void
+	status( bool const r, bool const v );
 	//
 	logger_ptr get_logger() {
 		return ( get_slot<env2logger>().item() );

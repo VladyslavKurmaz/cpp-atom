@@ -114,9 +114,8 @@ static char_t const bslash								= '\\';
 
 static char_t const* CONST_CMD_HELP						= "help";
 static char_t const* CONST_CMD_CHANGE_ENV				= "cd";
-static char_t const* CONST_CMD_LIST						= "ls";
-static char_t const* CONST_CMD_UPDATE					= "update";
 static char_t const* CONST_CMD_EXIT						= "exit";
+static char_t const* CONST_CMD_ENV_ACTION				= ".";
 
 static char_t const* CONST_PT_COMP_DEPENDS				= "depends";
 static char_t const* CONST_PT_COMP_INHERITS				= "inherits";

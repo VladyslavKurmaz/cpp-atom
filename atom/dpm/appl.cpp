@@ -123,7 +123,7 @@ appl::init( int argc, char const * const argv[] ) {
 		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), def_env, this->home ) );
 		if ( this->cenv ) {
 			this->cenv->scan();
-			this->get_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
+			this->get_root_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
 			this->process_command();
 		} else {
 			throw std::exception( "[emerg] Home folder is not an environment, doesn't contain dpm.conf" );
@@ -158,7 +158,7 @@ appl::run( std::ostream& os, std::istream& is ) {
 void
 appl::clear(){
 	this->cenv.reset();
-	atom::clear_node( this->get_env() );
+	atom::clear_node( this->get_root_env() );
 	base_node_t::clear();
 }
 
@@ -169,32 +169,15 @@ appl::process_command() {
 	string_t pos2 = this->po.as< string_t >( po_subcommand2 );
 	//
 	if ( ( pos1 == CONST_CMD_HELP ) || this->po.count( po_help ) ) {
-		//
-		//
 		throw std::exception( "dpm command line parameters:" );
-		//
 	} else if ( pos1 == CONST_CMD_CHANGE_ENV ) {
-		//
 		// change current environment
-		this->get_env()->find( pos2, this->cenv );
-		//
-	} else if ( pos1 == CONST_CMD_LIST ) {
-		//
-		// show environments structure
-		*(this->get_logger()) << std::endl;
-		this->get_env()->print( this->get_logger(), this->cenv, string_t(), ( this->po.count( po_verbose ) > 0 ) );
-		*(this->get_logger()) << std::endl;
-		//
-	} else if ( pos1 == CONST_CMD_UPDATE ) {
-		//
-		// sync command
-		this->cenv->update( ( this->po.count( po_recursive ) > 0 ) );
-		//
+		this->get_root_env()->find( pos2, this->cenv );
 	} else if ( pos1 == CONST_CMD_EXIT ) {
-		//
-		//
 		return false;
-		//
+	} else if ( pos1 == CONST_CMD_ENV_ACTION ) {
+		// action
+		this->cenv->action( pos2, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
 	} else if ( pos1.length() && pos2.length() ){
 		try {
 			this->cenv->execute( pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );

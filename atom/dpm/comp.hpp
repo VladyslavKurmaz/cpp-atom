@@ -30,7 +30,7 @@ public:
 	update();
 	///
 	void
-	print( logger_ptr l, string_t const& offs );
+	info( string_t const& offs );
 	///
 	void
 	execute( string_t const& cmd );

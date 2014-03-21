@@ -31,7 +31,7 @@ protected:
 		return ( get_slot<appl2logger>().item() ); }
 	//
 	env_ptr
-	get_env() {
+	get_root_env() {
 		return ( get_slot<appl2env>().item() ); }
 	///
 	bool

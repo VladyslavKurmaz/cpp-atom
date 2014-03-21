@@ -85,8 +85,8 @@ Dashboard::mergePropertyTrees( const boost::property_tree::ptree& rptFirst, cons
 }
 
 void
-comp::print( logger_ptr l, string_t const& offs ) {
-	*l << std::endl << offs << this->get_id();
+comp::info( string_t const& offs ) {
+	*(this->get_logger()) << std::endl << offs << this->get_id();
 }
 
 void
