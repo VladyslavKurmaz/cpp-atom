@@ -27,13 +27,16 @@ public:
 	}
 	///
 	void
+	action( string_t const& a, unsigned int const l, bool const r );
+	///
+	void
 	update();
 	///
 	void
 	info( string_t const& offs );
 	///
 	void
-	execute( string_t const& cmd );
+	execute( string_t const& c );
 	///
 	static void
 	parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );

@@ -19,6 +19,11 @@ comp::clear() {
 }
 
 void
+comp::action( string_t const& a, unsigned int const l, bool const r ) {
+	print_offset( *(this->get_logger()), l + 2 ) << this->get_id() << std::endl;
+}
+
+void
 comp::update() {
 	// load additional json config from project folder
 	// merge two property trees http://paste.tbee-clan.de/TX2Vm
@@ -90,20 +95,20 @@ comp::info( string_t const& offs ) {
 }
 
 void
-comp::execute( string_t const& cmd ) {
+comp::execute( string_t const& c ) {
 	//
-	*(this->get_logger()) << this->get_id() << " execute" << std::endl;
-	BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, this->props.get_child("stages")) {
+	*(this->get_logger()) << this->get_id() << ":" << c << std::endl;
+	//BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, this->props.get_child("stages")) {
 		//*(this->get_logger()) << this->get_id() << " run:" << child.second.get<string_t>("id") << std::endl;
-	}
+	//}
 	//
-	comp_deq_t cs;
-	parse_inherits( this->get_id(), this->get_env(), cs, true );
+	//comp_deq_t cs;
+	//parse_inherits( this->get_id(), this->get_env(), cs, true );
 	// collect var array and script arrays
 	// construct and execute cmd file
-	BOOST_FOREACH( comp_ptr c, cs ) {
-		*(this->get_logger()) << "* " << c->get_id() << std::endl;
-	}
+	//BOOST_FOREACH( comp_ptr c, cs ) {
+	//	*(this->get_logger()) << "* " << c->get_id() << std::endl;
+	//}
 
 
 	//

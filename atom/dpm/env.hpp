@@ -55,7 +55,7 @@ public:
 	scan();
 	///
 	void
-	action( string_t const& a, unsigned int const l, bool const r, bool const v );
+	action( string_t const& c, unsigned int const l, bool const r, bool const v );
 	///
 	void
 	find( string_t const& n, env_ptr& ce );
@@ -87,9 +87,6 @@ protected:
 	///
 	void
 	status( string_t const& a, unsigned int const l );
-	//
-	void
-	print_title( unsigned int const l, bool el );
 	//
 	logger_ptr get_logger() {
 		return ( get_slot<env2logger>().item() );

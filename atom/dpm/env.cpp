@@ -67,18 +67,25 @@ catch( std::exception& e ) {
 }
 
 void
-env::action( string_t const& a, unsigned int const l, bool const r, bool const v ) try {
-	actions_t::iterator it = this->actions.find( a );
+env::action( string_t const& c, unsigned int const l, bool const r, bool const v ) try {
+	actions_t::iterator it = this->actions.find( c );
+	//
+	stringstream_t ss;
+	ss << this->name << "@" << this->get_paths().get_home();
+	print_title( *(this->get_logger()), ss.str(), l ) << std::endl;
 	//
 	if ( it != this->actions.end() ) {
-		(*it).second( a, l );
+		(*it).second( c, l );
 		//
 		if ( v ) {
-			//this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( id ), boost::ref( c ) ) );
+			std::vector< string_t > cl;
+			struct _{ static void __( comp_ptr c, std::vector< string_t >& l ){ l.push_back( c->get_id() ); } };
+			this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::ref( cl ) ) );
+			this->execute( boost::algorithm::join( cl, CONST_CMD_DELIM ), c, false );
 		}
 		//
 		if ( r ) {
-			this->get_slot<env2envs>().for_each( boost::bind( &env::action, _1, a, l + 1, r, v ) );
+			this->get_slot<env2envs>().for_each( boost::bind( &env::action, _1, boost::cref( c ), l + 1, r, v ) );
 		}
 	} else {
 	}
@@ -96,7 +103,6 @@ env::init() {
 
 void
 env::sync( string_t const& a, unsigned int const l ) {
-	this->print_title( 0, true );
 	//boost::property_tree::ptree::const_iterator it = this->config.find("pi");
 	boost::filesystem::path dpm = this->get_paths().get_dpm();
 	bool const checkout = !boost::filesystem::exists( dpm );
@@ -130,25 +136,12 @@ env::sync( string_t const& a, unsigned int const l ) {
 	}
 }
 
-	//if ( v ) {
-	//	*(this->get_logger()) << " {";
-	//	this->get_slot<env2comps>().for_each( boost::bind( &comp::info, _1, boost::cref( offs + string_t( "   " ) ) ) );
-	//	*(this->get_logger()) << " }";
-	//}
-	////
-	//if ( r ) {
-	//	string_t s = offs + string_t( " " );
-	//	this->get_slot<env2envs>().for_each( boost::bind( &env::info, _1, boost::cref( s ), r, v ) );
-	//}
-
 void
 env::info( string_t const& a, unsigned int const l ) {
-	this->print_title( l, true );
 }
 
 void
 env::status( string_t const& a, unsigned int const l ) {
-	this->print_title( 0, true );
 	boost::filesystem::path dpm = this->get_paths().get_dpm();
 	bool const checkout = !boost::filesystem::exists( dpm );
 	//
@@ -170,19 +163,6 @@ env::status( string_t const& a, unsigned int const l ) {
 }
 
 void
-env::print_title( unsigned int const l, bool el ) {
-	assert( l < 512 );
-	char_t offset[512] = {' '};
-	offset[ l ] = '\0';
-	*(this->get_logger()) << offset << "[" << this->name << "@" << this->get_paths().get_home() << "]";
-	//
-	if ( el ) {
-		*(this->get_logger()) << std::endl;
-	}
-}
-
-
-void
 env::find( string_t const& n, env_ptr& ce ) {
 	if ( this->name == n ) {
 		ce = this->shared_from_this();
@@ -195,7 +175,7 @@ comp_ptr
 env::find_comp( string_t const& id ) {
 	comp_ptr c;
 	struct _ { static void __( comp_ptr component, string_t const& id, comp_ptr& r ) {
-		if ( component->get_id() == id ) { r = component; } }; };
+		if ( component->get_id() == id ) { r = component; } } };
 	//
 	this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( id ), boost::ref( c ) ) );
 	//
@@ -213,7 +193,7 @@ env::find_comp( string_t const& id ) {
 void
 env::execute( string_t const& sids, string_t const& scmds, const bool r ) {
 	std::vector< string_t > cmds;
-	boost::split( cmds, scmds, boost::is_any_of( ";" ) );
+	boost::split( cmds, scmds, boost::is_any_of( CONST_CMD_DELIM ) );
 	// build components' list
 	comp_deq_t cs;
 	comp::parse_depends( sids, this->shared_from_this(), cs, r );
