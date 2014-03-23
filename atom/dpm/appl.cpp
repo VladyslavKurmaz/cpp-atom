@@ -177,7 +177,7 @@ appl::process_command() {
 		return false;
 	} else if ( pos1 == CONST_CMD_ENV_ACTION ) {
 		// action
-		this->cenv->action( pos2, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
+		this->cenv->action( pos2, 0, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
 	} else if ( pos1.length() && pos2.length() ){
 		try {
 			this->cenv->execute( pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );

@@ -117,6 +117,10 @@ static char_t const* CONST_CMD_CHANGE_ENV				= "cd";
 static char_t const* CONST_CMD_EXIT						= "exit";
 static char_t const* CONST_CMD_ENV_ACTION				= ".";
 
+static char_t const* CONST_CMD_INFO						= "info";
+static char_t const* CONST_CMD_SYNC						= "sync";
+static char_t const* CONST_CMD_STATUS					= "status";
+
 static char_t const* CONST_PT_COMP_DEPENDS				= "depends";
 static char_t const* CONST_PT_COMP_INHERITS				= "inherits";
 

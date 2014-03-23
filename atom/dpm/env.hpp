@@ -37,6 +37,7 @@ public:
 		//
 		if ( boost::filesystem::exists( ps.get_conf_file() ) ) {
 			result = env_ptr( new env( l, a, n, ps ) );
+			result->init();
 			if ( p ) {
 				atom::mount<env2env>( result, p );
 				atom::mount<env2envs>( p, result );
@@ -54,7 +55,7 @@ public:
 	scan();
 	///
 	void
-	action( string_t const a, bool const r, bool const v );
+	action( string_t const& a, unsigned int const l, bool const r, bool const v );
 	///
 	void
 	find( string_t const& n, env_ptr& ce );
@@ -76,13 +77,19 @@ public:
 protected:
 	///
 	void
-	sync( bool const r, bool const v );
+	init();
 	///
 	void
-	info( string_t const& offs, bool const r, bool const v );
+	sync( string_t const& a, unsigned int const l );
 	///
 	void
-	status( bool const r, bool const v );
+	info( string_t const& a, unsigned int const l );
+	///
+	void
+	status( string_t const& a, unsigned int const l );
+	//
+	void
+	print_title( unsigned int const l, bool el );
 	//
 	logger_ptr get_logger() {
 		return ( get_slot<env2logger>().item() );
@@ -103,7 +110,11 @@ private:
 		paths;
 	boost::property_tree::ptree
 		config;
-
+	//
+	typedef std::map< string_t, boost::function< void( string_t const&, unsigned int const ) > >
+		actions_t;
+	actions_t
+		actions;
 	///
 	env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps );
 };

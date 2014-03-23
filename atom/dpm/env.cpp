@@ -8,6 +8,7 @@ env::env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps ) :
 		name( n )
 	,	paths( ps )
 	,	config()
+	,	actions()
 {
 	atom::mount<env2logger>( this, l );
 	atom::mount<env2appl>( this, a );
@@ -66,18 +67,36 @@ catch( std::exception& e ) {
 }
 
 void
-env::action( string_t const a, bool const r, bool const v ) {
-	if ( a == "sync" ) {
-		sync( r, v );
-	} else if ( a == "info" ){
-		info( string_t(), r, v );
-	} else if ( a == "status" ){
-		status( r, v );
+env::action( string_t const& a, unsigned int const l, bool const r, bool const v ) try {
+	actions_t::iterator it = this->actions.find( a );
+	//
+	if ( it != this->actions.end() ) {
+		(*it).second( a, l );
+		//
+		if ( v ) {
+			//this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::cref( id ), boost::ref( c ) ) );
+		}
+		//
+		if ( r ) {
+			this->get_slot<env2envs>().for_each( boost::bind( &env::action, _1, a, l + 1, r, v ) );
+		}
+	} else {
 	}
+}
+catch( std::exception& e ) {
+	*(this->get_logger()) << e.what() << std::endl;
 }
 
 void
-env::sync( bool const r, bool const v ) try {
+env::init() {
+	actions[ CONST_CMD_INFO ] = boost::bind( &env::info, this->shared_from_this(), _1, _2 );
+	actions[ CONST_CMD_SYNC ] = boost::bind( &env::sync, this->shared_from_this(), _1, _2 );
+	actions[ CONST_CMD_STATUS ] = boost::bind( &env::status, this->shared_from_this(), _1, _2 );
+}
+
+void
+env::sync( string_t const& a, unsigned int const l ) {
+	this->print_title( 0, true );
 	//boost::property_tree::ptree::const_iterator it = this->config.find("pi");
 	boost::filesystem::path dpm = this->get_paths().get_dpm();
 	bool const checkout = !boost::filesystem::exists( dpm );
@@ -109,37 +128,27 @@ env::sync( bool const r, bool const v ) try {
 			throw std::exception( "There is no repository info at dpm.conf file" );
 		}
 	}
-	//
-	if ( v ) {
-		// send sync command to the environment components
-	}
-	//
-	if ( r ) {
-		this->get_slot<env2envs>().for_each( boost::bind( &env::sync, _1, r, v ) );
-	}
 }
-catch( std::exception& e ) {
-	*(this->get_logger()) << e.what() << std::endl;
+
+	//if ( v ) {
+	//	*(this->get_logger()) << " {";
+	//	this->get_slot<env2comps>().for_each( boost::bind( &comp::info, _1, boost::cref( offs + string_t( "   " ) ) ) );
+	//	*(this->get_logger()) << " }";
+	//}
+	////
+	//if ( r ) {
+	//	string_t s = offs + string_t( " " );
+	//	this->get_slot<env2envs>().for_each( boost::bind( &env::info, _1, boost::cref( s ), r, v ) );
+	//}
+
+void
+env::info( string_t const& a, unsigned int const l ) {
+	this->print_title( l, true );
 }
 
 void
-env::info( string_t const& offs, bool const r, bool const v ) {
-	*(this->get_logger()) << offs << "[" << this->name << "@" << this->get_paths().get_home() << "]";
-	if ( v ) {
-		*(this->get_logger()) << " {";
-		this->get_slot<env2comps>().for_each( boost::bind( &comp::info, _1, boost::cref( offs + string_t( "   " ) ) ) );
-		*(this->get_logger()) << " }";
-	}
-	*(this->get_logger()) << std::endl;
-	//
-	if ( r ) {
-		string_t s = offs + string_t( " " );
-		this->get_slot<env2envs>().for_each( boost::bind( &env::info, _1, boost::cref( s ), r, v ) );
-	}
-}
-
-void
-env::status( bool const r, bool const v ) try {
+env::status( string_t const& a, unsigned int const l ) {
+	this->print_title( 0, true );
 	boost::filesystem::path dpm = this->get_paths().get_dpm();
 	bool const checkout = !boost::filesystem::exists( dpm );
 	//
@@ -158,18 +167,20 @@ env::status( bool const r, bool const v ) try {
 			throw std::exception( "There is no repository info at dpm.conf file" );
 		}
 	}
+}
+
+void
+env::print_title( unsigned int const l, bool el ) {
+	assert( l < 512 );
+	char_t offset[512] = {' '};
+	offset[ l ] = '\0';
+	*(this->get_logger()) << offset << "[" << this->name << "@" << this->get_paths().get_home() << "]";
 	//
-	if ( v ) {
-		// send sync command to the environment components
-	}
-	//
-	if ( r ) {
-		this->get_slot<env2envs>().for_each( boost::bind( &env::status, _1, r, v ) );
+	if ( el ) {
+		*(this->get_logger()) << std::endl;
 	}
 }
-catch( std::exception& e ) {
-	*(this->get_logger()) << e.what() << std::endl;
-}
+
 
 void
 env::find( string_t const& n, env_ptr& ce ) {
