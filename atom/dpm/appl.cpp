@@ -60,8 +60,8 @@ appl::appl( logger_ptr l ) :
 	//
 	atom::po::options_description_t& subcommands_desc = this->po.add_desc( po_subcommands_desc, "" );
 	this->po.
-		add_option( po_subcommand1,		"sc1",				"<component>|help|cd   |ls|sync|exit", subcommands_desc, boost::program_options::value<std::string>()->default_value( "" ) ).
-		add_option( po_subcommand2,		"sc2",				"<stage>    |    |<env>|  |    |", subcommands_desc, boost::program_options::value<std::string>()->default_value( "" ) );
+		add_option( po_subcommand1,		"sc1",				"<component>|help|cd   |info|sync|status|exit", subcommands_desc, boost::program_options::value<std::string>()->default_value( "" ) ).
+		add_option( po_subcommand2,		"sc2",				"<stage>    |    |<env>|    |    |      |", subcommands_desc, boost::program_options::value<std::string>()->default_value( "" ) );
 
 	atom::po::positional_options_description_t& subcommands_posdesc = this->po.add_pdesc( po_subcommands_posdesc, "" );
 	this->po.

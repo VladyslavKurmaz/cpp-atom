@@ -124,8 +124,10 @@ static char_t const* CONST_CMD_INFO						= "info";
 static char_t const* CONST_CMD_SYNC						= "sync";
 static char_t const* CONST_CMD_STATUS					= "status";
 
-static char_t const* CONST_PT_COMP_DEPENDS				= "prop.depends";
-static char_t const* CONST_PT_COMP_INHERITS				= "prop.inherits";
+static char_t const* CONST_PT_COMP_DEPENDS				= "depends";
+static char_t const* CONST_PT_COMP_INHERITS				= "inherits";
+static char_t const* CONST_PT_COMP_PACKAGE				= "package";
+
 
 // dpm.conf
 static char_t const* CONST_DPM_CONF_CATALOG_FILE		= "catalog";

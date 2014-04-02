@@ -70,10 +70,6 @@ void
 env::action( string_t const& c, unsigned int const l, bool const r, bool const v ) try {
 	actions_t::iterator it = this->actions.find( c );
 	//
-	stringstream_t ss;
-	ss << this->name << "@" << this->get_paths().get_home();
-	print_title( *(this->get_logger()), ss.str(), l ) << std::endl;
-	//
 	if ( it != this->actions.end() ) {
 		(*it).second( c, l );
 		//
@@ -88,6 +84,7 @@ env::action( string_t const& c, unsigned int const l, bool const r, bool const v
 			this->get_slot<env2envs>().for_each( boost::bind( &env::action, _1, boost::cref( c ), l + 1, r, v ) );
 		}
 	} else {
+		throw std::exception( "unknown command" );
 	}
 }
 catch( std::exception& e ) {
@@ -138,6 +135,9 @@ env::sync( string_t const& a, unsigned int const l ) {
 
 void
 env::info( string_t const& a, unsigned int const l ) {
+	stringstream_t ss;
+	ss << this->name << "@" << this->get_paths().get_home();
+	print_title( *(this->get_logger()), ss.str(), l ) << std::endl;
 }
 
 void

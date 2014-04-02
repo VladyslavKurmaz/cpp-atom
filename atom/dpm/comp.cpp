@@ -97,18 +97,32 @@ comp::info( string_t const& offs ) {
 void
 comp::execute( string_t const& c ) {
 	//
-	*(this->get_logger()) << this->get_id() << ":" << c << std::endl;
-	//BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, this->props.get_child("stages")) {
-		//*(this->get_logger()) << this->get_id() << " run:" << child.second.get<string_t>("id") << std::endl;
-	//}
+	logger& l = *(this->get_logger());
 	//
-	//comp_deq_t cs;
-	//parse_inherits( this->get_id(), this->get_env(), cs, true );
-	// collect var array and script arrays
-	// construct and execute cmd file
-	//BOOST_FOREACH( comp_ptr c, cs ) {
-	//	*(this->get_logger()) << "* " << c->get_id() << std::endl;
-	//}
+	print_title( l, this->get_id(), 0 ) << std::endl;
+	boost::optional< boost::property_tree::ptree& > package = this->props.get_child_optional( CONST_PT_COMP_PACKAGE );
+	if( package )
+	{
+		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, this->props.get_child( CONST_PT_COMP_PACKAGE )) {
+			l << child.first.c_str() << " : " << child.second.data().c_str() << std::endl;
+			//*(this->get_logger()) << this->get_id() << " run:" << child.second.get<string_t>("id") << std::endl;
+
+			//BOOST_FOREACH(ptree::value_type &v,
+			//            pt.get_child("debug.modules"))
+			//        m_modules.insert(v.second.data());
+
+		}
+	}
+
+	//
+	comp_deq_t cs;
+	parse_inherits( this->get_id(), this->get_env(), cs, true );
+	//collect var array and script arrays
+	//	construct and execute cmd file
+	BOOST_FOREACH( comp_ptr c, cs ) {
+		l << "* " << c->get_id() << std::endl;
+	}
+	l << std::endl;
 
 
 	//
@@ -160,7 +174,7 @@ void comp::parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e
 	//
 	if ( r ) {
 		BOOST_FOREACH( comp_ptr c, ncs ) {
-			parse_hierarchy( key, c->props.get<string_t>( key ), c->get_env(), cs, r );
+			parse_hierarchy( key, c->props.get( key, string_t() ), c->get_env(), cs, r );
 		}
 	}
 }
