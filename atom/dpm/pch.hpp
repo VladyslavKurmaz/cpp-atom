@@ -55,6 +55,10 @@ typedef boost::shared_ptr< comp >
 typedef std::deque< comp_ptr >
 	comp_deq_t;
 
+class context;
+typedef boost::shared_ptr< context >
+	context_ptr;
+
 // appl
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
@@ -71,6 +75,8 @@ typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > comp2logger;
 typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > comp2appl;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > comp2env;
 
+//context
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > context2logger;
 
 
 //-----------------------------------------------------------------------------
