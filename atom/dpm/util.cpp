@@ -17,3 +17,5 @@ print_offset( logger& log, unsigned int const l ) {
 	log << offset;
 	return log;
 }
+
+

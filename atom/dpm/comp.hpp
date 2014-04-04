@@ -27,6 +27,9 @@ public:
 	}
 	///
 	void
+	build_env_block( context_ptr cont );
+	///
+	void
 	action( string_t const& a, unsigned int const l, bool const r );
 	///
 	void
@@ -40,6 +43,9 @@ public:
 	///
 	static void
 	parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	///
+	static void
+	parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
 
 protected:
 	//
@@ -51,7 +57,7 @@ protected:
 	}
 	///
 	void
-	parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	build_env_vars( string_t const& prefix, env_paths const& ep, context_ptr cont );
 	///
 	static void
 	parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );

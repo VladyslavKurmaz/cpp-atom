@@ -133,6 +133,7 @@ static char_t const* CONST_CMD_STATUS					= "status";
 static char_t const* CONST_PT_COMP_DEPENDS				= "depends";
 static char_t const* CONST_PT_COMP_INHERITS				= "inherits";
 static char_t const* CONST_PT_COMP_PACKAGE				= "package";
+static char_t const* CONST_PT_COMP_VAR					= "var";
 
 
 // dpm.conf
@@ -151,4 +152,27 @@ static char_t const* CONST_CATALOG_CONF_COMPONENT		= "component";
 
 
 #include "./util.hpp"
+
+//
+class env_paths {
+public:
+	env_paths( boost::filesystem::path const& h ) :
+			home( h )
+		,	conf_file( boost::filesystem::path( home ).operator/=( boost::filesystem::path( "dpm.conf" ) ) )
+		,	dpm( boost::filesystem::path( home ).operator/=( boost::filesystem::path( ".dpm" ) ) )
+		{}
+	boost::filesystem::path const & get_home() const { return ( this->home ); }
+	boost::filesystem::path const & get_conf_file() const { return ( this->conf_file ); }
+	boost::filesystem::path const & get_dpm() const { return ( this->dpm ); }
+	boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( this->dpm ).operator/= ( f ) ); }
+
+protected:
+private:
+	boost::filesystem::path const
+		home;
+	boost::filesystem::path const
+		conf_file;
+	boost::filesystem::path const
+		dpm;
+};
 
