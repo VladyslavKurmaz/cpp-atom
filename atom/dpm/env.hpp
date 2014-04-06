@@ -34,7 +34,7 @@ public:
 	scan();
 	///
 	void
-	action( string_t const& c, unsigned int const l, bool const r, bool const v );
+	action( context_ptr cont, string_t const& c, unsigned int const l, bool const r, bool const v );
 	///
 	void
 	find( string_t const& n, env_ptr& ce );
@@ -47,11 +47,23 @@ public:
 		return ( this->name );
 	}
 	///
+	void
+	get_prefix( ostream_t& os ){
+		env_ptr p = this->get_parent();
+		if ( p ) {
+			p->get_prefix( os );
+
+		} else {
+			os << CONST_PREFIX_HEAD;
+		}
+		os << get_caption();
+	}
+	///
 	env_paths const&
 	get_paths() const { return ( this->paths ); }
 	///
 	void
-	execute( string_t const& sids, string_t const& scmds, const bool r );
+	execute( context_ptr cont, string_t const& sids, string_t const& scmds, const bool r );
 
 protected:
 	///

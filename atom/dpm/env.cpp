@@ -67,7 +67,7 @@ catch( std::exception& e ) {
 }
 
 void
-env::action( string_t const& c, unsigned int const l, bool const r, bool const v ) try {
+env::action( context_ptr cont, string_t const& c, unsigned int const l, bool const r, bool const v ) try {
 	actions_t::iterator it = this->actions.find( c );
 	//
 	if ( it != this->actions.end() ) {
@@ -77,11 +77,11 @@ env::action( string_t const& c, unsigned int const l, bool const r, bool const v
 			std::vector< string_t > cl;
 			struct _{ static void __( comp_ptr c, std::vector< string_t >& l ){ l.push_back( c->get_id() ); } };
 			this->get_slot<env2comps>().for_each( boost::bind( _::__, _1, boost::ref( cl ) ) );
-			this->execute( boost::algorithm::join( cl, CONST_CMD_DELIM ), c, false );
+			this->execute( cont, boost::algorithm::join( cl, CONST_CMD_DELIM ), c, false );
 		}
 		//
 		if ( r ) {
-			this->get_slot<env2envs>().for_each( boost::bind( &env::action, _1, boost::cref( c ), l + 1, r, v ) );
+			this->get_slot<env2envs>().for_each( boost::bind( &env::action, _1, cont, boost::cref( c ), l + 1, r, v ) );
 		}
 	} else {
 		throw std::exception( "unknown command" );
@@ -191,16 +191,16 @@ env::find_comp( string_t const& id ) {
 }
 
 void
-env::execute( string_t const& sids, string_t const& scmds, const bool r ) {
+env::execute( context_ptr cont, string_t const& sids, string_t const& scmds, const bool r ) {
 	std::vector< string_t > cmds;
 	boost::split( cmds, scmds, boost::is_any_of( CONST_CMD_DELIM ) );
 	// build components' list
 	comp_deq_t cs;
-	comp::parse_depends( sids, this->shared_from_this(), cs, r );
+	comp::parse_depends( cont, sids, this->shared_from_this(), cs, r );
 	// execute 
 	BOOST_FOREACH( string_t const& cmd, cmds ) {
 		BOOST_FOREACH( comp_ptr c, cs ) {
-			c->execute( cmd );
+			c->execute( cont, cmd );
 		}
 	}
 }

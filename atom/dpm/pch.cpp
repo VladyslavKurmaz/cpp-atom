@@ -12,6 +12,7 @@ int atom::node_cnt = 0;
 //o[2] - returns invalid value on x64 if you are x86 process http://stackoverflow.com/questions/1738985/why-processor-architecture-always-returns-x86-instead-of-amd64
 //+[3] - change environmwnt output [/] "d:\work2" -> [/@d:\work2]
 //o[4] - remove constraints for root environment, add environment creation command
+//o[5] - add command line parameter filter which will overwrite values, were built from platform, form is json {}
 
 /* commands
 help							print help message
@@ -29,6 +30,7 @@ create <env> [-u] [-p] [-m]		create new environment as child of current
 			<custom step>
 
 */
+
 /* environment template
  /
  |-/.dpm
@@ -44,3 +46,17 @@ create <env> [-u] [-p] [-m]		create new environment as child of current
  |-* dpm.conf - json file, that points to repository for environment, also marks folder as environment not component
  |
  */
+
+/* DSL for environment variables
+"var":{
+	"<name>":"<value>"
+}
+g - generate name or path, u - use name or path, m - modify name
+[1] gg	"gg|SRC":"src"											-> SET DPM__CPP_ATOM_SRC=D:\work2\cpp-atom\src
+[2] gu	"gu|9_vars":"%VS90COMNTOOLS%..\\..\\VC\\vcvarsall.bat"	-> SET DPM__MSVC_9_VARS=%VS90COMNTOOLS%..\\..\\VC\\vcvarsall.bat
+[3] ug	"ug|CYGWIN":""											-> SET CYGWIN=D:\work2\cpp-atom\cygwin-32
+[4] uu	"uu|ROOT":"d:\work2"									-> SET ROOT=d:\work2
+[5] mg	"mg|PATH":"bin"											-> SET PATH=%PATH%;d:\work2\cmake\bin 
+[6] mu	"mu|PATH":"d:\work2"									-> SET PATH=%PATH%;d:\work2
+
+*/

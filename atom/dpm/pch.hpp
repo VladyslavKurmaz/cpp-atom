@@ -36,6 +36,9 @@ typedef std::basic_string< char_t >
 typedef std::basic_stringstream< char_t >
 	stringstream_t;
 
+typedef std::ostream
+	ostream_t;
+
 
 class logger;
 typedef boost::shared_ptr< logger >
@@ -59,6 +62,10 @@ class context;
 typedef boost::shared_ptr< context >
 	context_ptr;
 
+class filter;
+typedef boost::shared_ptr< filter >
+	filter_ptr;
+
 // appl
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
@@ -77,6 +84,9 @@ typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > comp2env;
 
 //context
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > context2logger;
+
+//filter
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > filter2logger;
 
 
 //-----------------------------------------------------------------------------
@@ -120,6 +130,10 @@ static char_t const slash								= '/';
 static char_t const bslash								= '\\';
 
 static char_t const* CONST_CMD_DELIM					= ";";
+static char_t const* CONST_CMD_DELIM1					= "|";
+static char_t const* CONST_PREFIX_DELIM					= "_";
+static char_t const* CONST_PREFIX_HEAD					= "DPM";
+static char_t const* CONST_PREFIX_REPLACE				= "/\\-.";
 
 static char_t const* CONST_CMD_HELP						= "help";
 static char_t const* CONST_CMD_CHANGE_ENV				= "cd";

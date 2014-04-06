@@ -22,16 +22,24 @@ comp::clear() {
 void
 comp::build_env_block( context_ptr cont ) {
 	comp_deq_t ics;
-	parse_inherits( this->get_id(), this->get_env(), ics, true );
+	parse_inherits( cont, this->get_id(), this->get_env(), ics, true );
+	//
+	env_ptr e = get_env();
+	env_paths const & ep = e->get_paths();
+	//
+	stringstream_t prefix;
+	e->get_prefix( prefix );
+	prefix << CONST_PREFIX_DELIM << this->get_id();
+	//
 	BOOST_FOREACH( comp_ptr c, ics ) {
-		get_env()->find_comp( c->get_id() )->build_env_vars( this->get_id(), get_env()->get_paths(), cont );
+		e->find_comp( c->get_id() )->build_env_vars( cont, ep, this->get_id(), prefix.str() );
 	}
 }
 
-void
-comp::action( string_t const& a, unsigned int const l, bool const r ) {
-	print_offset( *(this->get_logger()), l + 2 ) << this->get_id() << std::endl;
-}
+//void
+//comp::action( string_t const& a, unsigned int const l, bool const r ) {
+//	print_offset( *(this->get_logger()), l + 2 ) << this->get_id() << std::endl;
+//}
 
 void
 comp::update() {
@@ -105,14 +113,14 @@ comp::info( string_t const& offs ) {
 }
 
 void
-comp::execute( string_t const& c ) {
-	context_ptr cont = context::create( this->get_logger() );
+comp::execute( context_ptr cont, string_t const& c ) {
 	//
 	comp_deq_t dcs;
-	parse_depends( this->get_id(), this->get_env(), dcs, true );
+	parse_depends( cont, this->get_id(), this->get_env(), dcs, true );
 	BOOST_FOREACH( comp_ptr c, dcs ) {
 		get_env()->find_comp( c->get_id() )->build_env_block( cont );
 	}
+	cont->dump();
 
 #if 0
 	//
@@ -163,7 +171,7 @@ comp::execute( string_t const& c ) {
 }
 
 void
-comp::build_env_vars( string_t const& prefix, env_paths const& ep, context_ptr cont ){
+comp::build_env_vars( context_ptr cont, env_paths const& ep, string_t const& id, string_t const& prefix ){
 	logger& l = *(this->get_logger());
 	//
 	boost::optional< boost::property_tree::ptree& > var = this->props.get_child_optional( CONST_PT_COMP_VAR );
@@ -171,26 +179,58 @@ comp::build_env_vars( string_t const& prefix, env_paths const& ep, context_ptr c
 		boost::filesystem::path const& home = ep.get_home();
 		BOOST_FOREACH( const boost::property_tree::ptree::value_type& child, this->props.get_child( CONST_PT_COMP_VAR )) {
 			boost::filesystem::path p = home;
-			p /= boost::filesystem::path( child.second.data().c_str() );
-			l << prefix << child.first.c_str() << "=" << p.string() << std::endl;
+			p /= boost::filesystem::path( id );
+			p /= boost::filesystem::path( child.second.data() );
+			//
+			string_t name = prefix + string_t(CONST_PREFIX_DELIM) + child.first;
+			string_t value = p.string();
+			//
+			std::vector< string_t > ids;
+			boost::split( ids, child.first, boost::is_any_of( CONST_CMD_DELIM1 ) );
+			if ( ( ids.size() == 2 ) && ( ids[0].length() == 2 ) ) {
+				name = prefix + string_t(CONST_PREFIX_DELIM) + ids[1];
+				//
+				char_t const& nm = ids[0][0];
+				char_t const& vm = ids[0][1];
+				if ( vm == 'g' ) {
+				} else if ( vm == 'u' ) {
+					value = child.second.data();
+				} else {
+					throw std::exception( "Invalid environment variable format modifier" );
+				}
+				//
+				if ( nm == 'g' ) {
+				} else if ( nm == 'u' ) {
+					name = ids[1];
+				} else if ( nm == 'm' ) {
+					name = ids[1];
+					stringstream_t ss;
+					ss << "%"<< name << "%;" << value;
+					value = ss.str();
+				} else {
+					throw std::exception( "Invalid environment variable format modifier" );
+				}
+
+			}
+			cont->add_env_var( name, value );
 		}
 	}
 }
 
 void
-comp::parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
-	parse_hierarchy( CONST_PT_COMP_DEPENDS, sids, e, cs, r );
+comp::parse_depends( context_ptr cont, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+	parse_hierarchy( cont, CONST_PT_COMP_DEPENDS, sids, e, cs, r );
 }
 
 void
-comp::parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
-	parse_hierarchy( CONST_PT_COMP_INHERITS, sids, e, cs, r );
+comp::parse_inherits( context_ptr cont, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+	parse_hierarchy( cont, CONST_PT_COMP_INHERITS, sids, e, cs, r );
 }
 
 void
-comp::parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
+comp::parse_hierarchy( context_ptr cont, string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r ) {
 	std::vector< string_t > ids;
-	boost::split( ids, sids, boost::is_any_of( ";" ) );
+	boost::split( ids, sids, boost::is_any_of( CONST_CMD_DELIM ) );
 	//
 	std::vector< comp_ptr > ncs;
 	BOOST_FOREACH( string_t const& id, ids ) {
@@ -212,7 +252,7 @@ comp::parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, com
 	//
 	if ( r ) {
 		BOOST_FOREACH( comp_ptr c, ncs ) {
-			parse_hierarchy( key, c->props.get( key, string_t() ), c->get_env(), cs, r );
+			parse_hierarchy( cont, key, c->props.get( key, string_t() ), c->get_env(), cs, r );
 		}
 	}
 }

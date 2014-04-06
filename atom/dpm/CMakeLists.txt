@@ -12,4 +12,5 @@ add_executable(
 	"./dpm.cpp"
 	"./util.cpp"
 	"./context.cpp"
+	"./filter.cpp"
 )
