@@ -1,6 +1,6 @@
 /*
 /-----------------------------------------------------------------------------\
-| Copyright © 2008-2013 by Vladyslav Kurmaz.                                  |
+| Copyright © 2008-2014 by Vladyslav Kurmaz.                                  |
 | All Rights Reserved                                                         |
 | vladislav.kurmaz@gmail.com                                                  |
 |-----------------------------------------------------------------------------|
