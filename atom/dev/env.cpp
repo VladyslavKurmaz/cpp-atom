@@ -54,7 +54,7 @@ env::scan() try {
 	for ( boost::filesystem::directory_iterator end, dir( this->get_paths().get_home() ); dir != end; ++dir ) {
 		boost::filesystem::path id = boost::filesystem::path( this->name ) / (*dir).path().leaf();
 		std::string sid = id.string();
-		std::replace( sid.begin(), sid.end(), bslash, slash );
+		//std::replace( sid.begin(), sid.end(), bslash, slash );
 		//
 		env_ptr e = env::create( this->get_logger(), this->get_appl(), this->shared_from_this(), sid, *dir );
 		if ( e ) {

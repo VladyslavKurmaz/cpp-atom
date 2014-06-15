@@ -9,21 +9,16 @@
 
 appl::appl( logger_ptr l ) : 
 		po()
-	,	def_env()
-	,	shell_mode( false )
-	,	home()
 	,	msbuild()
-	,	cenv() {
+	,	cursor() {
 	atom::mount<appl2logger>( this, l );
 	//
-	def_env.push_back( slash );
-	//
-	char const* root = getenv( "DEV_HOME" ); 
+	char const* root = getenv( CONST_DEV_HOME_ENV_VAR ); 
 	string_t h( ( root != NULL )?( root ):( "" ) );
 	//
 	//[2]
 	char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
-	string_t am( ( arch != NULL )?( ( !strcmp( arch, "x86" ) )?( "x86" ):( "x64" ) ):( "" ) );
+	string_t am( ( arch != NULL )?( ( !strcmp( arch, CONST_IS_X86 ) )?( CONST_IS_X86 ):( CONST_IS_X64 ) ):( "" ) );
 	//
 	atom::po::options_description_t& util_desc = this->po.add_desc( po_util_desc, "" );
 	this->po.
@@ -33,9 +28,8 @@ appl::appl( logger_ptr l ) :
 	//
 	atom::po::options_description_t& startup_desc = this->po.add_desc( po_startup_desc, "" );
 	this->po.
-		add_option( po_shell,			"shell,s",				"(s)hell mode", startup_desc ).
 		add_option( po_home,			"home,o",				"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
-		add_option( po_init_env,		"env,e",				"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
+		add_option( po_init_env,		"env,e",				"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( "" ) ).
 		add_option( po_msbuild_ver,		"msbuild,b",			"(b)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
@@ -43,14 +37,14 @@ appl::appl( logger_ptr l ) :
 		add_option( po_user,			"user,u",				"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
 		add_option( po_password,		"password,p",			"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
 		add_option( po_email,			"email,m",				"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_origin,			"ori(g)in,g",			"repository ori(g)in", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_branch,			"branc(h),h",			"branc(h)", conf_desc, boost::program_options::value<std::string>() ).
 		add_option( po_osystem,			"operating-system,y",	"operating s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value( "windows" ) ).
 		add_option( po_toolset,			"toolset,t",			"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value( "msvc11" ) ).
 		add_option( po_instruction_set,	"instruction-set,n",	"i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
 		add_option( po_address_model,	"address-model,a",		"(a)ddress-model", conf_desc, boost::program_options::value<std::string>()->default_value( am ) ).
 		add_option( po_configuration,	"configuration,c",		"(c)onfiguration", conf_desc, boost::program_options::value<std::string>()->default_value( "debug" ) );
 	// environment-type
-	// ori(g)in
-	// (b)ranch
 	//
 	atom::po::options_description_t& subcommands_desc = this->po.add_desc( po_subcommands_desc, "" );
 	this->po.
@@ -79,10 +73,8 @@ appl::init( int argc, char const * const argv[] ) {
 	try {
 		this->po.parse_arg( argc, argv, desc, pdesc, true );
 		//
-		this->shell_mode = ( this->po.count( po_shell ) > 0 );
-		this->home = this->po.as< string_t >( po_home );
-		if ( !this->home.length() ) {
-			throw std::exception( "[err] dpm home wasn't defined, set environment variable DPM2_HOME or use command line argument --env" );
+		if ( !this->po.as< string_t >( po_home ).length() ) {
+			throw std::exception( make_crit_msg( "Dev home wasn't defined, set environment variable DEV_HOME or use command line argument --home" ) );
 		}
 
 		// add path to msbuild into proccess env vars
@@ -97,7 +89,7 @@ appl::init( int argc, char const * const argv[] ) {
 			RegCloseKey( key );
 		}
 		if ( !this->msbuild.length() ) {
-			throw std::exception( "[emerg] Couldn't locate msbuild" );
+			throw std::exception( make_crit_msg( "Couldn't locate msbuild" ) );
 		} else {
 			// update path environment variable
 			bool update_err = true;
@@ -114,6 +106,7 @@ appl::init( int argc, char const * const argv[] ) {
 			}
 		}
 		// create root environment
+		/*
 		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), def_env, this->home ) );
 		if ( this->cenv ) {
 			this->cenv->scan();
@@ -122,6 +115,7 @@ appl::init( int argc, char const * const argv[] ) {
 		} else {
 			throw std::exception( "[emerg] Home folder is not an environment, doesn't contain dpm.conf" );
 		}
+		*/
 	} catch( std::exception& exc ) {
 		this->print_error( desc, exc );
 		return false;
@@ -133,9 +127,9 @@ void
 appl::run( std::ostream& os, std::istream& is ) {
 	atom::po::options_description_t& shell_desc = this->po.get_desc( po_shell_desc );
 	atom::po::positional_options_description_t& subcommands_posdesc = this->po.get_pdesc( po_subcommands_posdesc );
-	while( this->shell_mode ) {
+	while( true ) {
 		std::string s;
-		os << "[" << this->cenv->get_caption() << "]> ";
+		os << "[" << /*this->cenv->get_caption() <<*/ "]> ";
 		std::getline( is, s );
 		//
 		try {
@@ -151,37 +145,37 @@ appl::run( std::ostream& os, std::istream& is ) {
 
 void
 appl::clear(){
-	this->cenv.reset();
+	this->cursor.reset();
 	atom::clear_node( this->get_root_env() );
 	base_node_t::clear();
 }
 
 bool
 appl::process_command() {
-	context_ptr cont = context::create( this->get_logger() );
-	//
-	string_t pos1 = this->po.as< string_t >( po_subcommand1 );
-	string_t pos2 = this->po.as< string_t >( po_subcommand2 );
-	//
-	if ( ( pos1 == CONST_CMD_HELP ) || this->po.count( po_help ) ) {
-		throw std::exception( "dpm command line parameters:" );
-	} else if ( pos1 == CONST_CMD_CHANGE_ENV ) {
-		// change current environment
-		this->get_root_env()->find( pos2, this->cenv );
-	} else if ( pos1 == CONST_CMD_EXIT ) {
-		return false;
-	} else if ( pos1 == CONST_CMD_ENV_ACTION ) {
-		// action
-		this->cenv->action( cont, pos2, 0, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
-	} else if ( pos1.length() && pos2.length() ){
-		try {
-			this->cenv->execute( cont, pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );
-		} catch( std::exception& e ) {
-			*(this->get_logger()) << e.what() << std::endl;
-		}
-	}
-	*(this->get_logger()) << std::endl;
-	return ( true );
+	//context_ptr cont = context::create( this->get_logger() );
+	////
+	//string_t pos1 = this->po.as< string_t >( po_subcommand1 );
+	//string_t pos2 = this->po.as< string_t >( po_subcommand2 );
+	////
+	//if ( ( pos1 == CONST_CMD_HELP ) || this->po.count( po_help ) ) {
+	//	throw std::exception( "dpm command line parameters:" );
+	//} else if ( pos1 == CONST_CMD_CHANGE_ENV ) {
+	//	// change current environment
+	//	this->get_root_env()->find( pos2, this->cenv );
+	//} else if ( pos1 == CONST_CMD_EXIT ) {
+	//	return false;
+	//} else if ( pos1 == CONST_CMD_ENV_ACTION ) {
+	//	// action
+	//	this->cenv->action( cont, pos2, 0, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
+	//} else if ( pos1.length() && pos2.length() ){
+	//	try {
+	//		this->cenv->execute( cont, pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );
+	//	} catch( std::exception& e ) {
+	//		*(this->get_logger()) << e.what() << std::endl;
+	//	}
+	//}
+	//*(this->get_logger()) << std::endl;
+	return true;
 }
 
 void
