@@ -59,6 +59,6 @@ private:
 	string_t
 		msbuild;
 	///
-	env_ptr
-		cenv;
+	entity_ptr
+		cursor;
 };

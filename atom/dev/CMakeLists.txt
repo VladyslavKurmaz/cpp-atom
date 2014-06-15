@@ -4,13 +4,14 @@
 
 # Project's structure
 add_executable( 
-	dpm
+	dev
 	"./pch.cpp"
 	"./appl.cpp"
 	"./comp.cpp"
 	"./env.cpp"
-	"./dpm.cpp"
+	"./dev.cpp"
 	"./util.cpp"
 	"./context.cpp"
 	"./filter.cpp"
+	"./entity.cpp"
 )

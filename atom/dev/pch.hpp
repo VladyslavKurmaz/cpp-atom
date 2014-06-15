@@ -48,6 +48,10 @@ class appl;
 typedef boost::shared_ptr< appl >
 	appl_ptr;
 
+class entity;
+typedef boost::shared_ptr< entity >
+	entity_ptr;
+
 class env;
 typedef boost::shared_ptr< env >
 	env_ptr;
@@ -69,6 +73,11 @@ typedef boost::shared_ptr< filter >
 // appl
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
+
+// entity
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > entity2logger;
+typedef atom::nstorage< entity, boost::shared_ptr, atom::narray1 > entity2entity;
+typedef atom::nstorage< entity, boost::shared_ptr, atom::nlist > entity2entities;
 
 // env
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > env2logger;

@@ -7,14 +7,6 @@
 // TODO
 // substitute for_each with for_each2
 
-/*
-.dpm folder should contain conf file with system folder names overloads 
-conf
-download_folder=dl
-environment_folder=env
-
-*/
-
 appl::appl( logger_ptr l ) : 
 		po()
 	,	def_env()
@@ -26,7 +18,7 @@ appl::appl( logger_ptr l ) :
 	//
 	def_env.push_back( slash );
 	//
-	char const* root = getenv( "DPM2_HOME" ); 
+	char const* root = getenv( "DEV_HOME" ); 
 	string_t h( ( root != NULL )?( root ):( "" ) );
 	//
 	//[2]
@@ -35,27 +27,28 @@ appl::appl( logger_ptr l ) :
 	//
 	atom::po::options_description_t& util_desc = this->po.add_desc( po_util_desc, "" );
 	this->po.
-		add_option( po_help,			"help,h",			"show this (h)elp", util_desc ).
-		add_option( po_recursive,		"recursive,r",		"(r)ecursive mode", util_desc ).
-		add_option( po_verbose,			"verbose,v",		"(v)erbose", util_desc );
+		add_option( po_help,			"help,h",				"show this (h)elp", util_desc ).
+		add_option( po_recursive,		"recursive,r",			"(r)ecursive mode", util_desc ).
+		add_option( po_verbose,			"verbose,v",			"(v)erbose", util_desc );
 	//
 	atom::po::options_description_t& startup_desc = this->po.add_desc( po_startup_desc, "" );
 	this->po.
-		add_option( po_shell,			"shell,s",			"(s)hell mode", startup_desc ).
-		add_option( po_home,			"home,o",			"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
-		add_option( po_init_env,		"env,e",			"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
-		add_option( po_msbuild_ver,		"msbuild,b",		"(b)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
+		add_option( po_shell,			"shell,s",				"(s)hell mode", startup_desc ).
+		add_option( po_home,			"home,o",				"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
+		add_option( po_init_env,		"env,e",				"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( def_env ) ).
+		add_option( po_msbuild_ver,		"msbuild,b",			"(b)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
 	//
 	atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
 	this->po.
-		add_option( po_user,			"user,u",			"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
-		add_option( po_password,		"password,p",		"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
-		add_option( po_email,			"email,p",			"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
-		add_option( po_osystem,			"osystem,y",		"operation s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value( "windows" ) ).
-		add_option( po_toolset,			"toolset,t",		"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value( "msvc11" ) ).
-		add_option( po_instruction_set,	"instruction_set,n","i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
-		add_option( po_address_model,	"address-model,a",	"(a)ddress-model", conf_desc, boost::program_options::value<std::string>()->default_value( am ) ).
-		add_option( po_configuration,	"configuration,c",	"(c)onfiguration", conf_desc, boost::program_options::value<std::string>()->default_value( "debug" ) );
+		add_option( po_user,			"user,u",				"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_password,		"password,p",			"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_email,			"email,m",				"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
+		add_option( po_osystem,			"operating-system,y",	"operating s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value( "windows" ) ).
+		add_option( po_toolset,			"toolset,t",			"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value( "msvc11" ) ).
+		add_option( po_instruction_set,	"instruction-set,n",	"i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
+		add_option( po_address_model,	"address-model,a",		"(a)ddress-model", conf_desc, boost::program_options::value<std::string>()->default_value( am ) ).
+		add_option( po_configuration,	"configuration,c",		"(c)onfiguration", conf_desc, boost::program_options::value<std::string>()->default_value( "debug" ) );
+	// environment-type
 	// ori(g)in
 	// (b)ranch
 	//
