@@ -274,14 +274,14 @@ namespace atom {
 	struct parse_result {
 		size_t		total_found;
 		V			result;
-		std::vector< std::basic_string<C > >
+		std::vector< std::basic_string< C > >
 			unparsed;
 		parse_result() : total_found( 0 ), result(), unparsed() {}
 	};
 
-	template < typename C, typename V >
+	template < typename C, typename V, class T >
 	parse_result< C, V >
-	parse_tags( std::basic_string<C> const& input, parse_tag< C, V > const table[], size_t const table_size, std::vector< std::basic_string<C> > const& strs ) {
+	parse_tags( std::basic_string< C > const& input, T const table[], size_t const table_size, std::vector< std::basic_string< C > > const& strs ) {
 		parse_result< C, V > result;
 		//
 		result.total_found = strs.size(); 
@@ -301,14 +301,20 @@ namespace atom {
 		return result;
 	}
 
-	template < typename C, typename V >
+	template < typename C, typename V, class T >
 	parse_result< C, V >
-	parse_tags( std::basic_string<C> const& input, parse_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitters ) {
+	parse_tags( std::basic_string< C > const& input, T const table[], size_t const table_size, std::basic_string<C> const& splitters ) {
 		parse_result< C, V > result;
 		//
-		std::vector< std::basic_string<C> > strs;
+		std::vector< std::basic_string< C > > strs;
 		boost::split( strs, input, boost::is_any_of( splitters ) );
-		return parse_tags< C, V >( input, table, table_size, strs );
+		return parse_tags< C, V, T >( input, table, table_size, strs );
+	}
+
+	template < typename C, typename V >
+	parse_result< C, V >
+	parse_tags( std::basic_string< C > const& input, parse_tag< C, V > const table[], size_t const table_size, std::basic_string<C> const& splitters ) {
+		return parse_tags< C, V, parse_tag< C, V > >( input, table, table_size, splitters );
 	}
 	//-------------------------------------------------------------------------
 	//
