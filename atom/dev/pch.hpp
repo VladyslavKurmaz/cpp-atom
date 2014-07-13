@@ -52,10 +52,6 @@ class entity;
 typedef boost::shared_ptr< entity >
 	entity_ptr;
 
-class env;
-typedef boost::shared_ptr< env >
-	env_ptr;
-
 class comp;
 typedef boost::shared_ptr< comp >
 	comp_ptr;
@@ -72,24 +68,12 @@ typedef boost::shared_ptr< filter >
 
 // appl
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
-typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
+typedef atom::nstorage< entity, boost::shared_ptr, atom::narray1 > appl2entity;
 
 // entity
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > entity2logger;
 typedef atom::nstorage< entity, boost::shared_ptr, atom::narray1 > entity2entity;
 typedef atom::nstorage< entity, boost::shared_ptr, atom::nlist > entity2entities;
-
-// env
-typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > env2logger;
-typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > env2appl;
-typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > env2env;
-typedef atom::nstorage< env, boost::shared_ptr, atom::nlist > env2envs;
-typedef atom::nstorage< comp, boost::shared_ptr, atom::nlist > env2comps;
-
-//comp
-typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > comp2logger;
-typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > comp2appl;
-typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > comp2env;
 
 //context
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > context2logger;
@@ -142,6 +126,8 @@ static char_t const* CONST_IS_X64						= "x64";
 
 
 
+// env.json
+static char const* const CONST_ENV_JSON_CONFIG_FILE		= "env.json";
 
 
 

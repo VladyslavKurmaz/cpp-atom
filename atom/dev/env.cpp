@@ -1,9 +1,25 @@
 #include "./pch.hpp"
-#include <boost/algorithm/string.hpp>
-#include "./logger.hpp"
-#include "./comp.hpp"
+#include "./entity.hpp"
 #include "./env.hpp"
 
+env::env( logger_ptr l, entity_ptr p, string_t const& sid, boost::property_tree::ptree const& a ) : entity( l, p ) {
+}
+
+env::~env() {
+}
+
+void
+env::scan(){
+	// load entities from env.json
+	// load entities from catalo.json from .conf repository
+}
+
+void
+env::clear() {
+	entity::clear();
+}
+
+#if 0
 env::env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps ) :
 		name( n )
 	,	paths( ps )
@@ -204,3 +220,4 @@ env::execute( context_ptr cont, string_t const& sids, string_t const& scmds, con
 		}
 	}
 }
+#endif
