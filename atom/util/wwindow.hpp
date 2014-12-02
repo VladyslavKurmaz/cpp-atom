@@ -410,6 +410,10 @@ namespace atom {
 				  }
 			  }
 		  }
+		  static void exit( int const code ) {
+			  PostQuitMessage( code );
+		  }
+
 		  ///
 		  static void calc_rect( RECT& rect, DWORD const style, DWORD const ex_style, bool const menu, bool const center ) {
 			  calc_rect( rect, style, ex_style, menu, center, center );
