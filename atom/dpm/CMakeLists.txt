@@ -10,4 +10,7 @@ add_executable(
 	"./comp.cpp"
 	"./env.cpp"
 	"./dpm.cpp"
+	"./util.cpp"
+	"./context.cpp"
+	"./filter.cpp"
 )

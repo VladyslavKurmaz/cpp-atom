@@ -1,26 +1,5 @@
 #pragma once
 
-class env_paths {
-public:
-	env_paths( boost::filesystem::path const& h ) :
-			home( h )
-		,	conf_file( boost::filesystem::path( home ).operator/=( boost::filesystem::path( "dpm.conf" ) ) )
-		,	dpm( boost::filesystem::path( home ).operator/=( boost::filesystem::path( ".dpm" ) ) )
-		{}
-	boost::filesystem::path const & get_home() const { return ( this->home ); }
-	boost::filesystem::path const & get_conf_file() const { return ( this->conf_file ); }
-	boost::filesystem::path const & get_dpm() const { return ( this->dpm ); }
-	boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( dpm ).operator/= ( f ) ); }
-
-protected:
-private:
-	boost::filesystem::path const
-		home;
-	boost::filesystem::path const
-		conf_file;
-	boost::filesystem::path const
-		dpm;
-};
 
 class env :
 	public atom::node< LOKI_TYPELIST_5( env2logger, env2appl, env2env, env2envs, env2comps ) >,
@@ -37,6 +16,7 @@ public:
 		//
 		if ( boost::filesystem::exists( ps.get_conf_file() ) ) {
 			result = env_ptr( new env( l, a, n, ps ) );
+			result->init();
 			if ( p ) {
 				atom::mount<env2env>( result, p );
 				atom::mount<env2envs>( p, result );
@@ -54,13 +34,7 @@ public:
 	scan();
 	///
 	void
-	sync( bool const r );
-	///
-	void
-	print( logger_ptr l, env_ptr ce, string_t const& offs, bool const v );
-	///
-	void
-	print_c( logger_ptr l, string_t const& offs );
+	action( context_ptr cont, string_t const& c, unsigned int const l, bool const r, bool const v );
 	///
 	void
 	find( string_t const& n, env_ptr& ce );
@@ -73,13 +47,37 @@ public:
 		return ( this->name );
 	}
 	///
+	void
+	get_prefix( ostream_t& os ){
+		env_ptr p = this->get_parent();
+		if ( p ) {
+			p->get_prefix( os );
+
+		} else {
+			os << CONST_PREFIX_HEAD;
+		}
+		os << get_caption();
+	}
+	///
 	env_paths const&
 	get_paths() const { return ( this->paths ); }
 	///
 	void
-	execute( string_t const& sids, string_t const& scmds, const bool r );
+	execute( context_ptr cont, string_t const& sids, string_t const& scmds, const bool r );
 
 protected:
+	///
+	void
+	init();
+	///
+	void
+	sync( string_t const& a, unsigned int const l );
+	///
+	void
+	info( string_t const& a, unsigned int const l );
+	///
+	void
+	status( string_t const& a, unsigned int const l );
 	//
 	logger_ptr get_logger() {
 		return ( get_slot<env2logger>().item() );
@@ -98,6 +96,13 @@ private:
 		name;
 	env_paths
 		paths;
+	boost::property_tree::ptree
+		config;
+	//
+	typedef std::map< string_t, boost::function< void( string_t const&, unsigned int const ) > >
+		actions_t;
+	actions_t
+		actions;
 	///
 	env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps );
 };

@@ -27,16 +27,25 @@ public:
 	}
 	///
 	void
+	build_env_block( context_ptr cont );
+	///
+	//void
+	//action( string_t const& a, unsigned int const l, bool const r );
+	///
+	void
 	update();
 	///
 	void
-	print( logger_ptr l, string_t const& offs );
+	info( string_t const& offs );
 	///
 	void
-	execute( string_t const& cmd );
+	execute( context_ptr cont, string_t const& c );
 	///
 	static void
-	parse_depends( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	parse_depends( context_ptr cont, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	///
+	static void
+	parse_inherits( context_ptr cont, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
 
 protected:
 	//
@@ -48,10 +57,10 @@ protected:
 	}
 	///
 	void
-	parse_inherits( string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	build_env_vars( context_ptr cont, env_paths const& ep, string_t const& id, string_t const& prefix );
 	///
 	static void
-	parse_hierarchy( string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+	parse_hierarchy( context_ptr cont, string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
 
 private:
 	boost::property_tree::ptree

@@ -1,21 +1,4 @@
-// http://yuml.me/diagram/scruffy/class/[appl]-1[logger],[appl]1-0..1[env],[env]-1[logger],[env]*-0..1[env],[env]1-*[comp],[comp]-1[logger],[comp]-1[appl]
 
-
-/*
- /
- |-/dpm
- | |-* catalog.conf - contains list of components including initial configuration for them: repository, user, pass, additional folder etc.
- |
- |-/boost-1.55.0
- |
- |-/cpp-atom
- | |-/builds
- | |-/src
- |   |-* dpm.conf - additional component configuration script, act as clarification for catalog.json from embracing environment
- |
- |-* dpm.conf - json file, that points to repository for environment, also marks folder as environment not component
- |
- */
 #pragma once
 #pragma warning(disable : 4996)
 //#pragma warning(disable : 4355)
@@ -43,6 +26,7 @@
 #include <atom/util/proc.hpp>
 
 
+
 typedef TCHAR
 	char_t;
 
@@ -51,6 +35,9 @@ typedef std::basic_string< char_t >
 
 typedef std::basic_stringstream< char_t >
 	stringstream_t;
+
+typedef std::ostream
+	ostream_t;
 
 
 class logger;
@@ -71,6 +58,14 @@ typedef boost::shared_ptr< comp >
 typedef std::deque< comp_ptr >
 	comp_deq_t;
 
+class context;
+typedef boost::shared_ptr< context >
+	context_ptr;
+
+class filter;
+typedef boost::shared_ptr< filter >
+	filter_ptr;
+
 // appl
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > appl2env;
@@ -87,6 +82,11 @@ typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > comp2logger;
 typedef atom::nstorage< appl, boost::shared_ptr, atom::narray1 > comp2appl;
 typedef atom::nstorage< env, boost::shared_ptr, atom::narray1 > comp2env;
 
+//context
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > context2logger;
+
+//filter
+typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > filter2logger;
 
 
 //-----------------------------------------------------------------------------
@@ -107,7 +107,10 @@ static atom::po::id_t const po_msbuild_ver			=	po_init_env + 1;
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_conf_desc			=	po_msbuild_ver + 1;
 //
-static atom::po::id_t const po_osystem				=	po_conf_desc + 1;
+static atom::po::id_t const po_user					=	po_conf_desc + 1;
+static atom::po::id_t const po_password				=	po_user + 1;
+static atom::po::id_t const po_email				=	po_password + 1;
+static atom::po::id_t const po_osystem				=	po_email + 1;
 static atom::po::id_t const po_toolset				=	po_osystem + 1;
 static atom::po::id_t const po_instruction_set		=	po_toolset + 1;
 static atom::po::id_t const po_address_model		=	po_instruction_set + 1;
@@ -123,14 +126,67 @@ static atom::po::id_t const po_cmdline_desc			=	po_subcommand2 + 1;
 //-----------------------------------------------------------------------------
 static atom::po::id_t const po_shell_desc			=	po_cmdline_desc + 1;
 
-static char_t const slash							= '/';
-static char_t const bslash							= '\\';
+static char_t const slash								= '/';
+static char_t const bslash								= '\\';
 
-static char_t const* cmd_help						= "help";
-static char_t const* cmd_change						= "cd";
-static char_t const* cmd_list						= "ls";
-static char_t const* cmd_sync						= "sync";
-static char_t const* cmd_exit						= "exit";
+static char_t const* CONST_CMD_DELIM					= ";";
+static char_t const* CONST_CMD_DELIM1					= "|";
+static char_t const* CONST_PREFIX_DELIM					= "_";
+static char_t const* CONST_PREFIX_HEAD					= "DPM";
+static char_t const* CONST_PREFIX_REPLACE				= "/\\-.";
 
-static char_t const* pt_comp_depends				= "depends";
-static char_t const* pt_comp_inherits				= "inherits";
+static char_t const* CONST_CMD_HELP						= "help";
+static char_t const* CONST_CMD_CHANGE_ENV				= "cd";
+static char_t const* CONST_CMD_EXIT						= "exit";
+static char_t const* CONST_CMD_ENV_ACTION				= ".";
+
+static char_t const* CONST_CMD_INFO						= "info";
+static char_t const* CONST_CMD_SYNC						= "sync";
+static char_t const* CONST_CMD_STATUS					= "status";
+
+static char_t const* CONST_PT_COMP_DEPENDS				= "depends";
+static char_t const* CONST_PT_COMP_INHERITS				= "inherits";
+static char_t const* CONST_PT_COMP_PACKAGE				= "package";
+static char_t const* CONST_PT_COMP_VAR					= "var";
+
+
+// dpm.conf
+static char_t const* CONST_DPM_CONF_CATALOG_FILE		= "catalog";
+static char_t const* CONST_DPM_CONF_REPO_GIT			= "repo.git";
+static char_t const* CONST_DPM_CONF_REPO_SVN			= "repo.svn";
+static char_t const* CONST_DPM_CONF_REPO_REMOTE			= "repo.remote";
+static char_t const* CONST_DPM_CONF_REPO_REMOTE_DEF		= "origin";
+static char_t const* CONST_DPM_CONF_REPO_BRANCH			= "repo.branch";
+static char_t const* CONST_DPM_CONF_REPO_BRANCH_DEF		= "master";
+static char_t const* CONST_DPM_CONF_REPO_USER_NAME		= "repo.user.name";
+static char_t const* CONST_DPM_CONF_REPO_USER_EMAIL		= "repo.user.email";
+
+// catalog_conf
+static char_t const* CONST_CATALOG_CONF_COMPONENT		= "component";
+
+
+#include "./util.hpp"
+
+//
+class env_paths {
+public:
+	env_paths( boost::filesystem::path const& h ) :
+			home( h )
+		,	conf_file( boost::filesystem::path( home ).operator/=( boost::filesystem::path( "dpm.conf" ) ) )
+		,	dpm( boost::filesystem::path( home ).operator/=( boost::filesystem::path( ".dpm" ) ) )
+		{}
+	boost::filesystem::path const & get_home() const { return ( this->home ); }
+	boost::filesystem::path const & get_conf_file() const { return ( this->conf_file ); }
+	boost::filesystem::path const & get_dpm() const { return ( this->dpm ); }
+	boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( this->dpm ).operator/= ( f ) ); }
+
+protected:
+private:
+	boost::filesystem::path const
+		home;
+	boost::filesystem::path const
+		conf_file;
+	boost::filesystem::path const
+		dpm;
+};
+
