@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 class comp :
 	public atom::node< LOKI_TYPELIST_3( comp2logger, comp2appl, comp2env ) >,
 	public boost::enable_shared_from_this< comp > {
@@ -89,3 +90,4 @@ public:
 protected:
 private:
 };
+#endif

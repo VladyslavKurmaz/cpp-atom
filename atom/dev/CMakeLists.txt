@@ -14,4 +14,5 @@ add_executable(
 	"./context.cpp"
 	"./filter.cpp"
 	"./entity.cpp"
+	"./repo.cpp"
 )

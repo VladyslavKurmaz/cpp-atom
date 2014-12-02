@@ -2,8 +2,8 @@
 #include "./logger.hpp"
 #include "./context.hpp"
 #include "./comp.hpp"
-#include "./env.hpp"
 
+#if 0
 comp::comp( logger_ptr l, appl_ptr a, boost::property_tree::ptree const& pt ) :
 		props( pt )
 {
@@ -257,3 +257,4 @@ comp::parse_hierarchy( context_ptr cont, string_t const& key, string_t const& si
 	}
 }
 
+#endif

@@ -1,6 +1,35 @@
 #pragma once
 
+class env :
+	public entity,
+	public boost::enable_shared_from_this< env > {
 
+public:
+	///
+	static entity_ptr create_root( logger_ptr l, boost::filesystem::path const& h ) {
+		entity::dev_home = h;
+		return ( create_entity< env >( l, entity_ptr() ) );
+	}
+	///
+	virtual ~env();
+	///
+	virtual void
+	scan();
+	///
+	virtual void
+	clear();
+
+protected:
+	///
+	env( logger_ptr l, entity_ptr p, string_t const& sid, boost::property_tree::ptree const& a );
+
+private:
+
+	template < class T >
+	friend entity_ptr create_entity( logger_ptr, entity_ptr );
+};
+
+#if 0
 class env :
 	public atom::node< LOKI_TYPELIST_5( env2logger, env2appl, env2env, env2envs, env2comps ) >,
 	public boost::enable_shared_from_this< env > {
@@ -106,3 +135,4 @@ private:
 	///
 	env( logger_ptr l, appl_ptr a, string_t const & n, env_paths const & ps );
 };
+#endif

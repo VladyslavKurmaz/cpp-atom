@@ -2,12 +2,20 @@
 #include "./logger.hpp"
 #include "./entity.hpp"
 
-entity::entity( logger_ptr l, entity_ptr p ) {
+boost::filesystem::path entity::dev_home;
+
+entity::entity( logger_ptr l, entity_ptr p, string_t const& sid, boost::property_tree::ptree const& a ):
+		id( sid )
+	,	attr( a ) {
 	atom::mount<entity2logger>( this, l );
 	atom::mount<entity2entity>( this, p );
 }
 
 entity::~entity() {
+}
+
+void
+entity::scan( ) {
 }
 
 void

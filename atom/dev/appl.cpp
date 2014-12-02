@@ -1,6 +1,9 @@
 #include "./pch.hpp"
 #include "./logger.hpp"
 #include "./context.hpp"
+
+#include "./entity.hpp"
+#include "./repo.hpp"
 #include "./env.hpp"
 #include "./appl.hpp"
 
@@ -105,19 +108,37 @@ appl::init( int argc, char const * const argv[] ) {
 				throw std::exception( "[emerg] Couldn't update process env block" );
 			}
 		}
-		// create root environment
-		/*
-		atom::mount<appl2env>( this, this->cenv = env::create( this->get_logger(), this->shared_from_this(), env_ptr(), def_env, this->home ) );
-		if ( this->cenv ) {
-			this->cenv->scan();
-			this->get_root_env()->find( this->po.as< string_t >( po_init_env ), this->cenv );
-			this->process_command();
-		} else {
-			throw std::exception( "[emerg] Home folder is not an environment, doesn't contain dpm.conf" );
+		// scan dev environment
+		struct scanner {
+			static void load( boost::property_tree::ptree& pt ) {
+			}
+			static entity_ptr scan( logger_ptr l, appl_ptr a, entity_ptr p, boost::filesystem::path const& f ) {
+				entity_ptr r;
+				// check env configuration script
+				boost::filesystem::path config_file = f / boost::filesystem::path( CONST_ENV_JSON_CONFIG_FILE );
+				if ( boost::filesystem::exists( config_file ) ) {
+					r = create_entity<env>( l, p );
+					//
+					boost::property_tree::ptree config;
+					boost::property_tree::read_json( config_file.string(), config );
+					//
+					BOOST_FOREACH( boost::property_tree::ptree::value_type const & c, config.get_child( "entity" )) {
+						std::cout << c.second.get<std::string>("id") << " " << c.second.get<std::string>("type") << " " << c.second.get<std::string>("attr.git") << std::endl;
+					}
+				}
+				return ( r );
+			};
+		};
+		//atom::mount<appl2entity>( this, this->cursor = scanner::scan( this->get_logger(), this->shared_from_this(), entity_ptr(), boost::filesystem::path( this->po.as< string_t >( po_home ) ) ) );
+		atom::mount<appl2entity>( this, this->cursor = env::create_root( this->get_logger(),  boost::filesystem::path( this->po.as< string_t >( po_home ) ) ) );
+		this->cursor->scan();
+		// ???????? find and set cursor by name
+		if ( !this->cursor ) {
+			throw std::exception( make_crit_msg( "Dev home don't contain environment configuration file, check path defined by DEV_HOME (or argument --home) environment variable" ) );
 		}
-		*/
 	} catch( std::exception& exc ) {
 		this->print_error( desc, exc );
+		std::cin.ignore();
 		return false;
 	}
 	return true;
@@ -146,35 +167,35 @@ appl::run( std::ostream& os, std::istream& is ) {
 void
 appl::clear(){
 	this->cursor.reset();
-	atom::clear_node( this->get_root_env() );
+	atom::clear_node( this->get_root() );
 	base_node_t::clear();
 }
 
 bool
 appl::process_command() {
-	//context_ptr cont = context::create( this->get_logger() );
-	////
-	//string_t pos1 = this->po.as< string_t >( po_subcommand1 );
-	//string_t pos2 = this->po.as< string_t >( po_subcommand2 );
-	////
-	//if ( ( pos1 == CONST_CMD_HELP ) || this->po.count( po_help ) ) {
-	//	throw std::exception( "dpm command line parameters:" );
-	//} else if ( pos1 == CONST_CMD_CHANGE_ENV ) {
-	//	// change current environment
-	//	this->get_root_env()->find( pos2, this->cenv );
-	//} else if ( pos1 == CONST_CMD_EXIT ) {
-	//	return false;
-	//} else if ( pos1 == CONST_CMD_ENV_ACTION ) {
-	//	// action
-	//	this->cenv->action( cont, pos2, 0, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
-	//} else if ( pos1.length() && pos2.length() ){
-	//	try {
-	//		this->cenv->execute( cont, pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );
-	//	} catch( std::exception& e ) {
-	//		*(this->get_logger()) << e.what() << std::endl;
-	//	}
-	//}
-	//*(this->get_logger()) << std::endl;
+	context_ptr cont = context::create( this->get_logger() );
+	//
+	string_t pos1 = this->po.as< string_t >( po_subcommand1 );
+	string_t pos2 = this->po.as< string_t >( po_subcommand2 );
+	//
+	if ( ( pos1 == CONST_CMD_HELP ) || this->po.count( po_help ) ) {
+		throw std::exception( "dpm command line parameters:" );
+	} else if ( pos1 == CONST_CMD_CHANGE_ENV ) {
+		// change current environment
+		//this->get_root_env()->find( pos2, this->cenv );
+	} else if ( pos1 == CONST_CMD_EXIT ) {
+		return false;
+	} else if ( pos1 == CONST_CMD_ENV_ACTION ) {
+		// action
+		//this->cenv->action( cont, pos2, 0, ( this->po.count( po_recursive ) )?( true ):( false ), ( this->po.count( po_verbose ) )?( true ):( false ) );
+	} else if ( pos1.length() && pos2.length() ){
+		try {
+			//this->cenv->execute( cont, pos1, pos2, ( this->po.count( po_recursive ) )?( true ):( false ) );
+		} catch( std::exception& e ) {
+			*(this->get_logger()) << e.what() << std::endl;
+		}
+	}
+	*(this->get_logger()) << std::endl;
 	return true;
 }
 

@@ -1,5 +1,5 @@
 rem 
-set PROJECT_HOME=D:\dev\rg\dev-2.0.0\src\
+set PROJECT_HOME=D:\dev\rg\dev-2.cpp-atom\src\
 set CMAKE_EXE=d:\dev\cmake-2.8.12.2-win32-x86\bin\cmake.exe
 set DEV_BOOST-1.55.0_INC=d:\dev\boost-1.55.0\
 set DEV_BOOST-1.55.0_LIB=d:\dev\boost-1.55.0\stage\lib\

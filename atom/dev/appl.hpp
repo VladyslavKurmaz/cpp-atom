@@ -1,10 +1,10 @@
 #pragma once
 
 class appl :
-	public atom::node< LOKI_TYPELIST_2( appl2logger, appl2env ) >,
+	public atom::node< LOKI_TYPELIST_2( appl2logger, appl2entity ) >,
 	public boost::enable_shared_from_this< appl > {
 
-	typedef atom::node< LOKI_TYPELIST_2( appl2logger, appl2env ) >
+	typedef atom::node< LOKI_TYPELIST_2( appl2logger, appl2entity ) >
 		base_node_t;
 
 public:
@@ -30,9 +30,9 @@ protected:
 	get_logger() {
 		return ( get_slot<appl2logger>().item() ); }
 	//
-	env_ptr
-	get_root_env() {
-		return ( get_slot<appl2env>().item() ); }
+	entity_ptr
+	get_root() {
+		return ( get_slot<appl2entity>().item() ); }
 	///
 	bool
 	process_command();
