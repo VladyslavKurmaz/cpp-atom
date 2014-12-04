@@ -25,3 +25,5 @@ const size_t conf_cmds_cnt = sizeof( conf_cmds ) / sizeof( conf_cmds[0] );
 
 const TCHAR DELIM1[] = _T( ";" );
 const TCHAR DELIM2[] = _T( ":" );
+
+int atom::node_cnt = 0;

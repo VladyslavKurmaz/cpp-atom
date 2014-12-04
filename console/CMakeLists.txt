@@ -2,10 +2,10 @@
 # Project's structure
 
 add_executable( 
-	cons
+	console
 	"./pch.cpp"
 	"./appl.cpp"
-	"./cons.cpp"
+	"./console.cpp"
 	"./frame.cpp"
 	"./pref.cpp"
 	"./window.cpp"

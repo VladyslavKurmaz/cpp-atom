@@ -162,7 +162,7 @@ void window::onchar( HWND hWnd, TCHAR ch, int cRepeat ) {
 
 void window::onhotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 	if ( idHotKey == this->appear_hk.id ) {
-		slide_begin();
+		slide_begin( true );
 	}
 }
 
@@ -257,7 +257,7 @@ void window::onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
 	case SPI_SETWORKAREA:
 	case SPI_ICONVERTICALSPACING:
 		this->calculate_docks();
-		this->slide_begin();
+		this->slide_begin( false );
 		break;
 	}
 }
@@ -492,6 +492,7 @@ bool operator!=( RECT const& l, RECT const& r ) {
 }
 
 void window::slide_update() {
+#if 0
 	if ( this->sliding ) {
 		DWORD const t = timeGetTime();
 		DWORD const total = get_pref()->get< unsigned int >( po_ui_timeout );
@@ -502,7 +503,7 @@ void window::slide_update() {
 		drect = ( this->sliding > 0 )?( this->rect_active ):( this->rect_inactive );
 		//
 		if ( ( t - slide_start_time ) < total ) {
-			float const mult = (float)dt / (float)total );
+			float const mult = ( (float)dt / (float)total );
 			//
 			slide_start_time = t;
 
@@ -545,6 +546,7 @@ slide_start_time
 	//
 	if ( mult == 1.f ) {
 	}
+#endif
 }
 
 
@@ -675,7 +677,7 @@ void window::process_fonts() {
 
 void window::process_window(){
 	this->calculate_docks();
-	this->slide_begin();
+	this->slide_begin( false );
 }
 
 void window::process_ui() {

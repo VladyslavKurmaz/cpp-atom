@@ -22,9 +22,9 @@ int main( int argc, char *argv[] )
 		unsigned int csb_width = 0;
 		unsigned int csb_height = 0;
 		//
-		po.add_option( 1, "mutex,m", boost::program_options::value<std::string>( &mutex_name ), "mutex name", desc );
-		po.add_option( 2, "wpipe,w", boost::program_options::value<std::string>( &wpipe_name ), "write pipe name", desc );
-		po.add_option( 3, "rpipe,r", boost::program_options::value<std::string>( &rpipe_name ), "read pipe name", desc );
+		po.add_option( 1, "mutex,m", "mutex name", desc, boost::program_options::value<std::string>( &mutex_name ) );
+		po.add_option( 2, "wpipe,w", "write pipe name", desc, boost::program_options::value<std::string>( &wpipe_name ) );
+		po.add_option( 3, "rpipe,r", "read pipe name", desc, boost::program_options::value<std::string>( &rpipe_name ) );
 		try {
 			po.parse_arg( argc, argv, desc, true );
 			//
