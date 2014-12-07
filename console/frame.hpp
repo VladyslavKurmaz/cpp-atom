@@ -60,13 +60,13 @@ private:
 	unsigned int
 		index;
 	///
-	string_t
+	std::string
 		buffer;
 	///
 	bridge
 		brdg;
 	///
-	string_t
+	std::string
 		process_caption;
 	///
 	frame( frame_id_t const i, logger_ptr l, pref_ptr p, window_ptr w );

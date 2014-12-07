@@ -28,7 +28,7 @@ void bridge::run( on_exit_t oe, on_parse_t op ) {
 	this->guard_thread = boost::thread( boost::bind( &bridge::guard, this ) );
 }
 
-void bridge::run( on_exit_t oe, on_parse_t op, string_t const& mn, string_t const& wpn, string_t const& rpn ) {
+void bridge::run( on_exit_t oe, on_parse_t op, std::string const& mn, std::string const& wpn, std::string const& rpn ) {
 	this->server = false;
 	this->mutex_name = mn;
 	this->wpipe_name = wpn;

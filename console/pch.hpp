@@ -38,33 +38,29 @@
 #define TXT( x )  x
 #endif
 
-
+// what does it mean?
 //#define STANDALONE
 #define WM_FRAMEEXIT	WM_USER+1
 
 typedef unsigned int
 	frame_id_t;
 
-
-typedef std::basic_string<TCHAR>
-	string_t;
-typedef std::basic_stringstream<TCHAR>
-	stringstream_t;
 ///
 static atom::po::id_t const po_none					=	0;
 static atom::po::id_t const po_help					=	po_none + 1;
 static atom::po::id_t const po_autostart			=	po_help + 1;
 //[hk.*]
 static atom::po::id_t const po_hk_appear			=	po_autostart + 1;
-static atom::po::id_t const po_hk_split				=	po_hk_appear + 1;
-static atom::po::id_t const po_hk_expand			=	po_hk_split + 1;
-static atom::po::id_t const po_hk_rotate			=	po_hk_expand + 1;
-static atom::po::id_t const po_hk_next				=	po_hk_rotate + 1;
-static atom::po::id_t const po_hk_prev				=	po_hk_next + 1;
-static atom::po::id_t const po_hk_ctrl_break		=	po_hk_prev + 1;
+static atom::po::id_t const po_hk_entire_screen		=	po_hk_appear + 1;
+static atom::po::id_t const po_hk_frame_split		=	po_hk_entire_screen + 1;
+static atom::po::id_t const po_hk_frame_minmax		=	po_hk_frame_split + 1;
+static atom::po::id_t const po_hk_frame_rotate		=	po_hk_frame_minmax + 1;
+static atom::po::id_t const po_hk_frame_next		=	po_hk_frame_rotate + 1;
+static atom::po::id_t const po_hk_frame_prev		=	po_hk_frame_next + 1;
+static atom::po::id_t const po_hk_frame_close		=	po_hk_frame_prev + 1;
+static atom::po::id_t const po_hk_ctrl_break		=	po_hk_frame_close + 1;
 static atom::po::id_t const po_hk_ctrl_c			=	po_hk_ctrl_break + 1;
-static atom::po::id_t const po_hk_close				=	po_hk_ctrl_c + 1;
-static atom::po::id_t const po_hk_tty1				=	po_hk_close + 1;
+static atom::po::id_t const po_hk_tty1				=	po_hk_ctrl_c + 1;
 static atom::po::id_t const po_hk_tty2				=	po_hk_tty1 + 1;
 static atom::po::id_t const po_hk_tty3				=	po_hk_tty2 + 1;
 static atom::po::id_t const po_hk_tty4				=	po_hk_tty3 + 1;
@@ -123,8 +119,27 @@ struct preferences {
 	};
 };
 
+struct placement {
+	RECT		active;
+	RECT		inactive;
+	bool		maximized;
+	int			sliding;
+	DWORD		startTime;
+	DWORD		timeout;
+	UINT_PTR	timerId;
+	placement() {
+		SetRectEmpty( &active );
+		SetRectEmpty( &inactive );
+		maximized = false;
+		sliding = 0;
+		startTime = 0;
+		timerId = 10;
+	}
+};
+
 ///
-static WORD	const CMDID_SPLIT		= 1000;
+static WORD	const CMDID_FULLSCREEN	= 1000;
+static WORD	const CMDID_SPLIT		= CMDID_FULLSCREEN + 1;
 extern const TCHAR CMDID_SPLIT_NAME[];
 static WORD	const CMDID_EXPAND		= CMDID_SPLIT + 1;
 extern const TCHAR CMDID_EXPAND_NAME[];

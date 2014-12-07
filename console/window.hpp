@@ -40,58 +40,62 @@ public:
 	void
 	clear();
 	///
-	void onkey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags );
+	void onKey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags );
 	//
-	void onchar( HWND hWnd, TCHAR ch, int cRepeat );
+	void onChar( HWND hWnd, TCHAR ch, int cRepeat );
 	///
-	void onhotkey(HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk);
+	void onHotkey(HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk);
 	///
-	void onpaint( HWND hWnd );
+	void onPaint( HWND hWnd );
 	///
-	void onclose( HWND );
+	void onClose( HWND );
 	///
-	void onsettingchange( HWND hWnd, UINT uiAction, LPCTSTR lpName );
+	void onSettingChange( HWND hWnd, UINT uiAction, LPCTSTR lpName );
 	///
-	void ontimer( HWND hWnd, UINT id );
+	void onTimer( HWND hWnd, UINT id );
 	///
-	void oncommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
+	void onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
 	//
-	void parse_conf( TCHAR const* conf );
+	void parseConf( TCHAR const* conf );
 	///
-	void process_empty() {}
+	void processEmpty() {}
 	///
-	void process_autostart();
+	void processAutostart();
 	///
-	void process_hotkeys();
+	void processHotkeys();
 	///
-	void process_fonts();
+	void processFonts();
 	//
-	void process_window();
+	void processWindow();
 	//
-	void process_ui();
+	void processUI();
 
 protected:
 	//
+	logger&
+	getLogger() { return ( *( get_slot< window2logger >().item() ) ); }
 	logger_ptr
-	get_logger() { return ( get_slot< window2logger >().item() ); }
+	getLoggerPtr() { return ( get_slot< window2logger >().item() ); }
 	//
+	pref&
+	getPref() { return ( *( get_slot< window2pref >().item() ) ); }
 	pref_ptr
-	get_pref() { return ( get_slot< window2pref >().item() ); }
+	getPrefPtr() { return ( get_slot< window2pref >().item() ); }
 	//
 	void
-	close_frame( frame_id_t const id );
+	closeFrame( frame_id_t const id );
 	//
 	void
-	update_hotkeys();
+	updateHotkeys();
 	//
 	void
-	calculate_docks();
+	updatePlacement();
 	//
 	void
-	slide_begin( bool const update );
+	slideBegin();
 	//
 	void
-	slide_update();
+	slideUpdate();
 
 private:
 	class area;
@@ -300,18 +304,8 @@ private:
 	atom::accel
 		accel;
 	//
-	RECT
-		rect_active;
-	RECT
-		rect_inactive;
-	int
-		sliding;
-	DWORD
-		slide_start_time;
-	DWORD
-		slide_last_time;
-	UINT_PTR
-		slide_timer_id;
+	placement
+		windowPlacement;
 	//
 	struct paint_param_t {
 		atom::shared_dc

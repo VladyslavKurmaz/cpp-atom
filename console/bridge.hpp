@@ -34,7 +34,7 @@ public:
 	///
 	void run( on_exit_t oe, on_parse_t op );
 	///
-	void run( on_exit_t oe, on_parse_t op, string_t const& mn, string_t const& wpn, string_t const& rpn );
+	void run( on_exit_t oe, on_parse_t op, std::string const& mn, std::string const& wpn, std::string const& rpn );
 	///
 	void join();
 	///
@@ -42,10 +42,10 @@ public:
 
 protected:
 	///
-	static string_t gen_guid() {
+	static std::string gen_guid() {
 		GUID guid;
 		CoCreateGuid( &guid );
-		stringstream_t gss;
+		std::stringstream gss;
 		gss << guid;
 		return ( gss.str() );
 	}
@@ -64,11 +64,11 @@ private:
 	on_parse_t
 		on_parse;
 	//
-	string_t
+	std::string
 		mutex_name;
-	string_t
+	std::string
 		wpipe_name;
-	string_t
+	std::string
 		rpipe_name;
 	//
 	atom::mutex

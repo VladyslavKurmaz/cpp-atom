@@ -27,11 +27,11 @@ public:
 
 protected:
 	//
-	logger& get_logger() {
+	logger& getLogger() {
 		return ( *( get_value( boost::mpl::identity< appl2logger >() ).item() ) );
 	}
 	//
-	window& get_window() {
+	window& getWindow() {
 		return ( *( get_value( boost::mpl::identity< appl2window >() ).item() ) );
 	}
 

@@ -33,38 +33,41 @@ public:
 	register_process_callback( pref_group_t const g, callback_t c );
 	///
 	bool
-	parse( string_t const& s );
+	parse( std::string const& s );
 	///
 	template <typename T >
 	T get( atom::po::id_t const id ) {
 		return ( this->po.as<T>( id ) );
 	}
 
+	void
+	calculateDocks( placement& windowPlacement );
+
 protected:
 	//
-	logger& get_logger() {
+	logger& getLogger() {
 		return ( *( get_value( boost::mpl::identity< pref2logger >() ).item() ) );
 	}
 	//
 	void id2gr( atom::po::id_t const id, pref_group_t const g ) {
-		this->pref_groups.insert( std::pair<atom::po::id_t, pref_group_t >( id, g ) );
+		this->prefGroups.insert( std::pair<atom::po::id_t, pref_group_t >( id, g ) );
 	}
 
 private:
 	///
 	typedef std::map< atom::po::id_t, pref_group_t >
-		pref_groups_t;
+		prefGroupsMap;
 	typedef std::map< pref_group_t, std::pair< bool, callback_t > >
-		process_callbacks_t;
+		processCallbacksMap;
 	///
 	pref( logger_ptr l );
 	///
 	atom::po
 		po;
 	///
-	pref_groups_t
-		pref_groups;
+	prefGroupsMap
+		prefGroups;
 	///
-	process_callbacks_t
-		process_callbacks;
+	processCallbacksMap
+		processCallbacks;
 };
