@@ -38,6 +38,9 @@
 #define TXT( x )  x
 #endif
 
+#define RECT_WIDTH( r ) ( (r).right - (r).left )
+#define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
+
 // what does it mean?
 //#define STANDALONE
 #define WM_FRAMEEXIT	WM_USER+1
@@ -120,23 +123,36 @@ struct preferences {
 };
 
 struct placement {
-	RECT		active;
-	RECT		inactive;
-	bool		maximized;
-	int			sliding;
-	DWORD		startTime;
-	DWORD		timeout;
-	UINT_PTR	timerId;
+	RECT			destination;
+	unsigned int	alpha;
+	bool			visible;
+	bool			fullScreen;
+	bool			sliding;
+	DWORD			startTime;
+	DWORD			lastTime;
+	DWORD			timeout;
+	UINT_PTR		timerId;
 	placement() {
-		SetRectEmpty( &active );
-		SetRectEmpty( &inactive );
-		maximized = false;
-		sliding = 0;
-		startTime = 0;
-		timerId = 10;
+		SetRectEmpty( &destination );
+		alpha		= 0;
+		visible		= false;
+		fullScreen	= false;
+		sliding		= false;
+		startTime	= 0;
+		lastTime	= 0;
+		timeout		= 0;
+		timerId		= 10;
 	}
 };
 
+struct hotkey {
+	int id;
+	UINT mods;
+	UINT vk;
+	hotkey() : id(0), mods(), vk() {}   
+	int operator==( hotkey const& r ) const { return ( ( this->mods == r.mods ) && ( this->vk == r.vk ) ); }
+	int operator!=( hotkey const& r ) const { return ( !( *this == r ) ); }
+};
 ///
 static WORD	const CMDID_FULLSCREEN	= 1000;
 static WORD	const CMDID_SPLIT		= CMDID_FULLSCREEN + 1;

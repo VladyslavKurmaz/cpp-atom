@@ -5,28 +5,28 @@
 #if 0
 
 default -> shared -> global -> user -> local 
-*[global]-computer/dropbox, [user]-computer-user, [instance|local] dpm-console instance settings
+	*[global]-computer/dropbox, [user]-computer-user, [instance|local] dpm-console instance settings
 
-profile.location.shared
-profile.location.global
-profile.location.user
-profile.location.local
+	profile.location.shared
+	profile.location.global
+	profile.location.user
+	profile.location.local
 
-hk.edit.exec VK_RETURN
-hk.edit.ml.enter VK_CONTROL + VK_RETURN
-hk.edit.ml.new-line VK_RETURN
-hk.edit.ml.exec VK_CONTROL + VK_RETURN
+	hk.edit.exec VK_RETURN
+	hk.edit.ml.enter VK_CONTROL + VK_RETURN
+	hk.edit.ml.new-line VK_RETURN
+	hk.edit.ml.exec VK_CONTROL + VK_RETURN
 
-distance between lines
-background image
-enable/bisable bell
-child process interaption hotket ctrl+c|ctrl+break
+	distance between lines
+	background image
+	enable/bisable bell
+	child process interaption hotket ctrl+c|ctrl+break
 
 #endif
 
 
-pref::pref( logger_ptr l ) :
-		base_t()
+	pref::pref( logger_ptr l ) :
+	base_t()
 	,	po()
 	,	prefGroups()
 	,	processCallbacks()
@@ -36,76 +36,76 @@ pref::pref( logger_ptr l ) :
 	//
 	po.
 		add_option( po_help,			"help",				"Show this help",
-			desc )( ( id2gr( po_help, pgEmpty ), 0 ) ).
+		desc )( ( id2gr( po_help, pgEmpty ), 0 ) ).
 		add_option( po_autostart,		"autostart",		"Start on Windows startup",
-			desc,	boost::program_options::value<bool>()->default_value( false ) )( ( id2gr( po_autostart, pgAutostart ), 0 ) ).
+		desc,	boost::program_options::value<bool>()->default_value( false ) )( ( id2gr( po_autostart, pgAutostart ), 0 ) ).
 		//[hk.*]
 		add_option( po_hk_appear,		"hk.appear",		"[win+][ctrl+][alt+][shift+]vk",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+0xC0") )( ( id2gr( po_hk_appear, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+0xC0") )( ( id2gr( po_hk_appear, pgHotkeys ), 0 ) ).
 		add_option( po_hk_entire_screen,"hk.entire-screen",	"[win+][ctrl+][alt+][shift+]vk",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+enter") )( ( id2gr( po_hk_entire_screen, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+enter") )( ( id2gr( po_hk_entire_screen, pgHotkeys ), 0 ) ).
 		add_option( po_hk_frame_split,	"hk.split",			"",	
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+S") )( ( id2gr( po_hk_frame_split, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+S") )( ( id2gr( po_hk_frame_split, pgHotkeys ), 0 ) ).
 		add_option( po_hk_frame_minmax,	"hk.expand",		"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+W") )( ( id2gr( po_hk_frame_minmax, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+W") )( ( id2gr( po_hk_frame_minmax, pgHotkeys ), 0 ) ).
 		add_option( po_hk_frame_rotate,	"hk.rotate",		"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+A") )( ( id2gr( po_hk_frame_rotate, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+A") )( ( id2gr( po_hk_frame_rotate, pgHotkeys ), 0 ) ).
 		add_option( po_hk_frame_next,	"hk.next",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+tab") )( ( id2gr( po_hk_frame_next, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+tab") )( ( id2gr( po_hk_frame_next, pgHotkeys ), 0 ) ).
 		add_option( po_hk_frame_prev,	"hk.prev",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+shift+tab") )( ( id2gr( po_hk_frame_prev, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+shift+tab") )( ( id2gr( po_hk_frame_prev, pgHotkeys ), 0 ) ).
 		add_option( po_hk_frame_close,	"hk.close",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+f4") )( ( id2gr( po_hk_frame_close, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+f4") )( ( id2gr( po_hk_frame_close, pgHotkeys ), 0 ) ).
 		add_option( po_hk_ctrl_break,	"hk.ctrl-break",	"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+break") )( ( id2gr( po_hk_ctrl_break, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+break") )( ( id2gr( po_hk_ctrl_break, pgHotkeys ), 0 ) ).
 		add_option( po_hk_ctrl_c,		"hk.ctrl-c",		"",
-			desc,	boost::program_options::value<std::string>()->default_value("ctrl+C") )( ( id2gr( po_hk_ctrl_c, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("ctrl+C") )( ( id2gr( po_hk_ctrl_c, pgHotkeys ), 0 ) ).
 		add_option( po_hk_tty1,			"hk.tty1",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f1") )( ( id2gr( po_hk_tty1, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f1") )( ( id2gr( po_hk_tty1, pgHotkeys ), 0 ) ).
 		add_option( po_hk_tty2,			"hk.tty2",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f2") )( ( id2gr( po_hk_tty2, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f2") )( ( id2gr( po_hk_tty2, pgHotkeys ), 0 ) ).
 		add_option( po_hk_tty3,			"hk.tty3",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f3") )( ( id2gr( po_hk_tty3, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f3") )( ( id2gr( po_hk_tty3, pgHotkeys ), 0 ) ).
 		add_option( po_hk_tty4,			"hk.tty4",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f4") )( ( id2gr( po_hk_tty4, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f4") )( ( id2gr( po_hk_tty4, pgHotkeys ), 0 ) ).
 		add_option( po_hk_tty5,			"hk.tty5",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f5") )( ( id2gr( po_hk_tty5, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f5") )( ( id2gr( po_hk_tty5, pgHotkeys ), 0 ) ).
 		add_option( po_hk_tty6,			"hk.tty6",			"",
-			desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f6") )( ( id2gr( po_hk_tty6, pgHotkeys ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("alt+ctrl+f6") )( ( id2gr( po_hk_tty6, pgHotkeys ), 0 ) ).
 		//[ui.*]
 		add_option( po_ui_timeout,		"ui.timeout",		"",
-			desc,	boost::program_options::value<unsigned int>()->default_value( 1000 ) )( ( id2gr( po_ui_timeout, pgEmpty ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 250 ) )( ( id2gr( po_ui_timeout, pgEmpty ), 0 ) ).
 		add_option( po_ui_alignment,	"ui.alignment",		"[left|right|hcenter|hclient+][top|bottom|vcenter|vclient+][client][center]",
-			desc,	boost::program_options::value<std::string>()->default_value("hclient+top") )( ( id2gr( po_ui_alignment, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value("hclient+top") )( ( id2gr( po_ui_alignment, pgWindow ), 0 ) ).
 		add_option( po_ui_width,		"ui.width",			"",
-			desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
 		add_option( po_ui_height,		"ui.height",		"",
-			desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
 		add_option( po_ui_clip,			"ui.clip",			"",
-			desc,	boost::program_options::value<bool>()->default_value( true ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<bool>()->default_value( true ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
 		add_option( po_ui_alpha,		"ui.alpha",			"",
-			desc,	boost::program_options::value<unsigned int>()->default_value( 0xF0 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 0xF0 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
 		add_option( po_ui_bk_color,		"ui.bk-color",		"",
-			desc,	boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ) )( ( id2gr( po_ui_bk_color, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ) )( ( id2gr( po_ui_bk_color, pgUI ), 0 ) ).
 		add_option( po_ui_lines_count,	"ui.lines-count",	"",
-			desc,	boost::program_options::value<unsigned int>()->default_value( 500 ) )( ( id2gr( po_ui_lines_count, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 500 ) )( ( id2gr( po_ui_lines_count, pgUI ), 0 ) ).
 		//[ui.font.*]
 		add_option( po_ui_font_text,	"ui.font.text",		"",
-			desc,	boost::program_options::value<std::string>()->default_value( "name:Consolas;height:16;color:FFFFFF" ))( ( id2gr( po_ui_font_text, pgFonts ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "name:Consolas;height:16;color:FFFFFF" ))( ( id2gr( po_ui_font_text, pgFonts ), 0 ) ).
 		add_option( po_ui_font_sys,		"ui.font.sys",		"",
-			desc,	boost::program_options::value<std::string>()->default_value( "name:Consolas;height:12;color:008000" ) )( ( id2gr( po_ui_font_sys, pgFonts ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "name:Consolas;height:12;color:008000" ) )( ( id2gr( po_ui_font_sys, pgFonts ), 0 ) ).
 		//[ui.margin.*]
 		add_option( po_ui_margin,		"ui.margin",		"",	
-			desc,	boost::program_options::value<std::string>()->default_value( "size:0" ) )( ( id2gr( po_ui_margin, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "size:0" ) )( ( id2gr( po_ui_margin, pgUI ), 0 ) ).
 		//[ui.border.*]
 		add_option( po_ui_border,		"ui.border",		"",
-			desc,	boost::program_options::value<std::string>()->default_value( "size:1;color:FFFFFF;inactive:404040" ) )( ( id2gr( po_ui_border, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "size:1;color:FFFFFF;inactive:404040" ) )( ( id2gr( po_ui_border, pgUI ), 0 ) ).
 		//[ui.padding.*]
 		add_option( po_ui_padding,		"ui.padding",		"",
-			desc,	boost::program_options::value<std::string>()->default_value( "size:1" ) )( ( id2gr( po_ui_padding, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "size:1" ) )( ( id2gr( po_ui_padding, pgUI ), 0 ) ).
 		//[ui.scroll.*]
 		add_option( po_ui_scroll,		"ui.scroll",		"",
-			desc,	boost::program_options::value<std::string>()->default_value( "size:2;color:008000" ) )( ( id2gr( po_ui_scroll, pgUI ), 0 ) );
+		desc,	boost::program_options::value<std::string>()->default_value( "size:2;color:008000" ) )( ( id2gr( po_ui_scroll, pgUI ), 0 ) );
 }
 
 pref::~pref() {
@@ -201,7 +201,7 @@ bool pref::parse( std::string const& s ) {
 }
 
 
-void pref::calculateDocks( placement& windowPlacement ){
+void pref::calculateDocks( placement& windowPlacement ) {
 	//
 	static atom::parse_tag< TCHAR, alignment::type > alignment_tags[] = {
 		{ "hcenter",	alignment::hcenter },
@@ -220,8 +220,9 @@ void pref::calculateDocks( placement& windowPlacement ){
 	static size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
 	//
 	std::string const alig_str	= this->get< std::string >( po_ui_alignment );
-	unsigned int const width	= ( windowPlacement.maximized )?( 100 ):( this->get< unsigned int >( po_ui_width ) );
-	unsigned int const height	= ( windowPlacement.maximized )?( 100 ):( this->get< unsigned int >( po_ui_height ) );
+
+	unsigned int const width	= ( windowPlacement.fullScreen )?( 100 ):( this->get< unsigned int >( po_ui_width ) );
+	unsigned int const height	= ( windowPlacement.fullScreen )?( 100 ):( this->get< unsigned int >( po_ui_height ) );
 	bool const clip				= this->get< bool >( po_ui_clip );
 
 	windowPlacement.timeout = this->get< unsigned int>( po_ui_timeout );
@@ -251,7 +252,41 @@ void pref::calculateDocks( placement& windowPlacement ){
 	int const wnd_rt_w = ((h_align == alignment::hclient )?(rt_w):(rt_w * width / 100));
 	int const wnd_rt_h = ((v_align == alignment::vclient )?(rt_h):(rt_h * height / 100));
 	//
-	SetRect( &windowPlacement.active, 0, 0, wnd_rt_w, wnd_rt_h );
-	windowPlacement.inactive = windowPlacement.active;
-	OffsetRect( &windowPlacement.inactive, 0, -wnd_rt_h );
+	SetRect( &windowPlacement.destination, 0, 0, wnd_rt_w, wnd_rt_h );
+	windowPlacement.alpha = this->get< unsigned int >( po_ui_alpha );
+	if ( !windowPlacement.visible ) {
+		windowPlacement.alpha = 0;
+		OffsetRect( &windowPlacement.destination, 0, -wnd_rt_h );
+	}
+}
+
+bool pref::parseHotkey( atom::po::id_t const id, hotkey& hk ) {
+	static atom::parse_tag< TCHAR, UINT > const hotkey_tags[] = {
+		{ "win",	MOD_WIN },
+		{ "ctrl",	MOD_CONTROL },
+		{ "alt",	MOD_ALT },
+		{ "shift",	MOD_SHIFT }
+	};
+	static size_t const hotkey_tags_count = sizeof( hotkey_tags ) / sizeof( hotkey_tags[0] );
+	//
+	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( this->get< std::string >( id ), hotkey_tags, hotkey_tags_count, std::string( "+" ) );
+	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 1 ) ) {
+		hk.mods = MOD_NOREPEAT | result.result;
+		try {
+			std::stringstream ss;
+			ss << result.unparsed[0];
+			ss >> hk.vk;
+			if ( !hk.vk ) {
+				std::stringstream ss;
+				ss << result.unparsed[0];
+				ss >> std::hex >> hk.vk;
+			}
+			return ( hk.vk > 0 );
+		}
+		catch( std::exception& e ){
+			this->getLogger() << "Invalid hotkey format " << e.what()<< std::endl;
+		}
+	}
+
+	return false;
 }

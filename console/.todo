@@ -1,5 +1,7 @@
 - ctrl+~ hide/show panel
 - alt+enter fullscreen on/off
+- fix alignment
+
 - mstack, implements FSM
 - region selection, lbm+move+space
 - test PrintWindows

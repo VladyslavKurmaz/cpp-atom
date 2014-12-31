@@ -21,7 +21,6 @@ bool appl::init() {
 }
 
 appl& appl::run() {
-	this->getWindow().show( true ).activate();
 	this->getWindow().run();
 	return (*this);
 }

@@ -296,6 +296,11 @@ namespace atom {
 			  SetLayeredWindowAttributes( this->get_hwnd(), RGB( 0, 0, 0 ), alpha, LWA_ALPHA );
 			  return (*this); }
 		  ///
+		  wwindow const& getAlpha( BYTE& alpha ) const {
+			  DWORD flags = LWA_ALPHA;
+			  GetLayeredWindowAttributes( this->get_hwnd(), 0, &alpha, &flags );
+			  return (*this); }
+		  ///
 		  HWND	get_hwnd() const {
 			  return ( this->wnd ); }
 		  ///
