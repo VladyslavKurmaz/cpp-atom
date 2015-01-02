@@ -17,6 +17,7 @@ int main( int argc, char *argv[] )
 		if( p->init( argc, argv ) ) {
 			appl_ptr a = appl::create( l, p );
 			if ( a->init() ) {
+
 				a->run().clear();
 			}
 		}

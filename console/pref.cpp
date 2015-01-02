@@ -76,7 +76,7 @@ default -> shared -> global -> user -> local
 		add_option( po_ui_timeout,		"ui.timeout",		"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 250 ) )( ( id2gr( po_ui_timeout, pgEmpty ), 0 ) ).
 		add_option( po_ui_alignment,	"ui.alignment",		"[left|right|hcenter|hclient+][top|bottom|vcenter|vclient+][client][center]",
-		desc,	boost::program_options::value<std::string>()->default_value("hclient+top") )( ( id2gr( po_ui_alignment, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "hclient+top" ) )( ( id2gr( po_ui_alignment, pgWindow ), 0 ) ).
 		add_option( po_ui_width,		"ui.width",			"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
 		add_option( po_ui_height,		"ui.height",		"",
@@ -84,7 +84,7 @@ default -> shared -> global -> user -> local
 		add_option( po_ui_clip,			"ui.clip",			"",
 		desc,	boost::program_options::value<bool>()->default_value( true ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
 		add_option( po_ui_alpha,		"ui.alpha",			"",
-		desc,	boost::program_options::value<unsigned int>()->default_value( 0xF0 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 0xF5 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
 		add_option( po_ui_bk_color,		"ui.bk-color",		"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ) )( ( id2gr( po_ui_bk_color, pgUI ), 0 ) ).
 		add_option( po_ui_lines_count,	"ui.lines-count",	"",
@@ -237,6 +237,7 @@ void pref::calculateDocks( placement& windowPlacement ) {
 		align = alignment::hcenter | alignment::top;
 	}
 	//
+
 	RECT rt;
 	//
 	SetRect( &rt, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
@@ -247,17 +248,44 @@ void pref::calculateDocks( placement& windowPlacement ) {
 	alignment::type const h_align = align & alignment::hmask;
 	alignment::type const v_align = align & alignment::vmask;
 	//
-	int const rt_w = rt.right - rt.left;
-	int const rt_h = rt.bottom - rt.top;
+	int const rt_w = RECT_WIDTH( rt );
+	int const rt_h = RECT_HEIGHT( rt );
 	int const wnd_rt_w = ((h_align == alignment::hclient )?(rt_w):(rt_w * width / 100));
 	int const wnd_rt_h = ((v_align == alignment::vclient )?(rt_h):(rt_h * height / 100));
 	//
-	SetRect( &windowPlacement.destination, 0, 0, wnd_rt_w, wnd_rt_h );
+	RECT rrt;
+	SetRect( &rrt, 0, 0, wnd_rt_w, wnd_rt_h );
+	OffsetRect( &rrt, rt.left, rt.top );
+	//
+	LONG offset_x = 0;
+	LONG offset_y = 0;
+	LONG offset_x_inv = 0;
+	LONG offset_y_inv = 0;
+	if ( h_align == alignment::hcenter ) {
+		offset_x = ( rt_w - RECT_WIDTH( rrt ) ) / 2;
+	} else if ( h_align == alignment::left ) {
+		offset_x_inv = -RECT_WIDTH( rrt );
+	} else if ( h_align == alignment::right ) {
+		offset_x = ( rt_w - RECT_WIDTH( rrt ) );
+		offset_x_inv = RECT_WIDTH( rrt );
+	}
+	if ( v_align == alignment::vcenter ) {
+		offset_y = ( rt_h - RECT_HEIGHT( rrt ) ) / 2;
+	} else if ( v_align == alignment::top ) {
+		offset_y_inv = -RECT_HEIGHT( rrt );
+	} else if ( v_align == alignment::bottom ) {
+		offset_y = ( rt_h - RECT_HEIGHT( rrt ) );
+		offset_y_inv = RECT_HEIGHT( rrt );
+	}
+	OffsetRect( &rrt, offset_x, offset_y );
+	//
 	windowPlacement.alpha = this->get< unsigned int >( po_ui_alpha );
 	if ( !windowPlacement.visible ) {
 		windowPlacement.alpha = 0;
-		OffsetRect( &windowPlacement.destination, 0, -wnd_rt_h );
+		OffsetRect( &rrt, offset_x_inv, offset_y_inv );
 	}
+	//
+	windowPlacement.destination = rrt;
 }
 
 bool pref::parseHotkey( atom::po::id_t const id, hotkey& hk ) {

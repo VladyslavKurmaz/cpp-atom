@@ -270,7 +270,7 @@ void window::slideUpdate() {
 			// stop
 			this->show( show );
 			if ( show ) {
-				this->activate();
+				this->activate().focus();
 			}
 			KillTimer( this->get_hwnd(), this->windowPlacement.timerId );
 			this->windowPlacement.sliding = false;
@@ -278,9 +278,6 @@ void window::slideUpdate() {
 		MoveWindow( this->get_hwnd(), rt.left, rt.top, RECT_WIDTH( rt ), RECT_HEIGHT( rt ), TRUE );
 		this->set_alpha( alpha );
 	}
-	//
-	//
-	//
 }
 
 

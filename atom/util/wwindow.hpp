@@ -283,6 +283,9 @@ namespace atom {
 		  wwindow const& activate() const {
 			SetForegroundWindow( this->wnd ); return (*this); }
 		  ///
+		  wwindow const& focus() const {
+			SetFocus( this->wnd ); return (*this); }
+		  ///
 		  wwindow const& invalidate() const {
 			InvalidateRect( this->wnd, NULL, TRUE ); return (*this); }
 		  ///
