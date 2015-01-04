@@ -4,19 +4,16 @@
 
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > frame2logger;
-typedef atom::nstorage< pref, boost::shared_ptr, atom::narray1 > frame2pref;
-typedef atom::nstorage< window, boost::shared_ptr, atom::narray1 > frame2window;
-
 
 class frame :
-	public atom::node< LOKI_TYPELIST_3( frame2logger, frame2pref, frame2window ) >,
+	public atom::node< LOKI_TYPELIST_1( frame2logger ) >,
 	public boost::enable_shared_from_this< frame > {
 	///
-	typedef atom::node< LOKI_TYPELIST_3( frame2logger, frame2pref, frame2window ) >
+	typedef atom::node< LOKI_TYPELIST_1( frame2logger ) >
 		base_node_t;
 public:
 	///
-	static frame_ptr create( logger_ptr l, pref_ptr p, window_ptr w );
+	static frame_ptr create( logger_ptr l );
 	///
 	~frame();
 	///
@@ -29,9 +26,6 @@ public:
 	frame_id_t
 	get_id() const { return ( this->id ); }
 	///
- 	frame_ptr
-	split();
-	///
 	void
 	clear();
 	///
@@ -43,14 +37,8 @@ public:
 
 protected:
 	//
-	logger_ptr
-	get_logger() { return ( get_slot<frame2logger>().item() ); }
-	//
-	pref_ptr
-	get_pref() { return ( get_slot<frame2pref>().item() ); }
-	///
-	window_ptr
-	get_window() { return ( get_slot<frame2window>().item() ); }
+	logger&
+	getLogger() { return ( *( get_slot<frame2logger>().item() ) ); }
 
 private:
 	///
@@ -59,15 +47,15 @@ private:
 	///
 	unsigned int
 		index;
-	///
-	std::string
-		buffer;
-	///
-	bridge
-		brdg;
+	/////
+	//std::string
+	//	buffer;
+	/////
+	//bridge
+	//	brdg;
 	///
 	std::string
 		process_caption;
 	///
-	frame( frame_id_t const i, logger_ptr l, pref_ptr p, window_ptr w );
+	frame( frame_id_t const i, logger_ptr l );
 };

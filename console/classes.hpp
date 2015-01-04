@@ -11,6 +11,14 @@ class pref;
 typedef boost::shared_ptr< pref >
 	pref_ptr;
 //
+class area;
+typedef boost::shared_ptr< area >
+	area_ptr;
+//
+class shell;
+typedef boost::shared_ptr< shell >
+	shell_ptr;
+//
 class frame;
 typedef boost::shared_ptr< frame >
 	frame_ptr;
@@ -127,3 +135,36 @@ namespace atom {
 			timeout;
 	};
 }
+
+struct paint_param_t {
+	atom::shared_dc
+		dc;
+	atom::shared_gdiobj< HBITMAP >
+		bitmap;
+	atom::shared_gdiobj< HBRUSH >
+		bk;
+	RECT
+		padding;
+	atom::shared_gdiobj< HBRUSH >
+		borderActive;
+	atom::shared_gdiobj< HBRUSH >
+		borderInactive;
+	atom::shared_gdiobj< HFONT >
+		textFont;
+	COLORREF
+		textColor;
+	atom::shared_gdiobj< HFONT >
+		sysFont;
+	COLORREF
+		sysColor;
+	//
+	void updareDC( SIZE const &sz ) {
+		HDC dc = GetDC( NULL );
+		{
+			this->dc		= CreateCompatibleDC( dc );
+			this->bitmap	= CreateCompatibleBitmap( dc, sz.cx, sz.cy );
+			SelectObject( this->dc, this->bitmap );
+		}
+		ReleaseDC( NULL, dc );
+	}
+};

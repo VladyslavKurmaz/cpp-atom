@@ -95,5 +95,11 @@ private:
 	//
 	placement
 		windowPlacement;
+	//
+	paint_param_t
+		paintParam;
+	//
+	shell_ptr
+		sh;
 };
 

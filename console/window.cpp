@@ -2,8 +2,7 @@
 #include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
-#include "./process.hpp"
-#include "./frame.hpp"
+#include "./shell.hpp"
 #include "./window.hpp"
 
 
@@ -11,10 +10,14 @@ window::window( logger_ptr l, pref_ptr p ) :
 		wwindow( *this, INITLIST_9( &window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand ) )
 	,	appearHotKey()
 	,	accel()
-	,	windowPlacement() {
+	,	windowPlacement()
+	,	paintParam()
+	,	sh() {
 	//
 	atom::mount<window2logger>( this, l );
 	atom::mount<window2pref>( this, p );
+	//
+	sh = shell::create( l, p );
 }
 
 window::~window() {
@@ -53,6 +56,65 @@ bool window::init() {
 			return true;
 		}
 	};
+	// prepare paint objects
+	//
+	std::string const d1( DELIM1 );
+	std::string const d2( DELIM2 );
+	//
+	static const struct font_t {
+		atom::po::id_t	opt;
+	} fonts[] = {
+		po_ui_font_text,
+		po_ui_font_sys
+	};
+	//
+	BOOST_FOREACH( font_t const& font, fonts )
+	{
+		std::string s = this->getPref().get< std::string >( font.opt );
+		atom::attributes< TCHAR > a( s, d1, d2 );
+		HFONT f = CreateFont(
+			a.as<unsigned int>(_T("height") ),
+			0,
+			0,
+			0,
+			FW_NORMAL,
+			FALSE,
+			FALSE,
+			FALSE,
+			OEM_CHARSET,
+			OUT_OUTLINE_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			DEFAULT_QUALITY,
+			FIXED_PITCH,
+			a.as<std::string>(_T("name") ).c_str()
+			);
+		unsigned int color = a.as_color( _T("color") );
+		//
+		if ( f != NULL ) {
+			switch( font.opt ) {
+			case po_ui_font_text:
+				this->paintParam.textFont	= f;
+				this->paintParam.textColor	= color;
+				break;
+			case po_ui_font_sys:
+				this->paintParam.sysFont	= f; 
+				this->paintParam.sysColor	= color;
+				break;
+			};
+		} else {
+			this->getLogger() << "Text font creation error: " << s << std::endl;
+		}
+	}
+	//
+	this->paintParam.bk = CreateSolidBrush( this->getPref().get< unsigned int >( po_ui_bk_color ) );
+
+	atom::attributes< TCHAR > padding( this->getPref().get< std::string >( po_ui_padding ), d1, d2 );
+	unsigned int const p = padding.as<unsigned int>(_T("size") );
+	SetRect( &this->paintParam.padding, p, p, p, p );
+
+	atom::attributes< TCHAR > border( this->getPref().get< std::string >( po_ui_border ), d1, d2 );
+	this->paintParam.borderActive			= CreateSolidBrush( border.as_color( _T("color") ) );
+	this->paintParam.borderInactive			= CreateSolidBrush( border.as_color( _T("inactive") ) );
 	//
 	this->updatePlacement( false, false );
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->windowPlacement.destination ), style, ex_style ), true ) ) {
@@ -110,6 +172,7 @@ void window::run() {
 }
 
 void window::clear() {
+	this->sh->clear();
 	base_node_t::clear();
 }
 
@@ -131,14 +194,40 @@ void window::onPaint( HWND hWnd ) {
 	HDC			dc = BeginPaint( hWnd, &ps );
 	{
 		GetClientRect( hWnd, &rect );
-		FillRect( dc, &rect, (HBRUSH)GetStockObject( BLACK_BRUSH ) );
-		FrameRect( dc, &rect, (HBRUSH)GetStockObject( GRAY_BRUSH ) );
+		if ( this->windowPlacement.sliding ) {
+			//SIZE bmsz = { 0 };
+			//GetBitmapDimensionEx( this->paintParam.bitmap, &bmsz );
+			//StretchBlt( dc,
+			//	0,
+			//	0,
+			//	rect.right,
+			//	rect.bottom,
+			//	this->paintParam.dc,
+			//	0,
+			//	0,
+			//	bmsz.cx,
+			//	bmsz.cy,
+			//	SRCCOPY );
+			FillRect( dc, &rect, this->paintParam.bk );
+		} else {
+			FillRect( this->paintParam.dc, &rect, this->paintParam.bk );
+			this->sh->paint( this->paintParam, rect );
+			BitBlt( dc,
+				0,
+				0,
+				rect.right,
+				rect.bottom,
+				this->paintParam.dc,
+				0,
+				0,
+				SRCCOPY );
+		}
 	}
 	EndPaint( hWnd, &ps );
 }
 
 void window::onClose( HWND hWnd ) {
-	PostThreadMessage( GetWindowThreadProcessId( hWnd, 0 ) , WM_QUIT, 0, 0 );
+	PostQuitMessage( 0 );
 }
 
 void window::onSettingChange( HWND hWnd, UINT uiAction, LPCTSTR lpName ) {
@@ -158,35 +247,12 @@ void window::onTimer( HWND hWnd, UINT id ){
 }
 
 void window::onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
-	switch( id ) {
-	case CMDID_FULLSCREEN:
-		this->toggleFullScreen();
-		break;
-	case CMDID_SPLIT:
-		break;
-	case CMDID_EXPAND:
-		break;
-	case CMDID_ROTATE:
-		break;
-	case CMDID_NEXT:
-		break;
-	case CMDID_PREV:
-		break;
-	case CMDID_CTRL_BREAK:
-		break;
-	case CMDID_CTRL_C:
-		break;
-	case CMDID_CLOSE:
-		break;
-	case CMDID_TTY1:
-	case CMDID_TTY2:
-	case CMDID_TTY3:
-	case CMDID_TTY4:
-	case CMDID_TTY5:
-	case CMDID_TTY6:
-		break;
-	default:
-		return;
+	if ( !sh->cmd( id ) ) {
+		switch( id ) {
+		case CMDID_FULLSCREEN:
+			this->toggleFullScreen();
+			break;
+		}
 	}
 	this->invalidate();
 }
@@ -202,9 +268,17 @@ void window::toggleFullScreen(){
 }
 
 void window::updatePlacement( bool const visible, bool const fullScreen ) {
+	RECT rt = this->windowPlacement.destination;
 	this->windowPlacement.visible = visible;
 	this->windowPlacement.fullScreen = fullScreen;
 	this->getPref().calculateDocks( this->windowPlacement );
+	// update mem dc
+	SIZE sz;
+	sz.cx = RECT_WIDTH( this->windowPlacement.destination );
+	sz.cy = RECT_HEIGHT( this->windowPlacement.destination );
+	if ( ( RECT_WIDTH( rt ) != sz.cx ) || ( RECT_HEIGHT( rt ) != sz.cy ) ) {
+		this->paintParam.updareDC( sz );
+	}
 }
 
 void window::slideBegin() {
@@ -274,6 +348,7 @@ void window::slideUpdate() {
 			}
 			KillTimer( this->get_hwnd(), this->windowPlacement.timerId );
 			this->windowPlacement.sliding = false;
+			this->invalidate();
 		}
 		MoveWindow( this->get_hwnd(), rt.left, rt.top, RECT_WIDTH( rt ), RECT_HEIGHT( rt ), TRUE );
 		this->set_alpha( alpha );

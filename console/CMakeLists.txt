@@ -10,6 +10,7 @@ add_executable(
 	"./pref.cpp"
 	"./window.cpp"
 	"./bridge.cpp"
+	"./shell.cpp"
 )
 
 add_executable( 

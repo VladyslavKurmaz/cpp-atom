@@ -99,7 +99,7 @@ default -> shared -> global -> user -> local
 		desc,	boost::program_options::value<std::string>()->default_value( "size:0" ) )( ( id2gr( po_ui_margin, pgUI ), 0 ) ).
 		//[ui.border.*]
 		add_option( po_ui_border,		"ui.border",		"",
-		desc,	boost::program_options::value<std::string>()->default_value( "size:1;color:FFFFFF;inactive:404040" ) )( ( id2gr( po_ui_border, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<std::string>()->default_value( "color:FFFFFF;inactive:404040" ) )( ( id2gr( po_ui_border, pgUI ), 0 ) ).
 		//[ui.padding.*]
 		add_option( po_ui_padding,		"ui.padding",		"",
 		desc,	boost::program_options::value<std::string>()->default_value( "size:1" ) )( ( id2gr( po_ui_padding, pgUI ), 0 ) ).

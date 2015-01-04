@@ -7,50 +7,39 @@
 #include "./frame.hpp"
 #include "./window.hpp"
 
-frame_ptr frame::create( logger_ptr l, pref_ptr p, window_ptr w ) {
+frame_ptr frame::create( logger_ptr l ) {
 	static frame_id_t gid = 0;
-	frame_ptr f = frame_ptr( new frame( ++gid, l, p, w ) );
-	struct notify {
-		frame_id_t id;
-		unsigned long tid;
-		notify( frame_id_t const i ) : id( i ), tid( GetCurrentThreadId() ){}
-		void operator()() { PostThreadMessage( this->tid, WM_FRAMEEXIT, this->id, 0 ); }
-	} n( gid );
-//	f->brdg.run( boost::bind<void>( n ), boost::bind( &window::parseConf, w, _1 ) );
+	frame_ptr f = frame_ptr( new frame( ++gid, l ) );
+//	struct notify {
+//		frame_id_t id;
+//		unsigned long tid;
+//		notify( frame_id_t const i ) : id( i ), tid( GetCurrentThreadId() ){}
+//		void operator()() { PostThreadMessage( this->tid, WM_FRAMEEXIT, this->id, 0 ); }
+//	} n( gid );
+////	f->brdg.run( boost::bind<void>( n ), boost::bind( &window::parseConf, w, _1 ) );
 	return ( f );
 }
 
-frame::frame( frame_id_t const i, logger_ptr l, pref_ptr p, window_ptr w ) :
+frame::frame( frame_id_t const i, logger_ptr l ) :
 		id( i )
 	,	index( 0 )
-	,	buffer()
-	,	brdg()
+	//,	buffer()
+	//,	brdg()
 	,	process_caption() {
 	atom::mount<frame2logger>( this, l );
-	atom::mount<frame2pref>( this, p );
-	atom::mount<frame2window>( this, w );
 }
 
 frame::~frame() {
 }
 
-frame_ptr frame::split(){
-#ifndef STANDALONE
-	frame_ptr f = create( get_slot<frame2logger>().item(), get_slot<frame2pref>().item(), get_slot<frame2window>().item() );
-	return f;
-#else
-	return ( this->shared_from_this() );
-#endif
-}
-
 void frame::clear(){
-	this->brdg.join();
+	//this->brdg.join();
 	base_node_t::clear();
 }
 
 void
 frame::process( bridge_msg::type const id, void const* param ) {
-	this->brdg.write( id, param );
+	//this->brdg.write( id, param );
 }
 
 void frame::draw( HDC dc, RECT const& rt ) {

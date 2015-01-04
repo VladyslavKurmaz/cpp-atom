@@ -2,6 +2,7 @@
 + alt+enter fullscreen on/off
 + fix alignment
 
+- hide console window on start
 - set kbrd focus
 - mstack, implements FSM
 - region selection, lbm+move+space
