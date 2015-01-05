@@ -2,7 +2,6 @@
 #include "./classes.hpp"
 #include "./bridge.hpp"
 
-
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > frame2logger;
 
 class frame :
@@ -28,12 +27,11 @@ public:
 	///
 	void
 	clear();
+	//
+	void key( KEY_EVENT_RECORD const& k );
 	///
 	void
-	process( bridge_msg::type const id, void const* param );
-	///
-	void
-	draw( HDC dc, RECT const& rt );
+	paint( HDC dc, RECT const& rt );
 
 protected:
 	//
@@ -47,12 +45,9 @@ private:
 	///
 	unsigned int
 		index;
-	/////
-	//std::string
-	//	buffer;
-	/////
-	//bridge
-	//	brdg;
+	//
+	bridge
+		console2Proxy;
 	///
 	std::string
 		process_caption;

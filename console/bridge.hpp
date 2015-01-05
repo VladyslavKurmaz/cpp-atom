@@ -3,6 +3,40 @@
 #include "./classes.hpp"
 
 
+
+class bridge : public boost::noncopyable {
+public:
+	//
+	bridge();
+	//
+	explicit bridge( std::string const& name );
+	//
+	~bridge();
+	//
+	void join();
+	//
+	void console();
+	//
+	void proxy();
+	//
+	void write( KEY_EVENT_RECORD const& k );
+
+
+protected:
+private:
+	//
+	atom::proc<TCHAR>
+		proc;
+	//
+	std::string
+		pipeName;
+	//
+	atom::pipe
+		pipe;
+};
+
+#if 0
+
 class bridge : public boost::noncopyable {
 
 public:
@@ -81,3 +115,4 @@ private:
 		guard_thread;
 
 };
+#endif

@@ -27,8 +27,6 @@ public:
 			p->second = a->second; if ( p->second ) { p->second->parent = p; }
 			p->frame = a->frame;
 			//
-			a->clear();
-			//
 			p->reorder();
 			r = p->find();
 		}
@@ -189,6 +187,7 @@ private:
 	}
 	///
 	void clear() {
+		this->frame->clear();
 		this->parent = this->first = this->second = area_ptr();
 		this->frame = frame_ptr();
 	}

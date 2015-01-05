@@ -80,7 +80,7 @@ default -> shared -> global -> user -> local
 		add_option( po_ui_width,		"ui.width",			"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
 		add_option( po_ui_height,		"ui.height",		"",
-		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 25 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
 		add_option( po_ui_clip,			"ui.clip",			"",
 		desc,	boost::program_options::value<bool>()->default_value( true ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
 		add_option( po_ui_alpha,		"ui.alpha",			"",

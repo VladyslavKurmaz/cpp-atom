@@ -5,28 +5,44 @@
 #include "./process.hpp"
 #include "./frame.hpp"
 #include "./window.hpp"
+#include "./bridge.hpp"
 #include "./appl.hpp"
+
+#ifdef STANDALONE
+void standaloneThread() {
+	bridge proxy2Console( TEST_PIPE_NAME );
+	proxy2Console.proxy();
+	proxy2Console.join();
+}
+#endif
 
 int main( int argc, char *argv[] )
 {
-	FreeConsole();
+	CoInitialize( NULL );
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
+#ifndef STANDALONE
+		FreeConsole();
+#endif
 		logger_ptr l = logger::create();
 		l->add_std_cout();
 		//
 		pref_ptr p = pref::create( l );
 		if( p->init( argc, argv ) ) {
+#ifdef STANDALONE
+			boost::thread testThread( standaloneThread );
+#endif
 			appl_ptr a = appl::create( l, p );
 			if ( a->init() ) {
-
 				a->run().clear();
 			}
+#ifdef STANDALONE
+			testThread.join();
+#endif
 		}
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	assert( atom::node_cnt == 0 );
 	return 0;
-
 }
 
 

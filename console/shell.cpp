@@ -2,6 +2,7 @@
 #include "./classes.hpp"
 #include "./cmds.hpp"
 #include "./log.hpp"
+#include "./process.hpp"
 #include "./frame.hpp"
 #include "./area.hpp"
 #include "./shell.hpp"
@@ -20,10 +21,12 @@ shell::shell( logger_ptr l, pref_ptr p ):
 shell::~shell() {
 }
 
-bool shell::cmd( int const id ) {
+bool shell::command( int const id ) {
 	switch ( id ) {
 	case CMDID_SPLIT:
+#ifndef STANDALONE
 		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( get_value( boost::mpl::identity< shell2logger >() ).item() ) );
+#endif
 		return true;
 	case CMDID_EXPAND:
 		this->expandMode = !this->expandMode;
@@ -62,6 +65,10 @@ bool shell::cmd( int const id ) {
 	return false;
 }
 
+void shell::key( KEY_EVENT_RECORD const& k ) {
+	this->currentFrame->key( k );
+}
+
 void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
 	struct _{
 		static void __( frame_ptr const& f, frame_coord const& coord, bool const cf, paint_param_t& pp, RECT r ) {
@@ -91,7 +98,7 @@ void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
 				//
 				SelectObject( dc, pp.textFont );
 				SetTextColor( dc, pp.textColor );
-				f->draw( dc, rt );
+				f->paint( dc, rt );
 			}
 			SelectClipRgn( dc, NULL );
 		}

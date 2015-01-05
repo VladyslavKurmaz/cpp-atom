@@ -17,7 +17,10 @@ public:
 	~shell();
 	///
 	bool
-		cmd( int const id );
+		command( int const id );
+	//
+	void
+		key( KEY_EVENT_RECORD const& k );
 	///
 	void
 		paint( paint_param_t& paintParam, RECT const& rect );

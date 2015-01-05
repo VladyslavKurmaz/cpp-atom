@@ -14,8 +14,8 @@ add_executable(
 )
 
 add_executable( 
-	consd
+	proxy
 	"./pch.cpp"
-	"./consd.cpp"
+	"./proxy.cpp"
 	"./bridge.cpp"
 )

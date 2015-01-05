@@ -32,20 +32,17 @@ typedef boost::shared_ptr< appl >
 	appl_ptr;
 //
 //
-struct bridge_msg {
+struct bridgeMsg {
 	enum type {
 		bmNone			= 0,
 		bmSize			= 1,
-		bmConf			= 2,
-		bmKbrd			= 3,
-		bmCtrlBreak		= 4,
-		bmCtrlC			= 5,
-		bmText			= 6,
-		bmExit			= 7
+		bmKbrd			= 2,
+		bmCtrlBreak		= 3,
+		bmCtrlC			= 4,
+		bmExit			= 5
 	} id;
 	union {
-		TCHAR				text[MAX_PATH];
-		COORD				size;
+		SIZE				size;
 		KEY_EVENT_RECORD	key;
 	};
 };

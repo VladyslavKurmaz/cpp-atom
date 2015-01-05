@@ -8,6 +8,10 @@
 //SetWinEventHook.
 // http://stackoverflow.com/questions/2175665/createprocess-process-do-not-terminate-when-redirecting-std-out-in-err
 
+#ifdef STANDALONE
+const std::string TEST_PIPE_NAME = "TEST_PIPE";
+#endif
+
 const TCHAR CMDID_SPLIT_NAME[]		= _T( "split" );
 const TCHAR CMDID_EXPAND_NAME[]		= _T( "expand" );
 const TCHAR CMDID_ROTATE_NAME[]		= _T( "rotate" );
@@ -29,45 +33,21 @@ const TCHAR DELIM2[] = _T( ":" );
 int atom::node_cnt = 0;
 
 
+std::string gen_uuid() {
+	GUID guid;
+	CoCreateGuid( &guid );
+	std::stringstream gss;
+	gss << guid;
+	return ( gss.str() );
+}
+
 /*
 
 
 
 
 	void window::onKey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ){
-	KEY_EVENT_RECORD key;
-	key.bKeyDown			=	down;
-	key.wRepeatCount		=	repeat;
-	key.wVirtualKeyCode		=	vk;
-	key.wVirtualScanCode	=	MapVirtualKey( vk, MAPVK_VK_TO_VSC );
-	BYTE kbrd[256] = { 0 };
-	WORD c = 0;
-	GetKeyboardState( kbrd );
-	ToAscii(
-		key.wVirtualKeyCode,
-		key.wVirtualScanCode,
-		kbrd,
-		&c,
-		0
-		);
-	key.uChar.UnicodeChar	=	c;
-	key.uChar.AsciiChar;
-	key.dwControlKeyState	=
-		( ( GetKeyState( VK_CAPITAL ) & 0x01 ) ? ( CAPSLOCK_ON ) : ( 0 ) ) |
-		//ENHANCED_KEY
-		( ( GetKeyState( VK_LMENU ) & 0x80 ) ? ( LEFT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_LCONTROL ) & 0x80 ) ? ( LEFT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_NUMLOCK ) & 0x01 ) ? ( NUMLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RMENU ) & 0x80 ) ? ( RIGHT_ALT_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_RCONTROL ) & 0x80 ) ? ( RIGHT_CTRL_PRESSED ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SCROLL ) & 0x01 ) ? ( SCROLLLOCK_ON ) : ( 0 ) ) |
-		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
-	//this->getLogger() << vk << ((down)?(" down"):(" up")) << std::endl;
-	if ( this->current_frame ) {
-		this->current_frame->process( bridge_msg::bmKbrd, &key );
-	}
-	this->invalidate();
 
 }
 

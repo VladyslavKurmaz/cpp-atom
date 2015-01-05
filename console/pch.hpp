@@ -41,8 +41,15 @@
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
-// what does it mean?
+std::string gen_uuid();
+
+
 //#define STANDALONE
+
+#ifdef STANDALONE
+extern const std::string TEST_PIPE_NAME;
+#endif
+
 #define WM_FRAMEEXIT	WM_USER+1
 
 typedef unsigned int
