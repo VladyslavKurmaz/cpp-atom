@@ -50,4 +50,7 @@ private:
 	//
 	bool
 		expandMode;
+	//
+	COORD
+		consoleSize;
 };

@@ -18,14 +18,16 @@ int main( int argc, char *argv[] )
 		atom::po po;
 		atom::po::options_description_t& desc = po.add_desc( 0, "proxy options" );
 		std::string pipe_name;
+		std::string sharedmem_name;
 		//unsigned int csb_width = 0;
 		//unsigned int csb_height = 0;
 		//
-		po.add_option( 1, "pipe-name,p", "mutex name", desc, boost::program_options::value<std::string>( &pipe_name ) );
+		po.add_option( 1, "pipe-name,p", "pipe name", desc, boost::program_options::value<std::string>( &pipe_name ) );
+		po.add_option( 2, "sharedmem-name,s", "shared memory name", desc, boost::program_options::value<std::string>( &sharedmem_name ) );
 		try {
 			po.parse_arg( argc, argv, desc, true );
 			//
-			if ( !( po.count( 1 )  ) ) {
+			if ( !( po.count( 1 ) && po.count( 2 )  ) ) {
 				throw std::exception( "[ERROR] Pipe's name and/or Shered memory's name are not defined" );
 			}
 			//
@@ -38,10 +40,11 @@ int main( int argc, char *argv[] )
 			return -1;
 		}
 		//
-		bridge proxy2Console( pipe_name );
-		std::cout << "before proxy" << std::endl;
+		COORD size = { 0 };
+		SMALL_RECT view = { 0 };
+		getConsoleSize( size, view );
+		bridge proxy2Console( size, sharedmem_name, pipe_name );
 		proxy2Console.proxy();
-		std::cout << "after proxy" << std::endl;
 		proxy2Console.join();
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );

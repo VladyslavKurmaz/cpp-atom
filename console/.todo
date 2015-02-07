@@ -1,12 +1,16 @@
 + ctrl+~ hide/show panel
 + alt+enter fullscreen on/off
 + fix alignment
++ implements frames and remote consoles
 
+:console
+- correct console buffer mapping
 - hide console window on start
 - set kbrd focus
 - mstack, implements FSM
-- region selection, lbm+move+space
-- test PrintWindows
-- integrate Tesseract library
-- implements frames and remote consoles
 - rb popup menu and hotkeys to select mode (scan|console|atlas|...)
+
+:recognition
+- region selection, lbm+move+space
+- test PrintWindows for image recognition
+- integrate Tesseract library

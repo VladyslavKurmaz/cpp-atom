@@ -12,7 +12,7 @@ class frame :
 		base_node_t;
 public:
 	///
-	static frame_ptr create( logger_ptr l );
+	static frame_ptr create( logger_ptr l, COORD const& size );
 	///
 	~frame();
 	///
@@ -31,7 +31,7 @@ public:
 	void key( KEY_EVENT_RECORD const& k );
 	///
 	void
-	paint( HDC dc, RECT const& rt );
+	paint( HDC dc, RECT const& rt, unsigned int const lineHeight );
 
 protected:
 	//
@@ -52,5 +52,5 @@ private:
 	std::string
 		process_caption;
 	///
-	frame( frame_id_t const i, logger_ptr l );
+	frame( frame_id_t const i, logger_ptr l, COORD const& size );
 };

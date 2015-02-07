@@ -5,11 +5,18 @@
 
 
 class bridge : public boost::noncopyable {
+	typedef boost::shared_ptr< boost::interprocess::windows_shared_memory >
+		sharedmem_t;
+	typedef boost::shared_ptr< boost::interprocess::mapped_region >
+		sharedmem_region_t;
+
 public:
+	typedef std::deque< std::string >
+		lines_t;
 	//
-	bridge();
+	explicit bridge( COORD const& sz );
 	//
-	explicit bridge( std::string const& name );
+	explicit bridge( COORD const& sz, std::string const& shname, std::string const& pname );
 	//
 	~bridge();
 	//
@@ -19,17 +26,39 @@ public:
 	//
 	void proxy();
 	//
+	void getLines( lines_t& lines );
+	//
 	void write( KEY_EVENT_RECORD const& k );
+	//
+	void writeExit();
 
 
 protected:
+	//
+	bool sharedmemConfigure( bool const create );
+	//
+	size_t getSharedmemSize() const {
+		return ( sizeof( CHAR_INFO ) * this->consoleSize.X * this->consoleSize.Y );
+	}
+
 private:
+	//
+	COORD
+		consoleSize;
+	std::string
+		sharedmemName;
+	std::string
+		pipeName;
 	//
 	atom::proc<TCHAR>
 		proc;
 	//
-	std::string
-		pipeName;
+	sharedmem_t
+		sharedmem;
+	sharedmem_region_t
+		sharedmemRegion;
+	CHAR_INFO*
+		sharedmemBuffer;
 	//
 	atom::pipe
 		pipe;

@@ -41,13 +41,13 @@
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
-std::string gen_uuid();
 
 
 //#define STANDALONE
 
 #ifdef STANDALONE
 extern const std::string TEST_PIPE_NAME;
+extern const std::string TEST_SHAREDMEM_NAME;
 #endif
 
 #define WM_FRAMEEXIT	WM_USER+1
@@ -191,3 +191,7 @@ extern const size_t conf_cmds_cnt;
 //
 extern const TCHAR DELIM1[];
 extern const TCHAR DELIM2[];
+
+std::string gen_uuid();
+
+bool getConsoleSize( COORD& size, SMALL_RECT& view );

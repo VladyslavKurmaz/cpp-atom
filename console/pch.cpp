@@ -9,7 +9,8 @@
 // http://stackoverflow.com/questions/2175665/createprocess-process-do-not-terminate-when-redirecting-std-out-in-err
 
 #ifdef STANDALONE
-const std::string TEST_PIPE_NAME = "TEST_PIPE";
+const std::string TEST_PIPE_NAME		= "TEST_PIPE";
+const std::string TEST_SHAREDMEM_NAME	= "TEST_SHAREDMEM";
 #endif
 
 const TCHAR CMDID_SPLIT_NAME[]		= _T( "split" );
@@ -39,6 +40,16 @@ std::string gen_uuid() {
 	std::stringstream gss;
 	gss << guid;
 	return ( gss.str() );
+}
+
+bool getConsoleSize( COORD& size, SMALL_RECT& view ) {
+	CONSOLE_SCREEN_BUFFER_INFO csbiInfo = { 0 };
+	if ( GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbiInfo ) ) {
+		size = csbiInfo.dwSize;
+		view = csbiInfo.srWindow;
+		return true;
+	}
+	return false;
 }
 
 /*

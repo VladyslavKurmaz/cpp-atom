@@ -63,22 +63,26 @@ bool window::init() {
 	//
 	static const struct font_t {
 		atom::po::id_t	opt;
+		paint_font_t&	font;
 	} fonts[] = {
-		po_ui_font_text,
-		po_ui_font_sys
+		{ po_ui_font_text, this->paintParam.textFont },
+		{ po_ui_font_sys, this->paintParam.sysFont }
 	};
 	//
 	BOOST_FOREACH( font_t const& font, fonts )
 	{
 		std::string s = this->getPref().get< std::string >( font.opt );
 		atom::attributes< TCHAR > a( s, d1, d2 );
+		unsigned int height = a.as<unsigned int>(_T("height") );
+		unsigned int color = a.as_color( _T("color") );
+		//
 		HFONT f = CreateFont(
-			a.as<unsigned int>(_T("height") ),
+			height,
 			0,
 			0,
 			0,
-			FW_NORMAL,
-			FALSE,
+			FW_NORMAL,//FW_HEAVY,
+			FALSE,//TRUE
 			FALSE,
 			FALSE,
 			OEM_CHARSET,
@@ -88,19 +92,11 @@ bool window::init() {
 			FIXED_PITCH,
 			a.as<std::string>(_T("name") ).c_str()
 			);
-		unsigned int color = a.as_color( _T("color") );
 		//
 		if ( f != NULL ) {
-			switch( font.opt ) {
-			case po_ui_font_text:
-				this->paintParam.textFont	= f;
-				this->paintParam.textColor	= color;
-				break;
-			case po_ui_font_sys:
-				this->paintParam.sysFont	= f; 
-				this->paintParam.sysColor	= color;
-				break;
-			};
+			font.font.height = height;
+			font.font.font = f;
+			font.font.color = color;
 		} else {
 			this->getLogger() << "Text font creation error: " << s << std::endl;
 		}

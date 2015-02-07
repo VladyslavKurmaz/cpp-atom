@@ -133,6 +133,15 @@ namespace atom {
 	};
 }
 
+struct paint_font_t {
+	unsigned int
+		height;
+	atom::shared_gdiobj< HFONT >
+		font;
+	COLORREF
+		color;
+};
+
 struct paint_param_t {
 	atom::shared_dc
 		dc;
@@ -146,14 +155,11 @@ struct paint_param_t {
 		borderActive;
 	atom::shared_gdiobj< HBRUSH >
 		borderInactive;
-	atom::shared_gdiobj< HFONT >
+	
+	paint_font_t
 		textFont;
-	COLORREF
-		textColor;
-	atom::shared_gdiobj< HFONT >
+	paint_font_t
 		sysFont;
-	COLORREF
-		sysColor;
 	//
 	void updareDC( SIZE const &sz ) {
 		HDC dc = GetDC( NULL );

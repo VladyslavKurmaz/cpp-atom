@@ -10,7 +10,9 @@
 
 #ifdef STANDALONE
 void standaloneThread() {
-	bridge proxy2Console( TEST_PIPE_NAME );
+	SIZE size = { 0 };
+	getConsoleSize( size );
+	bridge proxy2Console( size, TEST_SHAREDMEM_NAME, TEST_PIPE_NAME );
 	proxy2Console.proxy();
 	proxy2Console.join();
 }

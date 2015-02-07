@@ -2,6 +2,7 @@
 #include "./classes.hpp"
 #include "./cmds.hpp"
 #include "./log.hpp"
+#include "./pref.hpp"
 #include "./process.hpp"
 #include "./frame.hpp"
 #include "./area.hpp"
@@ -10,11 +11,17 @@
 shell::shell( logger_ptr l, pref_ptr p ):
 		headArea()
 	,	currentFrame()
-	,	expandMode( false ) {
+	,	expandMode( false )
+	,	consoleSize() {
 	atom::mount<shell2logger>( this, l );
 	atom::mount<shell2pref>( this, p );
 	//
-	this->currentFrame = frame::create( l );
+	this->consoleSize.X = 120;
+	this->consoleSize.Y = this->getPref().get< unsigned int >( po_ui_lines_count );
+#ifdef STANDALONE
+	getConsoleSize( consoleSize );
+#endif
+	this->currentFrame = frame::create( l, this->consoleSize );
 	this->headArea = area::create( area_ptr(), this->currentFrame ); 
 }
 
@@ -25,7 +32,7 @@ bool shell::command( int const id ) {
 	switch ( id ) {
 	case CMDID_SPLIT:
 #ifndef STANDALONE
-		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( get_value( boost::mpl::identity< shell2logger >() ).item() ) );
+		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( get_value( boost::mpl::identity< shell2logger >() ).item(), this->consoleSize ) );
 #endif
 		return true;
 	case CMDID_EXPAND:
@@ -90,15 +97,15 @@ void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
 			atom::shared_gdiobj<HRGN> rgn = CreateRectRgn( rt.left, rt.top, rt.right, rt.bottom );
 			SelectClipRgn( dc, rgn );
 			{
-				SelectObject( dc, pp.sysFont );
-				SetTextColor( dc, pp.sysColor );
+				SelectObject( dc, pp.sysFont.font);
+				SetTextColor( dc, pp.sysFont.color );
 				std::stringstream ss;
 				ss << " #" << f->get_index();
 				DrawText( dc, ss.str().c_str(), -1, &rt, DT_RIGHT | DT_TOP | DT_SINGLELINE );
 				//
-				SelectObject( dc, pp.textFont );
-				SetTextColor( dc, pp.textColor );
-				f->paint( dc, rt );
+				SelectObject( dc, pp.textFont.font );
+				SetTextColor( dc, pp.textFont.color );
+				f->paint( dc, rt, pp.textFont.height );
 			}
 			SelectClipRgn( dc, NULL );
 		}
