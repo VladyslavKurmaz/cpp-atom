@@ -84,7 +84,7 @@ default -> shared -> global -> user -> local
 		add_option( po_ui_clip,			"ui.clip",			"",
 		desc,	boost::program_options::value<bool>()->default_value( true ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
 		add_option( po_ui_alpha,		"ui.alpha",			"",
-		desc,	boost::program_options::value<unsigned int>()->default_value( 0xE0 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 0x40 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
 		add_option( po_ui_bk_color,		"ui.bk-color",		"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ) )( ( id2gr( po_ui_bk_color, pgUI ), 0 ) ).
 		add_option( po_ui_lines_count,	"ui.lines-count",	"",

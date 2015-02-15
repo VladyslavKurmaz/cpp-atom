@@ -11,6 +11,7 @@ add_executable(
 	"./window.cpp"
 	"./bridge.cpp"
 	"./shell.cpp"
+	"./ar.cpp"
 )
 
 add_executable( 

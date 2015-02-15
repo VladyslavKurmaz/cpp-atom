@@ -9,12 +9,15 @@
 #include <algorithm>
 #include <map>
 #include <vector>
+#include <limits>
+#include <cstddef>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
+#include "boost/tuple/tuple.hpp"
 
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
@@ -31,6 +34,8 @@
 #include <atom/util/pipe.hpp>
 #include <atom/util/cast.hpp>
 #include <atom/util/proc.hpp>
+
+#undef max
 
 #ifdef UNICODE
 #define TXT( x )  L ## x
@@ -195,3 +200,5 @@ extern const TCHAR DELIM2[];
 std::string gen_uuid();
 
 bool getConsoleSize( COORD& size, SMALL_RECT& view );
+
+bool bitmapSave( LPTSTR pszFile, HDC hDC, HBITMAP hBmp );

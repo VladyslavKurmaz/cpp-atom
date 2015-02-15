@@ -16,10 +16,17 @@ ATOM_DEF_ONSETTINGCHANGE( window )
 ATOM_DEF_ONTIMER( window )
 ATOM_DEF_ONCOMMAND( window )
 
-class window :	public atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t ) >,
+ATOM_DEF_ONLBUTTONDOWN( window )
+ATOM_DEF_ONLBUTTONUP( window )
+ATOM_DEF_ONMOUSEMOVE( window )
+ATOM_DEF_CAPTURECHANGED( window )
+ATOM_DEF_ONSYSCOMMAND( window )
+
+
+class window :	public atom::wwindow< window, LOKI_TYPELIST_14( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t, onlbuttondown_pair_t, onlbuttonup_pair_t, onmousemove_pair_t, oncapturechanged_pair_t, onsyscommand_pair_t ) >,
 				public atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >,
 				public boost::enable_shared_from_this< window > {
-	typedef atom::wwindow< window, LOKI_TYPELIST_9( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t ) >
+	typedef atom::wwindow< window, LOKI_TYPELIST_14( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t, onlbuttondown_pair_t, onlbuttonup_pair_t, onmousemove_pair_t, oncapturechanged_pair_t, onsyscommand_pair_t ) >
 		base_window_t;
 	typedef atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >
 		base_node_t;
@@ -55,6 +62,16 @@ public:
 	void onTimer( HWND hWnd, UINT id );
 	///
 	void onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
+	//
+	void onLBDown( HWND, BOOL, int, int, UINT );
+	//
+	void onLBUp( HWND, int, int, UINT );
+	//
+	void onMouseMove( HWND, int, int, UINT );
+	//
+	void onCaptureChanged( HWND, HWND );
+	//
+	void onSysCommand( HWND hWnd, UINT cmd, int x, int y );
 
 protected:
 	//
@@ -74,14 +91,13 @@ protected:
 	void
 	toggleFullScreen();
 	//
-	void
-	updatePlacement( bool const visible, bool const fullScreen );
+	void updatePlacement( bool const visible, bool const fullScreen );
 	//
-	void
-	slideBegin();
+	void slideBegin();
 	//
-	void
-	slideUpdate();
+	void slideUpdate();
+	///
+	void modeSwitch( size_t const mode );
 
 private:
 	///
@@ -99,7 +115,13 @@ private:
 	paint_param_t
 		paintParam;
 	//
-	shell_ptr
-		sh;
+	typedef boost::tuple< std::string, mode_ptr >
+		mode_item_t;
+	typedef std::vector< mode_item_t >
+		modes_t;
+	modes_t
+		modes;
+	mode_ptr
+		currentMode;
 };
 

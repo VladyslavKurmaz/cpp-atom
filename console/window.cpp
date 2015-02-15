@@ -3,26 +3,32 @@
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./shell.hpp"
+#include "./ar.hpp"
 #include "./window.hpp"
 
 
+#define SC_MODE_CMD         0x0010
+
 window::window( logger_ptr l, pref_ptr p ) :
-		wwindow( *this, INITLIST_9( &window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand ) )
+	wwindow( *this, INITLIST_14( &window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand, &window::onLBDown, &window::onLBUp, &window::onMouseMove, &window::onCaptureChanged, &window::onSysCommand ) )
 	,	appearHotKey()
 	,	accel()
 	,	windowPlacement()
 	,	paintParam()
-	,	sh() {
-	//
-	atom::mount<window2logger>( this, l );
-	atom::mount<window2pref>( this, p );
-	//
-	sh = shell::create( l, p );
+	,	modes()
+	,	currentMode() {
+		//
+		atom::mount<window2logger>( this, l );
+		atom::mount<window2pref>( this, p );
+		//
+		this->modes.push_back( boost::make_tuple( "Console", mode::create<shell>( l, p ) ) );
+		this->modes.push_back( boost::make_tuple( "Augmented desktop", mode::create<ar>( l, p ) ) );
 }
 
 window::~window() {
 }
 
+HWND hStatic = NULL;
 bool window::init() {
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
@@ -112,9 +118,21 @@ bool window::init() {
 	this->paintParam.borderActive			= CreateSolidBrush( border.as_color( _T("color") ) );
 	this->paintParam.borderInactive			= CreateSolidBrush( border.as_color( _T("inactive") ) );
 	//
-	this->updatePlacement( false, false );
+	this->updatePlacement( false, true );
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->windowPlacement.destination ), style, ex_style ), true ) ) {
-		this->set_styles( WS_OVERLAPPED, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).set_alpha( this->getPref().get< unsigned int >( po_ui_alpha ) );
+		this->set_styles( WS_OVERLAPPED | WS_SYSMENU, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).setAlpha( this->getPref().get< unsigned int >( po_ui_alpha ) );
+		//
+		UINT pos = 0;
+		BOOST_FOREACH( mode_item_t& m, modes ) {
+			this->sysMenuInsert( pos, MF_BYPOSITION | MF_STRING, SC_MODE_CMD + ( pos << 4 ), m.get<0>().c_str() );
+			pos++;
+		}
+		this->sysMenuInsert( pos, MF_BYPOSITION | MF_SEPARATOR, 0, "" );
+		this->modeSwitch( 0 );
+		//
+		hStatic = CreateWindowEx( WS_EX_TOOLWINDOW, "EDIT", "Control panel", WS_OVERLAPPED | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX, this->windowPlacement.destination.right - 256, 0, 256, RECT_HEIGHT( this->windowPlacement.destination ) / 2 , this->get_hwnd(), NULL, (HINSTANCE)GetModuleHandle(NULL), NULL );
+		LONG clst = GetClassLong( hStatic, GCL_STYLE );
+		SetClassLong( hStatic, GCL_STYLE, clst | CS_NOCLOSE );
 		//
 		hotkey new_hk;
 		if ( this->getPref().parseHotkey( po_hk_appear, new_hk ) ) {
@@ -156,7 +174,7 @@ bool window::init() {
 	}
 	return false;
 }
-  
+
 void window::run() {
 	struct _ {
 		static bool __( HWND hWnd, MSG* msg, atom::accel& accel, window& w ) {
@@ -165,14 +183,21 @@ void window::run() {
 	};
 	this->toggleVisibility();
 	base_window_t::run( boost::bind( _::__, _1, _2, boost::ref( this->accel ), boost::ref( *this ) ) );
+	this->modeSwitch( std::numeric_limits<size_t>::max() );
 }
 
 void window::clear() {
-	this->sh->clear();
+	BOOST_FOREACH( mode_item_t& m, modes ) {
+		m.get<1>()->clear();
+	}
 	base_node_t::clear();
 }
 
 void window::onKey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ) {
+	if ( vk == 32 ) {
+		//HMENU hmenu = GetSystemMenu( hWnd, false );
+		//TrackPopupMenu( hmenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN, 0, 0, 0, hWnd, NULL);
+	}
 	KEY_EVENT_RECORD key;
 	key.bKeyDown			=	down;
 	key.wRepeatCount		=	repeat;
@@ -202,7 +227,7 @@ void window::onKey( HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags ) {
 		( ( GetKeyState( VK_SHIFT ) & 0x80 ) ? ( SHIFT_PRESSED ) : ( 0 ) ) ;
 
 	//this->getLogger() << vk << ((down)?(" down"):(" up")) << std::endl;
-	this->sh->key( key );
+	this->currentMode->key( key );
 	this->invalidate();
 }
 
@@ -214,6 +239,8 @@ void window::onHotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 		this->toggleVisibility();
 	}
 }
+
+atom::rectCtrl ctrl;
 
 void window::onPaint( HWND hWnd ) {
 	PAINTSTRUCT	ps; 
@@ -237,14 +264,20 @@ void window::onPaint( HWND hWnd ) {
 			//	SRCCOPY );
 			FillRect( dc, &rect, this->paintParam.bk );
 		} else {
-			FillRect( this->paintParam.dc, &rect, this->paintParam.bk );
-			this->sh->paint( this->paintParam, rect );
+			FillRect( this->paintParam.dcb.dc, &rect, this->paintParam.bk );
+			this->currentMode->paint( this->paintParam, rect );
+			//
+			if ( this->inputIsCaptured( mouse ) ) {
+				RECT rt;
+				ctrl.getRect( rt );
+				FrameRect( this->paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+			}
 			BitBlt( dc,
 				0,
 				0,
 				rect.right,
 				rect.bottom,
-				this->paintParam.dc,
+				this->paintParam.dcb.dc,
 				0,
 				0,
 				SRCCOPY );
@@ -274,7 +307,7 @@ void window::onTimer( HWND hWnd, UINT id ){
 }
 
 void window::onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
-	if ( !sh->command( id ) ) {
+	if ( !currentMode->command( id ) ) {
 		switch( id ) {
 		case CMDID_FULLSCREEN:
 			this->toggleFullScreen();
@@ -282,6 +315,80 @@ void window::onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 		}
 	}
 	this->invalidate();
+}
+
+void window::onLBDown( HWND, BOOL dblclick, int x , int y, UINT ) {
+	if ( !dblclick ) {
+		ctrl.start( x, y );
+		this->inputCapture( keyboard );
+		this->inputCapture( mouse );
+		this->invalidate();
+	}
+}
+
+void window::onLBUp( HWND hWnd, int, int, UINT ) {
+	RECT r;
+	if ( this->inputIsCaptured( mouse ) ) {
+		ctrl.getRect( r );
+		//bitmapSave( "desktop.bmp", this->paintParam.dcb.dc, this->paintParam.dcb.bitmap );
+		HDC dc = GetDC( NULL );
+		size_t const cx = RECT_WIDTH( r );
+		size_t const cy = RECT_HEIGHT( r );
+		if ( ( cx > 8 ) && ( cy > 8 ) ) {
+			dcb_t dcb;
+			dcb.updateDC( cx, cy );
+			BitBlt( dcb.dc,
+				0,
+				0,
+				RECT_WIDTH( r ),
+				RECT_HEIGHT( r ),
+				dc,
+				r.left,
+				r.top,
+				SRCCOPY );
+			bitmapSave( "desktop.bmp", dcb.dc, dcb.bitmap );
+			ReleaseDC( NULL, dc );
+			//
+			atom::proc<TCHAR> proc;
+			if ( proc.run( "tesseract desktop.bmp out", false ) ) {
+				proc.join();
+			}
+
+			std::ifstream t("out.txt");
+			std::string str;
+
+			t.seekg(0, std::ios::end);   
+			str.reserve(t.tellg());
+			t.seekg(0, std::ios::beg);
+
+			str.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+			//
+			SetWindowText( hStatic, str.c_str() );
+		}
+	}
+	this->inputRelease( mouse );
+} 
+
+void window::onMouseMove( HWND hWnd, int x, int y, UINT ) {
+	if ( this->inputIsCaptured( mouse ) ) {
+		RECT r;
+		GetClientRect( hWnd, &r );
+		ctrl.update( x, y, ( GetKeyState( VK_SPACE ) & 0x80 ) > 0, r );
+		this->invalidate();
+	}
+}
+
+void window::onCaptureChanged( HWND, HWND ) {
+	this->invalidate();
+}
+
+void window::onSysCommand( HWND hWnd, UINT cmd, int x, int y ) {
+	UINT pos = ( cmd - SC_MODE_CMD ) >> 4;
+	if ( ( 0 <= pos ) && ( pos < this->modes.size() ) ) {
+		this->modeSwitch( pos );
+	} else {
+		FORWARD_WM_SYSCOMMAND( hWnd, cmd, x, y, DefWindowProc );
+	}
 }
 
 void window::toggleVisibility() {
@@ -304,7 +411,7 @@ void window::updatePlacement( bool const visible, bool const fullScreen ) {
 	sz.cx = RECT_WIDTH( this->windowPlacement.destination );
 	sz.cy = RECT_HEIGHT( this->windowPlacement.destination );
 	if ( ( RECT_WIDTH( rt ) != sz.cx ) || ( RECT_HEIGHT( rt ) != sz.cy ) ) {
-		this->paintParam.updareDC( sz );
+		this->paintParam.updareDC( sz.cx, sz.cy );
 	}
 }
 
@@ -315,7 +422,7 @@ void window::slideBegin() {
 		this->windowPlacement.sliding = true;
 		//
 		this->windowPlacement.startTime =
-		this->windowPlacement.lastTime = timeGetTime();
+			this->windowPlacement.lastTime = timeGetTime();
 		SetTimer( this->get_hwnd(), this->windowPlacement.timerId, USER_TIMER_MINIMUM, NULL );
 		this->show( true ).activate();
 	}
@@ -371,16 +478,26 @@ void window::slideUpdate() {
 			// stop
 			this->show( show );
 			if ( show ) {
-				this->activate().focus();
+				this->activate().inputCapture( keyboard );
 			}
 			KillTimer( this->get_hwnd(), this->windowPlacement.timerId );
 			this->windowPlacement.sliding = false;
 			this->invalidate();
 		}
 		MoveWindow( this->get_hwnd(), rt.left, rt.top, RECT_WIDTH( rt ), RECT_HEIGHT( rt ), TRUE );
-		this->set_alpha( alpha );
+		this->setAlpha( alpha );
 	}
 }
 
-
-
+void window::modeSwitch( size_t const mode ) {
+	if ( this->currentMode ) {
+		this->currentMode->activate( false );
+	}
+	this->currentMode = mode_ptr();
+	size_t const sz = this->modes.size();
+	if ( ( 0 <= mode ) && ( mode < sz ) ) {
+		this->currentMode = this->modes[ mode ].get<1>();
+		this->sysMenuCheckRadioItem( 0, sz - 1, mode, true );
+		this->currentMode->activate( true );
+	}
+}

@@ -2,6 +2,7 @@
 + alt+enter fullscreen on/off
 + fix alignment
 + implements frames and remote consoles
++ switch between modes
 
 :console
 - correct console buffer mapping
@@ -11,6 +12,7 @@
 - rb popup menu and hotkeys to select mode (scan|console|atlas|...)
 
 :recognition
-- region selection, lbm+move+space
++ region selection, lbm+move+space
 - test PrintWindows for image recognition
 - integrate Tesseract library
+- rotate region selection with image rotate after selection

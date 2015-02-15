@@ -71,6 +71,9 @@ namespace atom {
 			}
 			return false;
 		}
+		bool run( std::basic_string< T > const& name, bool const show ) {
+			return this->run( name, 0, 0, false, show );
+		}
 		//
 		void join() {
 			WaitForSingleObject( this->pi.hProcess, INFINITE );

@@ -9,12 +9,11 @@
 #include "./shell.hpp"
 
 shell::shell( logger_ptr l, pref_ptr p ):
-		headArea()
+		mode( l, p )
+	,	headArea()
 	,	currentFrame()
 	,	expandMode( false )
 	,	consoleSize() {
-	atom::mount<shell2logger>( this, l );
-	atom::mount<shell2pref>( this, p );
 	//
 	this->consoleSize.X = 120;
 	this->consoleSize.Y = this->getPref().get< unsigned int >( po_ui_lines_count );
@@ -28,11 +27,17 @@ shell::shell( logger_ptr l, pref_ptr p ):
 shell::~shell() {
 }
 
+void shell::activate( bool const state ) {
+}
+
+void shell::show( bool const state ) {
+}
+
 bool shell::command( int const id ) {
 	switch ( id ) {
 	case CMDID_SPLIT:
 #ifndef STANDALONE
-		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( get_value( boost::mpl::identity< shell2logger >() ).item(), this->consoleSize ) );
+		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( get_value( boost::mpl::identity< mode2logger >() ).item(), this->consoleSize ) );
 #endif
 		return true;
 	case CMDID_EXPAND:
@@ -79,7 +84,7 @@ void shell::key( KEY_EVENT_RECORD const& k ) {
 void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
 	struct _{
 		static void __( frame_ptr const& f, frame_coord const& coord, bool const cf, paint_param_t& pp, RECT r ) {
-			HDC dc = pp.dc;
+			HDC dc = pp.dcb.dc;
 			RECT rt;
 			int const rw = RECT_WIDTH( r );
 			int const rh = RECT_HEIGHT( r );

@@ -15,9 +15,9 @@ class area;
 typedef boost::shared_ptr< area >
 	area_ptr;
 //
-class shell;
-typedef boost::shared_ptr< shell >
-	shell_ptr;
+class mode;
+typedef boost::shared_ptr< mode >
+	mode_ptr;
 //
 class frame;
 typedef boost::shared_ptr< frame >
@@ -142,11 +142,25 @@ struct paint_font_t {
 		color;
 };
 
-struct paint_param_t {
+struct dcb_t {
 	atom::shared_dc
 		dc;
 	atom::shared_gdiobj< HBITMAP >
 		bitmap;
+	void updateDC( size_t const cx, size_t const cy ) {
+		HDC dc = GetDC( NULL );
+		{
+			this->dc		= CreateCompatibleDC( dc );
+			this->bitmap	= CreateCompatibleBitmap( dc, cx, cy );
+			SelectObject( this->dc, this->bitmap );
+		}
+		ReleaseDC( NULL, dc );
+	}
+};
+
+struct paint_param_t {
+	dcb_t
+		dcb;
 	atom::shared_gdiobj< HBRUSH >
 		bk;
 	RECT
@@ -161,13 +175,7 @@ struct paint_param_t {
 	paint_font_t
 		sysFont;
 	//
-	void updareDC( SIZE const &sz ) {
-		HDC dc = GetDC( NULL );
-		{
-			this->dc		= CreateCompatibleDC( dc );
-			this->bitmap	= CreateCompatibleBitmap( dc, sz.cx, sz.cy );
-			SelectObject( this->dc, this->bitmap );
-		}
-		ReleaseDC( NULL, dc );
+	void updareDC( size_t const cx, size_t const cy ) {
+		dcb.updateDC( cx, cy );
 	}
 };

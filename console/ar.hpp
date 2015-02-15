@@ -1,11 +1,11 @@
 #pragma once
 #include "./mode.hpp"
 
-class shell :
+class ar :
 	public mode {
 public:
 	///
-	virtual ~shell();
+	virtual ~ar();
 	///
 	virtual void activate( bool const state );
 	///
@@ -23,18 +23,6 @@ protected:
 
 private:
 	///
-	shell( logger_ptr l, pref_ptr p );
-	//
-	area_ptr
-		headArea;
-	//
-	frame_ptr
-		currentFrame;
-	//
-	bool
-		expandMode;
-	//
-	COORD
-		consoleSize;
+	ar( logger_ptr l, pref_ptr p );
 	friend mode;
 };

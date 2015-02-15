@@ -39,6 +39,57 @@
 #define	ATOM_UTIL_WWINDOW_PROP	_T("wwindow")
 namespace atom {
 
+	class rectCtrl {
+	public:
+		//
+		rectCtrl() : s(), e() {
+		}
+		//
+		void start( int const x, int const y ) {
+			this->s.x = x;
+			this->s.y = y;
+			this->e = this->s; 
+		}
+		//
+		void update( int const x, int const y, bool const move, RECT const& r ) {
+			if ( move ) {
+				if ( ( r.left <= x ) && ( x < r.right ) ) {
+					this->s.x += x - this->e.x;
+				}
+				if ( ( r.top <= y ) && ( y < r.bottom ) ) {
+					this->s.y += y - this->e.y;
+				}
+			}
+			this->e.x = x;
+			this->e.y = y;
+			checkPt( this->s, r );
+			checkPt( this->e, r );
+		}
+		//
+		void getRect( RECT& r ) {
+			SetRect( &r, min( this->s.x,this->e.x), min(this->s.y,this->e.y), max(this->s.x,this->e.x), max(this->s.y,this->e.y) );
+		}
+	protected:
+		//
+		void checkPt( POINT& p, RECT const& r ) {
+			if ( p.x < r.left ) {
+				p.x = r.left;
+			}
+			if ( p.x > r.right ) {
+				p.x = r.right;
+			}
+			if ( p.y < r.top ) {
+				p.y = r.top;
+			}
+			if ( p.y > r.bottom ) {
+				p.y = r.bottom;
+			}
+		}
+	private:
+		POINT	s;
+		POINT	e;
+	};
+
 	class subclass
 	{
 	private:
@@ -193,6 +244,14 @@ namespace atom {
 		}
 	};
 
+#define	ATOM_DEF_CAPTURECHANGED( c )	typedef void( c::* oncapturechanged_t )( HWND, HWND ); typedef boost::mpl::pair< boost::mpl::int_< WM_CAPTURECHANGED >::type, oncapturechanged_t >::type oncapturechanged_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_CAPTURECHANGED, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (HWND)(lParam)), 0L);
+		}
+	};
+
 #define	ATOM_DEF_ONHOTKEY( c )	typedef void( c::* onhotkey_t )( HWND, int, UINT, UINT); typedef boost::mpl::pair< boost::mpl::int_< WM_HOTKEY >::type, onhotkey_t >::type onhotkey_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_HOTKEY, T, U > {
@@ -240,6 +299,14 @@ namespace atom {
 		}
 	};
 
+#define	ATOM_DEF_ONSYSCOMMAND( c )	typedef void( c::* onsyscommand_t )( HWND, UINT, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_SYSCOMMAND >::type, onsyscommand_t >::type onsyscommand_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_SYSCOMMAND, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)((hWnd), (UINT)(wParam), (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam)), 0L);
+		}
+	};
+
 	//------------------------------------------------------------------------
 	//
 	//------------------------------------------------------------------------
@@ -254,6 +321,11 @@ namespace atom {
 			stringstream_t;
 
 	public:
+		///
+		enum input_t {
+			mouse,
+			keyboard
+		};
 		///
 		template < typename P >
 		wwindow( B& b, P const& p ) :
@@ -283,9 +355,6 @@ namespace atom {
 		  wwindow const& activate() const {
 			SetForegroundWindow( this->wnd ); return (*this); }
 		  ///
-		  wwindow const& focus() const {
-			SetFocus( this->wnd ); return (*this); }
-		  ///
 		  wwindow const& invalidate() const {
 			InvalidateRect( this->wnd, NULL, TRUE ); return (*this); }
 		  ///
@@ -295,7 +364,7 @@ namespace atom {
 			  SetWindowPos( this->get_hwnd(), 0, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED );
 			  return (*this); }
 		  ///
-		  wwindow const& set_alpha( BYTE const alpha ) const {
+		  wwindow const& setAlpha( BYTE const alpha ) const {
 			  SetLayeredWindowAttributes( this->get_hwnd(), RGB( 0, 0, 0 ), alpha, LWA_ALPHA );
 			  return (*this); }
 		  ///
@@ -304,8 +373,50 @@ namespace atom {
 			  GetLayeredWindowAttributes( this->get_hwnd(), 0, &alpha, &flags );
 			  return (*this); }
 		  ///
+		  wwindow const& sysMenuInsert( UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, LPCTSTR lpNewItem ) const {
+			  InsertMenu( GetSystemMenu( this->get_hwnd(), FALSE ), uPosition, uFlags, uIDNewItem, lpNewItem );
+			  return (*this); }
+		  ///
+		  wwindow const& sysMenuCheckRadioItem( UINT idFirst, UINT idLast, UINT idCheck, bool const byPosition ) const {
+			  CheckMenuRadioItem( GetSystemMenu( this->get_hwnd(), FALSE ), idFirst, idLast, idCheck, ( byPosition )?(MF_BYPOSITION):(MF_BYCOMMAND) );
+			  return (*this); }
+		  ///
 		  HWND	get_hwnd() const {
 			  return ( this->wnd ); }
+		  ///
+		  wwindow const& inputCapture( input_t const t ) const {
+			  switch ( t ) {
+			  case mouse:
+				  SetCapture( this->get_hwnd() );
+				  break;
+			  case keyboard:
+				  SetFocus( this->get_hwnd() );
+				  break;
+			  }
+			  return (*this);
+		  };
+		  ///
+		  bool inputIsCaptured( input_t const t ) const {
+			  switch ( t ) {
+			  case mouse:
+				  return ( GetCapture() == this->get_hwnd() );
+			  case keyboard:
+				  return ( GetFocus() == this->get_hwnd() );
+			  }
+			  return false;
+		  }
+		  ///
+		  wwindow const& inputRelease( input_t const t ) const {
+			  switch ( t ) {
+			  case mouse:
+				  ReleaseCapture();
+				  break;
+			  case keyboard:
+				  SetFocus( NULL );
+				  break;
+			  }
+			  return (*this);
+		  }
 		  ///
 		  bool init( boost::function< bool ( WNDCLASSEX&, CREATESTRUCT& )> configure, bool const ad ) {
 			  deinit(); 
