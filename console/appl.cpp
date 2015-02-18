@@ -17,16 +17,16 @@ appl::~appl() {
 }
 
 bool appl::init() {
-	return ( this->getWindow().init() );
+	return ( this->getWindow()->init() );
 }
 
 appl& appl::run() {
-	this->getWindow().run();
+	this->getWindow()->run();
 	return (*this);
 }
 
 void appl::clear() {
-	this->getWindow().clear();
+	this->getWindow()->clear();
 }
 
 

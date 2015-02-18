@@ -34,9 +34,7 @@ public:
 	paint( HDC dc, RECT const& rt, unsigned int const lineHeight );
 
 protected:
-	//
-	logger&
-	getLogger() { return ( *( get_slot<frame2logger>().item() ) ); }
+	LOGGER_ACCESSOR( frame2logger )
 
 private:
 	///

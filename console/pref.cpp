@@ -124,8 +124,8 @@ bool pref::init( int argc, char const * const argv[] ) {
 	} catch( std::exception& exc ) {
 		std::stringstream ss;
 		desc.print( ss );
-		this->getLogger() << exc.what() << std::endl;
-		this->getLogger() << ss.str() << std::endl;
+		*(this->getLogger()) << exc.what() << std::endl;
+		*(this->getLogger()) << ss.str() << std::endl;
 		return false;
 	}
 	return true;
@@ -194,7 +194,7 @@ bool pref::parse( std::string const& s ) {
 		}
 
 	} catch( std::exception& e ) {
-		this->getLogger() << e.what() << std::endl;
+		*(this->getLogger()) << e.what() << std::endl;
 		return false;
 	}
 	return true;
@@ -233,7 +233,7 @@ void pref::calculateDocks( placement& windowPlacement ) {
 	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
 		align = result.result;
 	} else {
-		getLogger() << "Invalid alignment format " << alig_str << std::endl;
+		*(this->getLogger()) << "Invalid alignment format " << alig_str << std::endl;
 		align = alignment::hcenter | alignment::top;
 	}
 	//
@@ -312,7 +312,7 @@ bool pref::parseHotkey( atom::po::id_t const id, hotkey& hk ) {
 			return ( hk.vk > 0 );
 		}
 		catch( std::exception& e ){
-			this->getLogger() << "Invalid hotkey format " << e.what()<< std::endl;
+			*(this->getLogger()) << "Invalid hotkey format " << e.what()<< std::endl;
 		}
 	}
 

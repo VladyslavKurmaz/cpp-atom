@@ -20,16 +20,19 @@ window::window( logger_ptr l, pref_ptr p ) :
 		//
 		atom::mount<window2logger>( this, l );
 		atom::mount<window2pref>( this, p );
-		//
-		this->modes.push_back( boost::make_tuple( "Console", mode::create<shell>( l, p ) ) );
-		this->modes.push_back( boost::make_tuple( "Augmented desktop", mode::create<ar>( l, p ) ) );
 }
 
 window::~window() {
 }
 
-HWND hStatic = NULL;
 bool window::init() {
+	//
+	logger_ptr	l = get_slot< window2logger >().item();
+	pref_ptr	p = get_slot< window2pref >().item(); 
+	window_ptr	w = this->shared_from_this();
+	this->modes.push_back( boost::make_tuple( "Console", mode::create<shell>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( "Augmented desktop", mode::create<ar>( l, p, w ) ) );
+	//
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
 	struct _ {
@@ -111,8 +114,8 @@ bool window::init() {
 	this->paintParam.bk = CreateSolidBrush( this->getPref().get< unsigned int >( po_ui_bk_color ) );
 
 	atom::attributes< TCHAR > padding( this->getPref().get< std::string >( po_ui_padding ), d1, d2 );
-	unsigned int const p = padding.as<unsigned int>(_T("size") );
-	SetRect( &this->paintParam.padding, p, p, p, p );
+	unsigned int const pv = padding.as<unsigned int>(_T("size") );
+	SetRect( &this->paintParam.padding, pv, pv, pv, pv );
 
 	atom::attributes< TCHAR > border( this->getPref().get< std::string >( po_ui_border ), d1, d2 );
 	this->paintParam.borderActive			= CreateSolidBrush( border.as_color( _T("color") ) );
@@ -128,11 +131,7 @@ bool window::init() {
 			pos++;
 		}
 		this->sysMenuInsert( pos, MF_BYPOSITION | MF_SEPARATOR, 0, "" );
-		this->modeSwitch( 0 );
-		//
-		hStatic = CreateWindowEx( WS_EX_TOOLWINDOW, "EDIT", "Control panel", WS_OVERLAPPED | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX, this->windowPlacement.destination.right - 256, 0, 256, RECT_HEIGHT( this->windowPlacement.destination ) / 2 , this->get_hwnd(), NULL, (HINSTANCE)GetModuleHandle(NULL), NULL );
-		LONG clst = GetClassLong( hStatic, GCL_STYLE );
-		SetClassLong( hStatic, GCL_STYLE, clst | CS_NOCLOSE );
+		this->modeSwitch( 1 );
 		//
 		hotkey new_hk;
 		if ( this->getPref().parseHotkey( po_hk_appear, new_hk ) ) {
@@ -240,7 +239,6 @@ void window::onHotkey( HWND hWnd, int idHotKey, UINT fuModifiers, UINT vk ) {
 	}
 }
 
-atom::rectCtrl ctrl;
 
 void window::onPaint( HWND hWnd ) {
 	PAINTSTRUCT	ps; 
@@ -267,11 +265,6 @@ void window::onPaint( HWND hWnd ) {
 			FillRect( this->paintParam.dcb.dc, &rect, this->paintParam.bk );
 			this->currentMode->paint( this->paintParam, rect );
 			//
-			if ( this->inputIsCaptured( mouse ) ) {
-				RECT rt;
-				ctrl.getRect( rt );
-				FrameRect( this->paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
-			}
 			BitBlt( dc,
 				0,
 				0,
@@ -317,65 +310,16 @@ void window::onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
 	this->invalidate();
 }
 
-void window::onLBDown( HWND, BOOL dblclick, int x , int y, UINT ) {
-	if ( !dblclick ) {
-		ctrl.start( x, y );
-		this->inputCapture( keyboard );
-		this->inputCapture( mouse );
-		this->invalidate();
-	}
+void window::onLBDown( HWND, BOOL dblclick, int x , int y, UINT state ) {
+	this->currentMode->mouselbdown( dblclick != 0, x, y, state );
 }
 
-void window::onLBUp( HWND hWnd, int, int, UINT ) {
-	RECT r;
-	if ( this->inputIsCaptured( mouse ) ) {
-		ctrl.getRect( r );
-		//bitmapSave( "desktop.bmp", this->paintParam.dcb.dc, this->paintParam.dcb.bitmap );
-		HDC dc = GetDC( NULL );
-		size_t const cx = RECT_WIDTH( r );
-		size_t const cy = RECT_HEIGHT( r );
-		if ( ( cx > 8 ) && ( cy > 8 ) ) {
-			dcb_t dcb;
-			dcb.updateDC( cx, cy );
-			BitBlt( dcb.dc,
-				0,
-				0,
-				RECT_WIDTH( r ),
-				RECT_HEIGHT( r ),
-				dc,
-				r.left,
-				r.top,
-				SRCCOPY );
-			bitmapSave( "desktop.bmp", dcb.dc, dcb.bitmap );
-			ReleaseDC( NULL, dc );
-			//
-			atom::proc<TCHAR> proc;
-			if ( proc.run( "tesseract desktop.bmp out", false ) ) {
-				proc.join();
-			}
-
-			std::ifstream t("out.txt");
-			std::string str;
-
-			t.seekg(0, std::ios::end);   
-			str.reserve(t.tellg());
-			t.seekg(0, std::ios::beg);
-
-			str.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-			//
-			SetWindowText( hStatic, str.c_str() );
-		}
-	}
-	this->inputRelease( mouse );
+void window::onLBUp( HWND hWnd, int x, int y, UINT state ) {
+	this->currentMode->mouselbup( x, y, state );
 } 
 
-void window::onMouseMove( HWND hWnd, int x, int y, UINT ) {
-	if ( this->inputIsCaptured( mouse ) ) {
-		RECT r;
-		GetClientRect( hWnd, &r );
-		ctrl.update( x, y, ( GetKeyState( VK_SPACE ) & 0x80 ) > 0, r );
-		this->invalidate();
-	}
+void window::onMouseMove( HWND hWnd, int x, int y, UINT state ) {
+	this->currentMode->mousemove( x, y, state );
 }
 
 void window::onCaptureChanged( HWND, HWND ) {
@@ -449,7 +393,7 @@ struct slider {
 void window::slideUpdate() {
 	if ( this->windowPlacement.sliding ) {
 		DWORD const total = this->windowPlacement.timeout;
-		bool const show = this->windowPlacement.sliding;
+		bool const show = this->windowPlacement.visible;
 		RECT srect;
 		RECT drect = this->windowPlacement.destination;
 		GetWindowRect( this->get_hwnd(), &srect );
@@ -480,6 +424,7 @@ void window::slideUpdate() {
 			if ( show ) {
 				this->activate().inputCapture( keyboard );
 			}
+			this->currentMode->show( show );
 			KillTimer( this->get_hwnd(), this->windowPlacement.timerId );
 			this->windowPlacement.sliding = false;
 			this->invalidate();

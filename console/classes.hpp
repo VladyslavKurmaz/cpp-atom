@@ -6,10 +6,12 @@
 class logger;
 typedef boost::shared_ptr< logger >
 	logger_ptr;
+#define LOGGER_ACCESSOR( t )	logger_ptr getLogger() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
 //
 class pref;
 typedef boost::shared_ptr< pref >
 	pref_ptr;
+#define PREF_ACCESSOR( t )	pref_ptr getPref() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
 //
 class area;
 typedef boost::shared_ptr< area >
@@ -26,6 +28,7 @@ typedef boost::shared_ptr< frame >
 class window;
 typedef boost::shared_ptr< window >
 	window_ptr;
+#define WINDOW_ACCESSOR( t )	window_ptr getWindow() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
 //
 class appl;
 typedef boost::shared_ptr< appl >

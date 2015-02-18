@@ -26,14 +26,9 @@ public:
 		clear();
 
 protected:
-	//
-	logger& getLogger() {
-		return ( *( get_value( boost::mpl::identity< appl2logger >() ).item() ) );
-	}
-	//
-	window& getWindow() {
-		return ( *( get_value( boost::mpl::identity< appl2window >() ).item() ) );
-	}
+	LOGGER_ACCESSOR( appl2logger )
+	PREF_ACCESSOR( appl2pref )
+	WINDOW_ACCESSOR( appl2window )
 
 private:
 	///

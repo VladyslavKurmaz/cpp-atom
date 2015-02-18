@@ -8,26 +8,31 @@
 #include "./area.hpp"
 #include "./shell.hpp"
 
-shell::shell( logger_ptr l, pref_ptr p ):
-		mode( l, p )
+shell::shell( logger_ptr l, pref_ptr p, window_ptr w ):
+		mode( l, p, w )
 	,	headArea()
 	,	currentFrame()
 	,	expandMode( false )
 	,	consoleSize() {
 	//
 	this->consoleSize.X = 120;
-	this->consoleSize.Y = this->getPref().get< unsigned int >( po_ui_lines_count );
+	this->consoleSize.Y = this->getPref()->get< unsigned int >( po_ui_lines_count );
 #ifdef STANDALONE
 	getConsoleSize( consoleSize );
 #endif
-	this->currentFrame = frame::create( l, this->consoleSize );
-	this->headArea = area::create( area_ptr(), this->currentFrame ); 
 }
 
 shell::~shell() {
 }
 
 void shell::activate( bool const state ) {
+	if ( state ) {
+		if ( !this->currentFrame ) {
+			this->currentFrame = frame::create( this->getLogger(), this->consoleSize );
+			this->headArea = area::create( area_ptr(), this->currentFrame ); 
+		}
+	} else {
+	}
 }
 
 void shell::show( bool const state ) {
@@ -37,7 +42,7 @@ bool shell::command( int const id ) {
 	switch ( id ) {
 	case CMDID_SPLIT:
 #ifndef STANDALONE
-		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( get_value( boost::mpl::identity< mode2logger >() ).item(), this->consoleSize ) );
+		this->currentFrame = this->headArea->find( this->currentFrame )->split( frame::create( this->getLogger(), this->consoleSize ) );
 #endif
 		return true;
 	case CMDID_EXPAND:
@@ -79,6 +84,15 @@ bool shell::command( int const id ) {
 
 void shell::key( KEY_EVENT_RECORD const& k ) {
 	this->currentFrame->key( k );
+}
+
+void shell::mouselbdown( bool dblclick, int x, int y, unsigned int state ) {
+}
+
+void shell::mouselbup( int x, int y, unsigned int state ) {
+}
+
+void shell::mousemove( int x, int y, unsigned int state ){
 }
 
 void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
@@ -123,9 +137,10 @@ void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
 	}
 }
 
-
 void shell::clear() {
-	this->headArea->closeAll();
+	if ( this->headArea ) {
+		this->headArea->closeAll();
+	}
 	this->headArea = area_ptr();
 	currentFrame = frame_ptr();
 	base_t::clear();

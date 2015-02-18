@@ -44,6 +44,8 @@ public:
 	void
 	run();
 	//
+	void getPlacement( placement& p ) const { p = this->windowPlacement; }
+	//
 	void
 	clear();
 	///
