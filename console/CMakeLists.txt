@@ -1,6 +1,8 @@
 
 # Project's structure
 
+#add_definitions(-DUNICODE -D_UNICODE)
+
 add_executable( 
 	console
 	"./pch.cpp"
@@ -12,6 +14,7 @@ add_executable(
 	"./bridge.cpp"
 	"./shell.cpp"
 	"./ar.cpp"
+	"./panel.cpp"
 )
 
 add_executable( 

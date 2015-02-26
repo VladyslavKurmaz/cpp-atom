@@ -18,7 +18,7 @@ bridge::bridge( COORD const& sz ) :
 	,	pipe() {
 }
 
-bridge::bridge( COORD const& sz, std::string const& shname, std::string const& pname ) :
+bridge::bridge( COORD const& sz, atom::string_t const& shname, atom::string_t const& pname ) :
 		consoleSize( sz )
 	,	sharedmemName( shname )
 	,	pipeName( pname )
@@ -51,8 +51,8 @@ void bridge::console() {
 			GetModuleFileName( NULL, path, MAX_PATH );
 			_tsplitpath_s( path, drive, dir, filename, ext );
 			_tmakepath_s( path, drive, dir, _T("proxy"), ext );
-			std::stringstream ss;
-			ss << "\"" << path << "\" --pipe-name " << this->pipeName << " --sharedmem-name " << this->sharedmemName;
+			atom::stringstream_t ss;
+			ss << _T( "\"" ) << path << _T( "\" --pipe-name " ) << this->pipeName << _T( " --sharedmem-name " ) << this->sharedmemName;
 			this->proc.run( ss.str(), this->consoleSize.X, this->consoleSize.Y, true, true );
 #endif
 			this->pipe.connect();
@@ -116,7 +116,7 @@ void exit2cons() {
 }
 
 void bridge::proxy() {
-	this->proc.run( "cmd.exe", 0, 0, false, true );
+	this->proc.run( _T( "cmd.exe" ), 0, 0, false, true );
 	// read loop from pipe
 	if ( sharedmemConfigure( false ) ) {
 		if ( this->pipe.open( this->pipeName ) ) {
@@ -181,9 +181,15 @@ void bridge::proxy() {
 void  bridge::getLines( lines_t& lines ){
 	bool add = false;
 	for ( SHORT i = this->consoleSize.Y - 1; i >= 0; i-- ) {
-		char s[255] = { 0 };
+		atom::char_t s[255] = { 0 };
 		for ( SHORT j = 0; j < this->consoleSize.X; j++ ) {
-			s[j] = this->sharedmemBuffer[ i * this->consoleSize.X + j ].Char.AsciiChar;
+			s[j] = this->sharedmemBuffer[ i * this->consoleSize.X + j ].Char
+#ifdef UNICODE
+				.UnicodeChar
+#else
+				.AsciiChar
+#endif
+			;
 			if ( !add && s[j] && ( s[j] != ' ' ) ) {
 				add = true;
 			}
@@ -213,7 +219,7 @@ bool bridge::sharedmemConfigure( bool const create ){
 		this->sharedmem = sharedmem_t( 
 			new boost::interprocess::windows_shared_memory( 
 			boost::interprocess::create_only,
-			this->sharedmemName.c_str(),
+			atom::s2s<std::string>( this->sharedmemName ).c_str(),
 			boost::interprocess::read_write,
 			size )
 			);
@@ -221,7 +227,7 @@ bool bridge::sharedmemConfigure( bool const create ){
 		this->sharedmem = sharedmem_t( 
 			new boost::interprocess::windows_shared_memory(
 			boost::interprocess::open_only,
-			this->sharedmemName.c_str(),
+			atom::s2s<std::string>( this->sharedmemName ).c_str(),
 			boost::interprocess::read_write )
 			);
 	}

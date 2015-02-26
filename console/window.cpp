@@ -30,8 +30,8 @@ bool window::init() {
 	logger_ptr	l = get_slot< window2logger >().item();
 	pref_ptr	p = get_slot< window2pref >().item(); 
 	window_ptr	w = this->shared_from_this();
-	this->modes.push_back( boost::make_tuple( "Console", mode::create<shell>( l, p, w ) ) );
-	this->modes.push_back( boost::make_tuple( "Augmented desktop", mode::create<ar>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( _T( "Console" ), mode::create<shell>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( _T( "Augmented desktop" ), mode::create<ar>( l, p, w ) ) );
 	//
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
@@ -67,8 +67,8 @@ bool window::init() {
 	};
 	// prepare paint objects
 	//
-	std::string const d1( DELIM1 );
-	std::string const d2( DELIM2 );
+	atom::string_t const d1( DELIM1 );
+	atom::string_t const d2( DELIM2 );
 	//
 	static const struct font_t {
 		atom::po::id_t	opt;
@@ -80,8 +80,8 @@ bool window::init() {
 	//
 	BOOST_FOREACH( font_t const& font, fonts )
 	{
-		std::string s = this->getPref().get< std::string >( font.opt );
-		atom::attributes< TCHAR > a( s, d1, d2 );
+		atom::string_t s = boost::lexical_cast<atom::string_t>( this->getPref()->get< atom::po::string_t >( font.opt ) );
+		atom::attributes< atom::char_t > a( s, d1, d2 );
 		unsigned int height = a.as<unsigned int>(_T("height") );
 		unsigned int color = a.as_color( _T("color") );
 		//
@@ -99,7 +99,7 @@ bool window::init() {
 			CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY,
 			FIXED_PITCH,
-			a.as<std::string>(_T("name") ).c_str()
+			a.as<atom::string_t>(_T("name") ).c_str()
 			);
 		//
 		if ( f != NULL ) {
@@ -107,44 +107,44 @@ bool window::init() {
 			font.font.font = f;
 			font.font.color = color;
 		} else {
-			this->getLogger() << "Text font creation error: " << s << std::endl;
+			*(this->getLogger()) << "Text font creation error: " << s << std::endl;
 		}
 	}
 	//
-	this->paintParam.bk = CreateSolidBrush( this->getPref().get< unsigned int >( po_ui_bk_color ) );
+	this->paintParam.bk = CreateSolidBrush( this->getPref()->get< unsigned int >( po_ui_bk_color ) );
 
-	atom::attributes< TCHAR > padding( this->getPref().get< std::string >( po_ui_padding ), d1, d2 );
+	atom::attributes< atom::char_t > padding( boost::lexical_cast<atom::string_t>( this->getPref()->get< atom::po::string_t >( po_ui_padding ) ), d1, d2 );
 	unsigned int const pv = padding.as<unsigned int>(_T("size") );
 	SetRect( &this->paintParam.padding, pv, pv, pv, pv );
 
-	atom::attributes< TCHAR > border( this->getPref().get< std::string >( po_ui_border ), d1, d2 );
+	atom::attributes< atom::char_t > border( boost::lexical_cast<atom::string_t>( this->getPref()->get< atom::po::string_t >( po_ui_border ) ), d1, d2 );
 	this->paintParam.borderActive			= CreateSolidBrush( border.as_color( _T("color") ) );
 	this->paintParam.borderInactive			= CreateSolidBrush( border.as_color( _T("inactive") ) );
 	//
-	this->updatePlacement( false, true );
+	this->updatePlacement( false, false );
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->windowPlacement.destination ), style, ex_style ), true ) ) {
-		this->set_styles( WS_OVERLAPPED | WS_SYSMENU, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).setAlpha( this->getPref().get< unsigned int >( po_ui_alpha ) );
+		this->setStyles( WS_OVERLAPPED | WS_SYSMENU, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).setAlpha( this->getPref()->get< unsigned int >( po_ui_alpha ) );
 		//
 		UINT pos = 0;
 		BOOST_FOREACH( mode_item_t& m, modes ) {
-			this->sysMenuInsert( pos, MF_BYPOSITION | MF_STRING, SC_MODE_CMD + ( pos << 4 ), m.get<0>().c_str() );
+			this->sysMenuInsert( pos, MF_BYPOSITION | MF_STRING, SC_MODE_CMD + ( pos << 4 ), m.get<0>() );
 			pos++;
 		}
-		this->sysMenuInsert( pos, MF_BYPOSITION | MF_SEPARATOR, 0, "" );
+		this->sysMenuInsert( pos, MF_BYPOSITION | MF_SEPARATOR, 0, _T( "" ) );
 		this->modeSwitch( 1 );
 		//
 		hotkey new_hk;
-		if ( this->getPref().parseHotkey( po_hk_appear, new_hk ) ) {
+		if ( this->getPref()->parseHotkey( po_hk_appear, new_hk ) ) {
 			//
 			if ( new_hk != this->appearHotKey ) {
 				new_hk.id++;
-				if ( RegisterHotKey( this->get_hwnd(), new_hk.id, new_hk.mods, new_hk.vk )) {
-					if ( this->appearHotKey.id && !UnregisterHotKey( this->get_hwnd(), this->appearHotKey.id ) ) {
-						this->getLogger() << "Hotkey unregister error" << std::endl;
+				if ( RegisterHotKey( this->getHWND(), new_hk.id, new_hk.mods, new_hk.vk )) {
+					if ( this->appearHotKey.id && !UnregisterHotKey( this->getHWND(), this->appearHotKey.id ) ) {
+						*(this->getLogger()) << "Hotkey unregister error" << std::endl;
 					}
 					this->appearHotKey = new_hk; 
 				} else {
-					this->getLogger() << "Hotkey register error" << std::endl;
+					*(this->getLogger()) << "Hotkey register error" << std::endl;
 				}
 			}
 		}
@@ -166,7 +166,7 @@ bool window::init() {
 			{ po_hk_tty5,			CMDID_TTY5 },
 			{ po_hk_tty6,			CMDID_TTY6 }
 		};
-		this->getPref().parseAccel( tags, this->accel );
+		this->getPref()->parseAccel( tags, this->accel );
 		this->accel.build();
 		//
 		return true;
@@ -349,7 +349,7 @@ void window::updatePlacement( bool const visible, bool const fullScreen ) {
 	RECT rt = this->windowPlacement.destination;
 	this->windowPlacement.visible = visible;
 	this->windowPlacement.fullScreen = fullScreen;
-	this->getPref().calculateDocks( this->windowPlacement );
+	this->getPref()->calculateDocks( this->windowPlacement );
 	// update mem dc
 	SIZE sz;
 	sz.cx = RECT_WIDTH( this->windowPlacement.destination );
@@ -367,7 +367,7 @@ void window::slideBegin() {
 		//
 		this->windowPlacement.startTime =
 			this->windowPlacement.lastTime = timeGetTime();
-		SetTimer( this->get_hwnd(), this->windowPlacement.timerId, USER_TIMER_MINIMUM, NULL );
+		SetTimer( this->getHWND(), this->windowPlacement.timerId, USER_TIMER_MINIMUM, NULL );
 		this->show( true ).activate();
 	}
 }
@@ -396,7 +396,7 @@ void window::slideUpdate() {
 		bool const show = this->windowPlacement.visible;
 		RECT srect;
 		RECT drect = this->windowPlacement.destination;
-		GetWindowRect( this->get_hwnd(), &srect );
+		GetWindowRect( this->getHWND(), &srect );
 		//
 		BYTE salpha = 0;
 		BYTE dalpha = this->windowPlacement.alpha;
@@ -425,11 +425,11 @@ void window::slideUpdate() {
 				this->activate().inputCapture( keyboard );
 			}
 			this->currentMode->show( show );
-			KillTimer( this->get_hwnd(), this->windowPlacement.timerId );
+			KillTimer( this->getHWND(), this->windowPlacement.timerId );
 			this->windowPlacement.sliding = false;
 			this->invalidate();
 		}
-		MoveWindow( this->get_hwnd(), rt.left, rt.top, RECT_WIDTH( rt ), RECT_HEIGHT( rt ), TRUE );
+		MoveWindow( this->getHWND(), rt.left, rt.top, RECT_WIDTH( rt ), RECT_HEIGHT( rt ), TRUE );
 		this->setAlpha( alpha );
 	}
 }

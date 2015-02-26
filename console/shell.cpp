@@ -118,8 +118,8 @@ void shell::paint( paint_param_t& paintParam, RECT const& rect ) {
 			{
 				SelectObject( dc, pp.sysFont.font);
 				SetTextColor( dc, pp.sysFont.color );
-				std::stringstream ss;
-				ss << " #" << f->get_index();
+				atom::stringstream_t ss;
+				ss << _T( " #" ) << f->get_index();
 				DrawText( dc, ss.str().c_str(), -1, &rt, DT_RIGHT | DT_TOP | DT_SINGLELINE );
 				//
 				SelectObject( dc, pp.textFont.font );

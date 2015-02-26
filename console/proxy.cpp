@@ -17,13 +17,13 @@ int main( int argc, char *argv[] )
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		atom::po po;
 		atom::po::options_description_t& desc = po.add_desc( 0, "proxy options" );
-		std::string pipe_name;
-		std::string sharedmem_name;
+		atom::string_t pipe_name;
+		atom::string_t sharedmem_name;
 		//unsigned int csb_width = 0;
 		//unsigned int csb_height = 0;
 		//
-		po.add_option( 1, "pipe-name,p", "pipe name", desc, boost::program_options::value<std::string>( &pipe_name ) );
-		po.add_option( 2, "sharedmem-name,s", "shared memory name", desc, boost::program_options::value<std::string>( &sharedmem_name ) );
+		po.add_option( 1, "pipe-name,p", "pipe name", desc, boost::program_options::value<atom::string_t>( &pipe_name ) );
+		po.add_option( 2, "sharedmem-name,s", "shared memory name", desc, boost::program_options::value<atom::string_t>( &sharedmem_name ) );
 		try {
 			po.parse_arg( argc, argv, desc, true );
 			//

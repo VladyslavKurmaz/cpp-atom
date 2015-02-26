@@ -11,12 +11,12 @@ class bridge : public boost::noncopyable {
 		sharedmem_region_t;
 
 public:
-	typedef std::deque< std::string >
+	typedef std::deque< atom::string_t >
 		lines_t;
 	//
 	explicit bridge( COORD const& sz );
 	//
-	explicit bridge( COORD const& sz, std::string const& shname, std::string const& pname );
+	explicit bridge( COORD const& sz, atom::string_t const& shname, atom::string_t const& pname );
 	//
 	~bridge();
 	//
@@ -45,12 +45,12 @@ private:
 	//
 	COORD
 		consoleSize;
-	std::string
+	atom::string_t
 		sharedmemName;
-	std::string
+	atom::string_t
 		pipeName;
 	//
-	atom::proc<TCHAR>
+	atom::proc
 		proc;
 	//
 	sharedmem_t

@@ -4,6 +4,7 @@
 
 
 #include <windows.h>
+#include <commctrl.h>
 
 #include <iostream>
 #include <algorithm>
@@ -18,11 +19,16 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
 #include "boost/tuple/tuple.hpp"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/locale.hpp>
 
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
 
 
+#include <atom/util/cast.hpp>
+#include <atom/strs.hpp>
 #include <atom/util/log.hpp>
 #include <atom/node/tldefs.hpp>
 #include <atom/node/node.hpp>
@@ -32,16 +38,9 @@
 #include <atom/util/waccel.hpp>
 #include <atom/util/ptr.hpp>
 #include <atom/util/pipe.hpp>
-#include <atom/util/cast.hpp>
 #include <atom/util/proc.hpp>
 
 #undef max
-
-#ifdef UNICODE
-#define TXT( x )  L ## x
-#else
-#define TXT( x )  x
-#endif
 
 #define RECT_WIDTH( r ) ( (r).right - (r).left )
 #define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
@@ -197,8 +196,8 @@ extern const size_t conf_cmds_cnt;
 extern const TCHAR DELIM1[];
 extern const TCHAR DELIM2[];
 
-std::string gen_uuid();
+atom::string_t gen_uuid();
 
 bool getConsoleSize( COORD& size, SMALL_RECT& view );
 
-bool bitmapSave( LPTSTR pszFile, HDC hDC, HBITMAP hBmp );
+bool bitmapSave( atom::string_t const& file, HDC hDC, HBITMAP hBmp );

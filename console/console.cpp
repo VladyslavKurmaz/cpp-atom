@@ -8,6 +8,7 @@
 #include "./bridge.hpp"
 #include "./appl.hpp"
 
+
 #ifdef STANDALONE
 void standaloneThread() {
 	SIZE size = { 0 };
@@ -21,6 +22,10 @@ void standaloneThread() {
 int main( int argc, char *argv[] )
 {
 	CoInitialize( NULL );
+	INITCOMMONCONTROLSEX icex;
+	icex.dwICC = ICC_LISTVIEW_CLASSES;
+	InitCommonControlsEx( &icex );
+
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 #ifndef STANDALONE
 		FreeConsole();

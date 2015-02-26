@@ -30,6 +30,10 @@ typedef boost::shared_ptr< window >
 	window_ptr;
 #define WINDOW_ACCESSOR( t )	window_ptr getWindow() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
 //
+class panel;
+typedef boost::shared_ptr< panel >
+	panel_ptr;
+//
 class appl;
 typedef boost::shared_ptr< appl >
 	appl_ptr;

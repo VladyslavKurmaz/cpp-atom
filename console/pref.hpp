@@ -26,25 +26,22 @@ public:
 	///
 	~pref();
 	///
-	bool
-	init( int argc, char const * const argv[] );
+	bool init( int argc, char const * const argv[] );
 	///
-	void
-	register_process_callback( pref_group_t const g, callback_t c );
+	void register_process_callback( pref_group_t const g, callback_t c );
 	///
-	bool
-	parse( std::string const& s );
+	bool parse( atom::string_t const& s );
 	///
 	template <typename T >
 	T get( atom::po::id_t const id ) {
 		return ( this->po.as<T>( id ) );
 	}
 	//
-	void
-		calculateDocks( placement& windowPlacement );
+	void getView( RECT& r );
 	//
-	bool
-		parseHotkey( atom::po::id_t const id, hotkey& hk );
+	void calculateDocks( placement& windowPlacement );
+	//
+	bool parseHotkey( atom::po::id_t const id, hotkey& hk );
 
 	///
 	struct opt2cmd_t {
@@ -54,38 +51,38 @@ public:
 	template < size_t N >
 	void parseAccel( opt2cmd_t const (&tags)[N], atom::accel& accel ) {
 
-		static atom::parse_tag< TCHAR, BYTE > const accel_tags[] = {
-			{ "alt",		FALT },
-			{ "ctrl",		FCONTROL },
-			{ "shift",		FSHIFT }
+		static atom::parse_tag< atom::char_t, BYTE > const accel_tags[] = {
+			{ _T( "alt" ),			FALT },
+			{ _T( "ctrl" ),			FCONTROL },
+			{ _T( "shift" ),		FSHIFT }
 		};
 		static size_t const accel_tags_count = sizeof( accel_tags ) / sizeof( accel_tags[0] );
 
-		static atom::parse_tag< TCHAR, WORD > const vk_tags[] = {
-			{ "tab",		VK_TAB },
-			{ "break",		VK_CANCEL },
-			{ "return",		VK_RETURN },
-			{ "enter",		VK_RETURN },
-			{ "f1",			VK_F1 },
-			{ "f2",			VK_F2 },
-			{ "f3",			VK_F3 },
-			{ "f4",			VK_F4 },
-			{ "f5",			VK_F5 },
-			{ "f6",			VK_F6 },
-			{ "f7",			VK_F7 },
-			{ "f8",			VK_F8 },
-			{ "f9",			VK_F9 },
-			{ "f10",		VK_F10 }
+		static atom::parse_tag< atom::char_t, WORD > const vk_tags[] = {
+			{ _T( "tab" ),			VK_TAB },
+			{ _T( "break" ),		VK_CANCEL },
+			{ _T( "return" ),		VK_RETURN },
+			{ _T( "enter" ),		VK_RETURN },
+			{ _T( "f1" ),			VK_F1 },
+			{ _T( "f2" ),			VK_F2 },
+			{ _T( "f3" ),			VK_F3 },
+			{ _T( "f4" ),			VK_F4 },
+			{ _T( "f5" ),			VK_F5 },
+			{ _T( "f6" ),			VK_F6 },
+			{ _T( "f7" ),			VK_F7 },
+			{ _T( "f8" ),			VK_F8 },
+			{ _T( "f9" ),			VK_F9 },
+			{ _T( "f10" ),			VK_F10 }
 		};
 		static size_t const vk_tags_count = sizeof( vk_tags ) / sizeof( vk_tags[0] );
 		//
 		BOOST_FOREACH( opt2cmd_t const& tag, tags )
 		{
-			std::string s = this->get< std::string >( tag.opt );
-			atom::parse_result< TCHAR, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, std::string( "+" ) );
+			atom::string_t s = boost::lexical_cast<atom::string_t>( this->get< atom::po::string_t >( tag.opt ) );
+			atom::parse_result< atom::char_t, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, atom::string_t( _T( "+" ) ) );
 			//
 			if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
-				atom::parse_result< TCHAR, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
+				atom::parse_result< atom::char_t, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
 				if ( ( vk.total_found = 1 ) && ( vk.unparsed.size() == 0 ) ) {
 				} else {
 					vk.result = (WORD)mods.unparsed[0].c_str()[0];

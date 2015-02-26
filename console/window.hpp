@@ -23,10 +23,10 @@ ATOM_DEF_CAPTURECHANGED( window )
 ATOM_DEF_ONSYSCOMMAND( window )
 
 
-class window :	public atom::wwindow< window, LOKI_TYPELIST_14( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t, onlbuttondown_pair_t, onlbuttonup_pair_t, onmousemove_pair_t, oncapturechanged_pair_t, onsyscommand_pair_t ) >,
+class window :	public atom::wwindow< window, LOKI_TYPELIST_14( window_onkeydown_pair_t, window_onkeyup_pair_t, window_onchar_pair_t, window_onhotkey_pair_t, window_onpaint_pair_t, window_onclose_pair_t, window_onsettingchange_pair_t, window_ontimer_pair_t, window_oncommand_pair_t, window_onlbuttondown_pair_t, window_onlbuttonup_pair_t, window_onmousemove_pair_t, window_oncapturechanged_pair_t, window_onsyscommand_pair_t ) >,
 				public atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >,
 				public boost::enable_shared_from_this< window > {
-	typedef atom::wwindow< window, LOKI_TYPELIST_14( onkeydown_pair_t, onkeyup_pair_t, onchar_pair_t, onhotkey_pair_t, onpaint_pair_t, onclose_pair_t, onsettingchange_pair_t, ontimer_pair_t, oncommand_pair_t, onlbuttondown_pair_t, onlbuttonup_pair_t, onmousemove_pair_t, oncapturechanged_pair_t, onsyscommand_pair_t ) >
+	typedef atom::wwindow< window, LOKI_TYPELIST_14( window_onkeydown_pair_t, window_onkeyup_pair_t, window_onchar_pair_t, window_onhotkey_pair_t, window_onpaint_pair_t, window_onclose_pair_t, window_onsettingchange_pair_t, window_ontimer_pair_t, window_oncommand_pair_t, window_onlbuttondown_pair_t, window_onlbuttonup_pair_t, window_onmousemove_pair_t, window_oncapturechanged_pair_t, window_onsyscommand_pair_t ) >
 		base_window_t;
 	typedef atom::node< LOKI_TYPELIST_2( window2logger, window2pref ) >
 		base_node_t;
@@ -76,16 +76,8 @@ public:
 	void onSysCommand( HWND hWnd, UINT cmd, int x, int y );
 
 protected:
-	//
-	logger&
-	getLogger() { return ( *( get_slot< window2logger >().item() ) ); }
-	logger_ptr
-	getLoggerPtr() { return ( get_slot< window2logger >().item() ); }
-	//
-	pref&
-	getPref() { return ( *( get_slot< window2pref >().item() ) ); }
-	pref_ptr
-	getPrefPtr() { return ( get_slot< window2pref >().item() ); }
+	LOGGER_ACCESSOR( window2logger )
+	PREF_ACCESSOR( window2pref )
 	//
 	void
 	toggleVisibility();
@@ -117,7 +109,7 @@ private:
 	paint_param_t
 		paintParam;
 	//
-	typedef boost::tuple< std::string, mode_ptr >
+	typedef boost::tuple< atom::string_t, mode_ptr >
 		mode_item_t;
 	typedef std::vector< mode_item_t >
 		modes_t;

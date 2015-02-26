@@ -33,7 +33,8 @@ private:
 	//
 	atom::rectCtrl ctrl;
 	//
-	HWND hStatic;
+	panel_ptr
+		arPanel;
 
 	friend mode;
 };

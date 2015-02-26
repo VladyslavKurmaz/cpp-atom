@@ -1,6 +1,7 @@
 #include "./pch.hpp"
 
 #pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "Comctl32.lib")
 
 // https://connect.microsoft.com/PowerShell/feedback/details/572313/powershell-exe-can-hang-if-stdin-is-redirected
 // http://en.wikipedia.org/wiki/ANSI_escape_code
@@ -28,18 +29,20 @@ const conf_cmd_t conf_cmds[] = {
 };
 const size_t conf_cmds_cnt = sizeof( conf_cmds ) / sizeof( conf_cmds[0] );
 
-const TCHAR DELIM1[] = _T( ";" );
-const TCHAR DELIM2[] = _T( ":" );
+const atom::char_t DELIM1[] = _T( ";" );
+const atom::char_t DELIM2[] = _T( ":" );
 
 int atom::node_cnt = 0;
 
-
-std::string gen_uuid() {
+atom::string_t gen_uuid() {
 	GUID guid;
 	CoCreateGuid( &guid );
-	std::stringstream gss;
-	gss << guid;
-	return ( gss.str() );
+
+	OLECHAR* bstr;
+	::StringFromCLSID( guid, &bstr );
+	atom::string_t s = std::wstring( bstr );
+	::CoTaskMemFree( bstr );
+	return ( s );
 }
 
 bool getConsoleSize( COORD& size, SMALL_RECT& view ) {
@@ -61,7 +64,7 @@ void window::processAutostart() {
 
 */
 
-bool bitmapSave( LPTSTR pszFile, HDC hDC, HBITMAP hBmp ) {
+bool bitmapSave( atom::string_t const& file, HDC hDC, HBITMAP hBmp ) {
 	bool result = false;
 
 	BITMAP bmp; 
@@ -135,7 +138,7 @@ bool bitmapSave( LPTSTR pszFile, HDC hDC, HBITMAP hBmp ) {
 			if ( GetDIBits(hDC, hBmp, 0, (WORD) pbih->biHeight, lpBits, pbmi, DIB_RGB_COLORS)) {
 
 				// Create the .BMP file.  
-				hf = CreateFile(pszFile, 
+				hf = CreateFile( file.c_str(), 
 					GENERIC_READ | GENERIC_WRITE, 
 					(DWORD) 0, 
 					NULL, 

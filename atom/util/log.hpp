@@ -45,16 +45,8 @@ namespace atom {
 	private:
 	protected:
 		///
-		typedef char
-			char_t;
-		typedef std::basic_string< char_t >
-			string_t;
 		typedef log
 			log_t;
-		typedef std::basic_ostream< char_t >
-			ostream_t;
-		typedef std::basic_ofstream< char_t >
-			ofstream_t;
 		///
 		typedef std::vector< boost::reference_wrapper< ostream_t > >
 			streams_t;
@@ -78,7 +70,13 @@ namespace atom {
 		  ///
 		  log_t& add_std_cout()
 		  {
-			  this->add_stream( std::cout );
+			  this->add_stream(
+#ifdef UNICODE
+				  std::wcout
+#else
+				  std::cout
+#endif
+				  );
 			  return ( *this );
 		  }
 		  ///
@@ -95,7 +93,8 @@ namespace atom {
 			  return ( *this );
 		  }
 		  ///
-		  void write( char const* _str, size_t const _str_len )
+		  template < typename T >
+		  void write( T const* _str, size_t const _str_len )
 		  {
 #if 0
 			  struct s
@@ -122,7 +121,7 @@ namespace atom {
 		  }
 		  ///
 		  template< typename T > friend log& operator<<( log& l, T const& t );
-		  friend log& operator<<( log& l, std::ostream&(*pfn)(std::ostream&) );
+		  friend log& operator<<( log& l, ostream_t&(*pfn)(ostream_t&) );
 		  friend log& operator<<( log& l, std::ios_base&(*pfn)(std::ios_base&) );
 	};
 	///
@@ -132,7 +131,7 @@ namespace atom {
 	{
 		struct _
 		{
-			void __( boost::reference_wrapper< std::ostream >& s, T const& t )
+			void __( boost::reference_wrapper< ostream_t >& s, T const& t )
 			{ s.get() << t; }
 		} ___;
 		//
@@ -143,7 +142,14 @@ namespace atom {
 		return l;
 	}
 	///
-	inline log& operator<<( log& l, std::ostream&(*pfn)(std::ostream&) )
+	template<>
+	inline log& operator<< <std::string>( log& l, std::string const& t )
+	{
+		l << s2s<string_t>( t );
+		return l;
+	}
+	///
+	inline log& operator<<( log& l, ostream_t&(*pfn)(ostream_t&) )
 	{
 #if 0
 		struct _

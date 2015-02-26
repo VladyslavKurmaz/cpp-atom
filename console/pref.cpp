@@ -157,7 +157,7 @@ bool operator!=( const boost::any & lhs, const boost::any & rhs ){
 	return ( !( lhs == rhs ) );
 }
 
-bool pref::parse( std::string const& s ) {
+bool pref::parse( atom::string_t const& s ) {
 	atom::po npo = this->po;
 	//
 	atom::po::options_description_t& desc = npo.get_desc( 0 );
@@ -200,35 +200,41 @@ bool pref::parse( std::string const& s ) {
 	return true;
 }
 
+void pref::getView( RECT& r ) {
+	SetRect( &r, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
+	if ( this->get< bool >( po_ui_clip ) ) {
+		SystemParametersInfo( SPI_GETWORKAREA, 0, &r, 0 );
+	}
+}
+
 
 void pref::calculateDocks( placement& windowPlacement ) {
 	//
-	static atom::parse_tag< TCHAR, alignment::type > alignment_tags[] = {
-		{ "hcenter",	alignment::hcenter },
-		{ "left",		alignment::left },
-		{ "right",		alignment::right },
-		{ "hclient",	alignment::hclient },
-		{ "hmask",		alignment::hmask },
-		{ "vcenter",	alignment::vcenter },
-		{ "top",		alignment::top },
-		{ "bottom",		alignment::bottom },
-		{ "vclient",	alignment::vclient },
-		{ "vmask",		alignment::vmask },
-		{ "client",		alignment::client },
-		{ "center",		alignment::center }
+	static atom::parse_tag< atom::char_t, alignment::type > alignment_tags[] = {
+		{ _T( "hcenter" ),		alignment::hcenter },
+		{ _T( "left" ),			alignment::left },
+		{ _T( "right" ),		alignment::right },
+		{ _T( "hclient" ),		alignment::hclient },
+		{ _T( "hmask" ),		alignment::hmask },
+		{ _T( "vcenter" ),		alignment::vcenter },
+		{ _T( "top" ),			alignment::top },
+		{ _T( "bottom" ),		alignment::bottom },
+		{ _T( "vclient" ),		alignment::vclient },
+		{ _T( "vmask" ),		alignment::vmask },
+		{ _T( "client" ),		alignment::client },
+		{ _T( "center" ),		alignment::center }
 	};
 	static size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
 	//
-	std::string const alig_str	= this->get< std::string >( po_ui_alignment );
+	atom::string_t const alig_str	= boost::lexical_cast<atom::string_t>( this->get< atom::po::string_t >( po_ui_alignment ) );
 
 	unsigned int const width	= ( windowPlacement.fullScreen )?( 100 ):( this->get< unsigned int >( po_ui_width ) );
 	unsigned int const height	= ( windowPlacement.fullScreen )?( 100 ):( this->get< unsigned int >( po_ui_height ) );
-	bool const clip				= this->get< bool >( po_ui_clip );
 
 	windowPlacement.timeout = this->get< unsigned int>( po_ui_timeout );
 	//
 	alignment::type align = alignment::client;
-	atom::parse_result< TCHAR, alignment::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, std::string( "+" ) );
+	atom::parse_result< atom::char_t, alignment::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, atom::string_t( _T( "+" ) ) );
 	//
 	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
 		align = result.result;
@@ -239,11 +245,7 @@ void pref::calculateDocks( placement& windowPlacement ) {
 	//
 
 	RECT rt;
-	//
-	SetRect( &rt, 0, 0, GetSystemMetrics( SM_CXSCREEN ), GetSystemMetrics( SM_CYSCREEN ) );
-	if ( clip ) {
-		SystemParametersInfo( SPI_GETWORKAREA, 0, &rt, 0 );
-	}
+	this->getView( rt );
 	//
 	alignment::type const h_align = align & alignment::hmask;
 	alignment::type const v_align = align & alignment::vmask;
@@ -289,23 +291,23 @@ void pref::calculateDocks( placement& windowPlacement ) {
 }
 
 bool pref::parseHotkey( atom::po::id_t const id, hotkey& hk ) {
-	static atom::parse_tag< TCHAR, UINT > const hotkey_tags[] = {
-		{ "win",	MOD_WIN },
-		{ "ctrl",	MOD_CONTROL },
-		{ "alt",	MOD_ALT },
-		{ "shift",	MOD_SHIFT }
+	static atom::parse_tag< atom::char_t, UINT > const hotkey_tags[] = {
+		{ _T( "win" ),		MOD_WIN },
+		{ _T( "ctrl" ),		MOD_CONTROL },
+		{ _T( "alt" ),		MOD_ALT },
+		{ _T( "shift" ),	MOD_SHIFT }
 	};
 	static size_t const hotkey_tags_count = sizeof( hotkey_tags ) / sizeof( hotkey_tags[0] );
 	//
-	atom::parse_result< TCHAR, UINT > result = atom::parse_tags( this->get< std::string >( id ), hotkey_tags, hotkey_tags_count, std::string( "+" ) );
+	atom::parse_result< atom::char_t, UINT > result = atom::parse_tags( boost::lexical_cast<atom::string_t>( this->get< atom::po::string_t >( id ) ), hotkey_tags, hotkey_tags_count, atom::string_t( _T( "+" ) ) );
 	if ( ( result.total_found > 1 ) && ( result.unparsed.size() == 1 ) ) {
 		hk.mods = MOD_NOREPEAT | result.result;
 		try {
-			std::stringstream ss;
+			atom::stringstream_t ss;
 			ss << result.unparsed[0];
 			ss >> hk.vk;
 			if ( !hk.vk ) {
-				std::stringstream ss;
+				atom::stringstream_t ss;
 				ss << result.unparsed[0];
 				ss >> std::hex >> hk.vk;
 			}

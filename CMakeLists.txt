@@ -2,8 +2,8 @@
 cmake_minimum_required( VERSION 2.6 )
 project( cpp-atom )
 
-#add_definitions(-DUNICODE -D_UNICODE)
-add_definitions("/EHsc")
+add_definitions(-DUNICODE -D_UNICODE)
+#add_definitions("/EHsc")
 
 
 
