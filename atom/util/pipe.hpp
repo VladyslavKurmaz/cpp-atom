@@ -37,15 +37,15 @@ namespace atom {
 			close();
 		}
 		///
-		std::string get_name() const {
+		string_t get_name() const {
 			return ( this->name ); }
 		///
-		bool create( std::string const & name ) {
+		bool create( string_t const & name ) {
 			if ( !this->is_valid() ) {
 				server = true;
 				this->name = name;
-				std::stringstream ss;
-				ss << "\\\\.\\pipe\\" << this->name;
+				stringstream_t ss;
+				ss << _T("\\\\.\\pipe\\") << this->name;
 				this->p = CreateNamedPipe( 
 					ss.str().c_str(),           // pipe name 
 					PIPE_ACCESS_DUPLEX,			// read/write access 
@@ -68,11 +68,11 @@ namespace atom {
 			return false;
 		}
 		///
-		bool open( std::string const & name ) {
+		bool open( string_t const & name ) {
 			if ( !this->is_valid() ) {
 				this->name = name;
-				std::stringstream ss;
-				ss << "\\\\.\\pipe\\" << this->name;
+				stringstream_t ss;
+				ss << _T( "\\\\.\\pipe\\" ) << this->name;
 				this->p = CreateFile( 
 					ss.str().c_str(),   // pipe name 
 					GENERIC_READ |  // read and write access 
@@ -139,7 +139,7 @@ namespace atom {
 		HANDLE
 			p;
 		///
-		std::string
+		string_t
 			name;
 		///
 		bool

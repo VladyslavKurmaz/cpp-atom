@@ -40,6 +40,16 @@
 									std::pair< I1, DEFLIST_8( I2, I3, I4, I5, I6, I7, I8, I9 ) >
 #define	DEFLIST_10( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10 ) \
 									std::pair< I1, DEFLIST_9( I2, I3, I4, I5, I6, I7, I8, I9, I10 ) >
+#define	DEFLIST_11( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11 ) \
+									std::pair< I1, DEFLIST_10( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11 ) >
+#define	DEFLIST_12( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12 ) \
+									std::pair< I1, DEFLIST_11( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12 ) >
+#define	DEFLIST_13( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13 ) \
+									std::pair< I1, DEFLIST_12( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13 ) >
+#define	DEFLIST_14( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14 ) \
+									std::pair< I1, DEFLIST_13( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14 ) >
+#define	DEFLIST_15( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15 ) \
+									std::pair< I1, DEFLIST_14( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15 ) >
 
 #define	INITLIST_0 \
 									::Loki::NullType()
@@ -63,5 +73,15 @@
 									std::make_pair( I1, INITLIST_8( I2, I3, I4, I5, I6, I7, I8, I9 ) )
 #define	INITLIST_10( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10 ) \
 									std::make_pair( I1, INITLIST_9( I2, I3, I4, I5, I6, I7, I8, I9, I10 ) )
+#define	INITLIST_11( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11 ) \
+									std::make_pair( I1, INITLIST_10( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11 ) )
+#define	INITLIST_12( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12 ) \
+									std::make_pair( I1, INITLIST_11( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12 ) )
+#define	INITLIST_13( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13 ) \
+									std::make_pair( I1, INITLIST_12( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13 ) )
+#define	INITLIST_14( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14 ) \
+									std::make_pair( I1, INITLIST_13( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14 ) )
+#define	INITLIST_15( I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15 ) \
+									std::make_pair( I1, INITLIST_14( I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15 ) )
 
 #endif //ATOM_NODE_TLDEFS_HPP
