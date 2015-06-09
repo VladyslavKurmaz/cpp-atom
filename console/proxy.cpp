@@ -9,6 +9,8 @@ void wait_please() {
 
 int main( int argc, char *argv[] )
 {
+	ShowWindow( GetConsoleWindow(), SW_HIDE );
+	//
 	std::cout << "*proxy stared" << std::endl;
 	for ( int i = 0; i < argc; ++i ) {
 		std::cout << "-[" << i << "]:\t" << argv[i] << std::endl;

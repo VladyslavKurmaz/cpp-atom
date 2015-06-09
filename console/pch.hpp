@@ -35,15 +35,17 @@
 #include <atom/util/dbg.hpp>
 #include <atom/util/po.hpp>
 #include <atom/util/wwindow.hpp>
+#include <atom/util/wctrls.hpp>
 #include <atom/util/waccel.hpp>
 #include <atom/util/ptr.hpp>
 #include <atom/util/pipe.hpp>
 #include <atom/util/proc.hpp>
 
+
+#include "resource.h"
+
 #undef max
 
-#define RECT_WIDTH( r ) ( (r).right - (r).left )
-#define RECT_HEIGHT( r ) ( (r).bottom - (r).top )
 
 
 
@@ -55,6 +57,32 @@ extern const std::string TEST_SHAREDMEM_NAME;
 #endif
 
 #define WM_FRAMEEXIT	WM_USER+1
+
+
+// Augmented desktop panel
+// ad-panel controls
+static unsigned int const	AD_PANEL_TOOLBAR			=	10000;
+static unsigned int const	AD_PANEL_LISTVIEW			=	AD_PANEL_TOOLBAR + 1;
+
+// ad-panel commands
+static unsigned int const	AD_PANEL_TB_PIN				=	0x0800;
+static unsigned int const	AD_PANEL_TB_LANG_FROM		=	AD_PANEL_TB_PIN + 1;
+static unsigned int const	AD_PANEL_TB_LANG_SWAP		=	AD_PANEL_TB_LANG_FROM + 1;
+static unsigned int const	AD_PANEL_TB_LANG_TO			=	AD_PANEL_TB_LANG_SWAP + 1;
+static unsigned int const	AD_PANEL_TB_DELETE			=	AD_PANEL_TB_LANG_TO + 1;
+static unsigned int const	AD_PANEL_TB_LANGUAGE		=	AD_PANEL_TB_DELETE + 1;
+
+// ad-panel images
+static int const			AD_PANEL_IMAGE_PIN			=	0;
+static int const			AD_PANEL_IMAGE_SWAP			=	AD_PANEL_IMAGE_PIN + 1;
+static int const			AD_PANEL_IMAGE_DELETE		=	AD_PANEL_IMAGE_SWAP + 1;
+static int const			AD_PANEL_IMAGE_LANG_FIRST	=	AD_PANEL_IMAGE_DELETE + 1;
+static int const			AD_PANEL_IMAGE_LANG_EN		=	AD_PANEL_IMAGE_LANG_FIRST;
+static int const			AD_PANEL_IMAGE_LANG_UA		=	AD_PANEL_IMAGE_LANG_EN + 1;
+static int const			AD_PANEL_IMAGE_LANG_RU		=	AD_PANEL_IMAGE_LANG_UA + 1;
+static int const			AD_PANEL_IMAGE_LANG_LAST	=	AD_PANEL_IMAGE_LANG_RU;
+static int const			AD_PANEL_IMAGE_LANG_COUNT	=	AD_PANEL_IMAGE_LANG_LAST - AD_PANEL_IMAGE_LANG_FIRST + 1;
+
 
 typedef unsigned int
 	frame_id_t;

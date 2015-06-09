@@ -22,8 +22,10 @@ void standaloneThread() {
 int main( int argc, char *argv[] )
 {
 	CoInitialize( NULL );
+	//InitCommonControls();
 	INITCOMMONCONTROLSEX icex;
-	icex.dwICC = ICC_LISTVIEW_CLASSES;
+	icex.dwSize = sizeof( icex );
+	icex.dwICC = ICC_WIN95_CLASSES | ICC_LISTVIEW_CLASSES;
 	InitCommonControlsEx( &icex );
 
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {

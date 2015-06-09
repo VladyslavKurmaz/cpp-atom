@@ -8,11 +8,15 @@ class panel;
 
 ATOM_DEF_ONPAINT( panel )
 ATOM_DEF_ONSIZE( panel )
+ATOM_DEF_ONNOTIFY( panel )
+ATOM_DEF_ONCOMMAND( panel )
 
-class panel :	public atom::wwindow< panel, LOKI_TYPELIST_2( panel_onpaint_pair_t, panel_onsize_pair_t ) >,
+
+
+class panel :	public atom::wwindow< panel, LOKI_TYPELIST_4( panel_onpaint_pair_t, panel_onsize_pair_t, panel_onnotify_pair_t,  panel_oncommand_pair_t ) >,
 				public atom::node< LOKI_TYPELIST_2( panel2logger, panel2pref ) >,
 				public boost::enable_shared_from_this< panel > {
-	typedef atom::wwindow< panel, LOKI_TYPELIST_2( panel_onpaint_pair_t, panel_onsize_pair_t ) >
+	typedef atom::wwindow< panel, LOKI_TYPELIST_4( panel_onpaint_pair_t, panel_onsize_pair_t, panel_onnotify_pair_t, panel_oncommand_pair_t ) >
 		base_panel_t;
 	typedef atom::node< LOKI_TYPELIST_2( panel2logger, panel2pref ) >
 		base_node_t;
@@ -34,14 +38,27 @@ public:
 	void onPaint( HWND hWnd );
 	///
 	void onSize( HWND hWnd, UINT state, int cx, int cy );
+	///
+	void onNotify( int id, LPNMHDR lpnm );
+	///
+	void onCommand( int id, HWND hwndCtl, UINT codeNotify );
 
 protected:
 	LOGGER_ACCESSOR( panel2logger )
 	PREF_ACCESSOR( panel2pref )
+	///
+	void popupLangMenu( int const id );
+	///
+	void updateLangsImages();
+
 
 private:
-	HWND
-		hListView;
+	///
+	atom::wImageList imageList;
+	///
+	atom::wctrlListView listView;
+	///
+	atom::wctrlToolbar toolbar;
 	///
 	panel( logger_ptr l, pref_ptr p );
 };

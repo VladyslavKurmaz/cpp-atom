@@ -63,7 +63,7 @@ public:
 	///
 	void onTimer( HWND hWnd, UINT id );
 	///
-	void onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify );
+	void onCommand( int id, HWND hwndCtl, UINT codeNotify );
 	//
 	void onLBDown( HWND, BOOL, int, int, UINT );
 	//

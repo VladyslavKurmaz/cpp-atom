@@ -10,8 +10,8 @@ add_definitions(-DUNICODE -D_UNICODE)
 # Inc/Lib
 include_directories( "./" )
 
-include_directories( "$ENV{DEV_BOOST-1.57.0_INC}" )
-link_directories( "$ENV{DEV_BOOST-1.57.0_LIB}" )
+include_directories( "$ENV{DEV_BOOST-1.58.0_INC}" )
+link_directories( "$ENV{DEV_BOOST-1.58.0_LIB}" )
 
 include_directories( "$ENV{DEV_LOKI-0.1.7_INC}" )
 

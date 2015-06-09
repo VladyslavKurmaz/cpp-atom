@@ -28,6 +28,8 @@ default -> shared -> global -> user -> local
 	pref::pref( logger_ptr l ) :
 	base_t()
 	,	po()
+	,	langsPair()
+	,	langs()
 	,	prefGroups()
 	,	processCallbacks()
 {
@@ -80,11 +82,12 @@ default -> shared -> global -> user -> local
 		add_option( po_ui_width,		"ui.width",			"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
 		add_option( po_ui_height,		"ui.height",		"",
-		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 10 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
 		add_option( po_ui_clip,			"ui.clip",			"",
-		desc,	boost::program_options::value<bool>()->default_value( true ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<bool>()->default_value( false ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
 		add_option( po_ui_alpha,		"ui.alpha",			"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 0x40 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
+		//desc,	boost::program_options::value<unsigned int>()->default_value( 0xF0 ))( ( id2gr( po_ui_alpha, pgUI ), 0 ) ).
 		add_option( po_ui_bk_color,		"ui.bk-color",		"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 0x0F0F0F ) )( ( id2gr( po_ui_bk_color, pgUI ), 0 ) ).
 		add_option( po_ui_lines_count,	"ui.lines-count",	"",
@@ -106,6 +109,17 @@ default -> shared -> global -> user -> local
 		//[ui.scroll.*]
 		add_option( po_ui_scroll,		"ui.scroll",		"",
 		desc,	boost::program_options::value<std::string>()->default_value( "size:2;color:008000" ) )( ( id2gr( po_ui_scroll, pgUI ), 0 ) );
+	///
+	///
+	lang_t const en = boost::make_tuple( _T("eng"), _T("en"), _T("English"), AD_PANEL_IMAGE_LANG_EN );
+	lang_t const ua = boost::make_tuple( _T("ukr"), _T("uk"), _T("Український"), AD_PANEL_IMAGE_LANG_UA );
+	lang_t const ru = boost::make_tuple( _T("rus"), _T("ru"), _T("Русский"), AD_PANEL_IMAGE_LANG_RU );
+
+	this->langs.push_back( en );
+	this->langs.push_back( ua );
+	this->langs.push_back( ru );
+	//
+	this->langSetPair( std::make_pair( en, ru ) );
 }
 
 pref::~pref() {
@@ -319,4 +333,31 @@ bool pref::parseHotkey( atom::po::id_t const id, hotkey& hk ) {
 	}
 
 	return false;
+}
+
+void pref::langSetPair( langspair_t const& lngs ) {
+	this->langsPair = lngs;
+}
+
+pref::langspair_t pref::langGetPair() const {
+	return this->langsPair;
+}
+
+void pref::langSetLang( bool const from, size_t const ind ) {
+	if ( ( 0 <= ind ) && ( ind < this->langs.size() ) ) {
+		lang_t l = this->langs[ind];
+		if ( from ) {
+			this->langsPair.first = l;
+		} else {
+			this->langsPair.second = l;
+		}
+	}
+}
+
+void pref::langEnum( boost::function< bool( lang_t const& ) > func ) const {
+	BOOST_FOREACH( lang_t const& l, langs ) {
+		if ( !func( l ) ) {
+			break;
+		}
+	}
 }

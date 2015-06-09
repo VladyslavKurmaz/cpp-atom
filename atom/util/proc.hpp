@@ -58,7 +58,7 @@ namespace atom {
 		//
 		bool run( string_t const& name, unsigned int const cw, unsigned int const ch, bool const new_console, bool const show ) {
 			this->si.cb				= sizeof( this->si );
-			this->si.dwFlags		= ( cw || ch ) ? ( STARTF_USECOUNTCHARS ) : ( 0 ) | STARTF_USESHOWWINDOW;
+			this->si.dwFlags		= ( ( cw || ch ) ? ( STARTF_USECOUNTCHARS ) : ( 0 ) ) | STARTF_USESHOWWINDOW;
 			this->si.dwXCountChars	= cw;
 			this->si.dwYCountChars	= ch;
 			this->si.wShowWindow	= ((show)?(SW_SHOW):(SW_HIDE));

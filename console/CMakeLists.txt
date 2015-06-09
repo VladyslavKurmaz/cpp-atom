@@ -13,8 +13,10 @@ add_executable(
 	"./window.cpp"
 	"./bridge.cpp"
 	"./shell.cpp"
-	"./ar.cpp"
+	"./ad.cpp"
+	"./atlas.cpp"
 	"./panel.cpp"
+	"./console.rc"
 )
 
 add_executable( 

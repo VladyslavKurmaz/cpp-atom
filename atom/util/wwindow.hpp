@@ -34,6 +34,7 @@
 #include <loki/Typelist.h>
 //
 #include <atom/node/tldefs.hpp>
+#include <atom/util/wctrls.hpp>
 //
 
 #define	ATOM_UTIL_WWINDOW_PROP	_T("wwindow")
@@ -268,11 +269,19 @@ namespace atom {
 		}
 	};
 
-#define	ATOM_DEF_ONCOMMAND( c )	typedef void( c::* c ## _oncommand_t )( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ); typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, c ## _oncommand_t >::type c ## _oncommand_pair_t;
+#define	ATOM_DEF_ONCOMMAND( c )	typedef void( c::* c ## _oncommand_t )( int id, HWND hwndCtl, UINT codeNotify ); typedef boost::mpl::pair< boost::mpl::int_< WM_COMMAND >::type, c ## _oncommand_t >::type c ## _oncommand_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_COMMAND, T, U > {
 		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
-			return ((t.*u)((hWnd), (int)(LOWORD(wParam)), (HWND)(lParam), (UINT)HIWORD(wParam)), 0L);
+			return ((t.*u)((int)(LOWORD(wParam)), (HWND)(lParam), (UINT)HIWORD(wParam)), 0L);
+		}
+	};
+
+#define	ATOM_DEF_ONNOTIFY( c )	typedef void( c::* c ## _onnotify_t )( int id, LPNMHDR lpnm ); typedef boost::mpl::pair< boost::mpl::int_< WM_NOTIFY >::type, c ## _onnotify_t >::type c ## _onnotify_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_NOTIFY, T, U > {
+		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
+			return ((t.*u)( (int)(wParam), (NMHDR*)(lParam)), 0L);
 		}
 	};
 
@@ -319,7 +328,7 @@ namespace atom {
 	//
 	//------------------------------------------------------------------------
 	template < typename B, typename T >
-	class wwindow :	public boost::noncopyable
+	class wwindow :	public boost::noncopyable, public wctrl
 	{
 		typedef TCHAR
 			char_t;
@@ -337,14 +346,14 @@ namespace atom {
 		///
 		template < typename P >
 		wwindow( B& b, P const& p ) :
-				  base( b )
-				, class_atom( 0 )
-				, wnd( 0 )
-				, wcex()
-				, cs()
-				, subcl()
-				, auto_destroy( false )
-				, msg( p )
+					wctrl()
+				,	base( b )
+				,	class_atom( 0 )
+				,	wcex()
+				,	cs()
+				,	subcl()
+				,	auto_destroy( false )
+				,	msg( p )
 
 		  {
 			  memset( &wcex, 0, sizeof( wcex ) );
@@ -353,12 +362,6 @@ namespace atom {
 		  ///
 		  ~wwindow() {
 			  deinit(); }
-		  ///
-		  wwindow const& show( bool const s ) const {
-			  ShowWindow( this->wnd, ( ( s )?( SW_SHOW ):( SW_HIDE ) ) ); return (*this); }
-		  ///
-		  bool isVisible() const {
-			  return ((IsWindowVisible(this->wnd))?(true):(false)); }
 		  ///
 		  wwindow const& activate() const {
 			SetForegroundWindow( this->wnd ); return (*this); }
@@ -388,9 +391,6 @@ namespace atom {
 		  wwindow const& sysMenuCheckRadioItem( UINT idFirst, UINT idLast, UINT idCheck, bool const byPosition ) const {
 			  CheckMenuRadioItem( GetSystemMenu( this->getHWND(), FALSE ), idFirst, idLast, idCheck, ( byPosition )?(MF_BYPOSITION):(MF_BYCOMMAND) );
 			  return (*this); }
-		  ///
-		  HWND	getHWND() const {
-			  return ( this->wnd ); }
 		  ///
 		  void	getClientRect( RECT& r ) const {
 				GetClientRect( this->getHWND(), &r ); }
@@ -639,9 +639,6 @@ namespace atom {
 		///
 		ATOM
 			class_atom;
-		///
-		HWND
-			wnd;
 		///
 		WNDCLASSEX
 			wcex;

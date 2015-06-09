@@ -3,7 +3,9 @@
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./shell.hpp"
-#include "./ar.hpp"
+#include "./ad.hpp"
+#include "./atlas.hpp"
+#include "./atlas.hpp"
 #include "./window.hpp"
 
 
@@ -31,7 +33,8 @@ bool window::init() {
 	pref_ptr	p = get_slot< window2pref >().item(); 
 	window_ptr	w = this->shared_from_this();
 	this->modes.push_back( boost::make_tuple( _T( "Console" ), mode::create<shell>( l, p, w ) ) );
-	this->modes.push_back( boost::make_tuple( _T( "Augmented desktop" ), mode::create<ar>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( _T( "Augmented desktop" ), mode::create<ad>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( _T( "Atlas" ), mode::create<atlas>( l, p, w ) ) );
 	//
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
@@ -299,7 +302,7 @@ void window::onTimer( HWND hWnd, UINT id ){
 	};
 }
 
-void window::onCommand( HWND hWnd, int id, HWND hwndCtl, UINT codeNotify ) {
+void window::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 	if ( !currentMode->command( id ) ) {
 		switch( id ) {
 		case CMDID_FULLSCREEN:
@@ -368,7 +371,8 @@ void window::slideBegin() {
 		this->windowPlacement.startTime =
 			this->windowPlacement.lastTime = timeGetTime();
 		SetTimer( this->getHWND(), this->windowPlacement.timerId, USER_TIMER_MINIMUM, NULL );
-		this->show( true ).activate();
+		this->show( true );
+		this->activate();
 	}
 }
 

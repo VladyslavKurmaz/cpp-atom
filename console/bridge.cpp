@@ -53,7 +53,7 @@ void bridge::console() {
 			_tmakepath_s( path, drive, dir, _T("proxy"), ext );
 			atom::stringstream_t ss;
 			ss << _T( "\"" ) << path << _T( "\" --pipe-name " ) << this->pipeName << _T( " --sharedmem-name " ) << this->sharedmemName;
-			this->proc.run( ss.str(), this->consoleSize.X, this->consoleSize.Y, true, true );
+			this->proc.run( ss.str(), this->consoleSize.X, this->consoleSize.Y, true, false );
 #endif
 			this->pipe.connect();
 		}

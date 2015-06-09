@@ -1,8 +1,14 @@
+:general
 + ctrl+~ hide/show panel
 + alt+enter fullscreen on/off
 + fix alignment
 + implements frames and remote consoles
 + switch between modes
+- translate mouse wheel to the underlying window
+- ALt+Enter when focus is on the panel
+- hide/show panel notifications
+- move apps option from boost::po to json file
+- UI options dialog
 
 :console
 - correct console buffer mapping
@@ -17,5 +23,11 @@
 + integrate Tesseract library
 + use curl for google translate api access
 - rotate region selection with image rotate after selection
-- add toolbar (languages, toogled, delete, picture)
++ add toolbar (languages, toogled, delete, picture)
 - preview selection as an image
+- delete button
+
+:atlas
+- dx\ogl init, render loop
+
+:augmented manuals

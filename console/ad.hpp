@@ -1,11 +1,11 @@
 #pragma once
 #include "./mode.hpp"
 
-class ar :
+class ad :
 	public mode {
 public:
 	///
-	virtual ~ar();
+	virtual ~ad();
 	///
 	virtual void activate( bool const state );
 	///
@@ -29,12 +29,20 @@ protected:
 
 private:
 	///
-	ar( logger_ptr l, pref_ptr p, window_ptr w );
+	ad( logger_ptr l, pref_ptr p, window_ptr w );
 	//
 	atom::rectCtrl ctrl;
 	//
 	panel_ptr
-		arPanel;
+		adPanel;
+	//
+	typedef std::pair< atom::string_t, atom::string_t >
+		urls_t;
+	//
+	atom::string_t getOCRUrl();
+	//
+	atom::string_t getTranslateUrl( atom::string_t const& encoded );
+
 
 	friend mode;
 };
