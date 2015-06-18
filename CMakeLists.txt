@@ -5,8 +5,6 @@ project( cpp-atom )
 add_definitions(-DUNICODE -D_UNICODE)
 #add_definitions("/EHsc")
 
-
-
 # Inc/Lib
 include_directories( "./" )
 
