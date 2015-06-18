@@ -25,8 +25,8 @@ default -> shared -> global -> user -> local
 #endif
 
 
-	pref::pref( logger_ptr l ) :
-	base_t()
+pref::pref( logger_ptr l ) :
+		base_t()
 	,	po()
 	,	langsPair()
 	,	langs()
@@ -35,6 +35,27 @@ default -> shared -> global -> user -> local
 {
 	atom::mount<pref2logger>( this, l );
 	atom::po::options_description_t& desc = this->po.add_desc( 0, "program options" );
+	//
+	std::stringstream ss;
+	ss	<<	"{"
+		<<	" \"data\": {"
+		<<	"  \"translations\": ["
+		<<	"   {"
+		<<	"    \"translatedText\": \"Find\""
+		<<	"   }"
+		<<	"  ]"
+		<<	" }"
+		<<	"}";
+
+	boost::property_tree::ptree r;
+	boost::property_tree::read_json( ss, r );
+
+
+	BOOST_FOREACH( boost::property_tree::ptree::value_type const & c, r.get_child( "data.translations" )) {
+		std::wstring dest = boost::locale::conv::to_utf<wchar_t>( c.second.get<std::string>("translatedText"), "UTF-8" );
+		break;
+	}
+
 	//
 	po.
 		add_option( po_help,			"help",				"Show this help",

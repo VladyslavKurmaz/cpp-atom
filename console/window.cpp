@@ -5,7 +5,7 @@
 #include "./shell.hpp"
 #include "./ad.hpp"
 #include "./atlas.hpp"
-#include "./atlas.hpp"
+#include "./am.hpp"
 #include "./window.hpp"
 
 
@@ -35,6 +35,7 @@ bool window::init() {
 	this->modes.push_back( boost::make_tuple( _T( "Console" ), mode::create<shell>( l, p, w ) ) );
 	this->modes.push_back( boost::make_tuple( _T( "Augmented desktop" ), mode::create<ad>( l, p, w ) ) );
 	this->modes.push_back( boost::make_tuple( _T( "Atlas" ), mode::create<atlas>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( _T( "Augmented manuals" ), mode::create<am>( l, p, w ) ) );
 	//
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;

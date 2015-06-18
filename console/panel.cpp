@@ -103,7 +103,7 @@ void panel::clear() {
 }
 
 void panel::addRecord( atom::string_t const& s, atom::string_t const& d ) {
-	int const icnt = this->listView.getItemCount();
+	int const icnt = 0;//this->listView.getItemCount();
 	this->listView.insertItem( icnt, 0, s );
 	this->listView.setItem( icnt, 1, d );
 }
@@ -133,43 +133,43 @@ void panel::onSize( HWND hWnd, UINT state, int cx, int cy ) {
 }
 
 void panel::onNotify( int id, LPNMHDR lpnm ) {
-	switch( lpnm->code )
-	{
-	case NM_CLICK:
-		{
-			LPNMMOUSE lpnmBtn = reinterpret_cast<LPNMMOUSE>(lpnm);
-			// toolbar click
-			if ( lpnm->hwndFrom == this->toolbar.getHWND() ) {
-				switch( lpnmBtn->dwItemSpec ) {
-				case AD_PANEL_TB_PIN:
-					{
-						break;
-					}
-				case AD_PANEL_TB_LANG_SWAP:
-					{
-						//pref::langspair_t langs = this->getPref()->langGetPair();
-						//std::swap( langs.first, langs.second );
-						//this->getPref()->langSetPair( langs );
-						break;
-					}
-				case AD_PANEL_TB_DELETE:
-					{
-						break;
-					}
-				}
-			}
-			break;
-		}
-	case TBN_DROPDOWN:
-		{
-			LPNMTOOLBAR lpnmTB = reinterpret_cast<LPNMTOOLBAR>(lpnm);
-			// toolbar dropdown
-			if ( lpnm->hwndFrom == this->toolbar.getHWND() ) {
-				this->popupLangMenu( lpnmTB->iItem );
-			}
-			break;
-		}
-	}
+	//switch( lpnm->code )
+	//{
+	//case NM_CLICK:
+	//	{
+	//		LPNMMOUSE lpnmBtn = reinterpret_cast<LPNMMOUSE>(lpnm);
+	//		// toolbar click
+	//		if ( lpnm->hwndFrom == this->toolbar.getHWND() ) {
+	//			switch( lpnmBtn->dwItemSpec ) {
+	//			case AD_PANEL_TB_PIN:
+	//				{
+	//					break;
+	//				}
+	//			case AD_PANEL_TB_LANG_SWAP:
+	//				{
+	//					//pref::langspair_t langs = this->getPref()->langGetPair();
+	//					//std::swap( langs.first, langs.second );
+	//					//this->getPref()->langSetPair( langs );
+	//					break;
+	//				}
+	//			case AD_PANEL_TB_DELETE:
+	//				{
+	//					break;
+	//				}
+	//			}
+	//		}
+	//		break;
+	//	}
+	//case TBN_DROPDOWN:
+	//	{
+	//		LPNMTOOLBAR lpnmTB = reinterpret_cast<LPNMTOOLBAR>(lpnm);
+	//		// toolbar dropdown
+	//		if ( lpnm->hwndFrom == this->toolbar.getHWND() ) {
+	//			this->popupLangMenu( lpnmTB->iItem );
+	//		}
+	//		break;
+	//	}
+	//}
 }
 	
 void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
@@ -198,6 +198,7 @@ void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 		}
 	case AD_PANEL_TB_DELETE:
 		{
+			this->listView.deleteAllItems();
 			break;
 		}
 	default:
