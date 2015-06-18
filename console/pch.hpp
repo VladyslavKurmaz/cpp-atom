@@ -58,7 +58,6 @@ extern const std::string TEST_SHAREDMEM_NAME;
 
 #define WM_FRAMEEXIT	WM_USER+1
 
-
 // Augmented desktop panel
 // ad-panel controls
 static unsigned int const	AD_PANEL_TOOLBAR			=	10000;

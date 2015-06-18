@@ -10,6 +10,10 @@
 
 ad::ad( logger_ptr l, pref_ptr p, window_ptr w ):
 		mode( l, p, w )
+	,	ocrOutputFile( _T( "out" ) )
+	,	ocrOutputFileWithExt( ocrOutputFile + _T( ".txt" ) )
+	,	translationOutputFileW( _T( "tr.json" ) )
+	,	translationOutputFile( "tr.json" )
 	,	ctrl()
 	,	adPanel()
 {
@@ -46,7 +50,7 @@ void ad::mouselbdown( bool dblclick, int x, int y, unsigned int state ) {
 	}
 }
 
-void getFileContents( std::string const& n, std::string& s ) {
+void getFileContents( atom::string_t const& n, std::string& s ) {
 	std::ifstream t( n );
 
 	t.seekg(0, std::ios::end);   
@@ -108,8 +112,9 @@ void ad::mouselbup( int x, int y, unsigned int state ) {
 			if ( proc.run( this->getOCRUrl(), false ) ) {
 				proc.join();
 				//
+				try {
 				std::string s;
-				getFileContents( "out.txt", s );
+				getFileContents( this->ocrOutputFileWithExt, s );
 				std::string encoded = url_encode( s );
 				boost::replace_all( encoded, " ", "%20");
 				//src = atom::s2s<atom::string_t>( s );
@@ -121,12 +126,14 @@ void ad::mouselbup( int x, int y, unsigned int state ) {
 					proc.join();
 					//
 					boost::property_tree::ptree r;
-					boost::property_tree::read_json( "tr.json", r );
+					boost::property_tree::read_json( this->translationOutputFile, r );
 					//
 					BOOST_FOREACH( boost::property_tree::ptree::value_type const & c, r.get_child( "data.translations" )) {
 						dest = boost::locale::conv::to_utf<wchar_t>( c.second.get<std::string>("translatedText"), "UTF-8" );
 						break;
 					}
+				}
+				} catch( std::exception& ) {
 				}
 			}
 			this->adPanel->addRecord( src, dest );
@@ -161,14 +168,14 @@ void ad::clear() {
 atom::string_t ad::getOCRUrl() {
 	pref::langspair_t const lngs = getPref()->langGetPair();
 	atom::stringstream_t ss;
-	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.get<0>() << _T( " out" );
+	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.get<0>() << _T( " " ) << this->ocrOutputFile;
 	return ss.str();
 }
 
 atom::string_t ad::getTranslateUrl( atom::string_t const& encoded ) {
 	pref::langspair_t const lngs = getPref()->langGetPair();
 	atom::stringstream_t ss;
-	ss << _T( "curl -k -o tr.json \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.get<1>() << _T("&target=") << lngs.second.get<1>() << _T("&q=" ) << encoded << _T( "\"" );
+	ss << _T( "curl -k -o " ) << this->translationOutputFileW << _T(" \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.get<1>() << _T("&target=") << lngs.second.get<1>() << _T("&q=" ) << encoded << _T( "\"" );
 	return ss.str();
 }
 

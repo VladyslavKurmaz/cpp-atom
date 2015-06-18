@@ -14,6 +14,7 @@ add_executable(
 	"./bridge.cpp"
 	"./shell.cpp"
 	"./ad.cpp"
+	"./am.cpp"
 	"./atlas.cpp"
 	"./panel.cpp"
 	"./console.rc"

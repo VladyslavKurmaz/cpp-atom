@@ -10,14 +10,14 @@
 - move apps option from boost::po to json file
 - UI options dialog
 
-:console
+:shell
 - correct console buffer mapping
 - hide console window on start
 - set kbrd focus
 - mstack, implements FSM
 - rb popup menu and hotkeys to select mode (scan|console|atlas|...)
 
-:recognition
+:augmented desktop
 + region selection, lbm+move+space
 - test PrintWindows for image recognition
 + integrate Tesseract library
@@ -26,6 +26,7 @@
 + add toolbar (languages, toogled, delete, picture)
 - preview selection as an image
 - delete button
+- text-like selection mode (lbd + alt), when mouse move (left-right) select rectangle with predefined height and up-down changes rectange height
 
 :atlas
 - dx\ogl init, render loop

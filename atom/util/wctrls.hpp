@@ -150,6 +150,10 @@ namespace atom {
 			return ListView_GetItemCount( this->getHWND() );
 		}
 
+		void deleteAllItems() const {
+			ListView_DeleteAllItems( this->getHWND() );
+		}
+
 		wctrlListView const& insertItem( int const item, int const subItem, atom::string_t const& text ) const {
 			LVITEM lvI = { 0 };
 			TCHAR txt[ 1024 ] = { 0 };
