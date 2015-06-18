@@ -9,26 +9,27 @@ void wait_please() {
 
 int main( int argc, char *argv[] )
 {
-	//std::cout << "consd stared" << std::endl;
-	//for ( int i = 0; i < argc; ++i ) {
-	//	std::cout << "[" << i << "]:" << argv[i] << std::endl;
-	//}
+	ShowWindow( GetConsoleWindow(), SW_HIDE );
+	//
+	std::cout << "*proxy stared" << std::endl;
+	for ( int i = 0; i < argc; ++i ) {
+		std::cout << "-[" << i << "]:\t" << argv[i] << std::endl;
+	}
+	CoInitialize( NULL );
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
 		atom::po po;
-		atom::po::options_description_t& desc = po.add_desc( 0, "consd options" );
-		std::string mutex_name;
-		std::string wpipe_name;
-		std::string rpipe_name;
-		unsigned int csb_width = 0;
-		unsigned int csb_height = 0;
+		atom::po::options_description_t& desc = po.add_desc( 0, "proxy options" );
+		atom::string_t pipe_name;
+		atom::string_t sharedmem_name;
+		//unsigned int csb_width = 0;
+		//unsigned int csb_height = 0;
 		//
-		po.add_option( 1, "mutex,m", boost::program_options::value<std::string>( &mutex_name ), "mutex name", desc );
-		po.add_option( 2, "wpipe,w", boost::program_options::value<std::string>( &wpipe_name ), "write pipe name", desc );
-		po.add_option( 3, "rpipe,r", boost::program_options::value<std::string>( &rpipe_name ), "read pipe name", desc );
+		po.add_option( 1, "pipe-name,p", "pipe name", desc, boost::program_options::value<atom::string_t>( &pipe_name ) );
+		po.add_option( 2, "sharedmem-name,s", "shared memory name", desc, boost::program_options::value<atom::string_t>( &sharedmem_name ) );
 		try {
 			po.parse_arg( argc, argv, desc, true );
 			//
-			if ( !( po.count( 1 ) && po.count( 2 ) && po.count( 3 ) ) ) {
+			if ( !( po.count( 1 ) && po.count( 2 )  ) ) {
 				throw std::exception( "[ERROR] Pipe's name and/or Shered memory's name are not defined" );
 			}
 			//
@@ -41,10 +42,12 @@ int main( int argc, char *argv[] )
 			return -1;
 		}
 		//
-		struct _{ static void _1() { } static void _2( TCHAR const* ) {} };
-		bridge e;
-		e.run( boost::bind( _::_1 ), boost::bind( _::_2, _1 ), mutex_name, wpipe_name, rpipe_name );
-		e.join();
+		COORD size = { 0 };
+		SMALL_RECT view = { 0 };
+		getConsoleSize( size, view );
+		bridge proxy2Console( size, sharedmem_name, pipe_name );
+		proxy2Console.proxy();
+		proxy2Console.join();
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
 	return 0;

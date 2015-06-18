@@ -5,44 +5,55 @@
 #include "./process.hpp"
 #include "./frame.hpp"
 #include "./window.hpp"
+#include "./bridge.hpp"
 #include "./appl.hpp"
+
+
+#ifdef STANDALONE
+void standaloneThread() {
+	SIZE size = { 0 };
+	getConsoleSize( size );
+	bridge proxy2Console( size, TEST_SHAREDMEM_NAME, TEST_PIPE_NAME );
+	proxy2Console.proxy();
+	proxy2Console.join();
+}
+#endif
 
 int main( int argc, char *argv[] )
 {
+	CoInitialize( NULL );
+	//InitCommonControls();
+	INITCOMMONCONTROLSEX icex;
+	icex.dwSize = sizeof( icex );
+	icex.dwICC = ICC_WIN95_CLASSES | ICC_LISTVIEW_CLASSES;
+	InitCommonControlsEx( &icex );
+
 	ATOM_DBG_MARK_BEGIN( p1, -1 ); {
+#ifndef STANDALONE
+		FreeConsole();
+#endif
 		logger_ptr l = logger::create();
 		l->add_std_cout();
 		//
 		pref_ptr p = pref::create( l );
 		if( p->init( argc, argv ) ) {
+#ifdef STANDALONE
+			boost::thread testThread( standaloneThread );
+#endif
 			appl_ptr a = appl::create( l, p );
 			if ( a->init() ) {
 				a->run().clear();
 			}
+#ifdef STANDALONE
+			testThread.join();
+#endif
 		}
 	}
 	ATOM_DBG_MARK_END( p1, p2, p1p2diff, true );
+	assert( atom::node_cnt == 0 );
 	return 0;
-
 }
-#if 0
-{1348} normal block at 0x01D56008, 8 bytes long.
- Data: <        > E0 87 C8 00 00 00 00 00 
-{156} normal block at 0x01D54EF0, 8 bytes long.
- Data: <        > F0 88 C8 00 00 00 00 00 
-{147} normal block at 0x01D54EA8, 8 bytes long.
- Data: <(       > 28 88 C8 00 00 00 00 00 
-{146} normal block at 0x01D55008, 16 bytes long.
- Data: <            HO  > 18 CE C5 00 02 00 00 00 01 00 00 00 48 4F D5 01 
-{145} normal block at 0x01D54FB0, 14 bytes long.
- Data: <bad exception > 62 61 64 20 65 78 63 65 70 74 69 6F 6E 00 
-{144} normal block at 0x01D54F48, 44 bytes long.
- Data: <                > 00 CE C5 00 00 00 00 00 F8 C4 C5 00 B0 C4 C5 00 
-{141} normal block at 0x01D54E58, 16 bytes long.
- Data: <             M  > 88 CD C5 00 02 00 00 00 01 00 00 00 F0 4D D5 01 
-{140} normal block at 0x01D54DF0, 44 bytes long.
- Data: <p               > 70 CD C5 00 00 00 00 00 20 C4 C5 00 D8 C3 C5 00 
-#endif
+
 
 #if 0
 

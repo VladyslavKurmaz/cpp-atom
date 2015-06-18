@@ -4,67 +4,105 @@
 
 
 #include <windows.h>
+#include <commctrl.h>
 
 #include <iostream>
 #include <algorithm>
 #include <map>
 #include <vector>
+#include <limits>
+#include <cstddef>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
+#include "boost/tuple/tuple.hpp"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/locale.hpp>
 
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
 
 
+#include <atom/util/cast.hpp>
+#include <atom/strs.hpp>
 #include <atom/util/log.hpp>
 #include <atom/node/tldefs.hpp>
 #include <atom/node/node.hpp>
 #include <atom/util/dbg.hpp>
 #include <atom/util/po.hpp>
 #include <atom/util/wwindow.hpp>
+#include <atom/util/wctrls.hpp>
 #include <atom/util/waccel.hpp>
 #include <atom/util/ptr.hpp>
 #include <atom/util/pipe.hpp>
-#include <atom/util/cast.hpp>
 #include <atom/util/proc.hpp>
 
-#ifdef UNICODE
-#define TXT( x )  L ## x
-#else
-#define TXT( x )  x
-#endif
+
+#include "resource.h"
+
+#undef max
+
+
 
 
 //#define STANDALONE
+
+#ifdef STANDALONE
+extern const std::string TEST_PIPE_NAME;
+extern const std::string TEST_SHAREDMEM_NAME;
+#endif
+
 #define WM_FRAMEEXIT	WM_USER+1
+
+
+// Augmented desktop panel
+// ad-panel controls
+static unsigned int const	AD_PANEL_TOOLBAR			=	10000;
+static unsigned int const	AD_PANEL_LISTVIEW			=	AD_PANEL_TOOLBAR + 1;
+
+// ad-panel commands
+static unsigned int const	AD_PANEL_TB_PIN				=	0x0800;
+static unsigned int const	AD_PANEL_TB_LANG_FROM		=	AD_PANEL_TB_PIN + 1;
+static unsigned int const	AD_PANEL_TB_LANG_SWAP		=	AD_PANEL_TB_LANG_FROM + 1;
+static unsigned int const	AD_PANEL_TB_LANG_TO			=	AD_PANEL_TB_LANG_SWAP + 1;
+static unsigned int const	AD_PANEL_TB_DELETE			=	AD_PANEL_TB_LANG_TO + 1;
+static unsigned int const	AD_PANEL_TB_LANGUAGE		=	AD_PANEL_TB_DELETE + 1;
+
+// ad-panel images
+static int const			AD_PANEL_IMAGE_PIN			=	0;
+static int const			AD_PANEL_IMAGE_SWAP			=	AD_PANEL_IMAGE_PIN + 1;
+static int const			AD_PANEL_IMAGE_DELETE		=	AD_PANEL_IMAGE_SWAP + 1;
+static int const			AD_PANEL_IMAGE_LANG_FIRST	=	AD_PANEL_IMAGE_DELETE + 1;
+static int const			AD_PANEL_IMAGE_LANG_EN		=	AD_PANEL_IMAGE_LANG_FIRST;
+static int const			AD_PANEL_IMAGE_LANG_UA		=	AD_PANEL_IMAGE_LANG_EN + 1;
+static int const			AD_PANEL_IMAGE_LANG_RU		=	AD_PANEL_IMAGE_LANG_UA + 1;
+static int const			AD_PANEL_IMAGE_LANG_LAST	=	AD_PANEL_IMAGE_LANG_RU;
+static int const			AD_PANEL_IMAGE_LANG_COUNT	=	AD_PANEL_IMAGE_LANG_LAST - AD_PANEL_IMAGE_LANG_FIRST + 1;
+
 
 typedef unsigned int
 	frame_id_t;
 
-
-typedef std::basic_string<TCHAR>
-	string_t;
-typedef std::basic_stringstream<TCHAR>
-	stringstream_t;
 ///
 static atom::po::id_t const po_none					=	0;
 static atom::po::id_t const po_help					=	po_none + 1;
 static atom::po::id_t const po_autostart			=	po_help + 1;
 //[hk.*]
 static atom::po::id_t const po_hk_appear			=	po_autostart + 1;
-static atom::po::id_t const po_hk_split				=	po_hk_appear + 1;
-static atom::po::id_t const po_hk_expand			=	po_hk_split + 1;
-static atom::po::id_t const po_hk_rotate			=	po_hk_expand + 1;
-static atom::po::id_t const po_hk_next				=	po_hk_rotate + 1;
-static atom::po::id_t const po_hk_prev				=	po_hk_next + 1;
-static atom::po::id_t const po_hk_ctrl_break		=	po_hk_prev + 1;
+static atom::po::id_t const po_hk_entire_screen		=	po_hk_appear + 1;
+static atom::po::id_t const po_hk_frame_split		=	po_hk_entire_screen + 1;
+static atom::po::id_t const po_hk_frame_minmax		=	po_hk_frame_split + 1;
+static atom::po::id_t const po_hk_frame_rotate		=	po_hk_frame_minmax + 1;
+static atom::po::id_t const po_hk_frame_next		=	po_hk_frame_rotate + 1;
+static atom::po::id_t const po_hk_frame_prev		=	po_hk_frame_next + 1;
+static atom::po::id_t const po_hk_frame_close		=	po_hk_frame_prev + 1;
+static atom::po::id_t const po_hk_ctrl_break		=	po_hk_frame_close + 1;
 static atom::po::id_t const po_hk_ctrl_c			=	po_hk_ctrl_break + 1;
-static atom::po::id_t const po_hk_close				=	po_hk_ctrl_c + 1;
-static atom::po::id_t const po_hk_tty1				=	po_hk_close + 1;
+static atom::po::id_t const po_hk_tty1				=	po_hk_ctrl_c + 1;
 static atom::po::id_t const po_hk_tty2				=	po_hk_tty1 + 1;
 static atom::po::id_t const po_hk_tty3				=	po_hk_tty2 + 1;
 static atom::po::id_t const po_hk_tty4				=	po_hk_tty3 + 1;
@@ -123,8 +161,40 @@ struct preferences {
 	};
 };
 
+struct placement {
+	RECT			destination;
+	unsigned int	alpha;
+	bool			visible;
+	bool			fullScreen;
+	bool			sliding;
+	DWORD			startTime;
+	DWORD			lastTime;
+	DWORD			timeout;
+	UINT_PTR		timerId;
+	placement() {
+		SetRectEmpty( &destination );
+		alpha		= 0;
+		visible		= false;
+		fullScreen	= false;
+		sliding		= false;
+		startTime	= 0;
+		lastTime	= 0;
+		timeout		= 0;
+		timerId		= 10;
+	}
+};
+
+struct hotkey {
+	int id;
+	UINT mods;
+	UINT vk;
+	hotkey() : id(0), mods(), vk() {}   
+	int operator==( hotkey const& r ) const { return ( ( this->mods == r.mods ) && ( this->vk == r.vk ) ); }
+	int operator!=( hotkey const& r ) const { return ( !( *this == r ) ); }
+};
 ///
-static WORD	const CMDID_SPLIT		= 1000;
+static WORD	const CMDID_FULLSCREEN	= 1000;
+static WORD	const CMDID_SPLIT		= CMDID_FULLSCREEN + 1;
 extern const TCHAR CMDID_SPLIT_NAME[];
 static WORD	const CMDID_EXPAND		= CMDID_SPLIT + 1;
 extern const TCHAR CMDID_EXPAND_NAME[];
@@ -153,3 +223,9 @@ extern const size_t conf_cmds_cnt;
 //
 extern const TCHAR DELIM1[];
 extern const TCHAR DELIM2[];
+
+atom::string_t gen_uuid();
+
+bool getConsoleSize( COORD& size, SMALL_RECT& view );
+
+bool bitmapSave( atom::string_t const& file, HDC hDC, HBITMAP hBmp );

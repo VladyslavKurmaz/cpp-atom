@@ -45,7 +45,6 @@ namespace atom {
     	}
 	}
 
-	template < typename T >
 	class proc : public boost::noncopyable {
 	public:
 		//
@@ -57,19 +56,22 @@ namespace atom {
 			CloseHandle( this->pi.hProcess );
 		}
 		//
-		bool run( std::basic_string< T > const& name, unsigned int const cw, unsigned int const ch, bool const show ) {
+		bool run( string_t const& name, unsigned int const cw, unsigned int const ch, bool const new_console, bool const show ) {
 			this->si.cb				= sizeof( this->si );
-			this->si.dwFlags		= STARTF_USECOUNTCHARS | STARTF_USESHOWWINDOW;
+			this->si.dwFlags		= ( ( cw || ch ) ? ( STARTF_USECOUNTCHARS ) : ( 0 ) ) | STARTF_USESHOWWINDOW;
 			this->si.dwXCountChars	= cw;
 			this->si.dwYCountChars	= ch;
 			this->si.wShowWindow	= ((show)?(SW_SHOW):(SW_HIDE));
 			//
-			TCHAR cmd_line[MAX_PATH] = { 0 };
-			strcpy_s( cmd_line, name.c_str() );
-			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &si, &pi ) ) {
+			char_t cmd_line[MAX_PATH] = { 0 };
+			wcscpy_s( cmd_line, name.c_str() );
+			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, ( new_console )? ( CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP ) : ( 0 ), NULL, NULL, &si, &pi ) ) {
 				return true;
 			}
 			return false;
+		}
+		bool run( string_t const& name, bool const show ) {
+			return this->run( name, 0, 0, false, show );
 		}
 		//
 		void join() {

@@ -6,10 +6,20 @@
 class logger;
 typedef boost::shared_ptr< logger >
 	logger_ptr;
+#define LOGGER_ACCESSOR( t )	logger_ptr getLogger() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
 //
 class pref;
 typedef boost::shared_ptr< pref >
 	pref_ptr;
+#define PREF_ACCESSOR( t )	pref_ptr getPref() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
+//
+class area;
+typedef boost::shared_ptr< area >
+	area_ptr;
+//
+class mode;
+typedef boost::shared_ptr< mode >
+	mode_ptr;
 //
 class frame;
 typedef boost::shared_ptr< frame >
@@ -18,26 +28,28 @@ typedef boost::shared_ptr< frame >
 class window;
 typedef boost::shared_ptr< window >
 	window_ptr;
+#define WINDOW_ACCESSOR( t )	window_ptr getWindow() { return ( ( get_value( boost::mpl::identity< t >() ).item() ) ); }
+//
+class panel;
+typedef boost::shared_ptr< panel >
+	panel_ptr;
 //
 class appl;
 typedef boost::shared_ptr< appl >
 	appl_ptr;
 //
 //
-struct bridge_msg {
+struct bridgeMsg {
 	enum type {
 		bmNone			= 0,
 		bmSize			= 1,
-		bmConf			= 2,
-		bmKbrd			= 3,
-		bmCtrlBreak		= 4,
-		bmCtrlC			= 5,
-		bmText			= 6,
-		bmExit			= 7
+		bmKbrd			= 2,
+		bmCtrlBreak		= 3,
+		bmCtrlC			= 4,
+		bmExit			= 5
 	} id;
 	union {
-		TCHAR				text[MAX_PATH];
-		COORD				size;
+		SIZE				size;
 		KEY_EVENT_RECORD	key;
 	};
 };
@@ -127,3 +139,50 @@ namespace atom {
 			timeout;
 	};
 }
+
+struct paint_font_t {
+	unsigned int
+		height;
+	atom::shared_gdiobj< HFONT >
+		font;
+	COLORREF
+		color;
+};
+
+struct dcb_t {
+	atom::shared_dc
+		dc;
+	atom::shared_gdiobj< HBITMAP >
+		bitmap;
+	void updateDC( size_t const cx, size_t const cy ) {
+		HDC dc = GetDC( NULL );
+		{
+			this->dc		= CreateCompatibleDC( dc );
+			this->bitmap	= CreateCompatibleBitmap( dc, cx, cy );
+			SelectObject( this->dc, this->bitmap );
+		}
+		ReleaseDC( NULL, dc );
+	}
+};
+
+struct paint_param_t {
+	dcb_t
+		dcb;
+	atom::shared_gdiobj< HBRUSH >
+		bk;
+	RECT
+		padding;
+	atom::shared_gdiobj< HBRUSH >
+		borderActive;
+	atom::shared_gdiobj< HBRUSH >
+		borderInactive;
+	
+	paint_font_t
+		textFont;
+	paint_font_t
+		sysFont;
+	//
+	void updareDC( size_t const cx, size_t const cy ) {
+		dcb.updateDC( cx, cy );
+	}
+};

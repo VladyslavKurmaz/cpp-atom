@@ -38,7 +38,7 @@ namespace atom {
 	public:
 		typedef std::string
 			string_t;
-		typedef std::vector< std::string >
+		typedef std::vector< string_t >
 			strings_t;
 		typedef unsigned int
 			id_t;
