@@ -16,4 +16,4 @@ include_directories( "$ENV{DEV_LOKI-0.1.7_INC}" )
 # Real stuff
 #add_subdirectory ( "./libs" )
 #add_subdirectory ( "./console" )
-add_subdirectory ( "./atom/dev" )
+add_subdirectory ( "./dev" )
