@@ -56,21 +56,23 @@ namespace atom {
 			CloseHandle( this->pi.hProcess );
 		}
 		//
-		bool run( string_t const& name, unsigned int const cw, unsigned int const ch, bool const new_console, bool const show ) {
+		template< typename C >
+		bool run( std::basic_string<C> const& name, unsigned int const cw, unsigned int const ch, bool const new_console, bool const show ) {
 			this->si.cb				= sizeof( this->si );
 			this->si.dwFlags		= ( ( cw || ch ) ? ( STARTF_USECOUNTCHARS ) : ( 0 ) ) | STARTF_USESHOWWINDOW;
 			this->si.dwXCountChars	= cw;
 			this->si.dwYCountChars	= ch;
 			this->si.wShowWindow	= ((show)?(SW_SHOW):(SW_HIDE));
 			//
-			char_t cmd_line[MAX_PATH] = { 0 };
+			C cmd_line[MAX_PATH] = { 0 };
 			wcscpy_s( cmd_line, name.c_str() );
 			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, ( new_console )? ( CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP ) : ( 0 ), NULL, NULL, &si, &pi ) ) {
 				return true;
 			}
 			return false;
 		}
-		bool run( string_t const& name, bool const show ) {
+		template< typename C >
+		bool run(std::basic_string<C> const& name, bool const show ) {
 			return this->run( name, 0, 0, false, show );
 		}
 		//

@@ -6,13 +6,6 @@
 add_executable( 
 	dev
 	"./pch.cpp"
-	"./appl.cpp"
-	"./comp.cpp"
-	"./env.cpp"
 	"./dev.cpp"
-	"./util.cpp"
-	"./context.cpp"
-	"./filter.cpp"
-	"./entity.cpp"
-	"./repo.cpp"
+	"./appl.cpp"
 )

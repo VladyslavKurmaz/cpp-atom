@@ -40,12 +40,15 @@ namespace atom {
 	//------------------------------------------------------------------------
 	//
 	//------------------------------------------------------------------------
-	class log
+	template < class T, class K >
+	class basic_log
 	{
 	private:
 	protected:
+		typedef T ostream_t;
+		typedef K ofstream_t;
 		///
-		typedef log
+		typedef basic_log< T, K >
 			log_t;
 		///
 		typedef std::vector< boost::reference_wrapper< ostream_t > >
@@ -59,7 +62,7 @@ namespace atom {
 
 	public:
 		///
-		log():
+		basic_log() :
 		  streams()
 			  ,	log_file()
 		  {
@@ -80,7 +83,8 @@ namespace atom {
 			  return ( *this );
 		  }
 		  ///
-		  log_t& add_file( string_t const& _file_name )
+		  template< typename C >
+		  log_t& add_file( std::basic_string< C > const& _file_name )
 		  {
 			  if ( !( this->log_file.is_open() ) )
 			  {
@@ -115,23 +119,24 @@ namespace atom {
 #endif
 		  }
 		  ///
-		  void write( string_t const & _str )
+		  template< typename C >
+		  void write(std::basic_string< C > const & _str )
 		  {
 			  write( _str.c_str(), _str.length() );
 		  }
 		  ///
-		  template< typename T > friend log& operator<<( log& l, T const& t );
-		  friend log& operator<<( log& l, ostream_t&(*pfn)(ostream_t&) );
-		  friend log& operator<<( log& l, std::ios_base&(*pfn)(std::ios_base&) );
+		  template< typename P > friend log_t& operator<<(log_t& l, P  const& t);
+		  friend log_t& operator<<(log_t& l, ostream_t&(*pfn)(ostream_t&));
+		  friend log_t& operator<<(log_t& l, std::ios_base&(*pfn)(std::ios_base&));
 	};
 	///
 
-	template< typename T >
-	inline log& operator<<( log& l, T const& t )
+	template< typename T, typename K, typename P >
+	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, P const& t)
 	{
 		struct _
 		{
-			void __( boost::reference_wrapper< ostream_t >& s, T const& t )
+			void __( boost::reference_wrapper< ostream_t >& s, P const& t )
 			{ s.get() << t; }
 		} ___;
 		//
@@ -142,14 +147,15 @@ namespace atom {
 		return l;
 	}
 	///
-	template<>
-	inline log& operator<< <std::string>( log& l, std::string const& t )
-	{
-		l << s2s<string_t>( t );
-		return l;
-	}
+	//template<>
+	//inline log& operator<< <std::string>( log& l, std::string const& t )
+	//{
+	//	l << s2s<string_t>( t );
+	//	return l;
+	//}
 	///
-	inline log& operator<<( log& l, ostream_t&(*pfn)(ostream_t&) )
+	template< typename T, typename K >
+	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, T&(*pfn)(T&))
 	{
 #if 0
 		struct _
@@ -171,7 +177,8 @@ namespace atom {
 		return l; 
 	}
 	///
-	inline log& operator<<( log& l, std::ios_base&(*pfn)(std::ios_base&) )
+	template< typename T, typename K >
+	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, std::ios_base&(*pfn)(std::ios_base&))
 	{ 
 #if 0
 		struct _
@@ -192,6 +199,13 @@ namespace atom {
 #endif
 		return l; 
 	}
+
+#ifdef UNICODE
+	typedef basic_log< std::wostream, std::wofstream > log;
+#else
+	typedef basic_log< std::ostream, std::ofstream > log;
+#endif
+
 }
 
 #endif//ATOM_UTIL_LOG_HPP

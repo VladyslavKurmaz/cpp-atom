@@ -4,9 +4,9 @@
 
 int main( int ac, char *av[] ) {
 	ATOM_DBG_MARK_BEGIN( p1, -1 )
-		logger_ptr l = logger::create();
+		dev::logger_ptr l = dev::logger::create();
 		l->add_std_cout();
-		appl_ptr a = appl::create( l );
+		dev::appl_ptr a = dev::appl::create( l );
 		if ( a->init( ac, av ) ) {
 			a->run( std::cout, std::cin );
 		}
