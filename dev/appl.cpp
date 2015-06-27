@@ -1,49 +1,48 @@
 #include "./pch.hpp"
 #include "./logger.hpp"
+#include "./entity.hpp"
 #include "./appl.hpp"
 
 // TODO
 // substitute for_each with for_each2
 namespace dev {
 
-	appl::appl( logger_ptr l )/* : 
+	appl::appl( logger_ptr l ) : 
 		po()
-	,	msbuild()
-	,	cursor()*/ {
+	,	cursor()
+		/*
+		po()
+	,	msbuild()*/ {
 		atom::mount<appl2logger>( this, l );
 		//
-#if 0
-		char const* root = getenv( CONST_DEV_HOME_ENV_VAR ); 
-		string_t h( ( root != NULL )?( root ):( "" ) );
+		char const* root = getenv(CONST_DEV_HOME_ENV);
+		std::string home;
+		if (root) {
+			home = std::string(root);
+		}
+		char const* arch = getenv(CONST_PA_ENV);
+		std::string am((arch != NULL) ? ((!strcmp(arch, CONST_PLATFORM_X86.c_str())) ? ("32") : ("64")) : (""));
 		//
-		//[2]
-		char const* arch = getenv( "PROCESSOR_ARCHITECTURE" ); 
-		string_t am( ( arch != NULL )?( ( !strcmp( arch, CONST_IS_X86 ) )?( CONST_IS_X86 ):( CONST_IS_X64 ) ):( "" ) );
-		//
-		atom::po::options_description_t& util_desc = this->po.add_desc( po_util_desc, "" );
+		atom::po::options_description_t& initial_desc = this->po.add_desc( po_initial_desc, "" );
 		this->po.
-			add_option( po_help,			"help,h",				"show this (h)elp", util_desc ).
-			add_option( po_recursive,		"recursive,r",			"(r)ecursive mode", util_desc ).
-			add_option( po_verbose,			"verbose,v",			"(v)erbose", util_desc );
-		//
-		atom::po::options_description_t& startup_desc = this->po.add_desc( po_startup_desc, "" );
-		this->po.
-			add_option( po_home,			"home,o",				"define dpm h(o)me directory, override %DPM_HOME% env var", startup_desc, boost::program_options::value<std::string>()->default_value( h ) ).
-			add_option( po_init_env,		"env,e",				"define current (e)nvironment", startup_desc, boost::program_options::value<std::string>()->default_value( "" ) ).
-			add_option( po_msbuild_ver,		"msbuild,b",			"(b)sbuild version to use", startup_desc, boost::program_options::value<std::string>()->default_value( "4.0" ) );
+			add_option(po_help,				"help,h", "show (h)elp", initial_desc).
+			add_option(po_shell,			"shell,s", "shell mode", initial_desc).
+			add_option(po_home,				"home,o", "define h(o)me directory, override %DEV_HOME% environment variable", initial_desc, boost::program_options::value<std::string>()->default_value(home));
 		//
 		atom::po::options_description_t& conf_desc = this->po.add_desc( po_conf_desc, "" );
 		this->po.
-			add_option( po_user,			"user,u",				"(u)ser", conf_desc, boost::program_options::value<std::string>() ).
-			add_option( po_password,		"password,p",			"(p)assword", conf_desc, boost::program_options::value<std::string>() ).
-			add_option( po_email,			"email,m",				"e(m)ail", conf_desc, boost::program_options::value<std::string>() ).
-			add_option( po_origin,			"ori(g)in,g",			"repository ori(g)in", conf_desc, boost::program_options::value<std::string>() ).
-			add_option( po_branch,			"branc(h),h",			"branc(h)", conf_desc, boost::program_options::value<std::string>() ).
-			add_option( po_osystem,			"operating-system,y",	"operating s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value( "windows" ) ).
-			add_option( po_toolset,			"toolset,t",			"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value( "msvc11" ) ).
-			add_option( po_instruction_set,	"instruction-set,n",	"i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value( "i386" ) ).
-			add_option( po_address_model,	"address-model,a",		"(a)ddress-model", conf_desc, boost::program_options::value<std::string>()->default_value( am ) ).
-			add_option( po_configuration,	"configuration,c",		"(c)onfiguration", conf_desc, boost::program_options::value<std::string>()->default_value( "debug" ) );
+			add_option(po_init_entity,		"entity,e",				"define current (e)nvironment", conf_desc, boost::program_options::value<std::string>()->default_value(CONST_ROOT_SIMBOL)).
+			add_option(po_recursive,		"recursive,r",			"(r)ecursive mode", conf_desc).
+			add_option(po_user,				"user,u",				"(u)ser", conf_desc, boost::program_options::value<std::string>()).
+			add_option(po_password,			"password,p",			"(p)assword", conf_desc, boost::program_options::value<std::string>()).
+			add_option(po_email,			"email,m",				"e(m)ail", conf_desc, boost::program_options::value<std::string>()).
+			add_option(po_origin,			"ori(g)in,g",			"repository ori(g)in", conf_desc, boost::program_options::value<std::string>()).
+			add_option(po_branch,			"branc(h),h",			"branc(h)", conf_desc, boost::program_options::value<std::string>()).
+			add_option(po_osystem,			"operating-system,y",	"operating s(y)stem", conf_desc, boost::program_options::value<std::string>()->default_value(CONST_DEF_OS)).
+			add_option(po_instruction_set, "instruction-set,n",		"i(n)struction set", conf_desc, boost::program_options::value<std::string>()->default_value(CONST_DEF_IS)).
+			add_option(po_address_model,	"address-model,a",		"(a)ddress-model", conf_desc, boost::program_options::value<std::string>()->default_value(am)).
+			add_option(po_toolset,			"toolset,t",			"build (t)oolset", conf_desc, boost::program_options::value<std::string>()->default_value(CONST_DEF_TOOLSET)).
+			add_option(po_configuration,	"configuration,c",		"(c)onfiguration", conf_desc, boost::program_options::value<std::string>()->default_value(CONST_DEF_CONFIGURATION));
 		// environment-type
 		//
 		atom::po::options_description_t& subcommands_desc = this->po.add_desc( po_subcommands_desc, "" );
@@ -57,93 +56,48 @@ namespace dev {
 			add_option( po_subcommand2,		"sc2",				"", subcommands_posdesc, 1 );
 		//
 		atom::po::options_description_t& cmdline_desc = this->po.add_desc( po_cmdline_desc, "" );
-		cmdline_desc.add( util_desc ).add( startup_desc ).add( conf_desc ).add( subcommands_desc );
+		cmdline_desc.add(initial_desc).add(conf_desc).add(subcommands_desc);
 		//
 		atom::po::options_description_t& shell_desc = this->po.add_desc( po_shell_desc, "" );
-		shell_desc.add( util_desc ).add( conf_desc ).add( subcommands_desc );
-#endif
+		shell_desc.add( conf_desc ).add( subcommands_desc );
 }
 
 appl::~appl() {
 }
 
 bool appl::init( int argc, char const * const argv[] ) {
-#if 0
+	//
 	atom::po::options_description_t& desc = this->po.get_desc( po_cmdline_desc );
 	atom::po::positional_options_description_t& pdesc = this->po.get_pdesc( po_subcommands_posdesc );
 	try {
 		this->po.parse_arg( argc, argv, desc, pdesc, true );
 		//
-		if ( !this->po.as< string_t >( po_home ).length() ) {
+		if ( !this->po.as< std::string >( po_home ).length() ) {
 			throw std::exception( make_crit_msg( "Dev home wasn't defined, set environment variable DEV_HOME or use command line argument --home" ) );
 		}
-
-		// add path to msbuild into proccess env vars
-		string_t msbuild_reg = string_t ( "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\" ) + this->po.as< string_t >( po_msbuild_ver );
-		HKEY key;
-		if ( ERROR_SUCCESS == RegOpenKeyEx( HKEY_LOCAL_MACHINE, msbuild_reg.c_str(), 0, KEY_READ, &key ) ) {
-			TCHAR buf[ MAX_PATH ] = { 0 };
-			DWORD bufsz = MAX_PATH;
-			if ( ERROR_SUCCESS == RegQueryValueEx( key, _T( "MSBuildToolsPath" ), 0, NULL, (LPBYTE)buf, &bufsz ) ) {
-				this->msbuild = buf;
-			}
-			RegCloseKey( key );
-		}
-		if ( !this->msbuild.length() ) {
-			throw std::exception( make_crit_msg( "Couldn't locate msbuild" ) );
-		} else {
-			// update path environment variable
-			bool update_err = true;
-			TCHAR b[4096] = { 0 };
-			if ( GetEnvironmentVariable( _T( "path" ), b, 4096 ) ) {
-				strcat( b, _T( ";" ) );
-				strcat( b, this->msbuild.c_str() );
-				if ( SetEnvironmentVariable( _T( "path" ), b ) ) {
-					update_err = false;
-				}
-			}
-			if ( update_err ) {
-				throw std::exception( "[emerg] Couldn't update process env block" );
-			}
-		}
-		// scan dev environment
-		struct scanner {
-			static void load( boost::property_tree::ptree& pt ) {
-			}
-			static entity_ptr scan( logger_ptr l, appl_ptr a, entity_ptr p, boost::filesystem::path const& f ) {
-				entity_ptr r;
-				// check env configuration script
-				boost::filesystem::path config_file = f / boost::filesystem::path( CONST_ENV_JSON_CONFIG_FILE );
-				if ( boost::filesystem::exists( config_file ) ) {
-					r = create_entity<env>( l, p );
-					//
-					boost::property_tree::ptree config;
-					boost::property_tree::read_json( config_file.string(), config );
-					//
-					BOOST_FOREACH( boost::property_tree::ptree::value_type const & c, config.get_child( "entity" )) {
-						std::cout << c.second.get<std::string>("id") << " " << c.second.get<std::string>("type") << " " << c.second.get<std::string>("attr.git") << std::endl;
-					}
-				}
-				return ( r );
-			};
-		};
-		//atom::mount<appl2entity>( this, this->cursor = scanner::scan( this->get_logger(), this->shared_from_this(), entity_ptr(), boost::filesystem::path( this->po.as< string_t >( po_home ) ) ) );
-		atom::mount<appl2entity>( this, this->cursor = env::create_root( this->get_logger(),  boost::filesystem::path( this->po.as< string_t >( po_home ) ) ) );
-		this->cursor->scan();
-		// ???????? find and set cursor by name
-		if ( !this->cursor ) {
-			throw std::exception( make_crit_msg( "Dev home don't contain environment configuration file, check path defined by DEV_HOME (or argument --home) environment variable" ) );
-		}
-	} catch( std::exception& exc ) {
-		this->print_error( desc, exc );
+		//
+		this->cursor = entity::create(this->getLogger(), dev::entity_ptr(), this->po.as<std::string>(po_home), "/", boost::property_tree::ptree());
+		atom::mount<appl2entity>(this, cursor);
+		// ... manually create .conf repo DEV_CATALOG and attach it to the dev root
+		// 1. get param from command line
+		// if .conf already exists - nothing to do
+		// if it doesn't - add ".git"."url|user|branch" property
+		cursor->build();
+	}
+	catch (std::exception& exc) {
+		this->printError( desc, exc );
 		std::cin.ignore();
 		return false;
 	}
-#endif
 	return true;
 }
 
 void appl::run( std::ostream& os, std::istream& is ) {
+	this->cursor->echo(std::cout, "");
+
+	std::string s;
+	os << "[" << /*this->cenv->get_caption() <<*/ "]> ";
+	std::getline( is, s );
 #if 0
 		atom::po::options_description_t& shell_desc = this->po.get_desc( po_shell_desc );
 		atom::po::positional_options_description_t& subcommands_posdesc = this->po.get_pdesc( po_subcommands_posdesc );
@@ -166,10 +120,19 @@ void appl::run( std::ostream& os, std::istream& is ) {
 
 void
 	appl::clear(){
-		//this->cursor.reset();
-		//atom::clear_node( this->get_root() );
+		this->cursor.reset();
+		this->getRoot()->clear();
 		base_node_t::clear();
 }
+
+
+void appl::printError(atom::po::options_description_t const& desc, std::exception& exc) {
+	std::stringstream ss;
+	desc.print( ss );
+	*(this->getLogger()) << boost::lexical_cast<dev::string_t>(std::string(exc.what())) << std::endl;
+	*(this->getLogger()) << boost::lexical_cast<dev::string_t>(ss.str()) << std::endl;
+}
+
 
 #if 0
 bool appl::process_command() {
@@ -199,12 +162,5 @@ bool appl::process_command() {
 		return true;
 }
 
-void
-	appl::print_error( atom::po::options_description_t const& desc, std::exception& exc ) {
-		std::stringstream ss;
-		desc.print( ss );
-		*(this->get_logger()) << exc.what() << std::endl;
-		*(this->get_logger()) << ss.str() << std::endl;
-}
 #endif
 }

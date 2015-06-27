@@ -3,16 +3,6 @@
 int atom::node_cnt = 0;
 
 
-// inline UML diagrams
-// http://yuml.me/diagram/scruffy/class/[appl]-1[logger],[appl]1-0..1[env],[env]-1[logger],[env]*-0..1[env],[env]1-*[comp],[comp]-1[logger],[comp]-1[appl]
-
-
-// Known issues
-//+[1] - If DPM2_HOME environment variable is not defined - application crashed
-//o[2] - returns invalid value on x64 if you are x86 process http://stackoverflow.com/questions/1738985/why-processor-architecture-always-returns-x86-instead-of-amd64
-//+[3] - change environmwnt output [/] "d:\work2" -> [/@d:\work2]
-//o[4] - remove constraints for root environment, add environment creation command
-//o[5] - add command line parameter filter which will overwrite values, were built from platform, form is json {}
 
 /* commands
 help							print help message

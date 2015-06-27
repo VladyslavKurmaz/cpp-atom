@@ -43,10 +43,11 @@ namespace atom {
 	template < class T, class K >
 	class basic_log
 	{
-	private:
-	protected:
+	public:
 		typedef T ostream_t;
 		typedef K ofstream_t;
+	private:
+	protected:
 		///
 		typedef basic_log< T, K >
 			log_t;
@@ -97,106 +98,58 @@ namespace atom {
 			  return ( *this );
 		  }
 		  ///
-		  template < typename T >
-		  void write( T const* _str, size_t const _str_len )
-		  {
-#if 0
-			  struct s
-			  { 
-				  void f( boost::reference_wrapper<ostream_t>& sref, char const* _str, size_t const _str_len )
-				  { sref.get().write( _str, _str_len ); }
-			  } v;
-			  //
-			  std::for_each(
-				  this->streams.begin(),
-				  this->streams.end(),
-				  boost::bind( &s::f, &v, _1, _str, _str_len ) );
-#else
-			  for ( streams_t::iterator it = this->streams.begin(); it != this->streams.end(); ++it )
-			  {
-				  (*it).get().write( _str, _str_len );
-			  }
-#endif
-		  }
-		  ///
-		  template< typename C >
-		  void write(std::basic_string< C > const & _str )
-		  {
-			  write( _str.c_str(), _str.length() );
-		  }
-		  ///
-		  template< typename P > friend log_t& operator<<(log_t& l, P  const& t);
-		  friend log_t& operator<<(log_t& l, ostream_t&(*pfn)(ostream_t&));
-		  friend log_t& operator<<(log_t& l, std::ios_base&(*pfn)(std::ios_base&));
+			template < typename T >
+			void write( T const* _str, size_t const _str_len ) {
+				for ( streams_t::iterator it = this->streams.begin(); it != this->streams.end(); ++it ) {
+					(*it).get().write( _str, _str_len );
+				}
+			}
+			///
+			template< typename C >
+			void write(std::basic_string< C > const & _str ) {
+				write( _str.c_str(), _str.length() );
+			}
+			///
+			template< typename T, typename K, typename P >
+				friend basic_log<T, K>& operator<<(basic_log<T, K>& l, P const& t);
+			template< typename T, typename K >
+				friend basic_log<T, K>& operator<<(basic_log<T, K>& l, typename basic_log<T, K>::ostream_t &(*pfn)( typename basic_log<T, K>::ostream_t&));
+			template< typename T, typename K >
+				friend basic_log<T, K>& operator<<(basic_log<T, K>& l, std::ios_base&(*pfn)(std::ios_base&));
 	};
 	///
-
 	template< typename T, typename K, typename P >
-	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, P const& t)
-	{
-		struct _
-		{
-			void __( boost::reference_wrapper< ostream_t >& s, P const& t )
-			{ s.get() << t; }
+	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, P const& t) {
+		struct _{
+			void __(boost::reference_wrapper< basic_log<T, K>::ostream_t >& s, P const& t) {
+				s.get() << t;
+			}
 		} ___;
 		//
 		for_each(
 			l.streams.begin(),
 			l.streams.end(),
-			boost::bind( &_::__, &___, _1, boost::cref( t ) ) );
+			boost::bind(&_::__, &___, _1, boost::cref(t)));
 		return l;
 	}
 	///
-	//template<>
-	//inline log& operator<< <std::string>( log& l, std::string const& t )
-	//{
-	//	l << s2s<string_t>( t );
-	//	return l;
-	//}
-	///
 	template< typename T, typename K >
-	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, T&(*pfn)(T&))
+	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, typename basic_log<T, K>::ostream_t &(*pfn)( typename basic_log<T, K>::ostream_t&))
 	{
-#if 0
-		struct _
-		{
-			void __( boost::reference_wrapper< std::ostream >& s, std::ostream&(*pfn)( std::ostream& ) )
-			{ pfn( s ); }
-		} ___;
-		//
-		for_each(
-			l.streams.begin(),
-			l.streams.end(),
-			boost::bind( &_::__, &___, _1, pfn ) );
-#else
 		for ( log::streams_t::iterator it = l.streams.begin(); it != l.streams.end(); ++it )
 		{
 			pfn( (*it) );
 		}
-#endif
 		return l; 
 	}
 	///
 	template< typename T, typename K >
 	inline basic_log<T, K>& operator<<(basic_log<T, K>& l, std::ios_base&(*pfn)(std::ios_base&))
 	{ 
-#if 0
-		struct _
-		{
-			void __( boost::reference_wrapper< std::ostream >& s, std::ios_base&(*pfn)( std::ios_base& ) )
-			{ pfn( s ); }
-		} ___;
-		//
-		for_each(
-			l.streams.begin(),
-			l.streams.end(),
-			boost::bind( &_::__, &___, _1, pfn ) );
-#else
 		for ( log::streams_t::iterator it = l.streams.begin(); it != l.streams.end(); ++it )
 		{
 			pfn( (*it) );
 		}
-#endif
 		return l; 
 	}
 

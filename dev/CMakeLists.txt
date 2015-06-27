@@ -8,4 +8,5 @@ add_executable(
 	"./pch.cpp"
 	"./dev.cpp"
 	"./appl.cpp"
+    "./entity.cpp"
 )

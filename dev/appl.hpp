@@ -24,9 +24,18 @@ namespace dev {
 
 	protected:
 		LOGGER_ACCESSOR( appl2logger );
+		entity_ptr getRoot() { return (this->get_value(boost::mpl::identity< appl2entity >()).item()); }
+		void printError(atom::po::options_description_t const& desc, std::exception& exc);
+
 
 	private:
 		///
 		appl( logger_ptr l );
+		//
+		atom::po
+			po;
+		//
+		entity_ptr
+			cursor;
 	};
 }
