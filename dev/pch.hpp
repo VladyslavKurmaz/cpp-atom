@@ -4,6 +4,7 @@
 //#pragma warning(disable : 4355)
 
 #include <iostream>
+#include <vector>
 
 #include <windows.h>
 #include <tchar.h>
@@ -32,6 +33,7 @@ namespace dev {
 	typedef std::basic_string< char_t > string_t;
 	typedef std::basic_stringstream< char_t > stringstream_t;
 	typedef std::ostream ostream_t;
+	typedef std::vector<std::string> path_t;
 
 	class logger;
 	typedef boost::shared_ptr< logger > logger_ptr;
@@ -66,11 +68,18 @@ namespace dev {
 	static std::string const	CONST_PLATFORM_X64		= "x64";
 
 	static std::string const	CONST_ROOT_SIMBOL		= "/";
+	static std::string const	CONST_LEVEL_UP			= "..";
 
 	static std::string const	CONST_DEF_OS			= "windows";
 	static std::string const	CONST_DEF_IS			= "i386";
 	static std::string const	CONST_DEF_TOOLSET		= "msvc-14.0";
-	static std::string const	CONST_DEF_CONFIGURATION = "msvc-14.0";
+	static std::string const	CONST_DEF_CONFIGURATION = "debug";
+
+
+	static std::string const	CONST_CMD_HELP			= "help";
+	static std::string const	CONST_CMD_CHANGE_ENTITY = "cd";
+	static std::string const	CONST_CMD_LIST			= "ls";
+	static std::string const	CONST_CMD_EXIT			= "exit";
 
 
 	//-----------------------------------------------------------------------------
@@ -189,9 +198,6 @@ namespace dev {
 	static char_t const* CONST_PREFIX_HEAD					= "DPM";
 	static char_t const* CONST_PREFIX_REPLACE				= "/\\-.";
 
-	static char_t const* CONST_CMD_HELP						= "help";
-	static char_t const* CONST_CMD_CHANGE_ENV				= "cd";
-	static char_t const* CONST_CMD_EXIT						= "exit";
 	static char_t const* CONST_CMD_ENV_ACTION				= ".";
 
 	static char_t const* CONST_CMD_INFO						= "info";

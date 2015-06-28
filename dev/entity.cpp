@@ -20,9 +20,29 @@ namespace dev {
 	entity::~entity() {
 	}
 
+	void entity::getAbsolutePath(std::string& path){
+		entity_ptr p = this->getParent();
+		if (p){
+			std::string s;
+			p->getAbsolutePath(s);
+			if (s == CONST_ROOT_SIMBOL){
+				path = s + this->getId();
+			}else{
+				path = s + CONST_ROOT_SIMBOL + this->getId();
+			}
+		}else{
+			path = this->getId();
+		}
+	}
+
 	void entity::echo(std::ostream& os, std::string const& offset){
-		os << offset << "-" << this->getId() << std::endl;
-		std::string off = offset + " |";
+		bool hp = offset.length() > 0;
+		os << offset;
+		if (hp){
+			os << "-";
+		}
+		os << this->getId() << std::endl;
+		std::string off = offset + ((hp) ? (" ") : ("")) + "|";
 		//
 		struct _{
 			static void __(entity_ptr const& e, std::ostream& os, std::string const& o) {
@@ -32,7 +52,7 @@ namespace dev {
 		this->get_slot<entity2entities>().for_each(boost::bind(&_::__, _1, boost::ref(os), boost::ref(off)));
 	}
 
-	entity_ptr entity::build(std::string const& identity, boost::property_tree::ptree const& attributes){
+	entity_ptr entity::findChild(std::string const& childId){
 		struct _{
 			static void __(entity_ptr const& e, std::string const& nid, entity_ptr& ne) {
 				if (e->getId() == nid){
@@ -41,7 +61,31 @@ namespace dev {
 			}
 		};
 		entity_ptr e;
-		this->get_slot<entity2entities>().for_each(boost::bind(&_::__, _1, boost::ref(identity), boost::ref(e)));
+		this->get_slot<entity2entities>().for_each(boost::bind(&_::__, _1, boost::ref(childId), boost::ref(e)));
+		return e;
+	}
+
+	entity_ptr entity::find(size_t const offset, path_t const& path){
+		if (offset < path.size()){
+			std::string const& p = path[offset];
+			if (p == CONST_LEVEL_UP){
+				entity_ptr p = this->getParent();
+				if (p){
+					return p->find(offset + 1, path);
+				}
+			} else if (p.length()){
+				entity_ptr e = this->findChild(p);
+				if (e){
+					return e->find(offset+1, path);
+				}
+				return e;
+			}
+		}
+		return this->shared_from_this();
+	}
+
+	entity_ptr entity::build(std::string const& identity, boost::property_tree::ptree const& attributes){
+		entity_ptr e = this->findChild(identity);
 		if (e) {
 			e->mergeAttr(attributes);
 		}else{

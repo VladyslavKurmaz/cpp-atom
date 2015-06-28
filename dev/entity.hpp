@@ -28,7 +28,19 @@ namespace dev {
 		///
 		std::string const& getId() const { return this->id; }
 		///
+		entity_ptr getParent(){ return ((get_value(boost::mpl::identity< entity2entity >()).item())); }
+		///
+		bool hasParent(){ return ((get_value(boost::mpl::identity< entity2entity >()).item().operator bool())); }
+		///
+		bool hasChildren(){ return ((get_value(boost::mpl::identity< entity2entities >()).size()>0)); }
+		///
+		void getAbsolutePath(std::string& path);
+		///
 		void echo(std::ostream& os, std::string const& offset);
+		///
+		entity_ptr findChild(std::string const& childId);
+		///
+		entity_ptr find(size_t const offset, path_t const& path);
 		///
 		entity_ptr build(std::string const& identity, boost::property_tree::ptree const& attributes);
 		///

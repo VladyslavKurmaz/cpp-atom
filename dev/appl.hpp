@@ -16,7 +16,7 @@ namespace dev {
 		///
 		~appl();
 		///
-		bool init( int argc, char const * const argv[] );
+		bool init(int argc, char const * const argv[], std::ostream& os);
 		///
 		void run( std::ostream& os, std::istream& is );
 		///
@@ -24,9 +24,12 @@ namespace dev {
 
 	protected:
 		LOGGER_ACCESSOR( appl2logger );
+		//
 		entity_ptr getRoot() { return (this->get_value(boost::mpl::identity< appl2entity >()).item()); }
+		//
 		void printError(atom::po::options_description_t const& desc, std::exception& exc);
-
+		//
+		bool processCommand(std::ostream& os);
 
 	private:
 		///

@@ -10,7 +10,7 @@ int main(int ac, char *av[]) {
 		dev::logger_ptr l = dev::logger::create();
 		l->add_std_cout();
 		dev::appl_ptr a = dev::appl::create(l);
-		if (a->init(ac, av)) {
+		if (a->init(ac, av, std::cout)) {
 			//
 			//
 			a->run(std::cout, std::cin);
