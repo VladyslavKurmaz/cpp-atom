@@ -8,16 +8,27 @@ namespace dev {
 	std::string const				entity::ENTITY("entity");
 	std::string const				entity::ID("id");
 	std::string const				entity::ATTR("attr");
+	std::string const				entity::DEPENDS("depends");
+	std::string const				entity::INHERITS("inherits");
+
 
 	entity::entity(logger_ptr l, entity_ptr p, boost::filesystem::path const& h, std::string const& i, boost::property_tree::ptree const& a) :
-			home(h)
-			, id(i)
-			, attr(a) {
+		home(h)
+		, id(i)
+		, attr(a) {
 		atom::mount<entity2logger>(this, l);
 		atom::mount<entity2entity>(this, p);
 	}
 
 	entity::~entity() {
+	}
+
+	entity_ptr entity::getRoot(){
+		entity_ptr p = this->getParent();
+		if (p){
+			return p->getRoot();
+		}
+		return this->shared_from_this();
 	}
 
 	void entity::getAbsolutePath(std::string& path){
@@ -27,10 +38,12 @@ namespace dev {
 			p->getAbsolutePath(s);
 			if (s == CONST_ROOT_SIMBOL){
 				path = s + this->getId();
-			}else{
+			}
+			else{
 				path = s + CONST_ROOT_SIMBOL + this->getId();
 			}
-		}else{
+		}
+		else{
 			path = this->getId();
 		}
 	}
@@ -65,7 +78,26 @@ namespace dev {
 		return e;
 	}
 
-	entity_ptr entity::find(size_t const offset, path_t const& path){
+	///
+	entity_ptr entity::find(std::string const& path){
+		entity_ptr r;
+		strings_t parts;
+		size_t offset = 0;
+		boost::split(parts, path, boost::is_any_of(CONST_ROOT_SIMBOL));
+		if (path.size()){
+			// relative path
+			entity_ptr e = this->shared_from_this();
+			if (!parts[0].length()){
+				// absolute path
+				e = this->getRoot();
+				offset++;
+			}
+			r = e->find(offset, parts);
+		}
+		return r;
+	}
+
+	entity_ptr entity::find(size_t const offset, strings_t const& path){
 		if (offset < path.size()){
 			std::string const& p = path[offset];
 			if (p == CONST_LEVEL_UP){
@@ -73,10 +105,11 @@ namespace dev {
 				if (p){
 					return p->find(offset + 1, path);
 				}
-			} else if (p.length()){
+			}
+			else if (p.length()){
 				entity_ptr e = this->findChild(p);
 				if (e){
-					return e->find(offset+1, path);
+					return e->find(offset + 1, path);
 				}
 				return e;
 			}
@@ -88,7 +121,8 @@ namespace dev {
 		entity_ptr e = this->findChild(identity);
 		if (e) {
 			e->mergeAttr(attributes);
-		}else{
+		}
+		else{
 			e = entity::create(this->getLogger(), this->shared_from_this(), this->getHome() / boost::filesystem::path(identity), identity, attributes);
 			atom::mount<entity2entities>(this, e);
 		}
@@ -138,6 +172,38 @@ namespace dev {
 				}
 			}
 		}
+	}
+
+	void entity::buildDependsOnList(std::string const& list, entities_t& entities){
+		strings_t ids;
+		boost::split(ids, list, boost::is_any_of(CONST_CMD_DELIMITER));
+		strings_t::const_iterator it = ids.begin();
+		strings_t::const_iterator eit = ids.end();
+		for (; it != eit; ++it){
+			entity_ptr e = this->findChild(*it);
+			if (e){
+				bool add = true;
+				entities_t::const_iterator ent_it = entities.begin();
+				entities_t::const_iterator ent_eit = entities.end();
+				for (; ent_it != ent_eit; ++ent_it){
+					if ((*ent_it)->getId() == e->getId()){
+						add = false;
+						break;
+					}
+				}
+				if (add){
+					e->buildDependsOnList(entities);
+					entities.push_back(e);
+				}
+
+			}else{
+				throw std::exception(std::string("Component wasn't found: "+(*it)).c_str());
+			}
+		}
+	}
+
+	void entity::buildDependsOnList(entities_t& entities){
+		this->buildDependsOnList(this->attr.get<std::string>(DEPENDS), entities);
 	}
 
 	void entity::clear() {

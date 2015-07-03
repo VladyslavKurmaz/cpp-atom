@@ -33,7 +33,7 @@ namespace dev {
 	typedef std::basic_string< char_t > string_t;
 	typedef std::basic_stringstream< char_t > stringstream_t;
 	typedef std::ostream ostream_t;
-	typedef std::vector<std::string> path_t;
+	typedef std::vector<std::string> strings_t;
 
 	class logger;
 	typedef boost::shared_ptr< logger > logger_ptr;
@@ -47,6 +47,7 @@ namespace dev {
 
 	class entity;
 	typedef boost::shared_ptr< entity > entity_ptr;
+	typedef std::list< entity_ptr > entities_t;
 
 	// appl
 	typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > appl2logger;
@@ -61,60 +62,61 @@ namespace dev {
 
 
 	//-----------------------------------------------------------------------------
-	static char const*			CONST_DEV_HOME_ENV		= "DEV_HOME";
-	static char const*			CONST_PA_ENV			= "PROCESSOR_ARCHITECTURE";
+	static char const*			CONST_DEV_HOME_ENV = "DEV_HOME";
+	static char const*			CONST_PA_ENV = "PROCESSOR_ARCHITECTURE";
 
-	static std::string const	CONST_PLATFORM_X86		= "x86";
-	static std::string const	CONST_PLATFORM_X64		= "x64";
+	static std::string const	CONST_PLATFORM_X86 = "x86";
+	static std::string const	CONST_PLATFORM_X64 = "x64";
 
-	static std::string const	CONST_ROOT_SIMBOL		= "/";
-	static std::string const	CONST_LEVEL_UP			= "..";
+	static std::string const	CONST_ROOT_SIMBOL = "/";
+	static std::string const	CONST_LEVEL_UP = "..";
+	static std::string const	CONST_CMD_DELIMITER = ";";
 
-	static std::string const	CONST_DEF_OS			= "windows";
-	static std::string const	CONST_DEF_IS			= "i386";
-	static std::string const	CONST_DEF_TOOLSET		= "msvc-14.0";
+	static std::string const	CONST_DEF_OS = "windows";
+	static std::string const	CONST_DEF_IS = "i386";
+	static std::string const	CONST_DEF_TOOLSET = "msvc-14.0";
 	static std::string const	CONST_DEF_CONFIGURATION = "debug";
 
 
-	static std::string const	CONST_CMD_HELP			= "help";
+	static std::string const	CONST_CMD_HELP = "help";
 	static std::string const	CONST_CMD_CHANGE_ENTITY = "cd";
-	static std::string const	CONST_CMD_LIST			= "ls";
-	static std::string const	CONST_CMD_EXIT			= "exit";
+	static std::string const	CONST_CMD_LIST = "ls";
+	static std::string const	CONST_CMD_EXIT = "exit";
 
 
 	//-----------------------------------------------------------------------------
-	static atom::po::id_t const po_none					= 0;
+	static atom::po::id_t const po_none = 0;
 	//
-	static atom::po::id_t const po_initial_desc			= po_none + 1;
+	static atom::po::id_t const po_initial_desc = po_none + 1;
 	//
-	static atom::po::id_t const po_help					= po_initial_desc + 1;
-	static atom::po::id_t const po_shell				= po_help + 1;
-	static atom::po::id_t const po_home					= po_shell + 1;
+	static atom::po::id_t const po_help = po_initial_desc + 1;
+	static atom::po::id_t const po_shell = po_help + 1;
+	static atom::po::id_t const po_home = po_shell + 1;
 
-	static atom::po::id_t const po_conf_desc			= po_home + 1;
+	static atom::po::id_t const po_conf_desc = po_home + 1;
 	//
-	static atom::po::id_t const po_init_entity			= po_conf_desc + 1;
-	static atom::po::id_t const po_recursive			= po_init_entity + 1;
-	static atom::po::id_t const po_user					= po_recursive + 1;
-	static atom::po::id_t const po_password				= po_user + 1;
-	static atom::po::id_t const po_email				= po_password + 1;
-	static atom::po::id_t const po_origin				= po_email + 1;
-	static atom::po::id_t const po_branch				= po_origin + 1;
-	static atom::po::id_t const po_osystem				= po_branch + 1;
-	static atom::po::id_t const po_toolset				= po_osystem + 1;
-	static atom::po::id_t const po_instruction_set		= po_toolset + 1;
-	static atom::po::id_t const po_address_model		= po_instruction_set + 1;
-	static atom::po::id_t const po_configuration		= po_address_model + 1;
+	static atom::po::id_t const po_init_entity = po_conf_desc + 1;
+	static atom::po::id_t const po_recursive = po_init_entity + 1;
+	static atom::po::id_t const po_user = po_recursive + 1;
+	static atom::po::id_t const po_password = po_user + 1;
+	static atom::po::id_t const po_email = po_password + 1;
+	static atom::po::id_t const po_origin = po_email + 1;
+	static atom::po::id_t const po_branch = po_origin + 1;
+	static atom::po::id_t const po_osystem = po_branch + 1;
+	static atom::po::id_t const po_toolset = po_osystem + 1;
+	static atom::po::id_t const po_instruction_set = po_toolset + 1;
+	static atom::po::id_t const po_address_model = po_instruction_set + 1;
+	static atom::po::id_t const po_configuration = po_address_model + 1;
 	//-----------------------------------------------------------------------------
-	static atom::po::id_t const po_subcommands_desc		= po_configuration + 1;
-	static atom::po::id_t const po_subcommands_posdesc	= po_subcommands_desc + 1;
+	static atom::po::id_t const po_subcommands_desc = po_configuration + 1;
+	static atom::po::id_t const po_subcommands_posdesc = po_subcommands_desc + 1;
 	//
-	static atom::po::id_t const po_subcommand1			= po_subcommands_posdesc + 1;
-	static atom::po::id_t const po_subcommand2			= po_subcommand1 + 1;
+	static atom::po::id_t const po_subcommand1 = po_subcommands_posdesc + 1;
+	static atom::po::id_t const po_subcommand2 = po_subcommand1 + 1;
 	//-----------------------------------------------------------------------------
-	static atom::po::id_t const po_cmdline_desc			= po_subcommand2 + 1;
+	static atom::po::id_t const po_cmdline_desc = po_subcommand2 + 1;
 	//-----------------------------------------------------------------------------
-	static atom::po::id_t const po_shell_desc			= po_cmdline_desc + 1;
+	static atom::po::id_t const po_shell_desc = po_cmdline_desc + 1;
 
 
 
@@ -140,7 +142,7 @@ namespace dev {
 			user
 		};
 		//
-		error( severity_t const s, std::string const& t ) : severity( s ), text( t ) {
+		error(severity_t const s, std::string const& t) : severity(s), text(t) {
 		}
 		//
 		std::string str() {
@@ -155,7 +157,7 @@ namespace dev {
 				"info",
 				"debug"
 			};
-			ss << "[" << errs[ this->severity] << "] " << this->text;
+			ss << "[" << errs[this->severity] << "] " << this->text;
 			return ss.str();
 		}
 	protected:
@@ -192,7 +194,6 @@ namespace dev {
 	//env.json
 	static char const* const CONST_ENV_JSON_CONFIG_FILE		= "env.json";
 
-	static char_t const* CONST_CMD_DELIM					= ";";
 	static char_t const* CONST_CMD_DELIM1					= "|";
 	static char_t const* CONST_PREFIX_DELIM					= "_";
 	static char_t const* CONST_PREFIX_HEAD					= "DPM";
@@ -231,14 +232,14 @@ namespace dev {
 	class env_paths {
 	public:
 		env_paths( boost::filesystem::path const& h ) :
-		  home( h )
-			  ,	conf_file( boost::filesystem::path( home ).operator/=( boost::filesystem::path( "dpm.conf" ) ) )
-			  ,	dpm( boost::filesystem::path( home ).operator/=( boost::filesystem::path( ".dpm" ) ) )
-		  {}
-		  boost::filesystem::path const & get_home() const { return ( this->home ); }
-		  boost::filesystem::path const & get_conf_file() const { return ( this->conf_file ); }
-		  boost::filesystem::path const & get_dpm() const { return ( this->dpm ); }
-		  boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( this->dpm ).operator/= ( f ) ); }
+			home( h )
+			,	conf_file( boost::filesystem::path( home ).operator/=( boost::filesystem::path( "dpm.conf" ) ) )
+			,	dpm( boost::filesystem::path( home ).operator/=( boost::filesystem::path( ".dpm" ) ) )
+		{}
+		boost::filesystem::path const & get_home() const { return ( this->home ); }
+		boost::filesystem::path const & get_conf_file() const { return ( this->conf_file ); }
+		boost::filesystem::path const & get_dpm() const { return ( this->dpm ); }
+		boost::filesystem::path get_dpm_file( boost::filesystem::path const& f ) const { return ( boost::filesystem::path( this->dpm ).operator/= ( f ) ); }
 
 	protected:
 	private:
