@@ -1,2 +1,2 @@
 echo off
-call build-msvc.cmd msvc10 debug
+call build-msvc.cmd msvc-10.0 debug

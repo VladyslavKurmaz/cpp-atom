@@ -18,6 +18,7 @@ namespace dev {
 		, attr(a) {
 		atom::mount<entity2logger>(this, l);
 		atom::mount<entity2entity>(this, p);
+		//*(this->getLogger()) << this->getId().c_str() << std::endl;
 	}
 
 	entity::~entity() {
@@ -78,6 +79,15 @@ namespace dev {
 		return e;
 	}
 
+	entity_ptr entity::findEntityUp(std::string const& entityId){
+		entity_ptr e = this->findChild(entityId);
+		if (!e && this->hasParent()) {
+			e = this->getParent()->findEntityUp(entityId);
+		}
+		return e;
+
+	}
+
 	///
 	entity_ptr entity::find(std::string const& path){
 		entity_ptr r;
@@ -135,8 +145,10 @@ namespace dev {
 			BOOST_FOREACH(boost::property_tree::ptree::value_type const & c, config.get_child(ENTITY)) {
 				boost::property_tree::ptree::const_assoc_iterator it = c.second.find(ATTR);
 				std::string nid = c.second.get<std::string>(ID);
+				//
+				boost::optional< const boost::property_tree::ptree& > child = c.second.get_child_optional(ATTR);
 				this->
-					build(nid, ((it != config.not_found()) ? (it->second) : (boost::property_tree::ptree())))->
+					build(nid, ((child) ? (it->second) : (boost::property_tree::ptree())))->
 					// recursive entities scan
 					build(c.second);
 			}
@@ -175,35 +187,49 @@ namespace dev {
 	}
 
 	void entity::buildDependsOnList(std::string const& list, entities_t& entities){
+		entity::linearizeHierarchy(this->shared_from_this(), DEPENDS, list, entities);
+	}
+
+	void entity::buildInheritsFromList(entities_t& entities){
+		this->linearizeHierarchy(INHERITS, entities);
+	}
+
+
+	void entity::linearizeHierarchy(entity_ptr parent, std::string const& type, std::string const& list, entities_t& entities){
 		strings_t ids;
 		boost::split(ids, list, boost::is_any_of(CONST_CMD_DELIMITER));
 		strings_t::const_iterator it = ids.begin();
 		strings_t::const_iterator eit = ids.end();
 		for (; it != eit; ++it){
-			entity_ptr e = this->findChild(*it);
-			if (e){
-				bool add = true;
-				entities_t::const_iterator ent_it = entities.begin();
-				entities_t::const_iterator ent_eit = entities.end();
-				for (; ent_it != ent_eit; ++ent_it){
-					if ((*ent_it)->getId() == e->getId()){
-						add = false;
-						break;
+			if ((*it).length()){
+				entity_ptr e = parent->findEntityUp(*it);
+				if (e){
+					bool add = true;
+					entities_t::const_iterator ent_it = entities.begin();
+					entities_t::const_iterator ent_eit = entities.end();
+					for (; ent_it != ent_eit; ++ent_it){
+						if ((*ent_it)->getId() == e->getId()){
+							add = false;
+							break;
+						}
+					}
+					if (add){
+						e->linearizeHierarchy(type, entities);
+						entities.push_back(e);
 					}
 				}
-				if (add){
-					e->buildDependsOnList(entities);
-					entities.push_back(e);
+				else{
+					throw std::exception(std::string("Component wasn't found: " + (*it)).c_str());
 				}
-
-			}else{
-				throw std::exception(std::string("Component wasn't found: "+(*it)).c_str());
 			}
 		}
 	}
 
-	void entity::buildDependsOnList(entities_t& entities){
-		this->buildDependsOnList(this->attr.get<std::string>(DEPENDS), entities);
+	void entity::linearizeHierarchy(std::string const& type, entities_t& entities){
+		boost::optional<std::string> v = this->attr.get_optional<std::string>(type);
+		if (v && this->hasParent()){
+			entity::linearizeHierarchy(this->getParent(), type, (*v), entities);
+		}
 	}
 
 	void entity::clear() {

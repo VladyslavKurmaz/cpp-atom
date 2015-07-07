@@ -28,7 +28,7 @@ namespace dev {
 		///
 		entity_ptr getParent(){ return ((get_value(boost::mpl::identity< entity2entity >()).item())); }
 		///
-		bool hasParent(){ return ((get_value(boost::mpl::identity< entity2entity >()).item().operator bool())); }
+		bool hasParent(){ return ((get_value(boost::mpl::identity< entity2entity >()).item().get() != NULL )); }
 		///
 		bool hasChildren(){ return ((get_value(boost::mpl::identity< entity2entities >()).size() > 0)); }
 		//
@@ -37,6 +37,8 @@ namespace dev {
 		void getAbsolutePath(std::string& path);
 		///
 		void echo(std::ostream& os, std::string const& offset);
+		///
+		entity_ptr findEntityUp(std::string const& entityId);
 		///
 		entity_ptr findChild(std::string const& childId);
 		///
@@ -52,7 +54,7 @@ namespace dev {
 		///
 		void buildDependsOnList(std::string const& list, entities_t& entities);
 		///
-		void buildDependsOnList(entities_t& entities);
+		void buildInheritsFromList(entities_t& entities);
 		///
 		void clear();
 
@@ -64,6 +66,10 @@ namespace dev {
 		boost::filesystem::path getHome() const { return this->home; };
 		///
 		void mergeAttr(boost::property_tree::ptree const& a);
+		///
+		static void linearizeHierarchy(entity_ptr parent, std::string const& type, std::string const& list, entities_t& entities);
+		///
+		void linearizeHierarchy(std::string const& type, entities_t& entities);
 
 	private:
 		///

@@ -123,7 +123,6 @@ namespace dev {
 		base_node_t::clear();
 	}
 
-
 	void appl::printError(atom::po::options_description_t const& desc, std::exception& exc) {
 		std::stringstream ss;
 		desc.print(ss);
@@ -154,12 +153,12 @@ namespace dev {
 			if (pos2.length()){
 				// entities
 				// get list of entites
-				entities_t entities;
-				this->cursor->buildDependsOnList(pos2, entities);
-				entities_t::const_iterator ent_it = entities.begin();
-				entities_t::const_iterator ent_eit = entities.end();
-				for (; ent_it != ent_eit; ++ent_it){
-					os << (*ent_it)->getId() << std::endl;
+				entities_t deps;
+				this->cursor->buildDependsOnList(pos2, deps);
+				entities_t::const_iterator deps_it = deps.begin();
+				entities_t::const_iterator deps_eit = deps.end();
+				for (; deps_it != deps_eit; ++deps_it){
+					os << (*deps_it)->getId() << std::endl;
 				}
 			}
 			else {

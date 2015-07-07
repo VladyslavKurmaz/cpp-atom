@@ -5,25 +5,22 @@ set BUILD_CONFIGURATION=%2
 set BUILD_DEST=build-%BUILD_TOOLSET%
 set BUILD_FOLDER=%BUILD_DEST%-%BUILD_CONFIGURATION%
 
-if "%BUILD_TOOLSET%"=="msvc14" (
-	set BUILD_ENV="%VS140COMNTOOLS%..\..\VC\vcvarsall.bat"
-	set BUILD_CMAKE_CODE="Visual Studio 14 2015"
-	set BUILD_BOOST_TOOLSET="msvc-14.0"
+if "%BUILD_TOOLSET%"=="msvc-14.0" (
+  set BUILD_ENV="%VS140COMNTOOLS%..\..\VC\vcvarsall.bat"
+  set BUILD_CMAKE_CODE="Visual Studio 14 2015"
 )
-if "%BUILD_TOOLSET%"=="msvc12" (
-	set BUILD_ENV="%VS120COMNTOOLS%..\..\VC\vcvarsall.bat"
-	set BUILD_CMAKE_CODE="Visual Studio 12"
-	set BUILD_BOOST_TOOLSET="msvc-12.0"
+if "%BUILD_TOOLSET%"=="msvc-12.0" (
+  set BUILD_ENV="%VS120COMNTOOLS%..\..\VC\vcvarsall.bat"
+  set BUILD_CMAKE_CODE="Visual Studio 12"
 )
-if "%BUILD_TOOLSET%"=="msvc11" (
-	set BUILD_ENV="%VS110COMNTOOLS%..\..\VC\vcvarsall.bat"
-	set BUILD_CMAKE_CODE="Visual Studio 11"
-	set BUILD_BOOST_TOOLSET="msvc-11.0"
+if "%BUILD_TOOLSET%"=="msvc-11.0" (
+  set BUILD_ENV="%VS110COMNTOOLS%..\..\VC\vcvarsall.bat"
+  set BUILD_CMAKE_CODE="Visual Studio 11"
+  set BUILD_BOOST_TOOLSET="msvc-11.0"
 )
-if "%BUILD_TOOLSET%"=="msvc10" (
-	set BUILD_ENV="%VS100COMNTOOLS%..\..\VC\vcvarsall.bat"
-	set BUILD_CMAKE_CODE="Visual Studio 10 2010"
-	set BUILD_BOOST_TOOLSET="msvc-10.0"
+if "%BUILD_TOOLSET%"=="msvc-10.0" (
+  set BUILD_ENV="%VS100COMNTOOLS%..\..\VC\vcvarsall.bat"
+  set BUILD_CMAKE_CODE="Visual Studio 10 2010"
 )
 
 set DEV_BOOST-1.58.0_INC=%DEV_HOME%\boost-1.58.0
