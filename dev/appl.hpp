@@ -3,10 +3,10 @@
 namespace dev {
 
 	class appl :
-		public atom::node< LOKI_TYPELIST_2(appl2logger, appl2entity) >,
+		public atom::node< LOKI_TYPELIST_2(appl2logger, appl2comp) >,
 		public boost::enable_shared_from_this < appl > {
 
-		typedef atom::node< LOKI_TYPELIST_2(appl2logger, appl2entity) > base_node_t;
+		typedef atom::node< LOKI_TYPELIST_2(appl2logger, appl2comp) > base_node_t;
 
 	public:
 		///
@@ -25,7 +25,7 @@ namespace dev {
 	protected:
 		LOGGER_ACCESSOR(appl2logger);
 		//
-		entity_ptr getRoot() { return (this->get_value(boost::mpl::identity< appl2entity >()).item()); }
+		comp_ptr getRoot() { return (this->get_value(boost::mpl::identity< appl2comp >()).item()); }
 		//
 		void printError(atom::po::options_description_t const& desc, std::exception& exc);
 		//
@@ -38,7 +38,7 @@ namespace dev {
 		atom::po
 			po;
 		//
-		entity_ptr
+		comp_ptr
 			cursor;
 	};
 }

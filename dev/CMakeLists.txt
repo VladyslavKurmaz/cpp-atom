@@ -4,9 +4,9 @@
 
 # Project's structure
 add_executable( 
-	dev
-	"./pch.cpp"
-	"./dev.cpp"
-	"./appl.cpp"
-    "./entity.cpp"
+  dev
+  "./pch.cpp"
+  "./dev.cpp"
+  "./appl.cpp"
+  "./comp.cpp"
 )

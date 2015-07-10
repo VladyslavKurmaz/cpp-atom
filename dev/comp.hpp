@@ -1,93 +1,85 @@
 #pragma once
 
-#if 0
-class comp :
-	public atom::node< LOKI_TYPELIST_3( comp2logger, comp2appl, comp2env ) >,
-	public boost::enable_shared_from_this< comp > {
+namespace dev {
 
-	typedef atom::node< LOKI_TYPELIST_3( comp2logger, comp2appl, comp2env ) >
-		base_node_t;
+  class comp :
+    public atom::node < LOKI_TYPELIST_3(comp2logger, comp2comp, comp2comps) >,
+    public boost::enable_shared_from_this < comp > {
 
-public:
-	///
-	static comp_ptr create( logger_ptr l, appl_ptr a, env_ptr e, boost::property_tree::ptree const& pt ) {
-		comp_ptr result = comp_ptr( new comp( l, a, pt ) );
-		atom::mount<env2comps>( e, result );
-		atom::mount<comp2env>( result, e );
-		return result;
-	}
-	///
-	~comp();
-	///
-	void
-	clear();
-	///
-	string_t
-	get_id() const {
-		return ( this->props.get<string_t>("id") );
-	}
-	///
-	void
-	build_env_block( context_ptr cont );
-	///
-	//void
-	//action( string_t const& a, unsigned int const l, bool const r );
-	///
-	void
-	update();
-	///
-	void
-	info( string_t const& offs );
-	///
-	void
-	execute( context_ptr cont, string_t const& c );
-	///
-	static void
-	parse_depends( context_ptr cont, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
-	///
-	static void
-	parse_inherits( context_ptr cont, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+    typedef atom::node < LOKI_TYPELIST_3(comp2logger, comp2comp, comp2comps) >
+      base_node_t;
 
-protected:
-	//
-	logger_ptr get_logger() {
-		return ( get_slot<comp2logger>().item() );
-	}
-	env_ptr get_env() {
-		return ( get_slot<comp2env>().item() );
-	}
-	///
-	void
-	build_env_vars( context_ptr cont, env_paths const& ep, string_t const& id, string_t const& prefix );
-	///
-	static void
-	parse_hierarchy( context_ptr cont, string_t const& key, string_t const& sids, env_ptr e, comp_deq_t& cs, const bool r );
+  public:
+    ///
+    static boost::filesystem::path const CONFIG_LOCATION;
+    static std::string const COMP;
+    static std::string const ID;
+    static std::string const ATTR;
+    static std::string const DEPENDS;
+    static std::string const INHERITS;
+    ///
+    static comp_ptr create(logger_ptr l, comp_ptr p, boost::filesystem::path const& h, std::string const& i, boost::property_tree::ptree const& a) {
+      return comp_ptr(new comp(l, p, h, i, a));
+    }
+    ///
+    ~comp();
+    ///
+    std::string const& getId() const { return this->id; }
+    ///
+    comp_ptr getParent(){ return ((get_value(boost::mpl::identity< comp2comp >()).item())); }
+    ///
+    bool hasParent(){ return ((get_value(boost::mpl::identity< comp2comp >()).item().get() != NULL )); }
+    ///
+    bool hasChildren(){ return ((get_value(boost::mpl::identity< comp2comps >()).size() > 0)); }
+    //
+    comp_ptr getRoot();
+    ///
+    void getAbsolutePath(std::string& path);
+    ///
+    void echo(std::ostream& os, std::string const& offset);
+    ///
+    comp_ptr findcompUp(std::string const& compId);
+    ///
+    comp_ptr findChild(std::string const& childId);
+    ///
+    comp_ptr find(std::string const& path);
+    ///
+    comp_ptr find(size_t const offset, strings_t const& path);
+    ///
+    comp_ptr build(std::string const& identity, boost::property_tree::ptree const& attributes);
+    ///
+    void build(boost::property_tree::ptree const& config);
+    ///
+    void build();
+    ///
+    void buildDependsOnList(std::string const& list, comps_t& comps);
+    ///
+    void buildInheritsFromList(comps_t& comps);
+    ///
+    void clear();
 
-private:
-	boost::property_tree::ptree
-		props;
-	///
-	comp( logger_ptr l, appl_ptr a, boost::property_tree::ptree const& pt );
-};
+  protected:
+    LOGGER_ACCESSOR(comp2logger);
+    ///
+    comp(logger_ptr l, comp_ptr p, boost::filesystem::path const& h, std::string const& i, boost::property_tree::ptree const& a);
+    ///
+    boost::filesystem::path getHome() const { return this->home; };
+    ///
+    void mergeAttr(boost::property_tree::ptree const& a);
+    ///
+    static void linearizeHierarchy(comp_ptr parent, std::string const& type, std::string const& list, comps_t& comps);
+    ///
+    void linearizeHierarchy(std::string const& type, comps_t& comps);
 
-
-/*
-var
- name		value
- name		gen_value
- gen_name	value
- gen_name	gen_value
-
- mod: override | extend
-
-file
-* archive
-* executable
-* file to download
-*/
-class prop {
-public:
-protected:
-private:
-};
-#endif
+  private:
+    ///
+    boost::filesystem::path const
+      home;
+    ///
+    std::string
+      id;
+    ///
+    boost::property_tree::ptree
+      attr;
+  };
+}
