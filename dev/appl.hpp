@@ -38,6 +38,9 @@ namespace dev {
 		atom::po
 			po;
 		//
+		platform_t
+			platform;
+		//
 		comp_ptr
 			cursor;
 	};

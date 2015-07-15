@@ -65,8 +65,8 @@ namespace atom {
 			this->si.wShowWindow	= ((show)?(SW_SHOW):(SW_HIDE));
 			//
 			C cmd_line[MAX_PATH] = { 0 };
-			wcscpy_s( cmd_line, name.c_str() );
-			if ( CreateProcess( NULL, cmd_line, NULL, NULL, TRUE, ( new_console )? ( CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP ) : ( 0 ), NULL, NULL, &si, &pi ) ) {
+			std::copy(name.begin(), name.end(), cmd_line);
+			if ( CreateProcessA(NULL, cmd_line, NULL, NULL, TRUE, (new_console) ? (CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP) : (0), NULL, NULL, &si, &pi)) {
 				return true;
 			}
 			return false;
@@ -85,7 +85,7 @@ namespace atom {
 		PROCESS_INFORMATION
 			pi;
 		//
-		STARTUPINFO
+		STARTUPINFOA
 			si;
 	};
 }

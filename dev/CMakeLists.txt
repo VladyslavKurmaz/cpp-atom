@@ -9,4 +9,5 @@ add_executable(
   "./dev.cpp"
   "./appl.cpp"
   "./comp.cpp"
+  "./context.cpp"
 )
