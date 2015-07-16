@@ -77,8 +77,8 @@ namespace dev {
 
 	std::string context::normalizeEnvName(std::string const& name){
 		std::string s = name;
-		boost::replace_all(s, ".", CONST_CMD_UNDERSCORE);
-		boost::replace_all(s, "-", CONST_CMD_UNDERSCORE);
+		boost::replace_all(s, CONST_CMD_DOT, CONST_CMD_UNDERSCORE);
+		boost::replace_all(s, CONST_CMD_DASH, CONST_CMD_UNDERSCORE);
 		boost::to_upper(s);
 		return s;
 	}

@@ -37,7 +37,15 @@ namespace dev {
 		return this->shared_from_this();
 	}
 
-	void comp::getMnemonicName(std::string& name){
+	///
+	std::string comp::getQualifiedId() {
+		std::string qn;
+		this->getMnemonicName(qn);
+		boost::replace_all(qn, CONST_ROOT_SIMBOL, CONST_CMD_DASH);
+		return qn;
+	}
+
+	void comp::getMnemonicName(std::string& name) {
 		comp_ptr p = this->getParent();
 		if (p){
 			std::string s;
@@ -260,7 +268,7 @@ namespace dev {
 		std::ofstream script;
 		//??? copy cmd file into home directory during make stage
 		//boost::filesystem::path fname = this->getHome() / boost::filesystem::path(this->getId() + CONST_CMD_FILE_EXT);
-		boost::filesystem::path fname = boost::filesystem::path(getenv("TEMP")) / boost::filesystem::path(this->getId() + CONST_CMD_FILE_EXT);
+		boost::filesystem::path fname = boost::filesystem::path(getenv("TEMP")) / boost::filesystem::path(this->getQualifiedId() + CONST_CMD_DASH + stage + CONST_CMD_FILE_EXT);
 		script.open(fname.c_str());
 		script << cnxt->getScriptText().c_str();
 		script.flush();

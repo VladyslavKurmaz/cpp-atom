@@ -71,6 +71,8 @@ namespace dev {
 	static std::string const  CONST_LEVEL_UP = "..";
 	static std::string const  CONST_CMD_DELIMITER = ";";
 	static std::string const  CONST_CMD_UNDERSCORE = "_";
+	static std::string const  CONST_CMD_DASH = "-";
+	static std::string const  CONST_CMD_DOT = ".";
 	static std::string const  CONST_CMD_FILE_EXT = ".cmd";
 
 	static std::string const  CONST_CMD_HELP = "help";

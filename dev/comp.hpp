@@ -34,8 +34,6 @@ namespace dev {
 		///
 		boost::filesystem::path getHome() const { return this->home; };
 		///
-		std::string const& getQualifiedId() const { return this->id; }
-		///
 		comp_ptr getParent(){ return ((get_value(boost::mpl::identity< comp2comp >()).item())); }
 		///
 		bool hasParent(){ return ((get_value(boost::mpl::identity< comp2comp >()).item().get() != NULL)); }
@@ -43,6 +41,8 @@ namespace dev {
 		bool hasChildren(){ return ((get_value(boost::mpl::identity< comp2comps >()).size() > 0)); }
 		//
 		comp_ptr getRootComponent();
+		///
+		std::string getQualifiedId();
 		///
 		void getMnemonicName(std::string& name);
 		///
