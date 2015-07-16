@@ -27,13 +27,8 @@ namespace dev {
 		base_node_t::clear();
 	}
 
-	void context::addEnvVar(std::string const& variable, std::string const& varType, std::string const& value, std::string const& valType){
-		envVar_t v;
-		v.variable = variable;
-		v.varType = parseVarType(varType);
-		v.value = value;
-		v.valType = parseVarType(valType);
-		this->envVars.push_back(v);
+	void context::addEnvVar(std::string const& name, std::string const& value){
+		this->envVars.push_back(std::make_pair(name, value));
 	}
 
 	void context::addScriptLines(std::string const& lines){
@@ -50,22 +45,18 @@ namespace dev {
 			os << "rem " << mname << std::endl;
 			BOOST_FOREACH(envVar_t const& v, this->envVars) {
 				os << "set ";
-				std::string name = v.variable;
-				if (v.varType == vtGenerate){
-					name = normalizeEnvName(/*"DEV" + CONST_CMD_UNDERSCORE + */cm->getQualifiedId() + CONST_CMD_UNDERSCORE + name);
-				}
+				std::string name = v.first;
+				boost::replace_all(name, "{name}", normalizeEnvName("DEV2" + cm->getQualifiedId() + CONST_CMD_UNDERSCORE));
+				//
 				os << name;
 				os << "=";
-				std::string value = v.value;
-				if (v.valType == vtGenerate){
-					boost::filesystem::path p = cm->getHome();
-					p /= boost::filesystem::path(value);
-					value = p.string();
+				std::string value = v.second;
+				boost::replace_all(value, "{home}", cm->getHome().string());
+				if (cm->hasParent()){
+					boost::replace_all(value, "{parent-home}", cm->getParent()->getHome().string());
 				}
+				//
 				os << value;
-				if (v.varType == vtExtend){
-					os << ";%" << name << "%";
-				}
 				os << std::endl;
 			}
 			this->envVars.clear();
@@ -82,28 +73,4 @@ namespace dev {
 		boost::to_upper(s);
 		return s;
 	}
-
-	context::envVarType context::parseVarType(std::string const& name){
-		///
-		static struct {
-			char*		id;
-			envVarType	type;
-		} const types[] = {
-			{ "gen", context::vtGenerate },
-			{ "use", context::vtUse },
-			{ "ext", context::vtExtend }
-		};
-		size_t const typesCount = sizeof(types) / sizeof(types[0]);
-		//
-		envVarType r = vtUndefined;
-		//
-		for (size_t i = 0; i < typesCount; ++i){
-			if (name == types[i].id){
-				r = types[i].type;
-				break;
-			}
-		}
-		return r;
-	}
-
 }

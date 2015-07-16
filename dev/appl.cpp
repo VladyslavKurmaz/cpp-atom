@@ -178,8 +178,8 @@ namespace dev {
 		}
 		else if (pos1.length()){
 			if (pos2.length()){
-				std::string p1 = "make";
-				std::string p2 = "cpp-atom.agd";
+				std::string p1 = pos1;// "make";
+				std::string p2 = pos2;// "cpp-atom.agd";
 				//
 				// split commands
 				strings_t stages;

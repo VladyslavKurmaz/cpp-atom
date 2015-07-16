@@ -20,7 +20,7 @@ namespace dev {
 		///
 		void clear();
 		///
-		void addEnvVar(std::string const& variable, std::string const& varType, std::string const& value, std::string const& valType);
+		void addEnvVar(std::string const& name, std::string const& value);
 		///
 		void addScriptLines(std::string const& lines);
 		///
@@ -29,27 +29,17 @@ namespace dev {
 		std::string getScriptText() { return this->script.str();  }
 
 	protected:
-		//
-		enum envVarType{
-			vtUndefined = 0,
-			vtGenerate,
-			vtUse,
-			vtExtend
-		};
 		///
 		LOGGER_ACCESSOR(context2logger);
 		//
 		std::string normalizeEnvName(std::string const& name);
 		//
-		envVarType parseVarType(std::string const& name);
 	private:
-		struct envVar_t{
-			std::string variable;
-			envVarType	varType;
-			std::string value;
-			envVarType	valType;
-		};
-		typedef std::vector < envVar_t >
+		//
+		typedef std::pair < std::string, std::string >
+			envVar_t;
+		///
+		typedef std::vector< envVar_t >
 			envVars_t;
 		envVars_t
 			envVars;

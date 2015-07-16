@@ -12,10 +12,6 @@ namespace dev {
 	std::string const       comp::INHERITS("inherits");
 	std::string const       comp::ATTR("attr");
 	std::string const       comp::VARS("var");
-	std::string const       comp::VARS_NAME("name");
-	std::string const       comp::VARS_NTYPE("ntype");
-	std::string const       comp::VARS_VALUE("value");
-	std::string const       comp::VARS_VTYPE("vtype");
 	std::string const       comp::STAGES("stage");
 
 	comp::comp(logger_ptr l, comp_ptr p, boost::filesystem::path const& h, std::string const& i, boost::property_tree::ptree const& a) :
@@ -268,7 +264,7 @@ namespace dev {
 		std::ofstream script;
 		//??? copy cmd file into home directory during make stage
 		//boost::filesystem::path fname = this->getHome() / boost::filesystem::path(this->getId() + CONST_CMD_FILE_EXT);
-		boost::filesystem::path fname = boost::filesystem::path(getenv("TEMP")) / boost::filesystem::path(this->getQualifiedId() + CONST_CMD_DASH + stage + CONST_CMD_FILE_EXT);
+		boost::filesystem::path fname = boost::filesystem::path(getenv("TEMP")) / boost::filesystem::path(stage + this->getQualifiedId() + CONST_CMD_FILE_EXT);
 		script.open(fname.c_str());
 		script << cnxt->getScriptText().c_str();
 		script.flush();
@@ -278,7 +274,7 @@ namespace dev {
 		//if (exec.run(fname.string(), true)){
 		//	exec.join();
 		//}
-		*(this->getLogger()) << cnxt->getScriptText().c_str() << std::endl;
+		//*(this->getLogger()) << cnxt->getScriptText().c_str() << std::endl;
 	}
 
 	void comp::clear() {
@@ -315,12 +311,8 @@ namespace dev {
 		if (mask & SCRIPT_MASK_ENVIRONMENT) {
 			boost::optional< const boost::property_tree::ptree& > vars = this->attr.get_child_optional(VARS);
 			if (vars) {
-				BOOST_FOREACH(boost::property_tree::ptree::value_type const & c, *vars) {
-					cnxt->addEnvVar(
-						c.second.get<std::string>(VARS_NAME),
-						c.second.get<std::string>(VARS_NTYPE),
-						c.second.get<std::string>(VARS_VALUE),
-						c.second.get<std::string>(VARS_VTYPE));
+				BOOST_FOREACH(boost::property_tree::ptree::value_type const & v, *vars) {
+					cnxt->addEnvVar(v.first, v.second.data());
 				}
 			}
 		}

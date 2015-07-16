@@ -1,7 +1,7 @@
 + read hierarchy of entitites
 + dependencies/inherints sections, build lists
 - deployment from url (cpp-netlib?)
-- clone/pull/push git repository
+- clone/pull/push/status git repository
 - deploy and build boost
 - remove constraints for root environment, add environment creation command
 - add command line parameter filter which will overwrite values, were built from platform, form is json {}
