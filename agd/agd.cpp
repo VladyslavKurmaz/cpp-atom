@@ -21,6 +21,29 @@ void standaloneThread() {
 
 int main( int argc, char *argv[] )
 {
+	char path[MAX_PATH] = { 0 };
+	char drive[MAX_PATH] = { 0 };
+	char dir[MAX_PATH] = { 0 };
+	char filename[MAX_PATH] = { 0 };
+	char ext[MAX_PATH] = { 0 };
+	GetModuleFileNameA(NULL, path, MAX_PATH);
+	_splitpath_s(path, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, NULL, NULL);
+	SetCurrentDirectoryA(path);
+
+	std::string env(getenv("PATH"));
+	std::string p(path);
+	p.pop_back();
+	env += ";" + p;
+	_makepath_s(path, drive, dir, "tesseract-ocr-3.02", NULL);
+	env += ";" + std::string(path);
+	SetEnvironmentVariableA("PATH", env.c_str());
+	_makepath_s(path, drive, dir, "tesseract-ocr-3.02\\", NULL);
+	SetEnvironmentVariableA("TESSDATA_PREFIX", path);
+	//
+	atom::proc proc;
+	proc.run(std::string("check.cmd"), false);
+	//
 	CoInitialize( NULL );
 	//InitCommonControls();
 	INITCOMMONCONTROLSEX icex;

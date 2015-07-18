@@ -103,7 +103,7 @@ pref::pref( logger_ptr l ) :
 		add_option( po_ui_width,		"ui.width",			"",
 		desc,	boost::program_options::value<unsigned int>()->default_value( 50 ))( ( id2gr( po_ui_width, pgWindow ), 0 ) ).
 		add_option( po_ui_height,		"ui.height",		"",
-		desc,	boost::program_options::value<unsigned int>()->default_value( 10 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
+		desc,	boost::program_options::value<unsigned int>()->default_value( 100 ))( ( id2gr( po_ui_height, pgWindow ), 0 ) ).
 		add_option( po_ui_clip,			"ui.clip",			"",
 		desc,	boost::program_options::value<bool>()->default_value( false ))( ( id2gr( po_ui_clip, pgWindow ), 0 ) ).
 		add_option( po_ui_alpha,		"ui.alpha",			"",
@@ -159,8 +159,9 @@ bool pref::init( int argc, char const * const argv[] ) {
 	} catch( std::exception& exc ) {
 		std::stringstream ss;
 		desc.print( ss );
-		*(this->getLogger()) << exc.what() << std::endl;
-		*(this->getLogger()) << ss.str() << std::endl;
+		//????????
+		*(this->getLogger()) << boost::lexical_cast<atom::string_t>( exc.what() ) << std::endl;
+		*(this->getLogger()) << boost::lexical_cast<atom::string_t>(ss.str()) << std::endl;
 		return false;
 	}
 	return true;

@@ -32,10 +32,14 @@ bool window::init() {
 	logger_ptr	l = get_slot< window2logger >().item();
 	pref_ptr	p = get_slot< window2pref >().item(); 
 	window_ptr	w = this->shared_from_this();
+#ifdef CONSOLE_STATE
 	this->modes.push_back( boost::make_tuple( _T( "Console" ), mode::create<shell>( l, p, w ) ) );
-	this->modes.push_back( boost::make_tuple( _T( "Augmented desktop" ), mode::create<ad>( l, p, w ) ) );
-	this->modes.push_back( boost::make_tuple( _T( "Atlas" ), mode::create<atlas>( l, p, w ) ) );
-	this->modes.push_back( boost::make_tuple( _T( "Augmented manuals" ), mode::create<am>( l, p, w ) ) );
+#endif
+#ifdef AUGMENTED_DESKTOP_STATE
+	this->modes.push_back(boost::make_tuple(_T("Augmented desktop"), mode::create<ad>(l, p, w)));
+#endif
+	//this->modes.push_back(boost::make_tuple(_T("Atlas"), mode::create<atlas>(l, p, w)));
+	//this->modes.push_back( boost::make_tuple( _T( "Augmented manuals" ), mode::create<am>( l, p, w ) ) );
 	//
 	DWORD const style = 0;
 	DWORD const ex_style = WS_EX_TOPMOST;
@@ -135,7 +139,7 @@ bool window::init() {
 			pos++;
 		}
 		this->sysMenuInsert( pos, MF_BYPOSITION | MF_SEPARATOR, 0, _T( "" ) );
-		this->modeSwitch( 1 );
+		this->modeSwitch( 0 );
 		//
 		hotkey new_hk;
 		if ( this->getPref()->parseHotkey( po_hk_appear, new_hk ) ) {

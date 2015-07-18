@@ -81,65 +81,68 @@ std::string url_encode( std::string const& value ) {
     return escaped.str();
 }
 
-void ad::mouselbup( int x, int y, unsigned int state ) {
+void ad::mouselbup(int x, int y, unsigned int state) {
 	window_ptr w = this->getWindow();
 	RECT r;
-	if ( w->inputIsCaptured( window::mouse ) ) {
-		ctrl.getRect( r );
+	if (w->inputIsCaptured(window::mouse)) {
+		ctrl.getRect(r);
 		//bitmapSave( "desktop.bmp", this->paintPadam.dcb.dc, this->paintPadam.dcb.bitmap );
-		HDC dc = GetDC( NULL );
-		size_t const cx = RECT_WIDTH( r );
-		size_t const cy = RECT_HEIGHT( r );
-		if ( ( cx > 8 ) && ( cy > 8 ) ) {
+		HDC dc = GetDC(NULL);
+		size_t const cx = RECT_WIDTH(r);
+		size_t const cy = RECT_HEIGHT(r);
+		if ((cx > 8) && (cy > 8)) {
 			dcb_t dcb;
-			dcb.updateDC( cx, cy );
-			BitBlt( dcb.dc,
+			dcb.updateDC(cx, cy);
+			BitBlt(dcb.dc,
 				0,
 				0,
-				RECT_WIDTH( r ),
-				RECT_HEIGHT( r ),
+				RECT_WIDTH(r),
+				RECT_HEIGHT(r),
 				dc,
 				r.left,
 				r.top,
-				SRCCOPY );
-			bitmapSave( _T( "desktop.bmp" ), dcb.dc, dcb.bitmap );
-			ReleaseDC( NULL, dc );
+				SRCCOPY);
+			bitmapSave(_T("desktop.bmp"), dcb.dc, dcb.bitmap);
+			ReleaseDC(NULL, dc);
 			//
-			atom::string_t src( _T( "?" ) );
-			atom::string_t dest( _T( "?" ) );
+			atom::string_t src(_T("?"));
+			atom::string_t dest(_T("?"));
 			atom::proc proc;
 			//
-			if ( proc.run( this->getOCRUrl(), false ) ) {
+			if (proc.run(this->getOCRUrl(), false)) {
 				proc.join();
 				//
 				try {
-				std::string s;
-				getFileContents( this->ocrOutputFileWithExt, s );
-				std::string encoded = url_encode( s );
-				boost::replace_all( encoded, " ", "%20");
-				//src = atom::s2s<atom::string_t>( s );
-				//atom::string_t wencoded = atom::s2s<atom::string_t>( encoded );
-				src = boost::locale::conv::to_utf<wchar_t>( s, "UTF-8" );
-				atom::string_t wencoded = boost::locale::conv::to_utf<wchar_t>( encoded, "UTF-8" );
-				//
-				if ( proc.run( this->getTranslateUrl( wencoded ), false ) ) {
-					proc.join();
-					//
-					boost::property_tree::ptree r;
-					boost::property_tree::read_json( this->translationOutputFile, r );
-					//
-					BOOST_FOREACH( boost::property_tree::ptree::value_type const & c, r.get_child( "data.translations" )) {
-						dest = boost::locale::conv::to_utf<wchar_t>( c.second.get<std::string>("translatedText"), "UTF-8" );
-						break;
+					std::string s;
+					getFileContents(this->ocrOutputFileWithExt, s);
+					if (s.length()){
+						std::string encoded = url_encode(s);
+						boost::replace_all(encoded, " ", "%20");
+						//src = atom::s2s<atom::string_t>( s );
+						//atom::string_t wencoded = atom::s2s<atom::string_t>( encoded );
+						src = boost::locale::conv::to_utf<wchar_t>(s, "UTF-8");
+						atom::string_t wencoded = boost::locale::conv::to_utf<wchar_t>(encoded, "UTF-8");
+						//
+						if (proc.run(this->getTranslateUrl(wencoded), false)) {
+							proc.join();
+							//
+							boost::property_tree::ptree r;
+							boost::property_tree::read_json(this->translationOutputFile, r);
+							//
+							BOOST_FOREACH(boost::property_tree::ptree::value_type const & c, r.get_child("data.translations")) {
+								dest = boost::locale::conv::to_utf<wchar_t>(c.second.get<std::string>("translatedText"), "UTF-8");
+								break;
+							}
+						}
 					}
 				}
-				} catch( std::exception& ) {
+				catch (std::exception&) {
 				}
 			}
-			this->adPanel->addRecord( src, dest );
+			this->adPanel->addRecord(src, dest);
 		}
 	}
-	w->inputRelease( window::mouse );
+	w->inputRelease(window::mouse);
 }
 
 void ad::mousemove( int x, int y, unsigned int state ){
