@@ -45,10 +45,49 @@ namespace atom {
     	}
 	}
 
+	template <typename T>
+	struct startupinfo;
+	template <>
+	struct startupinfo < char > {
+		STARTUPINFOA si;
+		BOOL(__stdcall*create())(
+			LPCSTR lpApplicationName,
+			LPSTR lpCommandLine,
+			LPSECURITY_ATTRIBUTES lpProcessAttributes,
+			LPSECURITY_ATTRIBUTES lpThreadAttributes,
+			BOOL bInheritHandles,
+			DWORD dwCreationFlags,
+			LPVOID lpEnvironment,
+			LPCSTR lpCurrentDirectory,
+			LPSTARTUPINFOA lpStartupInfo,
+			LPPROCESS_INFORMATION lpProcessInformation
+			) {
+			return CreateProcessA;
+		}
+	};
+	template <>
+	struct startupinfo < wchar_t > {
+		STARTUPINFOW si;
+		BOOL(__stdcall*create())(
+			LPCWSTR lpApplicationName,
+			LPWSTR lpCommandLine,
+			LPSECURITY_ATTRIBUTES lpProcessAttributes,
+			LPSECURITY_ATTRIBUTES lpThreadAttributes,
+			BOOL bInheritHandles,
+			DWORD dwCreationFlags,
+			LPVOID lpEnvironment,
+			LPCWSTR lpCurrentDirectory,
+			LPSTARTUPINFOW lpStartupInfo,
+			LPPROCESS_INFORMATION lpProcessInformation
+			) {
+			return CreateProcessW;
+		}
+	};
+
 	class proc : public boost::noncopyable {
 	public:
 		//
-		proc() : pi(), si() {
+		proc() : pi() {
 		}
 		//
 		~proc() {
@@ -58,16 +97,22 @@ namespace atom {
 		//
 		template< typename C >
 		bool run( std::basic_string<C> const& name, unsigned int const cw, unsigned int const ch, bool const new_console, bool const show ) {
-			this->si.cb				= sizeof( this->si );
-			this->si.dwFlags		= ( ( cw || ch ) ? ( STARTF_USECOUNTCHARS ) : ( 0 ) ) | STARTF_USESHOWWINDOW;
-			this->si.dwXCountChars	= cw;
-			this->si.dwYCountChars	= ch;
-			this->si.wShowWindow	= ((show)?(SW_SHOW):(SW_HIDE));
+			startupinfo<C> info;
+			memset(&info.si, 0, sizeof(info.si));
+			info.si.cb = sizeof(info.si);
+			info.si.dwFlags = ((cw || ch) ? (STARTF_USECOUNTCHARS) : (0)) | STARTF_USESHOWWINDOW;
+			info.si.dwXCountChars = cw;
+			info.si.dwYCountChars = ch;
+			info.si.wShowWindow = ((show) ? (SW_SHOW) : (SW_HIDE));
 			//
-			C cmd_line[MAX_PATH] = { 0 };
-			std::copy(name.begin(), name.end(), cmd_line);
-			if ( CreateProcessA(NULL, cmd_line, NULL, NULL, TRUE, (new_console) ? (CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP) : (0), NULL, NULL, &si, &pi)) {
-				return true;
+			size_t const cmd_line_len = sizeof(C) * (name.length() + 1);
+			C* cmd_line = (C*)_alloca(cmd_line_len);
+			if (cmd_line){
+				memset(cmd_line, 0, cmd_line_len);
+				std::copy(name.begin(), name.end(), cmd_line);
+				if (info.create()(NULL, cmd_line, NULL, NULL, TRUE, (new_console) ? (CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP) : (0), NULL, NULL, &info.si, &pi)) {
+					return true;
+				}
 			}
 			return false;
 		}
@@ -84,9 +129,6 @@ namespace atom {
 		//
 		PROCESS_INFORMATION
 			pi;
-		//
-		STARTUPINFOA
-			si;
 	};
 }
 

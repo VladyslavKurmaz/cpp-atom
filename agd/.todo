@@ -27,6 +27,7 @@
 - preview selection as an image
 - delete button
 - text-like selection mode (lbd + alt), when mouse move (left-right) select rectangle with predefined height and up-down changes rectange height
+- set TESSDATA_PREFIX environmetn variable, if it doesn't
 
 :atlas
 - dx\ogl init, render loop
