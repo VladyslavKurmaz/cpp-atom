@@ -66,7 +66,7 @@ namespace dev {
 		///
 		void buildInheritsFromList(platform_t const& platform, comps_t& comps);
 		///
-		void execute(platform_t const& platform, std::string const& stage, bool const recursive);
+		void execute(platform_t const& platform, std::string const& stage, bool const recursive, bool const idle);
 		///
 		void clear();
 

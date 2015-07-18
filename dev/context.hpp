@@ -32,8 +32,9 @@ namespace dev {
 		///
 		LOGGER_ACCESSOR(context2logger);
 		//
-		std::string normalizeEnvName(std::string const& name);
+		std::string normalizeEnvName(std::string const& name) const;
 		//
+		void replacePredevinedVariables(std::string& s, comp_ptr cm) const;
 	private:
 		//
 		typedef std::pair < std::string, std::string >

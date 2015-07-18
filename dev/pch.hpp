@@ -94,7 +94,8 @@ namespace dev {
 	//
 	static atom::po::id_t const po_init_comp = po_conf_desc + 1;
 	static atom::po::id_t const po_recursive = po_init_comp + 1;
-	static atom::po::id_t const po_user = po_recursive + 1;
+	static atom::po::id_t const po_idle = po_recursive + 1;
+	static atom::po::id_t const po_user = po_idle + 1;
 	static atom::po::id_t const po_password = po_user + 1;
 	static atom::po::id_t const po_email = po_password + 1;
 	static atom::po::id_t const po_origin = po_email + 1;

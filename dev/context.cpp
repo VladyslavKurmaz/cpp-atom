@@ -46,15 +46,12 @@ namespace dev {
 			BOOST_FOREACH(envVar_t const& v, this->envVars) {
 				os << "set ";
 				std::string name = v.first;
-				boost::replace_all(name, "{name}", normalizeEnvName("DEV2" + cm->getQualifiedId() + CONST_CMD_UNDERSCORE));
+				replacePredevinedVariables(name, cm);
 				//
 				os << name;
 				os << "=";
 				std::string value = v.second;
-				boost::replace_all(value, "{home}", cm->getHome().string());
-				if (cm->hasParent()){
-					boost::replace_all(value, "{parent-home}", cm->getParent()->getHome().string());
-				}
+				replacePredevinedVariables(value, cm);
 				//
 				os << value;
 				os << std::endl;
@@ -66,11 +63,21 @@ namespace dev {
 		}
 	}
 
-	std::string context::normalizeEnvName(std::string const& name){
+	std::string context::normalizeEnvName(std::string const& name) const{
 		std::string s = name;
 		boost::replace_all(s, CONST_CMD_DOT, CONST_CMD_UNDERSCORE);
 		boost::replace_all(s, CONST_CMD_DASH, CONST_CMD_UNDERSCORE);
 		boost::to_upper(s);
 		return s;
 	}
+
+	void context::replacePredevinedVariables(std::string& s, comp_ptr cm) const{
+		boost::replace_all(s, "{name}", normalizeEnvName("DEV2" + cm->getQualifiedId() + CONST_CMD_UNDERSCORE));
+		boost::replace_all(s, "{id}", cm->getId());
+		boost::replace_all(s, "{home}", cm->getHome().string());
+		if (cm->hasParent()){
+			boost::replace_all(s, "{parent-home}", cm->getParent()->getHome().string());
+		}
+	}
+
 }

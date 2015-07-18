@@ -1,14 +1,16 @@
 + read hierarchy of entitites
 + dependencies/inherints sections, build lists
++ deploy and build boost
++ simplify var description "{quilified}HOME":"{home}", "PATH":"{home}/include;%PATH%"
+
+- reload command, which will free and load againt jsons
 - deployment from url (cpp-netlib?)
 - clone/pull/push/status git repository
-- deploy and build boost
 - remove constraints for root environment, add environment creation command
 - add command line parameter filter which will overwrite values, were built from platform, form is json {}
 - utility command platform, show current platform parameters
 - save last command line parameters -t etc. ?
 - include feature allows to split descriptions into more that one file
-- simplify var description "{quilified}HOME":"{home}", "PATH":"{home}/include;%PATH%"
 
 // inline UML diagrams
 // http://yuml.me/diagram/scruffy/class/[appl]-1[logger],[appl]1-0..1[env],[env]-1[logger],[env]*-0..1[env],[env]1-*[comp],[comp]-1[logger],[comp]-1[appl]

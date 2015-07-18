@@ -59,6 +59,7 @@ namespace dev {
 			this->po.
 				add_option(po_init_comp, "comp,e", "define current (e)nvironment", conf_desc, boost::program_options::value<std::string>()->default_value(CONST_ROOT_SIMBOL)).
 				add_option(po_recursive, "recursive,r", "(r)ecursive mode", conf_desc).
+				add_option(po_idle, "idle", "generate and output script only, don't execute", conf_desc).
 				add_option(po_user, "user,u", "(u)ser", conf_desc, boost::program_options::value<std::string>()).
 				add_option(po_password, "password,p", "(p)assword", conf_desc, boost::program_options::value<std::string>()).
 				add_option(po_email, "email,m", "e(m)ail", conf_desc, boost::program_options::value<std::string>()).
@@ -159,7 +160,8 @@ namespace dev {
 	bool appl::processCommand(std::ostream& os) {
 		std::string const pos1 = this->po.as< std::string >(po_subcommand1);
 		std::string const pos2 = this->po.as< std::string >(po_subcommand2);
-		bool const recursive = ( this->po.count(po_recursive) > 0 );
+		bool const recursive = (this->po.count(po_recursive) > 0);
+		bool const idle = (this->po.count(po_idle) > 0);
 		//
 		if (pos1 == CONST_CMD_HELP) {
 			throw std::exception("command line parameters:");
@@ -202,7 +204,7 @@ namespace dev {
 				// execute commands
 				BOOST_FOREACH(std::string const& stage, stages) {
 					BOOST_FOREACH(comp_ptr cp, components) {
-						cp->execute(this->platform, stage, recursive);
+						cp->execute(this->platform, stage, recursive, idle);
 					}
 				}
 			}

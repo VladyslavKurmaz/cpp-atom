@@ -239,16 +239,16 @@ namespace dev {
 		}
 	}
 
-	void comp::execute(platform_t const& platform, std::string const& stage, bool const recursive){
+	void comp::execute(platform_t const& platform, std::string const& stage, bool const recursive, bool const idle){
 		if (recursive) {
 			// send command down to the children components
 			struct _{
-				static void __(comp_ptr e, platform_t const& p, std::string const& s, bool const r) {
-					e->execute(p, s, r);
+				static void __(comp_ptr e, platform_t const& p, std::string const& s, bool const r, bool const i) {
+					e->execute(p, s, r, i);
 				}
 			};
 			comp_ptr e;
-			this->get_slot<comp2comps>().for_each(boost::bind(&_::__, _1, boost::ref(platform), boost::ref(stage), recursive));
+			this->get_slot<comp2comps>().for_each(boost::bind(&_::__, _1, boost::ref(platform), boost::ref(stage), recursive, idle));
 		}
 		//
 		context_ptr cnxt = context::create(this->getLogger(), platform);
@@ -270,11 +270,14 @@ namespace dev {
 		script.flush();
 		script.close();
 		//
-		//atom::proc exec;
-		//if (exec.run(fname.string(), true)){
-		//	exec.join();
-		//}
-		//*(this->getLogger()) << cnxt->getScriptText().c_str() << std::endl;
+		if (idle){
+			*(this->getLogger()) << cnxt->getScriptText().c_str() << std::endl;
+		} else {
+			atom::proc exec;
+			if (exec.run(fname.string(), true)){
+				exec.join();
+			}
+		}
 	}
 
 	void comp::clear() {
