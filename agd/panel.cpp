@@ -81,7 +81,8 @@ bool panel::init( HWND hParent ) {
 		this->toolbar.
 			create( 0, WS_CHILD | CCS_NORESIZE | TBSTYLE_WRAPABLE | TBSTYLE_FLAT, tbrt, AD_PANEL_TOOLBAR, this->imageList, *this ).
 			setButtonSize( 24, 24 ).
-			addButton( AD_PANEL_IMAGE_PIN, AD_PANEL_TB_PIN, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_CHECK | BTNS_AUTOSIZE, NULL, atom::string_t() ).
+			addButton(-1, 0, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_SEP | BTNS_AUTOSIZE, NULL, atom::string_t()).
+			addButton(AD_PANEL_IMAGE_PIN, AD_PANEL_TB_PIN, /*TBSTATE_ENABLED | */TBSTATE_WRAP, BTNS_CHECK | BTNS_AUTOSIZE, NULL, atom::string_t()).
 			addButton( -1, 0, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_SEP | BTNS_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( langs.first.get<3>(), AD_PANEL_TB_LANG_FROM, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | TBSTYLE_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( AD_PANEL_IMAGE_SWAP, AD_PANEL_TB_LANG_SWAP, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | BTNS_AUTOSIZE, NULL, atom::string_t() ).

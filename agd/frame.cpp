@@ -37,7 +37,7 @@ void frame::paint( HDC dc, RECT const& rt, unsigned int const lineHeight ) {
 	bridge::lines_t lines;
 	this->console2Proxy.getLines( lines );
 	//
-	LONG view_lines = RECT_HEIGHT( rt ) / lineHeight;
+	size_t view_lines = RECT_HEIGHT(rt) / lineHeight;
 	size_t total_lines = lines.size();
 	//
 	int y = 0;

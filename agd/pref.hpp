@@ -82,7 +82,7 @@ public:
 			atom::parse_result< atom::char_t, BYTE > mods = atom::parse_tags( s, accel_tags, accel_tags_count, atom::string_t( _T( "+" ) ) );
 			//
 			if ( ( mods.total_found > 1 ) && ( mods.unparsed.size() == 1 ) ) {
-				atom::parse_result< atom::char_t, WORD > vk = atom::parse_tags( s, vk_tags, vk_tags_count, mods.unparsed );
+				atom::parse_result< atom::char_t, WORD > vk = atom::parse_tags< atom::char_t, WORD >(s, vk_tags, vk_tags_count, mods.unparsed);
 				if ( ( vk.total_found = 1 ) && ( vk.unparsed.size() == 0 ) ) {
 				} else {
 					vk.result = (WORD)mods.unparsed[0].c_str()[0];

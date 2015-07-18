@@ -51,6 +51,12 @@
 
 //#define STANDALONE
 
+//#define CONSOLE_STATE
+#define AUGMENTED_DESKTOP_STATE
+
+
+
+
 #ifdef STANDALONE
 extern const std::string TEST_PIPE_NAME;
 extern const std::string TEST_SHAREDMEM_NAME;
