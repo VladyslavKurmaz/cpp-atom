@@ -11,17 +11,15 @@ namespace dev {
 
 	public:
 		///
-		static boost::filesystem::path const CONFIG_LOCATION;
-		static std::string const COMP;
+		static boost::filesystem::path const CONFIG_FOLDER;
+		static boost::filesystem::path const CONFIG_FILE_NAME;
+		static std::string const INCLUDE;
 		static std::string const ID;
+		static std::string const COMP;
 		static std::string const PREREQUISITES;
 		static std::string const INHERITS;
 		static std::string const ATTR;
 		static std::string const VARS;
-		static std::string const VARS_NAME;
-		static std::string const VARS_NTYPE;
-		static std::string const VARS_VALUE;
-		static std::string const VARS_VTYPE;
 		static std::string const STAGES;
 		///
 		static comp_ptr create(logger_ptr l, comp_ptr p, boost::filesystem::path const& h, std::string const& i, boost::property_tree::ptree const& a) {
@@ -59,6 +57,8 @@ namespace dev {
 		comp_ptr build(std::string const& identity, boost::property_tree::ptree const& attributes);
 		///
 		void build(boost::property_tree::ptree const& config);
+		///
+		void build(boost::filesystem::path const& fileName);
 		///
 		void build();
 		///

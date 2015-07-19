@@ -5,9 +5,11 @@
 
 namespace dev {
 
-	boost::filesystem::path const comp::CONFIG_LOCATION(boost::filesystem::path(".conf") / boost::filesystem::path("catalog.json"));
-	std::string const       comp::COMP("comp");
+	boost::filesystem::path const comp::CONFIG_FOLDER(boost::filesystem::path(".conf"));
+	boost::filesystem::path const comp::CONFIG_FILE_NAME(boost::filesystem::path("catalog.json"));
+	std::string const		comp::INCLUDE("include");
 	std::string const       comp::ID("id");
+	std::string const       comp::COMP("comp");
 	std::string const       comp::PREREQUISITES("prerequisites");
 	std::string const       comp::INHERITS("inherits");
 	std::string const       comp::ATTR("attr");
@@ -56,21 +58,6 @@ namespace dev {
 		else{
 			name = this->getId();
 		}
-	}
-
-
-	const boost::regex e("\\A(\\d{3,4})[- ]?(\\d{4})[- ]?(\\d{4})[- ]?(\\d{4})\\z");
-	const std::string machine_format("\\1\\2\\3\\4");
-	const std::string human_format("\\1-\\2-\\3-\\4");
-
-	std::string machine_readable_card_number(const std::string s)
-	{
-		return regex_replace(s, e, machine_format, boost::match_default | boost::format_sed);
-	}
-
-	std::string human_readable_card_number(const std::string s)
-	{
-		return regex_replace(s, e, human_format, boost::match_default | boost::format_sed);
 	}
 
 	void comp::echo(std::ostream& os, std::string const& offset, std::string const& regex, bool const recursive){
@@ -178,12 +165,25 @@ namespace dev {
 		}
 	}
 
-	void comp::build() {
-		boost::filesystem::path config_file = this->home / CONFIG_LOCATION;
+	void comp::build(boost::filesystem::path const& fileName){
+		boost::filesystem::path config_file = this->home / CONFIG_FOLDER / fileName;
 		if (boost::filesystem::exists(config_file)) {
 			//
 			boost::property_tree::ptree config;
 			boost::property_tree::read_json(config_file.string(), config);
+			//
+			// include section
+			boost::optional<std::string> inc = config.get_optional<std::string>(INCLUDE);
+			if (inc){
+				strings_t includes;
+				boost::split(includes, (*inc), boost::is_any_of(CONST_CMD_DELIMITER));
+				//
+				BOOST_FOREACH(std::string const& i, includes) {
+					if (i.length()){
+						this->build(boost::filesystem::path(i));
+					}
+				}
+			}
 			//
 			// merger this->attr and "attr" section from config
 			boost::property_tree::ptree::const_assoc_iterator it = config.find(ATTR);
@@ -193,17 +193,23 @@ namespace dev {
 			//
 			// create hierarchy of comps based on json file
 			this->build(config);
-			//
-			// scan folders to find sub-environments
-			boost::filesystem::directory_iterator eit;
-			for (boost::filesystem::directory_iterator it(this->home); it != eit; ++it) {
-				if (boost::filesystem::is_directory(it->status())) {
-					boost::filesystem::path config_file = it->path() / CONFIG_LOCATION;
-					if (boost::filesystem::exists(config_file)) {
-						this->
-							build(it->path().leaf().generic_string(), boost::property_tree::ptree())->
-							build();
-					}
+		}else{
+			*(this->getLogger()) << "Config file doesn't exist: " << config_file.string().c_str() << std::endl;
+		}
+	}
+
+	void comp::build() {
+		this->build(CONFIG_FILE_NAME);
+		//
+		// scan folders to find sub-environments
+		boost::filesystem::directory_iterator eit;
+		for (boost::filesystem::directory_iterator it(this->home); it != eit; ++it) {
+			if (boost::filesystem::is_directory(it->status())) {
+				boost::filesystem::path config_file = it->path() / CONFIG_FOLDER / CONFIG_FILE_NAME;
+				if (boost::filesystem::exists(config_file)) {
+					this->
+						build(it->path().leaf().generic_string(), boost::property_tree::ptree())->
+						build();
 				}
 			}
 		}
