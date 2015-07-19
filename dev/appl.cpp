@@ -8,12 +8,12 @@
 namespace dev {
 
 	appl::appl(logger_ptr l) :
-		po()
-		, platform()
-		, cursor()
-		/*
-		po()
-		, msbuild()*/ {
+			po()
+		,	devHome()
+		,	platform()
+		,	cursor()
+		,	commands()
+		{
 			atom::mount<appl2logger>(this, l);
 			//
 			char const* root = getenv(CONST_DEV_HOME_ENV);
@@ -21,6 +21,12 @@ namespace dev {
 			if (root) {
 				home = std::string(root);
 			}
+			// configure commands
+			this->commands["help"] = &appl::cmdHelp;
+			this->commands["ls"] = &appl::cmdList;
+			this->commands["cd"] = &appl::cmdChangeDir;
+			this->commands["exit"] = &appl::cmdExit;
+			this->commands["reload"] = &appl::cmdReload;
 			//
 #ifdef _WIN32
 			SYSTEM_INFO si = { 0 };
@@ -53,7 +59,7 @@ namespace dev {
 			this->po.
 				add_option(po_help, "help,h", "show (h)elp", initial_desc).
 				add_option(po_shell, "shell,s", "shell mode", initial_desc).
-				add_option(po_home, "home,o", "define h(o)me directory, override %DEV_HOME% environment variable", initial_desc, boost::program_options::value<std::string>()->default_value(home));
+				add_option(po_home, "home,o", "define h(o)me directory, override %DEV_HOME% environment variable", initial_desc, boost::program_options::value<std::string>(&this->devHome)->default_value(home));
 			//
 			atom::po::options_description_t& conf_desc = this->po.add_desc(po_conf_desc, "");
 			this->po.
@@ -72,10 +78,16 @@ namespace dev {
 				add_option(po_configuration, "configuration,c", "(c)onfiguration", conf_desc, boost::program_options::value<std::string>(&this->platform.configuration)->default_value(this->platform.configuration));
 			// environment-type
 			//
+			std::stringstream sc1Help;
+			sc1Help << "<stage>[;<stage>;...]";
+			BOOST_FOREACH(commands_t::value_type const& c, this->commands) {
+				sc1Help << "|" << c.first;
+			}
+
 			atom::po::options_description_t& subcommands_desc = this->po.add_desc(po_subcommands_desc, "");
 			this->po.
-				add_option(po_subcommand1, "sc1", "<stage>    | cd  |help|ls|exit", subcommands_desc, boost::program_options::value<std::string>()->default_value("")).
-				add_option(po_subcommand2, "sc2", "<component>|<ent>|    |  |", subcommands_desc, boost::program_options::value<std::string>()->default_value(""));
+				add_option(po_subcommand1, "sc1", sc1Help.str(), subcommands_desc, boost::program_options::value<std::string>()->default_value("")).
+				add_option(po_subcommand2, "sc2", "<component>[;<component>;...]|<ent>", subcommands_desc, boost::program_options::value<std::string>()->default_value(""));
 
 			atom::po::positional_options_description_t& subcommands_posdesc = this->po.add_pdesc(po_subcommands_posdesc, "");
 			this->po.
@@ -99,20 +111,12 @@ namespace dev {
 		try {
 			this->po.parse_arg(argc, argv, desc, pdesc, true);
 			//
-			if (!this->po.as< std::string >(po_home).length()) {
+			if (!this->devHome.length()) {
 				throw std::exception(make_crit_msg("Dev home wasn't defined, set environment variable DEV_HOME or use command line argument --home"));
 			}
 			//
-			this->cursor = comp::create(this->getLogger(), dev::comp_ptr(), this->po.as<std::string>(po_home), CONST_ROOT_SIMBOL, boost::property_tree::ptree());
-			atom::mount<appl2comp>(this, cursor);
-			// ... manually create .conf repo DEV_CATALOG and attach it to the dev root
-			// 1. get param from command line
-			// if .conf already exists - nothing to do
-			// if it doesn't - add ".git"."url|user|branch" property
+			scanAndBuildHierarchy();
 			//
-			// ????////
-			// find --comp and set it as cursor
-			cursor->build();
 			this->processCommand(os);
 		}
 		catch (std::exception& exc) {
@@ -138,22 +142,23 @@ namespace dev {
 					break;
 				}
 			}
-			catch (std::exception& exc) {
-				this->printError(shell_desc, exc);
+			catch (helpException& e){
+				this->printError(shell_desc, e);
+			}
+			catch (std::exception& e) {
+				*(this->getLogger()) << boost::lexical_cast<dev::string_t>(std::string(e.what())) << std::endl;
 			}
 		}
 	}
 
 	void appl::clear(){
-		this->cursor.reset();
-		this->getRoot()->clear();
+		cleanupHierarchy();
 		base_node_t::clear();
 	}
 
 	void appl::printError(atom::po::options_description_t const& desc, std::exception& exc) {
 		std::stringstream ss;
 		desc.print(ss);
-		*(this->getLogger()) << boost::lexical_cast<dev::string_t>(std::string(exc.what())) << std::endl;
 		*(this->getLogger()) << boost::lexical_cast<dev::string_t>(ss.str()) << std::endl;
 	}
 
@@ -163,42 +168,38 @@ namespace dev {
 		bool const recursive = (this->po.count(po_recursive) > 0);
 		bool const idle = (this->po.count(po_idle) > 0);
 		//
-		if (pos1 == CONST_CMD_HELP) {
-			throw std::exception("command line parameters:");
+		commands_t::iterator cmd = this->commands.find(pos1);
+		if (cmd != this->commands.end()){
+			return (this->*(*cmd).second)(os, pos2, recursive);
 		}
-		else if (pos1 == CONST_CMD_CHANGE_COMP) {
-			comp_ptr nc;
-			if (nc = this->cursor->find(pos2)){
-				this->cursor = nc;
-			}
-		}
-		else if (pos1 == CONST_CMD_LIST) {
-			this->cursor->echo(os, "");
-		}
-		else if (pos1 == CONST_CMD_EXIT) {
-			return false;
-		}
-		else if (pos1.length()){
-			if (pos2.length()){
-				std::string p1 = pos1;// "make";
-				std::string p2 = pos2;// "cpp-atom.agd";
+		else{
+			std::string const stagesList = pos1;
+			std::string const compsList = pos2;
+			if (stagesList.length()){
 				//
-				// split commands
+				// split stages
 				strings_t stages;
-				boost::split(stages, p1, boost::is_any_of(CONST_CMD_DELIMITER));
+				boost::split(stages, stagesList, boost::is_any_of(CONST_CMD_DELIMITER));
 				//
-				// split components and resolve names
-				strings_t cmpns;
-				boost::split(cmpns, p2, boost::is_any_of(CONST_CMD_DELIMITER));
 				comps_t components;
-				BOOST_FOREACH(std::string const& cm, cmpns) {
-					comp_ptr c = this->cursor->findChild(cm);
-					if (c){
-						components.push_back(c);
+				//
+				if (compsList.length()){
+					//
+					// split components and resolve names
+					strings_t cmpns;
+					boost::split(cmpns, compsList, boost::is_any_of(CONST_CMD_DELIMITER));
+					BOOST_FOREACH(std::string const& cm, cmpns) {
+						comp_ptr c = this->cursor->findChild(cm);
+						if (c){
+							components.push_back(c);
+						}
+						else{
+							throw std::exception("component doesn't exist");
+						}
 					}
-					else{
-						throw std::exception("component doesn't find");
-					}
+				}
+				else {
+					components.push_back(this->cursor);
 				}
 				//
 				// execute commands
@@ -208,10 +209,56 @@ namespace dev {
 					}
 				}
 			}
-			else {
-				// reposotory with catalogs
-			}
 		}
 		return true;
 	}
+
+	bool appl::cmdHelp(std::ostream& os, std::string const& param, bool const recursive){
+		throw helpException();
+		return true;
+	}
+
+	bool appl::cmdList(std::ostream& os, std::string const& param, bool const recursive){
+		this->cursor->echo(os, " ", param, recursive);
+		return true;
+	}
+
+	bool appl::cmdChangeDir(std::ostream& os, std::string const& param, bool const recursive){
+		comp_ptr nc;
+		if (nc = this->cursor->find(param)){
+			this->cursor = nc;
+		}
+		return true;
+	}
+
+	bool appl::cmdExit(std::ostream& os, std::string const& param, bool const recursive){
+		return false;
+	}
+
+	bool appl::cmdReload(std::ostream& os, std::string const& param, bool const recursive){
+		cleanupHierarchy();
+		scanAndBuildHierarchy();
+		return true;
+	}
+
+	void appl::scanAndBuildHierarchy(){
+		this->cursor = comp::create(this->getLogger(), dev::comp_ptr(), this->devHome, CONST_ROOT_SIMBOL, boost::property_tree::ptree());
+		atom::mount<appl2comp>(this, cursor);
+		// ... manually create .conf repo DEV_CATALOG and attach it to the dev root
+		// 1. get param from command line
+		// if .conf already exists - nothing to do
+		// if it doesn't - add ".git"."url|user|branch" property
+		//
+		// ????////
+		// find --comp and set it as cursor
+		this->cursor->build();
+	}
+	
+	void appl::cleanupHierarchy(){
+		this->cursor.reset();
+		this->getRoot()->clear();
+	}
+
+
+
 }

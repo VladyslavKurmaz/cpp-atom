@@ -30,6 +30,7 @@ namespace dev {
 		void printError(atom::po::options_description_t const& desc, std::exception& exc);
 		//
 		bool processCommand(std::ostream& os);
+		///
 
 	private:
 		///
@@ -37,11 +38,34 @@ namespace dev {
 		//
 		atom::po
 			po;
+		///
+		std::string
+			devHome;
 		//
 		platform_t
 			platform;
 		//
 		comp_ptr
 			cursor;
+		//
+		typedef bool(appl::*cmdEntryPoint_t)(std::ostream&, std::string const&, bool const);
+		typedef std::map < std::string, cmdEntryPoint_t >
+			commands_t;
+		commands_t
+			commands;
+		//
+		bool cmdHelp(std::ostream& os, std::string const& param, bool const recursive);
+		//
+		bool cmdList(std::ostream& os, std::string const& param, bool const recursive);
+		//
+		bool cmdChangeDir(std::ostream& os, std::string const& param, bool const recursive);
+		//
+		bool cmdExit(std::ostream& os, std::string const& param, bool const recursive);
+		//
+		bool cmdReload(std::ostream& os, std::string const& param, bool const recursive);
+		///
+		void scanAndBuildHierarchy();
+		///
+		void cleanupHierarchy();
 	};
 }

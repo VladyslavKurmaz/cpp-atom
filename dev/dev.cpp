@@ -16,6 +16,7 @@ int main(int ac, char *av[]) {
 		}
 		a->clear();
 	}
+	assert(atom::node_cnt == 0);
 	ATOM_DBG_MARK_END(p1, p2, p1p2diff, true);
 	return 0;
 }

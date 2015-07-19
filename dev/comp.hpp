@@ -46,7 +46,7 @@ namespace dev {
 		///
 		void getMnemonicName(std::string& name);
 		///
-		void echo(std::ostream& os, std::string const& offset);
+		void echo(std::ostream& os, std::string const& offset, std::string const& regex, bool const recursive);
 		///
 		comp_ptr findCompUp(std::string const& compId);
 		///

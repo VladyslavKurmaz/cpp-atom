@@ -17,6 +17,7 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/regex.hpp>
 
 #include <atom/util/po.hpp>
 #include <atom/util/log.hpp>
@@ -35,6 +36,9 @@ namespace dev {
 	typedef std::basic_stringstream< char_t > stringstream_t;
 	typedef std::ostream ostream_t;
 	typedef std::vector<std::string> strings_t;
+
+	class helpException : public std::exception{};
+
 
 	class logger;
 	typedef boost::shared_ptr< logger > logger_ptr;

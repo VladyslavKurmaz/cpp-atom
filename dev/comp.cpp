@@ -58,21 +58,36 @@ namespace dev {
 		}
 	}
 
-	void comp::echo(std::ostream& os, std::string const& offset){
-		bool hp = offset.length() > 0;
-		os << offset;
-		if (hp){
-			os << "-";
-		}
-		os << this->getId() << std::endl;
-		std::string off = offset + ((hp) ? (" ") : ("")) + "|";
+
+	const boost::regex e("\\A(\\d{3,4})[- ]?(\\d{4})[- ]?(\\d{4})[- ]?(\\d{4})\\z");
+	const std::string machine_format("\\1\\2\\3\\4");
+	const std::string human_format("\\1-\\2-\\3-\\4");
+
+	std::string machine_readable_card_number(const std::string s)
+	{
+		return regex_replace(s, e, machine_format, boost::match_default | boost::format_sed);
+	}
+
+	std::string human_readable_card_number(const std::string s)
+	{
+		return regex_replace(s, e, human_format, boost::match_default | boost::format_sed);
+	}
+
+	void comp::echo(std::ostream& os, std::string const& offset, std::string const& regex, bool const recursive){
 		//
 		struct _{
-			static void __(comp_ptr const& e, std::ostream& os, std::string const& o) {
-				e->echo(os, o);
-			}
+			static void __(comp_ptr const& e, std::ostream& os, std::string const& o, std::string const& re, bool const r) {
+				std::string const& id = e->getId();
+				const boost::regex ex(re);
+				if (!re.length() || regex_match(id, ex)){
+					os << o << id << std::endl;
+					if (r){
+						e->echo(os, o + " ", re, r);
+					}
+				}
+			};
 		};
-		this->get_slot<comp2comps>().for_each(boost::bind(&_::__, _1, boost::ref(os), boost::ref(off)));
+		this->get_slot<comp2comps>().for_each(boost::bind(&_::__, _1, boost::ref(os), boost::ref(offset), boost::ref(regex), recursive));
 	}
 
 	comp_ptr comp::findChild(std::string const& childId){

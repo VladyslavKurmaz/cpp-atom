@@ -16,4 +16,4 @@ include_directories( "$ENV{LOKI_INCLUDE}" )
 # Real stuff
 #add_subdirectory ( "./libs" )
 add_subdirectory ( "./agd" )
-#add_subdirectory ( "./dev" )
+add_subdirectory ( "./dev" )

@@ -25,9 +25,11 @@
 - rotate region selection with image rotate after selection
 + add toolbar (languages, toogled, delete, picture)
 - preview selection as an image
-- delete button
+- delete button/ select items
 - text-like selection mode (lbd + alt), when mouse move (left-right) select rectangle with predefined height and up-down changes rectange height
-- set TESSDATA_PREFIX environmetn variable, if it doesn't
++ set TESSDATA_PREFIX environment variable, if it doesn't
+- save last selected region and use it during translation on hotkey (subtitles)
+- add more than one translation sources
 
 :atlas
 - dx\ogl init, render loop
