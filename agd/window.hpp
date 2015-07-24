@@ -44,7 +44,7 @@ public:
 	void
 	run();
 	//
-	void getPlacement( placement& p ) const { p = this->windowPlacement; }
+	void getPlacement( placement_t& p ) const { p = this->windowPlacement; }
 	//
 	void
 	clear();
@@ -100,16 +100,13 @@ private:
 	hotkey
 		appearHotKey;
 	//
-	atom::accel
-		accel;
-	//
-	placement
+	placement_t
 		windowPlacement;
 	//
 	paint_param_t
 		paintParam;
 	//
-	typedef boost::tuple< atom::string_t, mode_ptr >
+	typedef boost::tuple<atom::string_t, mode_ptr >
 		mode_item_t;
 	typedef std::vector< mode_item_t >
 		modes_t;

@@ -168,8 +168,6 @@ struct dcb_t {
 struct paint_param_t {
 	dcb_t
 		dcb;
-	atom::shared_gdiobj< HBRUSH >
-		bk;
 	RECT
 		padding;
 	atom::shared_gdiobj< HBRUSH >
@@ -182,7 +180,7 @@ struct paint_param_t {
 	paint_font_t
 		sysFont;
 	//
-	void updareDC( size_t const cx, size_t const cy ) {
+	void updateDC( size_t const cx, size_t const cy ) {
 		dcb.updateDC( cx, cy );
 	}
 };

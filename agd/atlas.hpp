@@ -29,7 +29,7 @@ protected:
 
 private:
 	///
-	atlas( logger_ptr l, pref_ptr p, window_ptr w );
+	atlas(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w);
 
 	friend mode;
 };

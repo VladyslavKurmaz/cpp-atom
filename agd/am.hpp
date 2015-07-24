@@ -29,7 +29,7 @@ protected:
 
 private:
 	///
-	am( logger_ptr l, pref_ptr p, window_ptr w );
+	am(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w);
 
 	friend mode;
 };

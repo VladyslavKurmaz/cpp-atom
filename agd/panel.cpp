@@ -2,15 +2,18 @@
 #include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
+#include "./window.hpp"
 #include "./shell.hpp"
 #include "./ad.hpp"
 #include "./panel.hpp"
 
 panel::panel( logger_ptr l, pref_ptr p ) :
 		wwindow( *this, INITLIST_4( &panel::onPaint, &panel::onSize, &panel::onNotify, &panel::onCommand ) )
-	,	imageList()
-	,	listView()
-	,	toolbar() {
+		, adActive(false)
+		, adVisible(false)
+		, imageList()
+		, listView()
+		, toolbar() {
 		//
 		atom::mount<panel2logger>( this, l );
 		atom::mount<panel2pref>( this, p );
@@ -20,6 +23,7 @@ panel::~panel() {
 }
 
 bool panel::init( HWND hParent ) {
+	assert(hParent);
 	//
 	logger_ptr	l = get_slot< panel2logger >().item();
 	pref_ptr	p = get_slot< panel2pref >().item(); 
@@ -51,7 +55,7 @@ bool panel::init( HWND hParent ) {
 			cs.style			=	WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_VISIBLE;
 			cs.lpszName;
 			cs.lpszClass;
-			cs.dwExStyle		=	WS_EX_PALETTEWINDOW;
+			cs.dwExStyle		= WS_EX_PALETTEWINDOW | WS_EX_TOPMOST;
 			return true;
 		}
 	};
@@ -66,7 +70,7 @@ bool panel::init( HWND hParent ) {
 		this->getClientRect( lvrt );
 		//
 		//
-		this->imageList.create( (HINSTANCE)GetModuleHandle( NULL ), MAKEINTRESOURCE( IDR_IMAGES ), 24, 0, RGB( 255, 255, 255 ) ); 
+		this->imageList.create( (HINSTANCE)GetModuleHandle( NULL ), MAKEINTRESOURCE( IDR_IMAGES ), 32, 0, RGB( 255, 255, 255 ) ); 
 		//
 		// Create the list-view window in report view with label editing enabled.
 		this->listView.create( 0, WS_CHILD | WS_BORDER | LVS_REPORT | LVS_EDITLABELS, lvrt, AD_PANEL_LISTVIEW, *this ).
@@ -77,12 +81,12 @@ bool panel::init( HWND hParent ) {
 		// create toolbar
 		pref::langspair_t const langs = this->getPref()->langGetPair();
 		RECT tbrt;
-		SetRect( &tbrt, 0, 0, 0, 32 );
+		SetRect( &tbrt, 0, 0, 0, 40 );
 		this->toolbar.
 			create( 0, WS_CHILD | CCS_NORESIZE | TBSTYLE_WRAPABLE | TBSTYLE_FLAT, tbrt, AD_PANEL_TOOLBAR, this->imageList, *this ).
-			setButtonSize( 24, 24 ).
-			addButton(-1, 0, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_SEP | BTNS_AUTOSIZE, NULL, atom::string_t()).
-			addButton(AD_PANEL_IMAGE_PIN, AD_PANEL_TB_PIN, /*TBSTATE_ENABLED | */TBSTATE_WRAP, BTNS_CHECK | BTNS_AUTOSIZE, NULL, atom::string_t()).
+			setButtonSize( 32, 32 ).
+			setIndent(8).
+			addButton(AD_PANEL_IMAGE_PIN, AD_PANEL_TB_PIN, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_CHECK | BTNS_AUTOSIZE, NULL, atom::string_t()).
 			addButton( -1, 0, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_SEP | BTNS_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( langs.first.get<3>(), AD_PANEL_TB_LANG_FROM, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | TBSTYLE_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( AD_PANEL_IMAGE_SWAP, AD_PANEL_TB_LANG_SWAP, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | BTNS_AUTOSIZE, NULL, atom::string_t() ).
@@ -172,11 +176,12 @@ void panel::onNotify( int id, LPNMHDR lpnm ) {
 	//	}
 	//}
 }
-	
+
 void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 	switch( id ) {
 	case AD_PANEL_TB_PIN:
 		{
+			this->show(this->adActive && this->adVisible);
 			break;
 		}
 	case AD_PANEL_TB_LANG_FROM:
@@ -230,6 +235,9 @@ void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 	}
 }
 
+bool panel::isLocked() const {
+	return this->toolbar.isBottonChecked(AD_PANEL_TB_PIN);
+}
 
 void panel::popupLangMenu( int const id ) {
 	pref::langspair_t langs = this->getPref()->langGetPair();

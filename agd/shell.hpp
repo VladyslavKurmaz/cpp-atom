@@ -29,7 +29,7 @@ protected:
 
 private:
 	///
-	shell( logger_ptr l, pref_ptr p, window_ptr w );
+	shell(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w);
 	//
 	area_ptr
 		headArea;

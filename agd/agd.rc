@@ -1,2 +1,3 @@
 #include "resource.h"
 IDR_IMAGES   BITMAP "images.bmp"
+IDR_CONFIG   TEXTFILE "config.json"

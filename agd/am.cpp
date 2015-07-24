@@ -4,11 +4,11 @@
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./panel.hpp"
-#include "./am.hpp"
 #include "./window.hpp"
+#include "./am.hpp"
 
-am::am( logger_ptr l, pref_ptr p, window_ptr w ):
-		mode( l, p, w )
+am::am(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w) :
+		mode( c, l, p, w )
 {
 }
 
