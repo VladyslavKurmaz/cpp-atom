@@ -4,12 +4,12 @@
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./panel.hpp"
-#include "./ad.hpp"
 #include "./window.hpp"
+#include "./ad.hpp"
 #include <boost/algorithm/string.hpp>
 
-ad::ad( logger_ptr l, pref_ptr p, window_ptr w ):
-		mode( l, p, w )
+ad::ad(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w) :
+		mode( c, l, p, w )
 	,	ocrOutputFile( _T( "out" ) )
 	,	ocrOutputFileWithExt( ocrOutputFile + _T( ".txt" ) )
 	,	translationOutputFileW( _T( "tr.json" ) )
@@ -23,14 +23,26 @@ ad::~ad() {
 }
 
 void ad::activate( bool const state ) {
+	mode::activate(state);
 	if ( !adPanel ) {
 		adPanel = panel::create( this->getLogger(), this->getPref() );
 		adPanel->init( this->getWindow()->getHWND() );
 	}
+	this->adPanel->show(state);
+	this->adPanel->setADState(state);
+	//if (state){
+	//	this->adPanel->activate();
+	//}
 }
 
 void ad::show( bool const state ) {
-	this->adPanel->show( state );
+	mode::activate(state);
+	this->adPanel->setADVisible(state);
+	bool const s = state || this->adPanel->isLocked();
+	this->adPanel->show(s);
+	//if (s){
+	//	this->adPanel->activate();
+	//}
 }
 
 bool ad::command( int const id ) {
@@ -143,24 +155,26 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 		}
 	}
 	w->inputRelease(window::mouse);
+	w->invalidate();
 }
 
-void ad::mousemove( int x, int y, unsigned int state ){
+void ad::mousemove(int x, int y, unsigned int state){
 	window_ptr w = this->getWindow();
-	if ( w->inputIsCaptured( window::mouse ) ) {
+	if (w->inputIsCaptured(window::mouse)) {
 		RECT r;
-		GetClientRect( w->getHWND(), &r );
-		ctrl.update( x, y, ( GetKeyState( VK_SPACE ) & 0x80 ) > 0, r );
+		GetClientRect(w->getHWND(), &r);
+		ctrl.update(x, y, (GetKeyState(VK_SPACE) & 0x80) > 0, r);
 		w->invalidate();
 	}
 }
 
-void ad::paint( paint_param_t& paintParam, RECT const& rect ) {
+void ad::paint(paint_param_t& paintParam, RECT const& rect) {
 	window_ptr w = this->getWindow();
-	if ( w->inputIsCaptured(window::mouse ) ) {
+	mode::paint(paintParam, rect);
+	if (w->inputIsCaptured(window::mouse)) {
 		RECT rt;
-		ctrl.getRect( rt );
-		FrameRect( paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject( WHITE_BRUSH ) );
+		ctrl.getRect(rt);
+		FrameRect(paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject(WHITE_BRUSH));
 	}
 }
 

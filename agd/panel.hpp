@@ -42,6 +42,16 @@ public:
 	void onNotify( int id, LPNMHDR lpnm );
 	///
 	void onCommand( int id, HWND hwndCtl, UINT codeNotify );
+	///
+	bool isLocked() const;
+	///
+	void setADState(bool const a) {
+		this->adActive = a;
+	};
+	///
+	void setADVisible(bool const v) {
+		this->adVisible = v;
+	};
 
 protected:
 	LOGGER_ACCESSOR( panel2logger )
@@ -53,12 +63,19 @@ protected:
 
 
 private:
+	bool
+		adActive;
+	bool
+		adVisible;
 	///
-	atom::wImageList imageList;
+	atom::wImageList
+		imageList;
 	///
-	atom::wctrlListView listView;
+	atom::wctrlListView
+		listView;
 	///
-	atom::wctrlToolbar toolbar;
+	atom::wctrlToolbar
+		toolbar;
 	///
 	panel( logger_ptr l, pref_ptr p );
 };

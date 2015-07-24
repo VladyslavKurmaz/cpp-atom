@@ -270,7 +270,16 @@ namespace atom {
 			SendMessage( this->getHWND(), TB_SETBUTTONSIZE, 0, MAKELPARAM( cx, cy ) );
 			return (*this);
 		}
-
+		//
+		wctrlToolbar& setIndent(unsigned int const indent) {
+			SendMessage(this->getHWND(), TB_SETINDENT, indent, 0);
+			return (*this);
+		}
+		///
+		bool isBottonChecked(int const command) const {
+			return (SendMessage(this->getHWND(), TB_GETSTATE, command, 0) & TBSTATE_CHECKED);
+		}
+		
 	protected:
 
 	private:

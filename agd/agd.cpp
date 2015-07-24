@@ -11,8 +11,9 @@
 
 #ifdef STANDALONE
 void standaloneThread() {
-	SIZE size = { 0 };
-	getConsoleSize( size );
+	COORD size = { 0 };
+	SMALL_RECT view;
+	getConsoleSize(size, view);
 	bridge proxy2Console( size, TEST_SHAREDMEM_NAME, TEST_PIPE_NAME );
 	proxy2Console.proxy();
 	proxy2Console.join();
@@ -39,7 +40,9 @@ int main( int argc, char *argv[] )
 	env += ";" + std::string(path);
 	SetEnvironmentVariableA("PATH", env.c_str());
 	_makepath_s(path, drive, dir, "tesseract-ocr-3.02\\", NULL);
-	SetEnvironmentVariableA("TESSDATA_PREFIX", path);
+	if (getenv("TESSDATA_PREFIX") == NULL){
+		SetEnvironmentVariableA("TESSDATA_PREFIX", path);
+	}
 	//
 	atom::proc proc;
 	proc.run(std::string("check.cmd"), false);

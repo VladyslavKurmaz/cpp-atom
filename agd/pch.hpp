@@ -58,12 +58,36 @@
 
 
 #ifdef STANDALONE
-extern const std::string TEST_PIPE_NAME;
-extern const std::string TEST_SHAREDMEM_NAME;
+extern const atom::string_t TEST_PIPE_NAME;
+extern const atom::string_t TEST_SHAREDMEM_NAME;
 #endif
 
 #define WM_FRAMEEXIT	WM_USER+1
 
+///////////////////////////////////////////////////////////////////////////////
+/// 
+static WORD	const CMDID_FULLSCREEN = 1000;
+static WORD	const CMDID_SPLIT = CMDID_FULLSCREEN + 1;
+extern const TCHAR CMDID_SPLIT_NAME[];
+static WORD	const CMDID_EXPAND = CMDID_SPLIT + 1;
+extern const TCHAR CMDID_EXPAND_NAME[];
+static WORD	const CMDID_ROTATE = CMDID_EXPAND + 1;
+extern const TCHAR CMDID_ROTATE_NAME[];
+static WORD	const CMDID_NEXT = CMDID_ROTATE + 1;
+extern const TCHAR CMDID_NEXT_NAME[];
+static WORD	const CMDID_PREV = CMDID_NEXT + 1;
+extern const TCHAR CMDID_PREV_NAME[];
+static WORD	const CMDID_CTRL_BREAK = CMDID_PREV + 1;
+static WORD	const CMDID_CTRL_C = CMDID_CTRL_BREAK + 1;
+static WORD	const CMDID_CLOSE = CMDID_CTRL_C + 1;
+static WORD	const CMDID_TTY1 = CMDID_CLOSE + 1;
+static WORD	const CMDID_TTY2 = CMDID_TTY1 + 1;
+static WORD	const CMDID_TTY3 = CMDID_TTY2 + 1;
+static WORD	const CMDID_TTY4 = CMDID_TTY3 + 1;
+static WORD	const CMDID_TTY5 = CMDID_TTY4 + 1;
+static WORD	const CMDID_TTY6 = CMDID_TTY5 + 1;
+
+///////////////////////////////////////////////////////////////////////////////
 // Augmented desktop panel
 // ad-panel controls
 static unsigned int const	AD_PANEL_TOOLBAR			=	10000;
@@ -92,50 +116,39 @@ static int const			AD_PANEL_IMAGE_LANG_COUNT	=	AD_PANEL_IMAGE_LANG_LAST - AD_PAN
 typedef unsigned int
 	frame_id_t;
 
-///
-static atom::po::id_t const po_none					=	0;
-static atom::po::id_t const po_help					=	po_none + 1;
-static atom::po::id_t const po_autostart			=	po_help + 1;
-//[hk.*]
-static atom::po::id_t const po_hk_appear			=	po_autostart + 1;
-static atom::po::id_t const po_hk_entire_screen		=	po_hk_appear + 1;
-static atom::po::id_t const po_hk_frame_split		=	po_hk_entire_screen + 1;
-static atom::po::id_t const po_hk_frame_minmax		=	po_hk_frame_split + 1;
-static atom::po::id_t const po_hk_frame_rotate		=	po_hk_frame_minmax + 1;
-static atom::po::id_t const po_hk_frame_next		=	po_hk_frame_rotate + 1;
-static atom::po::id_t const po_hk_frame_prev		=	po_hk_frame_next + 1;
-static atom::po::id_t const po_hk_frame_close		=	po_hk_frame_prev + 1;
-static atom::po::id_t const po_hk_ctrl_break		=	po_hk_frame_close + 1;
-static atom::po::id_t const po_hk_ctrl_c			=	po_hk_ctrl_break + 1;
-static atom::po::id_t const po_hk_tty1				=	po_hk_ctrl_c + 1;
-static atom::po::id_t const po_hk_tty2				=	po_hk_tty1 + 1;
-static atom::po::id_t const po_hk_tty3				=	po_hk_tty2 + 1;
-static atom::po::id_t const po_hk_tty4				=	po_hk_tty3 + 1;
-static atom::po::id_t const po_hk_tty5				=	po_hk_tty4 + 1;
-static atom::po::id_t const po_hk_tty6				=	po_hk_tty5 + 1;
-//[ui.*]
-static atom::po::id_t const po_ui_timeout			=	po_hk_tty6 + 1;
-static atom::po::id_t const po_ui_alignment			=	po_ui_timeout + 1;
-static atom::po::id_t const po_ui_width				=	po_ui_alignment + 1;
-static atom::po::id_t const po_ui_height			=	po_ui_width + 1;
-static atom::po::id_t const po_ui_clip				=	po_ui_height + 1;
-static atom::po::id_t const po_ui_alpha				=	po_ui_clip + 1;
-static atom::po::id_t const po_ui_bk_color			=	po_ui_alpha + 1;
-static atom::po::id_t const po_ui_lines_count		=	po_ui_bk_color + 1;
-//[ui.font.*]
-static atom::po::id_t const po_ui_font_text			=	po_ui_lines_count + 1;
-static atom::po::id_t const po_ui_font_sys			=	po_ui_font_text + 1;
-//[ui.margin.*]
-static atom::po::id_t const po_ui_margin			=	po_ui_font_sys + 1;
-//[ui.border.*]
-static atom::po::id_t const po_ui_border			=	po_ui_margin + 1;
-//[ui.padding.*]
-static atom::po::id_t const po_ui_padding			=	po_ui_border + 1;
-//[ui.scroll.*]
-static atom::po::id_t const po_ui_scroll			=	po_ui_padding + 1;
+
+static std::string CONFIG_TIMEOUT = "timeout";
+static std::string CONFIG_ALIGNMENT = "alignment";
+static std::string CONFIG_WIDTH = "width";
+static std::string CONFIG_HEIGHT = "height";
+static std::string CONFIG_CLIP = "clip";
+
+static std::string CONFIG_MODE = "mode.";
+static std::string CONFIG_BK_COLOR = "background-color";
+
+
+static struct command_t {
+	std::string id;
+	WORD command;
+} const commands[] = {
+	{ "hk.full-screen", CMDID_FULLSCREEN },
+	{ "hk.split", CMDID_SPLIT },
+	{ "hk.expand", CMDID_EXPAND },
+	{ "hk.rotate", CMDID_ROTATE },
+	{ "hk.next", CMDID_NEXT },
+	{ "hk.prev", CMDID_PREV },
+	{ "hk.close", CMDID_CLOSE },
+	{ "hk.ctrl-break", CMDID_CTRL_BREAK },
+	{ "hk.ctrl-c", CMDID_CTRL_C }
+};
+static std::string CONFIG_HK_APPEAR = "hk.appear";
+
+
+
+
 
 ///
-struct alignment {
+struct alignment_t {
 	typedef int
 		type;
 	enum {
@@ -155,18 +168,9 @@ struct alignment {
 		center	= hcenter | vcenter
 	};
 };
-///
-struct preferences {
-	typedef int
-		type;
-	enum {
-		pre		= 0x01,
-		update	= 0x02,
-		post	= 0x03
-	};
-};
 
-struct placement {
+///
+struct placement_t {
 	RECT			destination;
 	unsigned int	alpha;
 	bool			visible;
@@ -176,7 +180,7 @@ struct placement {
 	DWORD			lastTime;
 	DWORD			timeout;
 	UINT_PTR		timerId;
-	placement() {
+	placement_t() {
 		SetRectEmpty( &destination );
 		alpha		= 0;
 		visible		= false;
@@ -197,37 +201,8 @@ struct hotkey {
 	int operator==( hotkey const& r ) const { return ( ( this->mods == r.mods ) && ( this->vk == r.vk ) ); }
 	int operator!=( hotkey const& r ) const { return ( !( *this == r ) ); }
 };
-///
-static WORD	const CMDID_FULLSCREEN	= 1000;
-static WORD	const CMDID_SPLIT		= CMDID_FULLSCREEN + 1;
-extern const TCHAR CMDID_SPLIT_NAME[];
-static WORD	const CMDID_EXPAND		= CMDID_SPLIT + 1;
-extern const TCHAR CMDID_EXPAND_NAME[];
-static WORD	const CMDID_ROTATE		= CMDID_EXPAND + 1;
-extern const TCHAR CMDID_ROTATE_NAME[];
-static WORD	const CMDID_NEXT		= CMDID_ROTATE + 1;
-extern const TCHAR CMDID_NEXT_NAME[];
-static WORD	const CMDID_PREV		= CMDID_NEXT + 1;
-extern const TCHAR CMDID_PREV_NAME[];
-static WORD	const CMDID_CTRL_BREAK	= CMDID_PREV + 1;
-static WORD	const CMDID_CTRL_C		= CMDID_CTRL_BREAK + 1;
-static WORD	const CMDID_CLOSE		= CMDID_CTRL_C + 1;
-static WORD	const CMDID_TTY1		= CMDID_CLOSE + 1;
-static WORD	const CMDID_TTY2		= CMDID_TTY1 + 1;
-static WORD	const CMDID_TTY3		= CMDID_TTY2 + 1;
-static WORD	const CMDID_TTY4		= CMDID_TTY3 + 1;
-static WORD	const CMDID_TTY5		= CMDID_TTY4 + 1;
-static WORD	const CMDID_TTY6		= CMDID_TTY5 + 1;
+
 //
-extern const struct conf_cmd_t {
-	TCHAR const *	cmd;
-	WORD			id;
-	TCHAR const *	desc;
-}  conf_cmds[];
-extern const size_t conf_cmds_cnt;
-//
-extern const TCHAR DELIM1[];
-extern const TCHAR DELIM2[];
 
 atom::string_t gen_uuid();
 

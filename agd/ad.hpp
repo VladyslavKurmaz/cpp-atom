@@ -29,7 +29,7 @@ protected:
 
 private:
 	///
-	ad( logger_ptr l, pref_ptr p, window_ptr w );
+	ad(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w);
 	//
 	atom::string_t const ocrOutputFile;
 	atom::string_t const ocrOutputFileWithExt;

@@ -4,12 +4,11 @@
 #include "./log.hpp"
 #include "./pref.hpp"
 #include "./panel.hpp"
-#include "./atlas.hpp"
 #include "./window.hpp"
-#include <boost/algorithm/string.hpp>
+#include "./atlas.hpp"
 
-atlas::atlas( logger_ptr l, pref_ptr p, window_ptr w ):
-		mode( l, p, w ) {
+atlas::atlas(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w) :
+		mode( c, l, p, w ) {
 }
 
 atlas::~atlas() {

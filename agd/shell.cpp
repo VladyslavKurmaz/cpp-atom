@@ -6,19 +6,21 @@
 #include "./process.hpp"
 #include "./frame.hpp"
 #include "./area.hpp"
+#include "./window.hpp"
 #include "./shell.hpp"
 
-shell::shell( logger_ptr l, pref_ptr p, window_ptr w ):
-		mode( l, p, w )
+shell::shell(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w) :
+		mode( c, l, p, w )
 	,	headArea()
 	,	currentFrame()
 	,	expandMode( false )
 	,	consoleSize() {
 	//
 	this->consoleSize.X = 120;
-	this->consoleSize.Y = this->getPref()->get< unsigned int >( po_ui_lines_count );
+	this->consoleSize.Y = 512;
+	SMALL_RECT view;
 #ifdef STANDALONE
-	getConsoleSize( consoleSize );
+	getConsoleSize(consoleSize, view);
 #endif
 }
 
@@ -26,7 +28,8 @@ shell::~shell() {
 }
 
 void shell::activate( bool const state ) {
-	if ( state ) {
+	mode::activate(state);
+	if (state) {
 		if ( !this->currentFrame ) {
 			this->currentFrame = frame::create( this->getLogger(), this->consoleSize );
 			this->headArea = area::create( area_ptr(), this->currentFrame ); 
@@ -36,6 +39,7 @@ void shell::activate( bool const state ) {
 }
 
 void shell::show( bool const state ) {
+	mode::activate(state);
 }
 
 bool shell::command( int const id ) {

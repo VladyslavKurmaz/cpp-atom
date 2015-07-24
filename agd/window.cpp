@@ -2,11 +2,11 @@
 #include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
+#include "./window.hpp"
 #include "./shell.hpp"
 #include "./ad.hpp"
 #include "./atlas.hpp"
 #include "./am.hpp"
-#include "./window.hpp"
 
 
 #define SC_MODE_CMD         0x0010
@@ -14,7 +14,6 @@
 window::window( logger_ptr l, pref_ptr p ) :
 	wwindow( *this, INITLIST_14( &window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand, &window::onLBDown, &window::onLBUp, &window::onMouseMove, &window::onCaptureChanged, &window::onSysCommand ) )
 	,	appearHotKey()
-	,	accel()
 	,	windowPlacement()
 	,	paintParam()
 	,	modes()
@@ -33,10 +32,10 @@ bool window::init() {
 	pref_ptr	p = get_slot< window2pref >().item(); 
 	window_ptr	w = this->shared_from_this();
 #ifdef CONSOLE_STATE
-	this->modes.push_back( boost::make_tuple( _T( "Console" ), mode::create<shell>( l, p, w ) ) );
+	this->modes.push_back( boost::make_tuple( _T( "Console" ), mode::create<shell>( p->getModeConfig("ad"), l, p, w ) ) );
 #endif
 #ifdef AUGMENTED_DESKTOP_STATE
-	this->modes.push_back(boost::make_tuple(_T("Augmented desktop"), mode::create<ad>(l, p, w)));
+	this->modes.push_back(boost::make_tuple(_T("Augmented desktop"), mode::create<ad>(p->getModeConfig("console"), l, p, w)));
 #endif
 	//this->modes.push_back(boost::make_tuple(_T("Atlas"), mode::create<atlas>(l, p, w)));
 	//this->modes.push_back( boost::make_tuple( _T( "Augmented manuals" ), mode::create<am>( l, p, w ) ) );
@@ -73,65 +72,10 @@ bool window::init() {
 			return true;
 		}
 	};
-	// prepare paint objects
 	//
-	atom::string_t const d1( DELIM1 );
-	atom::string_t const d2( DELIM2 );
-	//
-	static const struct font_t {
-		atom::po::id_t	opt;
-		paint_font_t&	font;
-	} fonts[] = {
-		{ po_ui_font_text, this->paintParam.textFont },
-		{ po_ui_font_sys, this->paintParam.sysFont }
-	};
-	//
-	BOOST_FOREACH( font_t const& font, fonts )
-	{
-		atom::string_t s = boost::lexical_cast<atom::string_t>( this->getPref()->get< atom::po::string_t >( font.opt ) );
-		atom::attributes< atom::char_t > a( s, d1, d2 );
-		unsigned int height = a.as<unsigned int>(_T("height") );
-		unsigned int color = a.as_color( _T("color") );
-		//
-		HFONT f = CreateFont(
-			height,
-			0,
-			0,
-			0,
-			FW_NORMAL,//FW_HEAVY,
-			FALSE,//TRUE
-			FALSE,
-			FALSE,
-			OEM_CHARSET,
-			OUT_OUTLINE_PRECIS,
-			CLIP_DEFAULT_PRECIS,
-			DEFAULT_QUALITY,
-			FIXED_PITCH,
-			a.as<atom::string_t>(_T("name") ).c_str()
-			);
-		//
-		if ( f != NULL ) {
-			font.font.height = height;
-			font.font.font = f;
-			font.font.color = color;
-		} else {
-			*(this->getLogger()) << "Text font creation error: " << s << std::endl;
-		}
-	}
-	//
-	this->paintParam.bk = CreateSolidBrush( this->getPref()->get< unsigned int >( po_ui_bk_color ) );
-
-	atom::attributes< atom::char_t > padding( boost::lexical_cast<atom::string_t>( this->getPref()->get< atom::po::string_t >( po_ui_padding ) ), d1, d2 );
-	unsigned int const pv = padding.as<unsigned int>(_T("size") );
-	SetRect( &this->paintParam.padding, pv, pv, pv, pv );
-
-	atom::attributes< atom::char_t > border( boost::lexical_cast<atom::string_t>( this->getPref()->get< atom::po::string_t >( po_ui_border ) ), d1, d2 );
-	this->paintParam.borderActive			= CreateSolidBrush( border.as_color( _T("color") ) );
-	this->paintParam.borderInactive			= CreateSolidBrush( border.as_color( _T("inactive") ) );
-	//
-	this->updatePlacement( false, false );
+	this->updatePlacement(false, false);
 	if ( base_window_t::init( boost::bind( _::__, _1, _2, boost::ref( this->windowPlacement.destination ), style, ex_style ), true ) ) {
-		this->setStyles( WS_OVERLAPPED | WS_SYSMENU, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED ).setAlpha( this->getPref()->get< unsigned int >( po_ui_alpha ) );
+		this->setStyles( WS_OVERLAPPED | WS_SYSMENU, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED );
 		//
 		UINT pos = 0;
 		BOOST_FOREACH( mode_item_t& m, modes ) {
@@ -139,10 +83,10 @@ bool window::init() {
 			pos++;
 		}
 		this->sysMenuInsert( pos, MF_BYPOSITION | MF_SEPARATOR, 0, _T( "" ) );
-		this->modeSwitch( 0 );
+		this->modeSwitch(0);
 		//
 		hotkey new_hk;
-		if ( this->getPref()->parseHotkey( po_hk_appear, new_hk ) ) {
+		if (this->getPref()->parseHotkey(CONFIG_HK_APPEAR, new_hk)) {
 			//
 			if ( new_hk != this->appearHotKey ) {
 				new_hk.id++;
@@ -157,25 +101,6 @@ bool window::init() {
 			}
 		}
 		//
-		pref::opt2cmd_t tags[] = {
-			{ po_hk_entire_screen,	CMDID_FULLSCREEN },
-			{ po_hk_frame_split,	CMDID_SPLIT },
-			{ po_hk_frame_minmax,	CMDID_EXPAND },
-			{ po_hk_frame_rotate,	CMDID_ROTATE },
-			{ po_hk_frame_next,		CMDID_NEXT },
-			{ po_hk_frame_prev,		CMDID_PREV },
-			{ po_hk_frame_close,	CMDID_CLOSE },
-			{ po_hk_ctrl_break,		CMDID_CTRL_BREAK },
-			{ po_hk_ctrl_c,			CMDID_CTRL_C },
-			{ po_hk_tty1,			CMDID_TTY1 },
-			{ po_hk_tty2,			CMDID_TTY2 },
-			{ po_hk_tty3,			CMDID_TTY3 },
-			{ po_hk_tty4,			CMDID_TTY4 },
-			{ po_hk_tty5,			CMDID_TTY5 },
-			{ po_hk_tty6,			CMDID_TTY6 }
-		};
-		this->getPref()->parseAccel( tags, this->accel );
-		this->accel.build();
 		//
 		return true;
 	}
@@ -184,12 +109,12 @@ bool window::init() {
 
 void window::run() {
 	struct _ {
-		static bool __( HWND hWnd, MSG* msg, atom::accel& accel, window& w ) {
-			return accel.translate( hWnd, msg );
+		static bool __( HWND hWnd, MSG* msg, pref_ptr pref, window& w ) {
+			return pref->translateAccel( hWnd, msg );
 		}
 	};
 	this->toggleVisibility();
-	base_window_t::run( boost::bind( _::__, _1, _2, boost::ref( this->accel ), boost::ref( *this ) ) );
+	base_window_t::run( boost::bind( _::__, _1, _2, this->getPref(), boost::ref( *this ) ) );
 	this->modeSwitch( std::numeric_limits<size_t>::max() );
 }
 
@@ -268,9 +193,8 @@ void window::onPaint( HWND hWnd ) {
 			//	bmsz.cx,
 			//	bmsz.cy,
 			//	SRCCOPY );
-			FillRect( dc, &rect, this->paintParam.bk );
+			//FillRect( dc, &rect, this->paintParam.bk );
 		} else {
-			FillRect( this->paintParam.dcb.dc, &rect, this->paintParam.bk );
 			this->currentMode->paint( this->paintParam, rect );
 			//
 			BitBlt( dc,
@@ -357,13 +281,13 @@ void window::updatePlacement( bool const visible, bool const fullScreen ) {
 	RECT rt = this->windowPlacement.destination;
 	this->windowPlacement.visible = visible;
 	this->windowPlacement.fullScreen = fullScreen;
-	this->getPref()->calculateDocks( this->windowPlacement );
+	this->getPref()->calculateDocks(((this->currentMode) ? (this->currentMode->getAlpha()) : (255)), this->windowPlacement);
 	// update mem dc
 	SIZE sz;
 	sz.cx = RECT_WIDTH( this->windowPlacement.destination );
 	sz.cy = RECT_HEIGHT( this->windowPlacement.destination );
 	if ( ( RECT_WIDTH( rt ) != sz.cx ) || ( RECT_HEIGHT( rt ) != sz.cy ) ) {
-		this->paintParam.updareDC( sz.cx, sz.cy );
+		this->paintParam.updateDC( sz.cx, sz.cy );
 	}
 }
 
