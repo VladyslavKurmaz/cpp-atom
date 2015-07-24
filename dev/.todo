@@ -6,6 +6,7 @@
 + regex for ls command
 + include feature allows to split descriptions into more that one json files
 
+- read additional attributes from component folder: "VERSION":"0.x.0"
 - deployment from url (cpp-netlib?)
 - clone/pull/push/status git repository
 - remove constraints for root environment, add environment creation command
@@ -13,6 +14,7 @@
 - utility command platform, show current platform parameters
 - save last command line parameters -t etc. ?
 - skip empty stage run
+- multiple toolset/configuration inputs
 
 // inline UML diagrams
 // http://yuml.me/diagram/scruffy/class/[appl]-1[logger],[appl]1-0..1[env],[env]-1[logger],[env]*-0..1[env],[env]1-*[comp],[comp]-1[logger],[comp]-1[appl]
