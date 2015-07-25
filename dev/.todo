@@ -5,8 +5,12 @@
 + reload command, which will free and load againt jsons
 + regex for ls command
 + include feature allows to split descriptions into more that one json files
++ merge additional attributes from component folder "comp.conf" : "VERSION":"0.x.0"
 
-- read additional attributes from component folder: "VERSION":"0.x.0"
+- don't download and unzip acrhive if it already exists
+- output component caption to script
+- reload command, from current component?
+
 - deployment from url (cpp-netlib?)
 - clone/pull/push/status git repository
 - remove constraints for root environment, add environment creation command
@@ -16,9 +20,7 @@
 - skip empty stage run
 - multiple toolset/configuration inputs
 
-// inline UML diagrams
-// http://yuml.me/diagram/scruffy/class/[appl]-1[logger],[appl]1-0..1[env],[env]-1[logger],[env]*-0..1[env],[env]1-*[comp],[comp]-1[logger],[comp]-1[appl]
-                                                         
+                                                        
 
 // Known issues
 

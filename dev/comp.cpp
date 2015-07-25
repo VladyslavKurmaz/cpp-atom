@@ -7,7 +7,9 @@ namespace dev {
 
 	boost::filesystem::path const comp::CONFIG_FOLDER(boost::filesystem::path(".conf"));
 	boost::filesystem::path const comp::CONFIG_FILE_NAME(boost::filesystem::path("catalog.json"));
+
 	std::string const		comp::INCLUDE("include");
+	std::string const		comp::CONFIG("config");
 	std::string const       comp::ID("id");
 	std::string const       comp::COMP("comp");
 	std::string const       comp::PREREQUISITES("prerequisites");
@@ -137,14 +139,25 @@ namespace dev {
 		return this->shared_from_this();
 	}
 
-	comp_ptr comp::build(std::string const& idcomp, boost::property_tree::ptree const& attributes){
-		comp_ptr e = this->findChild(idcomp);
+	comp_ptr comp::build(std::string const& identity, boost::property_tree::ptree const& attributes, std::string const& additionalConfig){
+		comp_ptr e = this->findChild(identity);
 		if (e) {
 			e->mergeAttr(attributes);
 		}
 		else{
-			e = comp::create(this->getLogger(), this->shared_from_this(), this->getHome() / boost::filesystem::path(idcomp), idcomp, attributes);
+			e = comp::create(this->getLogger(), this->shared_from_this(), this->getHome() / boost::filesystem::path(identity), identity, attributes);
 			atom::mount<comp2comps>(this, e);
+		}
+		//
+		// merger additional attributes from component folder
+		if (additionalConfig.length()){
+			boost::filesystem::path config_file = e->getHome() / boost::filesystem::path(additionalConfig);
+			if (boost::filesystem::exists(config_file)) {
+				boost::property_tree::ptree config;
+				boost::property_tree::read_json(config_file.string(), config);
+				//
+				e->mergeAttr(config);
+			}
 		}
 		return (e);
 	}
@@ -153,12 +166,13 @@ namespace dev {
 		boost::property_tree::ptree::const_assoc_iterator it = config.find(COMP);
 		if (it != config.not_found()) {
 			BOOST_FOREACH(boost::property_tree::ptree::value_type const & c, config.get_child(COMP)) {
-				boost::property_tree::ptree::const_assoc_iterator it = c.second.find(ATTR);
+				//boost::property_tree::ptree::const_assoc_iterator it = c.second.find(ATTR);
 				std::string nid = c.second.get<std::string>(ID);
 				//
+				boost::optional< std::string > acfg = c.second.get_optional<std::string>(CONFIG);
 				boost::optional< const boost::property_tree::ptree& > child = c.second.get_child_optional(ATTR);
 				this->
-					build(nid, ((child) ? (it->second) : (boost::property_tree::ptree())))->
+					build(nid, ((child) ? (*child) : (boost::property_tree::ptree())), ((acfg) ? (*acfg) : ("")))->
 					// recursive comps scan
 					build(c.second);
 			}
@@ -208,7 +222,7 @@ namespace dev {
 				boost::filesystem::path config_file = it->path() / CONFIG_FOLDER / CONFIG_FILE_NAME;
 				if (boost::filesystem::exists(config_file)) {
 					this->
-						build(it->path().leaf().generic_string(), boost::property_tree::ptree())->
+						build(it->path().leaf().generic_string(), boost::property_tree::ptree(), "")->
 						build();
 				}
 			}
@@ -306,8 +320,72 @@ namespace dev {
 		base_node_t::clear();
 	}
 
-	void comp::mergeAttr(boost::property_tree::ptree const& a){
 
+
+	boost::property_tree::ptree mergePropertyTrees(boost::property_tree::ptree const& rptFirst, boost::property_tree::ptree const& rptSecond){
+		// Take over first property tree
+		boost::property_tree::ptree ptMerged = rptFirst;
+
+		// Keep track of keys and values (subtrees) in second property tree
+		std::queue<std::string> qKeys;
+		std::queue<boost::property_tree::ptree> qValues;
+		qValues.push(rptSecond);
+
+		// Iterate over second property tree
+		while (!qValues.empty())
+		{
+			// Setup keys and corresponding values
+			boost::property_tree::ptree ptree = qValues.front();
+			qValues.pop();
+			std::string keychain = "";
+			if (!qKeys.empty())
+			{
+				keychain = qKeys.front();
+				qKeys.pop();
+			}
+
+			// Iterate over keys level-wise
+			BOOST_FOREACH(const boost::property_tree::ptree::value_type& child, ptree)
+			{
+				// Leaf
+				if (child.second.size() == 0)
+				{
+					// No "." for first level entries
+					std::string s;
+					if (keychain != "")
+						s = keychain + "." + child.first.data();
+					else
+						s = child.first.data();
+
+					// Put into combined property tree
+					ptMerged.put(s, child.second.data());
+				}
+				// Subtree
+				else
+				{
+					// Put keys (identifiers of subtrees) and all of its parents (where present)
+					// aside for later iteration. Keys on first level have no parents
+					if (keychain != "")
+						qKeys.push(keychain + "." + child.first.data());
+					else
+						qKeys.push(child.first.data());
+
+					// Put values (the subtrees) aside, too
+					qValues.push(child.second);
+				}
+			}  // -- End of BOOST_FOREACH
+		}  // --- End of while
+
+		return ptMerged;
+	}
+
+
+	void comp::mergeAttr(boost::property_tree::ptree const& a){
+		this->attr = mergePropertyTrees(this->attr, a);
+		//
+		//std::stringstream ss;
+		//boost::property_tree::write_json(ss, this->attr);
+		//*(this->getLogger()) << ss.str().c_str() << std::endl;
 	}
 
 	bool comp::checkPlatform(platform_t const& platform) const{

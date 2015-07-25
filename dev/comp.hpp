@@ -13,7 +13,9 @@ namespace dev {
 		///
 		static boost::filesystem::path const CONFIG_FOLDER;
 		static boost::filesystem::path const CONFIG_FILE_NAME;
+
 		static std::string const INCLUDE;
+		static std::string const CONFIG;
 		static std::string const ID;
 		static std::string const COMP;
 		static std::string const PREREQUISITES;
@@ -54,7 +56,7 @@ namespace dev {
 		///
 		comp_ptr find(size_t const offset, strings_t const& path);
 		///
-		comp_ptr build(std::string const& identity, boost::property_tree::ptree const& attributes);
+		comp_ptr build(std::string const& identity, boost::property_tree::ptree const& attributes, std::string const& additionalConfig);
 		///
 		void build(boost::property_tree::ptree const& config);
 		///
