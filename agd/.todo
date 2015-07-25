@@ -4,11 +4,12 @@
 + fix alignment
 + implements frames and remote consoles
 + switch between modes
++ hide/show panel notifications
++ move apps option from boost::po to json file
 - translate mouse wheel to the underlying window
 - ALt+Enter when focus is on the panel
-- hide/show panel notifications
-- move apps option from boost::po to json file
-- UI options dialog
+- Alt+F4 exit from both window and panel and from panel close button 
+- UI options menu
 
 :shell
 - correct console buffer mapping
