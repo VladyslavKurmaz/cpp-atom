@@ -6,21 +6,28 @@
 + regex for ls command
 + include feature allows to split descriptions into more that one json files
 + merge additional attributes from component folder "comp.conf" : "VERSION":"0.x.0"
++ don't download and unzip acrhive if it already exists
++ output component caption before script execution
++ skip empty stages
++ clone/pull/status git repository
+- platform command
 
-- don't download and unzip acrhive if it already exists
-- output component caption to script
+- add attional loops for -a 32;64 -t mavc-12.0;msvc-13.0 -c debug;release;
+
 - reload command, from current component?
 
-- deployment from url (cpp-netlib?)
-- clone/pull/push/status git repository
 - remove constraints for root environment, add environment creation command
 - add command line parameter filter which will overwrite values, were built from platform, form is json {}
-- utility command platform, show current platform parameters
 - save last command line parameters -t etc. ?
-- skip empty stage run
-- multiple toolset/configuration inputs
+- deployment from url (cpp-netlib?)
 
                                                         
 
 // Known issues
+
+
+
+
+
+
 

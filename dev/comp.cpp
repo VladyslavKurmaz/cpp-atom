@@ -294,7 +294,7 @@ namespace dev {
 			prs->buildScript(platform, stage, SCRIPT_MASK_ENVIRONMENT, cnxt);
 		}
 		//
-		this->buildScript(platform, stage, SCRIPT_MASK_ALL, cnxt);
+		script_mask_t const smask = this->buildScript(platform, stage, SCRIPT_MASK_ALL, cnxt);
 		//
 		std::ofstream script;
 		//??? copy cmd file into home directory during make stage
@@ -305,12 +305,20 @@ namespace dev {
 		script.flush();
 		script.close();
 		//
-		if (idle){
-			*(this->getLogger()) << cnxt->getScriptText().c_str() << std::endl;
-		} else {
-			atom::proc exec;
-			if (exec.run(fname.string(), true)){
-				exec.join();
+		if (smask & SCRIPT_MASK_STAGES){
+			std::string nm;
+			this->getMnemonicName(nm);
+			*(this->getLogger())
+				<< std::endl
+				<< "*-------------------------------------------------------------------------------" << std::endl
+				<< "* " << nm.c_str() << std::endl;
+			if (idle){
+				*(this->getLogger()) << cnxt->getScriptText().c_str() << std::endl;
+			} else {
+				atom::proc exec;
+				if (exec.run(fname.string(), true)){
+					exec.join();
+				}
 			}
 		}
 	}
@@ -408,13 +416,15 @@ namespace dev {
 		return true;
 	}
 
-	void comp::constructScript(std::string const& stage, script_mask_t const mask, context_ptr cnxt) const {
+	comp::script_mask_t comp::constructScript(std::string const& stage, script_mask_t const mask, context_ptr cnxt) const {
+		script_mask_t r = SCRIPT_MASK_NONE;
 		// environment variables
 		if (mask & SCRIPT_MASK_ENVIRONMENT) {
 			boost::optional< const boost::property_tree::ptree& > vars = this->attr.get_child_optional(VARS);
 			if (vars) {
 				BOOST_FOREACH(boost::property_tree::ptree::value_type const & v, *vars) {
 					cnxt->addEnvVar(v.first, v.second.data());
+					r |= SCRIPT_MASK_ENVIRONMENT;
 				}
 			}
 		}
@@ -428,19 +438,23 @@ namespace dev {
 				BOOST_FOREACH(boost::property_tree::ptree::value_type const & s, *stages) {
 					if (s.first == stage) {
 						cnxt->addScriptLines(s.second.data());
+						r |= SCRIPT_MASK_STAGES;
 					}
 				}
 			}
 		}
+		return (r);
 	}
 
-	void comp::buildScript(platform_t const& platform, std::string const& stage, script_mask_t const mask, context_ptr cnxt) {
+	comp::script_mask_t comp::buildScript(platform_t const& platform, std::string const& stage, script_mask_t const mask, context_ptr cnxt) {
+		script_mask_t r = SCRIPT_MASK_NONE;
 		comps_t inhs;
 		this->buildInheritsFromList(platform, inhs);
 		BOOST_FOREACH(comp_ptr cp, inhs) {
-			cp->constructScript(stage, mask, cnxt);
+			r |= cp->constructScript(stage, mask, cnxt);
 		}
-		this->constructScript(stage, mask, cnxt);
+		r |= this->constructScript(stage, mask, cnxt);
 		cnxt->resolveScript(this->shared_from_this());
+		return (r);
 	}
 }

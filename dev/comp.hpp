@@ -74,6 +74,7 @@ namespace dev {
 
 	protected:
 		typedef unsigned int script_mask_t;
+		static script_mask_t const SCRIPT_MASK_NONE = 0x00;
 		static script_mask_t const SCRIPT_MASK_ENVIRONMENT = 0x01;
 		static script_mask_t const SCRIPT_MASK_PACKAGES = 0x02;
 		static script_mask_t const SCRIPT_MASK_STAGES = 0x04;
@@ -91,9 +92,9 @@ namespace dev {
 		///
 		void linearizeHierarchy(platform_t const& platform, std::string const& type, comps_t& comps);
 		///
-		void constructScript(std::string const& stage, script_mask_t const mask, context_ptr cnxt) const;
+		script_mask_t constructScript(std::string const& stage, script_mask_t const mask, context_ptr cnxt) const;
 		///
-		void buildScript(platform_t const& platform, std::string const& stage, script_mask_t const mask, context_ptr cnxt);
+		script_mask_t buildScript(platform_t const& platform, std::string const& stage, script_mask_t const mask, context_ptr cnxt);
 
 	private:
 		///
