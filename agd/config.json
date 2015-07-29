@@ -1,9 +1,9 @@
 {
   "autostart":1,
   "timeout":250,
-  "alignment":"top+left",
-  "width":50,
-  "height":50,
+  "alignment":"top+hclient",
+  "width":75,
+  "height":75,
   "maximized":0,
   "clip":1,
   "hk":{

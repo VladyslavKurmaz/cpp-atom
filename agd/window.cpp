@@ -169,11 +169,12 @@ static menuItem<int> topItems[] = {
 	{ _T(""), 0, NULL, NULL, 0 },
 	{ _T("Transparency"), 0, NULL, NULL, 0 },
 	{ _T("Background color"), CMDID_BACKGROUND_COLOR, NULL, NULL, 0 },
+	{ _T("Exclude startup toolbar"), CMDID_WORK_AREA, NULL, NULL, 0 },
+	{ _T(""), 0, NULL, NULL, 0 },
 	{ _T("Alignment"), 0, NULL, NULL, 0 },
 	{ _T("Vertical ratio"), 0, NULL, NULL, 0 },
 	{ _T("Horizontal ratio"), 0, NULL, NULL, 0 },
 	{ _T("Slide timeout"), 0, NULL, NULL, 0 },
-	{ _T("Work area"), CMDID_WORK_AREA, NULL, NULL, 0 },
 	{ _T(""), 0, NULL, NULL, 0 },
 	{ _T("Exit"), CMDID_EXIT, HBMMENU_MBAR_CLOSE, NULL, 0 }
 };
@@ -206,22 +207,25 @@ static menuItem<unsigned int> hrationItems[] = {
 };
 
 static menuItem<alignment_t::type> alignmentItems[] {
-	{ _T("Top + Left"), 0, NULL, NULL, 0 },
-	{ _T("Top + Center vertically"), 0, NULL, NULL, 0 },
-	{ _T("Top + Client vertically"), 0, NULL, NULL, 0 },
-	{ _T("Top + Right"), 0, NULL, NULL, 0 },
-	{ _T("Center horizontally + Left"), 0, NULL, NULL, 0 },
-	{ _T("Center horizontally + Center vertically"), 0, NULL, NULL, 0 },
-	{ _T("Center horizontally + Client vertically"), 0, NULL, NULL, 0 },
-	{ _T("Center horizontally + Right"), 0, NULL, NULL, 0 },
-	{ _T("Client horizontally + Left"), 0, NULL, NULL, 0 },
-	{ _T("Client horizontally + Center vertically"), 0, NULL, NULL, 0 },
-	{ _T("Client horizontally + Client vertically"), 0, NULL, NULL, 0 },
-	{ _T("Client horizontally + Right"), 0, NULL, NULL, 0 },
-	{ _T("Bottom + left"), 0, NULL, NULL, 0 },
-	{ _T("Bottom + Center vertically"), 0, NULL, NULL, 0 },
-	{ _T("Bottom + Client vertically"), 0, NULL, NULL, 0 },
-	{ _T("Bottom + Right"), 0, NULL, NULL, 0 }
+	{ _T("Top + Left"), 0, NULL, NULL, alignment_t::top | alignment_t::left },
+	{ _T("Top + Center horizontal"), 0, NULL, NULL, alignment_t::top | alignment_t::hcenter },
+	{ _T("Top + Client horizontal"), 0, NULL, NULL, alignment_t::top | alignment_t::hclient },
+	{ _T("Top + Right"), 0, NULL, NULL, alignment_t::top | alignment_t::right },
+	{ _T(""), 0, NULL, NULL, 0 },
+	{ _T("Center vertical + Left"), 0, NULL, NULL, alignment_t::vcenter | alignment_t::left },
+	{ _T("Center vertical + Center horizontal"), 0, NULL, NULL, alignment_t::vcenter | alignment_t::hcenter },
+	{ _T("Center vertical + Client horizontal"), 0, NULL, NULL, alignment_t::vcenter | alignment_t::hclient },
+	{ _T("Center vertical + Right"), 0, NULL, NULL, alignment_t::vcenter | alignment_t::right },
+	{ _T(""), 0, NULL, NULL, 0 },
+	{ _T("Client vertical + Left"), 0, NULL, NULL, alignment_t::vclient | alignment_t::left },
+	{ _T("Client vertical + Center horizontal"), 0, NULL, NULL, alignment_t::vclient | alignment_t::hcenter },
+	{ _T("Client vertical + Client horizontal"), 0, NULL, NULL, alignment_t::vclient | alignment_t::hclient },
+	{ _T("Client vertical + Right"), 0, NULL, NULL, alignment_t::vclient | alignment_t::right },
+	{ _T(""), 0, NULL, NULL, 0 },
+	{ _T("Bottom + left"), 0, NULL, NULL, alignment_t::bottom | alignment_t::left },
+	{ _T("Bottom + Center horizontal"), 0, NULL, NULL, alignment_t::bottom | alignment_t::hcenter },
+	{ _T("Bottom + Client horizontal"), 0, NULL, NULL, alignment_t::bottom | alignment_t::hclient },
+	{ _T("Bottom + Right"), 0, NULL, NULL, alignment_t::bottom | alignment_t::right }
 };
 
 static menuItem<unsigned int> slideItems[] {
@@ -474,15 +478,16 @@ void window::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 		if (mapMenuCommand<unsigned int>(id, transpItems, alpha)){
 			this->currentMode->setAlpha(255-alpha);
 		} else if (mapMenuCommand<alignment_t::type>(id, alignmentItems, aligment)){
-
+			this->updatePlacement(this->windowPlacement.visible, this->windowPlacement.fullScreen, this->windowPlacement.clip, this->windowPlacement.timeout, this->windowPlacement.width, this->windowPlacement.height, aligment);
+			this->slideBegin();
 		} else if (mapMenuCommand<unsigned int>(id, vrationItems, height)){
 			this->updatePlacement(this->windowPlacement.visible, this->windowPlacement.fullScreen, this->windowPlacement.clip, this->windowPlacement.timeout, this->windowPlacement.width, height, this->windowPlacement.alignment);
 			this->slideBegin();
 		} else if (mapMenuCommand<unsigned int>(id, hrationItems, width)){
 			this->updatePlacement(this->windowPlacement.visible, this->windowPlacement.fullScreen, this->windowPlacement.clip, this->windowPlacement.timeout, width, this->windowPlacement.height, this->windowPlacement.alignment);
 			this->slideBegin();
-
 		} else if (mapMenuCommand<unsigned int>(id, slideItems, slide)){
+			this->windowPlacement.timeout = slide;
 		}
 		//
 		switch (id) {
@@ -579,14 +584,14 @@ void window::onRBDown(HWND, BOOL, int x, int y, UINT){
 			return miptProcess;
 		}
 		static menuItemProcessType processAlignmentItems(menuItem<alignment_t::type> const& item, window_ptr w, alignment_t::type const alignment, bool& found){
-			if (!found && (alignment >= item.value)) {
+			if (!found && (alignment == item.value)) {
 				found = true;
 				return miptRadioCheck;
 			}
 			return miptProcess;
 		}
 		static menuItemProcessType processSlideItems(menuItem<unsigned int> const& item, window_ptr w, unsigned int const slide, bool& found){
-			if (!found && (slide >= item.value)) {
+			if (!found && (slide == item.value)) {
 				found = true;
 				return miptRadioCheck;
 			}
@@ -602,27 +607,31 @@ void window::onRBDown(HWND, BOOL, int x, int y, UINT){
 	//
 	atom::wpopupmenu alignmentMenu;
 	bool foundAlignment = false;
-	buildMenu<alignment_t::type>(alignmentMenu, alignmentItems, CMDID_ALIGNMENT_FIRST_ID, boost::bind(_::processAlignmentItems, _1, this->shared_from_this(), 0, boost::ref(foundAlignment)));
-	topItems[6].submenu = &alignmentMenu;
+	buildMenu<alignment_t::type>(alignmentMenu, alignmentItems, CMDID_ALIGNMENT_FIRST_ID, boost::bind(_::processAlignmentItems, _1, this->shared_from_this(), this->windowPlacement.alignment, boost::ref(foundAlignment)));
+	topItems[8].submenu = &alignmentMenu;
 	//
 	atom::wpopupmenu vratio;
 	bool foundVratio = false;
 	buildMenu<unsigned int>(vratio, vrationItems, CMDID_VRATION_FIRST_ID, boost::bind(_::processVratioItems, _1, this->shared_from_this(), this->windowPlacement.height, boost::ref(foundVratio)));
-	topItems[7].submenu = &vratio;
+	topItems[9].submenu = &vratio;
 	//
 	atom::wpopupmenu hratio;
 	bool foundHratio = false;
 	buildMenu<unsigned int>(hratio, hrationItems, CMDID_HRATION_FIRST_ID, boost::bind(_::processHratioItems, _1, this->shared_from_this(), this->windowPlacement.width, boost::ref(foundHratio)));
-	topItems[8].submenu = &hratio;
+	topItems[10].submenu = &hratio;
 	//
 	atom::wpopupmenu slide;
 	bool foundSlide = false;
 	buildMenu<unsigned int>(slide, slideItems, CMDID_SLIDE_FIRST_ID, boost::bind(_::processSlideItems, _1, this->shared_from_this(), this->windowPlacement.timeout, boost::ref(foundSlide)));
-	topItems[9].submenu = &slide;
+	topItems[11].submenu = &slide;
 	//
 	atom::wpopupmenu menu;
 	buildMenu<int>(menu, topItems, 0, boost::bind(_::processTopItems, _1, this->shared_from_this()));
-	menu.popup(this->getHWND(), x, y);
+	POINT pt;
+	pt.x = x;
+	pt.y = y;
+	MapWindowPoints(this->getHWND(), NULL, &pt, 1);
+	menu.popup(this->getHWND(), pt.x, pt.y);
 }
 
 
