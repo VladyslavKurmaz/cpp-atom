@@ -3,6 +3,8 @@
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
 
+
+
 class pref :
 	public atom::node< LOKI_TYPELIST_1( pref2logger ) >,
 	public boost::enable_shared_from_this< pref > {
@@ -25,13 +27,22 @@ public:
 	//
 	boost::property_tree::ptree const& getModeConfig(std::string const& key);
 	//
-	void getView( RECT& r );
+	void getView(bool const clip, RECT& r);
+	//
+	alignment_t::type getAlignment();
 	//
 	void calculateDocks(unsigned int const alpha, placement_t& windowPlacement);
 	//
 	bool parseHotkey(std::string const& id, hotkey& hk);
 	//
 	bool translateAccel(HWND hWnd, MSG* msg);
+	//
+	enum popupMenuType{
+		pmtTransparency,
+		pmtAlignment,
+		pmtVRatio,
+		pmtHRation
+	};
 	///
 	template < typename T, size_t N >
 	void parseAccel( T const (&tags)[N], atom::accel& accel ) {

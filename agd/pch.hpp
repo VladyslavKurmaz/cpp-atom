@@ -66,20 +66,29 @@ extern const atom::string_t TEST_SHAREDMEM_NAME;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// 
-static WORD	const CMDID_FULLSCREEN = 1000;
-static WORD	const CMDID_SPLIT = CMDID_FULLSCREEN + 1;
-extern const TCHAR CMDID_SPLIT_NAME[];
+
+static WORD	const CMDID_TRANSPARENT_FIRST_ID = 1000;
+static WORD	const CMDID_ALIGNMENT_FIRST_ID = 1100;
+static WORD	const CMDID_VRATION_FIRST_ID = 1200;
+static WORD	const CMDID_HRATION_FIRST_ID = 1300;
+static WORD	const CMDID_SLIDE_FIRST_ID = 1300;
+
+static WORD	const CMDID_FULLSCREEN = 1500;
+static WORD	const CMDID_EXIT = CMDID_FULLSCREEN + 1;
+static WORD	const CMDID_HIDE = CMDID_EXIT + 1;
+static WORD	const CMDID_MAXIMIZE = CMDID_HIDE + 1;
+static WORD	const CMDID_RESTORE = CMDID_MAXIMIZE + 1;
+static WORD	const CMDID_BACKGROUND_COLOR = CMDID_RESTORE + 1;
+static WORD	const CMDID_WORK_AREA = CMDID_BACKGROUND_COLOR + 1;
+static WORD	const CMDID_SPLIT = CMDID_WORK_AREA + 1;
 static WORD	const CMDID_EXPAND = CMDID_SPLIT + 1;
-extern const TCHAR CMDID_EXPAND_NAME[];
 static WORD	const CMDID_ROTATE = CMDID_EXPAND + 1;
-extern const TCHAR CMDID_ROTATE_NAME[];
 static WORD	const CMDID_NEXT = CMDID_ROTATE + 1;
-extern const TCHAR CMDID_NEXT_NAME[];
 static WORD	const CMDID_PREV = CMDID_NEXT + 1;
-extern const TCHAR CMDID_PREV_NAME[];
 static WORD	const CMDID_CTRL_BREAK = CMDID_PREV + 1;
 static WORD	const CMDID_CTRL_C = CMDID_CTRL_BREAK + 1;
 static WORD	const CMDID_CLOSE = CMDID_CTRL_C + 1;
+
 static WORD	const CMDID_TTY1 = CMDID_CLOSE + 1;
 static WORD	const CMDID_TTY2 = CMDID_TTY1 + 1;
 static WORD	const CMDID_TTY3 = CMDID_TTY2 + 1;
@@ -121,6 +130,7 @@ static std::string CONFIG_TIMEOUT = "timeout";
 static std::string CONFIG_ALIGNMENT = "alignment";
 static std::string CONFIG_WIDTH = "width";
 static std::string CONFIG_HEIGHT = "height";
+static std::string CONFIG_MAXIMIZED = "maximized";
 static std::string CONFIG_CLIP = "clip";
 
 static std::string CONFIG_MODE = "mode.";
@@ -142,10 +152,6 @@ static struct command_t {
 	{ "hk.ctrl-c", CMDID_CTRL_C }
 };
 static std::string CONFIG_HK_APPEAR = "hk.appear";
-
-
-
-
 
 ///
 struct alignment_t {
@@ -175,6 +181,10 @@ struct placement_t {
 	unsigned int	alpha;
 	bool			visible;
 	bool			fullScreen;
+	bool			clip;
+	unsigned int	width;
+	unsigned int	height;
+	alignment_t::type alignment;
 	bool			sliding;
 	DWORD			startTime;
 	DWORD			lastTime;

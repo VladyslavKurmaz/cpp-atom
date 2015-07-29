@@ -60,7 +60,7 @@ bool panel::init( HWND hParent ) {
 		}
 	};
 	RECT rt, view;
-	this->getPref()->getView( view );
+	this->getPref()->getView(this->getPref()->get< bool >(CONFIG_CLIP), view);
 	SetRect( &rt, view.left, view.top, view.left + RECT_WIDTH( view ) / 5, view.top + 2 * RECT_HEIGHT( view ) / 5 );
 	OffsetRect( &rt, RECT_WIDTH( view ) - RECT_WIDTH( rt ), RECT_HEIGHT( view ) - RECT_HEIGHT( rt ) );
 	if ( base_panel_t::init( boost::bind( _::__, _1, _2, boost::ref( rt ), hParent ), true ) ) {

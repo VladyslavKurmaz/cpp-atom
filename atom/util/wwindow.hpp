@@ -237,6 +237,15 @@ namespace atom {
 		}
 	};
 
+#define	ATOM_DEF_ONRBUTTONDOWN( c )	typedef void( c::* c ## _onrbuttondown_t )( HWND, BOOL, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_RBUTTONDOWN >::type, c ## _onrbuttondown_t >::type c ## _onrbuttondown_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_RBUTTONDOWN, T, U > {
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), FALSE, (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam), (UINT)(wParam)), 0L);
+		}
+	};
+
+
 #define	ATOM_DEF_ONMOUSEMOVE( c )	typedef void( c::* c ## _onmousemove_t )( HWND, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_MOUSEMOVE >::type, c ## _onmousemove_t >::type c ## _onmousemove_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_MOUSEMOVE, T, U > {

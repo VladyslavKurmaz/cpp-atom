@@ -116,51 +116,55 @@ boost::property_tree::ptree const&  pref::getModeConfig(std::string const& key){
 	return this->config.get_child(CONFIG_MODE + key);
 }
 
-void pref::getView(RECT& r) {
+void pref::getView(bool const clip, RECT& r) {
 	SetRect(&r, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-	if (this->get< bool >(CONFIG_CLIP)) {
+	if (clip) {
 		SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
 	}
 }
 
-void pref::calculateDocks(unsigned int const alpha, placement_t& windowPlacement) {
+alignment_t::type pref::getAlignment(){
 	//
 	static atom::parse_tag< char, alignment_t::type > alignment_tags[] = {
-		{ "hcenter",	alignment_t::hcenter },
-		{ "left",		alignment_t::left },
-		{ "right",		alignment_t::right },
-		{ "hclient",	alignment_t::hclient },
-		{ "hmask",		alignment_t::hmask },
-		{ "vcenter",	alignment_t::vcenter },
-		{ "top",		alignment_t::top },
-		{ "bottom",		alignment_t::bottom },
-		{ "vclient",	alignment_t::vclient },
-		{ "vmask",		alignment_t::vmask },
-		{ "client",		alignment_t::client },
-		{ "center",		alignment_t::center }
+		{ "hcenter", alignment_t::hcenter },
+		{ "left", alignment_t::left },
+		{ "right", alignment_t::right },
+		{ "hclient", alignment_t::hclient },
+		{ "hmask", alignment_t::hmask },
+		{ "vcenter", alignment_t::vcenter },
+		{ "top", alignment_t::top },
+		{ "bottom", alignment_t::bottom },
+		{ "vclient", alignment_t::vclient },
+		{ "vmask", alignment_t::vmask },
+		{ "client", alignment_t::client },
+		{ "center", alignment_t::center }
 	};
-	static size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
+	static size_t alignment_tags_count = sizeof(alignment_tags) / sizeof(alignment_tags[0]);
 	//
 	std::string const alig_str = this->get< std::string >(CONFIG_ALIGNMENT);
-
-	unsigned int const width = (windowPlacement.fullScreen) ? (100) : (this->get< unsigned int >(CONFIG_WIDTH));
-	unsigned int const height = (windowPlacement.fullScreen) ? (100) : (this->get< unsigned int >(CONFIG_HEIGHT));
-
-	windowPlacement.timeout = this->get< unsigned int>(CONFIG_TIMEOUT);
 	//
 	alignment_t::type align = alignment_t::client;
-	atom::parse_result< char, alignment_t::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, std::string("+") );
+	atom::parse_result< char, alignment_t::type > result = atom::parse_tags(alig_str, alignment_tags, alignment_tags_count, std::string("+"));
 	//
-	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
+	if ((result.total_found > 0) && (result.unparsed.size() == 0)) {
 		align = result.result;
-	} else {
+	}
+	else {
 		//*(this->getLogger()) << "Invalid alignment format " << alig_str << std::endl;
 		align = alignment_t::hcenter | alignment_t::top;
 	}
 	//
+	return align;
+}
+
+void pref::calculateDocks(unsigned int const alpha, placement_t& windowPlacement) {
+
+	unsigned int const width = (windowPlacement.fullScreen) ? (100) : (windowPlacement.width);
+	unsigned int const height = (windowPlacement.fullScreen) ? (100) : (windowPlacement.height);
+	alignment_t::type align = windowPlacement.alignment;
 
 	RECT rt;
-	this->getView( rt );
+	this->getView(windowPlacement.clip, rt);
 	//
 	alignment_t::type const h_align = align & alignment_t::hmask;
 	alignment_t::type const v_align = align & alignment_t::vmask;
