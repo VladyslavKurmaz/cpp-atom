@@ -4,3 +4,13 @@ v-0.1.0 18.07.2015
 v-0.1.1 24.07.2015
 * new shiny icons for in-place translator
 * locked mode for translation panel
+
+v-0.1.2 02.08.2015
+* quick access badge window
+* popup menu, which helps to control different aspects of application:
+ ** alignment
+ ** background color
+ ** transparency
+ ** vertical and horizontal ratio
+ ** slide timeout
+ ** hide/maximize/restore augmented panel
