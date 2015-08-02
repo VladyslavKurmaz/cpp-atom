@@ -80,7 +80,8 @@ static WORD	const CMDID_MAXIMIZE = CMDID_HIDE + 1;
 static WORD	const CMDID_RESTORE = CMDID_MAXIMIZE + 1;
 static WORD	const CMDID_BACKGROUND_COLOR = CMDID_RESTORE + 1;
 static WORD	const CMDID_WORK_AREA = CMDID_BACKGROUND_COLOR + 1;
-static WORD	const CMDID_SPLIT = CMDID_WORK_AREA + 1;
+static WORD	const CMDID_WORK_BADGE = CMDID_WORK_AREA + 1;
+static WORD	const CMDID_SPLIT = CMDID_WORK_BADGE + 1;
 static WORD	const CMDID_EXPAND = CMDID_SPLIT + 1;
 static WORD	const CMDID_ROTATE = CMDID_EXPAND + 1;
 static WORD	const CMDID_NEXT = CMDID_ROTATE + 1;
@@ -132,6 +133,7 @@ static std::string CONFIG_WIDTH = "width";
 static std::string CONFIG_HEIGHT = "height";
 static std::string CONFIG_MAXIMIZED = "maximized";
 static std::string CONFIG_CLIP = "clip";
+static std::string CONFIG_BADGE = "badge";
 
 static std::string CONFIG_MODE = "mode.";
 static std::string CONFIG_BK_COLOR = "background-color";

@@ -6,6 +6,7 @@
   "height":75,
   "maximized":0,
   "clip":1,
+  "badge":1,
   "hk":{
     "appear":"ctrl+0xC0",
     "full-screen":"alt+enter",

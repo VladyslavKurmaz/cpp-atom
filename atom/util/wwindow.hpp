@@ -103,8 +103,7 @@ namespace atom {
 
 	protected:
 		///
-		bool is_valid( HWND w, WNDPROC p ) const
-		{
+		bool is_valid( HWND w, WNDPROC p ) const {
 			return ( ( w != 0 ) && ( p != 0 ) );
 		}
 		///
@@ -116,30 +115,24 @@ namespace atom {
 		///
 		subclass() : 
 		  wnd( 0 )
-			  ,	proc( NULL )
-		  {
+			  ,	proc( NULL ) {
 		  }
 		  ///
-		  ~subclass()
-		  {
+		  ~subclass() {
 		  }
 		  ///
-		  WNDPROC sub( HWND w, WNDPROC p )
-		  {
+		  WNDPROC sub( HWND w, WNDPROC p ) {
 			  WNDPROC result = NULL;
-			  if ( is_valid( w, p ) )
-			  {
+			  if ( is_valid( w, p ) ) {
 				  result = unsub();
 				  this->proc = swap( ( this->wnd = w ), p );
 			  }
 			  return result;
 		  }
 		  ///
-		  WNDPROC unsub()
-		  {
+		  WNDPROC unsub() {
 			  WNDPROC result = NULL;
-			  if ( is_valid( this->wnd, this->proc ) )
-			  {
+			  if ( is_valid( this->wnd, this->proc ) ) {
 				  result = swap( this->wnd, this->proc );
 				  this->wnd		= 0;
 				  this->proc	= NULL;
@@ -147,10 +140,8 @@ namespace atom {
 			  return result;
 		  }
 		  ///
-		  LRESULT call( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
-		  {
-			  if ( this->proc != NULL )
-			  {
+		  LRESULT call( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+			  if ( this->proc != NULL ) {
 				  return ( CallWindowProc( this->proc, hWnd, uMsg, wParam, lParam ) );
 			  }
 			  return ::DefWindowProc( hWnd, uMsg, wParam, lParam );
@@ -167,8 +158,24 @@ namespace atom {
 #define	ATOM_DEF_ONNCHITTEST( c ) typedef LRESULT( c::* c ## _onnchittest_t )( HWND, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCHITTEST >::type, c ## _onnchittest_t >::type c ## _onnchittest_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_NCHITTEST, T, U > {
-		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
-			return ((t.*u)((hWnd), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) ));
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+		}
+	};
+
+#define	ATOM_DEF_ONNCLBUTTONDOWN( c ) typedef void( c::* c ## _onnclbuttondown_t )( HWND, int, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCLBUTTONDOWN >::type, c ## _onnclbuttondown_t >::type c ## _onnclbuttondown_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_NCLBUTTONDOWN, T, U > {
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), (int)wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), 0L);
+		}
+	};
+
+#define	ATOM_DEF_ONNCLBUTTONUP( c ) typedef void( c::* c ## _onnclbuttonup_t )( HWND, int, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCLBUTTONUP >::type, c ## _onnclbuttonup_t >::type c ## _onnclbuttonup_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_NCLBUTTONUP, T, U > {
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), (int)wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), 0L);
 		}
 	};
 

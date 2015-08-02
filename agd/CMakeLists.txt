@@ -20,6 +20,7 @@ add_executable(
   "./am.cpp"
   "./atlas.cpp"
   "./panel.cpp"
+  "./badge.cpp"
   "./agd.rc"
 )
 

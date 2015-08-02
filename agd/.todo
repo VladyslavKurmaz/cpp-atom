@@ -7,12 +7,13 @@
 + hide/show panel notifications
 + move apps option from boost::po to json file
 + UI options menu
++ Small window with AD logo to quick app access, like dropbox
 
 - translate mouse wheel to the underlying window
 - ALt+Enter when focus is on the panel
 - Alt+F4 exit from both window and panel and from panel close button 
-- Small window with AD logo to quick app access, like dropbox
 - block startup from RU region
+- help dialog
 
 :shell
 - correct console buffer mapping
@@ -36,6 +37,7 @@
 - text-like selection mode (lbd + alt), when mouse move (left-right) select rectangle with predefined height and up-down changes rectange height
 - save last selected region and use it during translation on hotkey (subtitles)
 - add more than one translation sources
+- edit recognized text and new translation loop
 
 :atlas
 - dx\ogl init, render loop

@@ -30,9 +30,6 @@ void ad::activate( bool const state ) {
 	}
 	this->adPanel->show(state);
 	this->adPanel->setADState(state);
-	//if (state){
-	//	this->adPanel->activate();
-	//}
 }
 
 void ad::show( bool const state ) {
@@ -40,9 +37,6 @@ void ad::show( bool const state ) {
 	this->adPanel->setADVisible(state);
 	bool const s = state || this->adPanel->isLocked();
 	this->adPanel->show(s);
-	//if (s){
-	//	this->adPanel->activate();
-	//}
 }
 
 bool ad::command( int const id ) {

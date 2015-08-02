@@ -7,6 +7,7 @@
 #include "./ad.hpp"
 #include "./atlas.hpp"
 #include "./am.hpp"
+#include "./badge.hpp"
 
 
 namespace atom {
@@ -176,6 +177,8 @@ static menuItem<int> topItems[] = {
 	{ _T("Horizontal ratio"), 0, NULL, NULL, 0 },
 	{ _T("Slide timeout"), 0, NULL, NULL, 0 },
 	{ _T(""), 0, NULL, NULL, 0 },
+	{ _T("Quick access badge"), CMDID_WORK_BADGE, NULL, NULL, 0 },
+	{ _T(""), 0, NULL, NULL, 0 },
 	{ _T("Exit"), CMDID_EXIT, HBMMENU_MBAR_CLOSE, NULL, 0 }
 };
 //
@@ -240,6 +243,7 @@ static menuItem<unsigned int> slideItems[] {
 
 window::window( logger_ptr l, pref_ptr p ) :
 wwindow(*this, INITLIST_15(&window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand, &window::onLBDown, &window::onLBUp, &window::onRBDown, &window::onMouseMove, &window::onCaptureChanged, &window::onSysCommand))
+	,	qlBadge()
 	,	appearHotKey()
 	,	windowPlacement()
 	,	paintParam()
@@ -252,6 +256,22 @@ wwindow(*this, INITLIST_15(&window::onKey, &window::onKey, &window::onChar, &win
 
 window::~window() {
 }
+
+atom::subclass sc;
+
+LRESULT CALLBACK WindowProc(
+	_In_ HWND   hwnd,
+	_In_ UINT   uMsg,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam
+	){
+	switch (uMsg){
+	case WM_NCHITTEST:
+		return HTCAPTION;
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
 
 bool window::init() {
 	//
@@ -336,7 +356,30 @@ bool window::init() {
 			}
 		}
 		//
+		this->qlBadge = badge::create(l, p, w);
+		this->qlBadge->init(this->getHWND());
+		this->qlBadge->show(this->getPref()->get< bool >(CONFIG_BADGE));
+
 		//
+		//HINSTANCE hInst = (HINSTANCE)GetModuleHandle(NULL);
+		//HWND hStatic = CreateWindowEx(
+		//	0,
+		//	_T("STATIC"),
+		//	NULL,
+		//	WS_OVERLAPPED | WS_VISIBLE | SS_BITMAP,
+		//	0, 0, 256, 128,
+		//	this->getHWND(),
+		//	NULL,
+		//	hInst,
+		//	NULL
+		//	);
+
+		//HBITMAP mybitmap = LoadBitmap(hInst, MAKEINTRESOURCE(IDR_IMAGES));
+		//SendMessage(hStatic, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)mybitmap);
+		//SetWindowLong(hStatic, GWL_STYLE, WS_OVERLAPPED | WS_VISIBLE | SS_BITMAP);
+		//SetWindowPos(hStatic, 0, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+		//sc.sub(hStatic, WindowProc);
+
 		return true;
 	}
 	return false;
@@ -357,6 +400,7 @@ void window::clear() {
 	BOOST_FOREACH( mode_item_t& m, modes ) {
 		m.get<1>()->clear();
 	}
+	this->qlBadge->clear();
 	base_node_t::clear();
 }
 
@@ -520,6 +564,9 @@ void window::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 		case CMDID_WORK_AREA:
 			this->toggleClip();
 			break;
+		case CMDID_WORK_BADGE:
+			this->qlBadge->show(!this->qlBadge->isVisible());
+			break;
 		}
 	}
 	this->invalidate();
@@ -559,6 +606,9 @@ void window::onRBDown(HWND, BOOL, int x, int y, UINT){
 			}
 			if (item.command == CMDID_WORK_AREA){
 				return ((w->windowPlacement.clip) ? (miptCheckboxChecked) : (miptCheckboxClear));
+			}
+			if (item.command == CMDID_WORK_BADGE){
+				return ((w->qlBadge->isVisible()) ? (miptCheckboxChecked) : (miptCheckboxClear));
 			}
 			return miptProcess;
 		}

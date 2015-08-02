@@ -79,16 +79,16 @@ public:
 	void onSysCommand( HWND hWnd, UINT cmd, int x, int y );
 	//
 	void exit();
-
-protected:
-	LOGGER_ACCESSOR( window2logger )
-	PREF_ACCESSOR( window2pref )
 	//
 	void toggleVisibility();
 	//
 	void toggleFullScreen();
 	//
 	void toggleClip();
+
+protected:
+	LOGGER_ACCESSOR( window2logger )
+	PREF_ACCESSOR( window2pref )
 	//
 	void updatePlacement(bool const visible, bool const fullScreen, bool const clip, DWORD const timeout, unsigned int const width, unsigned int const height, alignment_t::type const alignment);
 	//
@@ -101,6 +101,9 @@ protected:
 private:
 	///
 	window( logger_ptr l, pref_ptr p );
+	//
+	badge_ptr
+		qlBadge;
 	//
 	hotkey
 		appearHotKey;

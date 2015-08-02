@@ -38,6 +38,10 @@ class appl;
 typedef boost::shared_ptr< appl >
 	appl_ptr;
 //
+class badge;
+typedef boost::shared_ptr< badge >
+	badge_ptr;
+//
 //
 struct bridgeMsg {
 	enum type {
@@ -162,6 +166,15 @@ struct dcb_t {
 			SelectObject( this->dc, this->bitmap );
 		}
 		ReleaseDC( NULL, dc );
+	}
+	void loadBitmap(HINSTANCE hInst, UINT const resId){
+		HDC dc = GetDC(NULL);
+		{
+			this->dc = CreateCompatibleDC(dc);
+			this->bitmap = reinterpret_cast<HBITMAP>(LoadImage(hInst, MAKEINTRESOURCE(resId), IMAGE_BITMAP, 0, 0, 0));
+			SelectObject(this->dc, this->bitmap);
+		}
+		ReleaseDC(NULL, dc);
 	}
 };
 
