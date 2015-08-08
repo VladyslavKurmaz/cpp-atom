@@ -8,11 +8,16 @@
 + move apps option from boost::po to json file
 + UI options menu
 + Small window with AD logo to quick app access, like dropbox
++ add email, facebook, website links at help dialog
 
+- save preferences to json and read it at startup
+- move language pref from root to mode json section, list of available languages
+- check if new version is available, call php script on startup to check number of users, block startup from RU region
+- template class which allows to create shared ptr to the subset of fields
+- mode mode selection from system menu to the popup menu
 - translate mouse wheel to the underlying window
 - ALt+Enter when focus is on the panel
 - Alt+F4 exit from both window and panel and from panel close button 
-- block startup from RU region
 - help dialog
 
 :shell

@@ -40,7 +40,7 @@ public:
 	~window();
 	///
 	bool
-	init();
+		init(HINSTANCE hInst);
 	///
 	void
 	run();

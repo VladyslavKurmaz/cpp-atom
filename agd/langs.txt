@@ -1,0 +1,70 @@
++ Afrikaans af  afr
++ Albanian  sq  sqi
++ Arabic  ar  ara
++ Azerbaijani az  aze
+  Bangla    ban
+  Basque  eu  
+  Basque    eus
++ Belarusian  be  bel
+  Bengali bn  ben
++ Bulgarian bg  bul
+  Catalan ca  cat
+  Cherokee    chr
+  Chinese Simplified  zh-CN chi_sim
+  Chinese Traditional zh-TW 
+  Croatian  hr  hrv
++ Czech cs  ces
++ Danish  da  dan
++ Dutch nl  nld
++ English en  eng
+  Esperanto eo  epo
++ Estonian  et  est
+  Filipino  tl  
++ Finnish fi  fin
+  Frankish    frk
++ French  fr  fra
+  Galician  gl  glg
+  Georgian  ka  
++ German  de  deu
++ Greek el  ell
+  Gujarati  gu  
+  Haitian Creole  ht  
++ Hebrew  iw  heb
++ Hindi hi  hin
++ Hungarian hu  hun
++ Icelandic is  isl
++ Indonesian  id  ind
+  Irish ga  
++ Italian it  ita
++ Japanese  ja  jpn
+  Kannada kn  kan
++ Korean  ko  kor
+  Latin la  
++ Latvian lv  lav
++ Lithuanian  lt  lit
++ Macedonian  mk  mkd
+  Malay ms  msa
+  Malayalam   mal
+  Maltese mt  mlt
++ Norwegian no  nor
+  Persian fa  
++ Polish  pl  pol
++ Portuguese  pt  por
++ Romanian  ro  ron
++ Russian ru  rus
++ Serbian sr  srp
++ Slovak  sk  slk
++ Slovenian sl  slv
++ Spanish es  spa
+  Swahili sw  swa
++ Swedish sv  swe
+  Tagalog   tgl
+  Tamil ta  tam
+  Telugu  te  tel
+  Thai  th  tha
++ Turkish tr  tur
++ Ukrainian uk  ukr
+  Urdu  ur  
++ Vietnamese  vi  vie
+  Welsh cy  
+  Yiddish yi  

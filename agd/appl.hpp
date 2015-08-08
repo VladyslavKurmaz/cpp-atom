@@ -17,7 +17,7 @@ public:
 	~appl();
 	///
 	bool
-		init();
+		init(HINSTANCE hInst);
 	///
 	appl&
 		run();

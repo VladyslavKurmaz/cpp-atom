@@ -67,9 +67,10 @@ int main( int argc, char *argv[] )
 			boost::thread testThread( standaloneThread );
 #endif
 			appl_ptr a = appl::create( l, p );
-			if ( a->init() ) {
-				a->run().clear();
+			if ( a->init(reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL))) ) {
+				a->run();
 			}
+			a->clear();
 #ifdef STANDALONE
 			testThread.join();
 #endif

@@ -7,6 +7,7 @@
   "maximized":0,
   "clip":1,
   "badge":1,
+  "show-help":1,
   "hk":{
     "appear":"ctrl+0xC0",
     "full-screen":"alt+enter",
@@ -22,7 +23,9 @@
   "mode":{
     "ad":{
       "background-color":"F00F0F0F",
-      "selection-color":"00FF00"
+      "selection-color":"00FF00",
+      "languare-from":"",
+      "languare-to":""
     },
     "console":{
       "background-color":"400F0F0F",

@@ -9,19 +9,11 @@
 #define IDR_CONFIG                      1002
 #define IDR_IMG_BADGE                   1003
 #define IDR_IMG_HELP_PAGE_01            1004
-#define IDR_IMG_HELP_PAGE_02            1005
-#define IDR_IMG_HELP_PAGE_03            1006
-#define IDR_IMG_FACEBOOK                1007
-#define IDR_IMG_WWW                     1008
-#define IDR_IMG_EMAIL                   1009
 
 #define IDC_BUTTON_NEXT                 1001
 #define IDC_BUTTON_GOTIT                1002
 #define IDC_CHECK_SHOW_HELP_ONSTARTUP   1003
 #define IDC_BUTTON_DONATE               1004
-#define IDC_STATIC_FACEBOOK             1007
-#define IDC_STATIC_WWW                  1008
-#define IDC_STATIC_EMAIL                1009
 
 #define IDD_HELP                        101
 #define IDD_DIALOG_HELP_TOPICS          102

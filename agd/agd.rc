@@ -1,5 +1,132 @@
+// Microsoft Visual C++ generated resource script.
+//
 #include "resource.h"
-IDR_IMAGES   BITMAP "images.bmp"
-IDR_CONFIG   TEXTFILE "config.json"
-IDR_IMG_BADGE   BITMAP "badge.bmp"
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_IMAGES              BITMAP                  "img\\images.bmp"
+IDR_IMG_BADGE           BITMAP                  "img\\badge.bmp"
+IDR_IMG_DONATE          BITMAP                  "img\\donate.bmp"
+IDR_IMG_HELP_PAGE_01    BITMAP                  "img\\help-page-01.bmp"
+IDR_IMG_HELP_PAGE_02    BITMAP                  "img\\help-page-02.bmp"
+IDR_IMG_HELP_PAGE_03    BITMAP                  "img\\help-page-03.bmp"
+IDR_IMG_FACEBOOK        BITMAP                  "img\\facebook.bmp"
+IDR_IMG_WWW             BITMAP                  "img\\www.bmp"
+IDR_IMG_EMAIL           BITMAP                  "img\\email.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// 256
+//
+
+IDR_CONFIG              256                     "config.json"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_HELP DIALOGEX 0, 0, 249, 118
+STYLE DS_SETFONT | DS_CENTER | WS_POPUP | WS_BORDER
+FONT 12, "Microsoft Sans Serif", 400, 0, 0xCC
+BEGIN
+    DEFPUSHBUTTON   "Next",IDC_BUTTON_NEXT,210,100,35,14
+    PUSHBUTTON      "Got it",IDC_BUTTON_GOTIT,168,100,35,14
+    CONTROL         "Display help on startup",IDC_CHECK_SHOW_HELP_ONSTARTUP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,47,102,85,10
+    PUSHBUTTON      "Donate",IDC_BUTTON_DONATE,4,100,35,14
+    CONTROL         IDR_IMG_BADGE,IDC_STATIC,"Static",SS_BITMAP,1,1,21,19
+    CONTROL         IDR_IMG_FACEBOOK,IDC_STATIC_FACEBOOK,"Static",SS_BITMAP | SS_NOTIFY,199,4,14,13
+    CONTROL         IDR_IMG_WWW,IDC_STATIC_WWW,"Static",SS_BITMAP | SS_NOTIFY,215,4,14,13
+    CONTROL         IDR_IMG_EMAIL,IDC_STATIC_EMAIL,"Static",SS_BITMAP | SS_NOTIFY,231,4,14,13
+END
+
+IDD_DIALOG_HELP_TOPICS DIALOGEX 0, 0, 480, 52
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 18, "Microsoft Sans Serif", 400, 0, 0xCC
+BEGIN
+    LTEXT           "Use left mouse button to select region to translate. Use space button to move region",IDC_STATIC,400,2,69,48
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT | NOT WS_VISIBLE,160,2,1,48
+    LTEXT           "User Ctrl+'~' keyboard shortcut to show and hide application window",IDC_STATIC,80,2,69,48
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT | NOT WS_VISIBLE,320,2,1,48
+    LTEXT           "Use context menu (mouse right button) to control application options and switch modes",IDC_STATIC,240,2,69,48
+    CONTROL         IDR_IMG_HELP_PAGE_01,IDC_STATIC,"Static",SS_BITMAP,14,5,55,40,WS_EX_TRANSPARENT
+    CONTROL         IDR_IMG_HELP_PAGE_02,IDC_STATIC,"Static",SS_BITMAP,174,5,55,40
+    CONTROL         IDR_IMG_HELP_PAGE_03,IDC_STATIC,"Static",SS_BITMAP,334,5,55,40
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_HELP, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 245
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 114
+    END
+
+    IDD_DIALOG_HELP_TOPICS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 478
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 50
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
 
