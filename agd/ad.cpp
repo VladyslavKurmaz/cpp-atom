@@ -184,14 +184,14 @@ void ad::clear() {
 atom::string_t ad::getOCRUrl() {
 	langspair_t const lngs = this->adLangs->getPair();
 	atom::stringstream_t ss;
-	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.get<0>() << _T( " " ) << this->ocrOutputFile;
+	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.c3 << _T( " " ) << this->ocrOutputFile;
 	return ss.str();
 }
 
 atom::string_t ad::getTranslateUrl( atom::string_t const& encoded ) {
 	langspair_t const lngs = this->adLangs->getPair();
 	atom::stringstream_t ss;
-	ss << _T( "curl -k -o " ) << this->translationOutputFileW << _T(" \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.get<1>() << _T("&target=") << lngs.second.get<1>() << _T("&q=" ) << encoded << _T( "\"" );
+	ss << _T( "curl -k -o " ) << this->translationOutputFileW << _T(" \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.c2 << _T("&target=") << lngs.second.c2 << _T("&q=" ) << encoded << _T( "\"" );
 	return ss.str();
 }
 

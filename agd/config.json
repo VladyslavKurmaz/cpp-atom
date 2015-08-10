@@ -25,8 +25,8 @@
       "background-color":"400F0F0F",
       "selection-color":"00FF00",
       "translate":{
-        "languare-from":"",
-        "languare-to":"",
+        "languare-from":"en",
+        "languare-to":"uk",
         "language":[
 {"name":"Afrikaans","c2":"af","c3":"afr"},
 {"name":"Albanian","c2":"sq","c3":"sqi"},

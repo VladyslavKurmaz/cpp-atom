@@ -75,7 +75,37 @@ bool panel::init( HWND hParent ) {
 		this->getClientRect( lvrt );
 		//
 		//
-		this->imageList.create( (HINSTANCE)GetModuleHandle( NULL ), MAKEINTRESOURCE( IDR_IMAGES ), 32, 0, RGB( 255, 255, 255 ) ); 
+		size_t const btnSz = 32;
+		size_t const lngsCount = this->getLangs()->count() + 3;
+		COLORREF maskColor = RGB(255, 255, 255);
+
+		this->imageList.create((HINSTANCE)GetModuleHandle(NULL), MAKEINTRESOURCE(IDR_IMAGES), btnSz, 0, maskColor);
+#if 0
+		//
+		dcb_t dcb;
+		dcb.updateDC(btnSz * lngsCount, btnSz);
+		RECT rt;
+		SetRect(&rt, 0, 0, btnSz * lngsCount, btnSz);
+		FillRect(dcb.dc, &rt, reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
+		SetBkMode(dcb.dc, TRANSPARENT);
+		//
+		SetRect(&rt, 0, 0, btnSz, btnSz);
+		OffsetRect(&rt, btnSz * 3, 0);
+		struct _{
+			static bool __(language_t const& lang, dcb_t& dcb, RECT&rt, size_t const sz) {
+				atom::string_t c2 = lang.c2;
+				boost::to_upper(c2);
+				DrawText(dcb.dc, c2.c_str(), c2.length(), &rt, DT_SINGLELINE | DT_VCENTER | DT_CENTER);
+				OffsetRect(&rt, sz, 0);
+				return true;
+			}
+		};
+		this->getLangs()->foreach(boost::bind(&_::__, _1, boost::ref(dcb), boost::ref(rt), btnSz));
+		//int index = -1;
+		//this->imageList.append(dcb.bitmap, maskColor, index);
+		bitmapSave(_T("lang.bmp"), dcb.dc, dcb.bitmap);
+#endif
+
 		//
 		// Create the list-view window in report view with label editing enabled.
 		this->listView.create( 0, WS_CHILD | WS_BORDER | LVS_REPORT | LVS_EDITLABELS, lvrt, AD_PANEL_LISTVIEW, *this ).
@@ -89,13 +119,13 @@ bool panel::init( HWND hParent ) {
 		SetRect( &tbrt, 0, 0, 0, 40 );
 		this->toolbar.
 			create( 0, WS_CHILD | CCS_NORESIZE | TBSTYLE_WRAPABLE | TBSTYLE_FLAT, tbrt, AD_PANEL_TOOLBAR, this->imageList, *this ).
-			setButtonSize( 32, 32 ).
+			setButtonSize(btnSz, btnSz).
 			setIndent(8).
 			addButton(AD_PANEL_IMAGE_PIN, AD_PANEL_TB_PIN, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_CHECK | BTNS_AUTOSIZE, NULL, atom::string_t()).
 			addButton( -1, 0, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_SEP | BTNS_AUTOSIZE, NULL, atom::string_t() ).
-			addButton( langs.first.get<3>(), AD_PANEL_TB_LANG_FROM, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | TBSTYLE_AUTOSIZE, NULL, atom::string_t() ).
+			addButton( langs.first.img, AD_PANEL_TB_LANG_FROM, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | TBSTYLE_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( AD_PANEL_IMAGE_SWAP, AD_PANEL_TB_LANG_SWAP, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | BTNS_AUTOSIZE, NULL, atom::string_t() ).
-			addButton( langs.second.get<3>(), AD_PANEL_TB_LANG_TO, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | TBSTYLE_AUTOSIZE, NULL, atom::string_t() ).
+			addButton( langs.second.img, AD_PANEL_TB_LANG_TO, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | TBSTYLE_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( -1, 0, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_SEP | BTNS_AUTOSIZE, NULL, atom::string_t() ).
 			addButton( AD_PANEL_IMAGE_DELETE, AD_PANEL_TB_DELETE, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | BTNS_AUTOSIZE, NULL, atom::string_t() ).
 			build().
@@ -212,31 +242,6 @@ void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 			this->listView.deleteAllItems();
 			break;
 		}
-	default:
-		{
-			bool update = false;
-			bool from = true;
-
-			int ind = id - AD_PANEL_TB_LANGUAGE;
-			if ( ind >= 0 ) {
-				if ( ind < AD_PANEL_IMAGE_LANG_COUNT ) {
-					// from
-					update = true;
-				} else {
-					ind -= AD_PANEL_IMAGE_LANG_COUNT;
-					if ( ind < AD_PANEL_IMAGE_LANG_COUNT ) {
-						// to
-						from = false;
-						update = true;
-					}
-				}
-			}
-			if ( update ) {
-				this->getLangs()->setLang(from, (size_t)ind);
-				this->updateLangsImages();
-			}
-			break;
-		}
 	}
 }
 
@@ -246,12 +251,10 @@ bool panel::isLocked() const {
 
 void panel::popupLangMenu( int const id ) {
 	langspair_t langs = this->getLangs()->getPair();
-	lang_t clang = langs.first;
-	unsigned int langId = AD_PANEL_TB_LANGUAGE;
+	language_t clang = langs.first;
 
 	if ( id == AD_PANEL_TB_LANG_TO ) {
 		clang = langs.second;
-		langId += AD_PANEL_IMAGE_LANG_COUNT;
 	}
 
 	RECT rc;
@@ -264,22 +267,27 @@ void panel::popupLangMenu( int const id ) {
 	menu.create();
 	//
 	struct _{
-		static bool __( lang_t const& lang, lang_t const& clang, unsigned int& id, atom::wmenu& mn ) {
-			atom::stringstream_t ss;
-			ss << _T("[") << lang.get<1>() << _T("] ") << lang.get<2>();
-				mn.appendItem( MF_ENABLED | MF_STRING | MFT_RADIOCHECK | (( lang == clang )?( MF_CHECKED ):( 0 )), id, ss.str() );
-			id++;
+		static bool __(language_t const& lang, language_t const& clang, atom::wmenu& mn) {
+			if (lang.enable){
+				atom::stringstream_t ss;
+				ss << _T("[") << lang.c2 << _T("] ") << lang.name;
+				mn.appendItem(MF_ENABLED | MF_STRING | MFT_RADIOCHECK | ((lang == clang) ? (MF_CHECKED) : (0)), lang.command, ss.str());
+			}
 			return true;
 		}
 	};
-	this->getLangs()->foreach( boost::bind( &_::__, _1, boost::ref( clang ), boost::ref( langId ), boost::ref( menu ) ) );
-	menu.popup( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_VERTICAL, rc.left, rc.bottom, *this, rc );
+	this->getLangs()->foreach( boost::bind( &_::__, _1, boost::ref( clang ), boost::ref( menu ) ) );
+	UINT command = menu.popup(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_VERTICAL | TPM_NONOTIFY | TPM_RETURNCMD, rc.left, rc.bottom, *this, rc);
+	if (command){
+		this->getLangs()->setLang(id == AD_PANEL_TB_LANG_FROM, (size_t)(command - AD_PANEL_TB_LANGUAGE));
+		this->updateLangsImages();
+	}
 }
 
 void panel::updateLangsImages() {
 	langspair_t const langs = this->getLangs()->getPair();
 	//
-	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_FROM, langs.first.get<3>() );
-	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_TO, langs.second.get<3>() );
+	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_FROM, langs.first.img );
+	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_TO, langs.second.img );
 	this->toolbar.invalidate();
 }

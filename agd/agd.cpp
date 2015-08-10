@@ -41,7 +41,7 @@ int main( int argc, char *argv[] )
 	SetEnvironmentVariableA("PATH", env.c_str());
 	_makepath_s(path, drive, dir, "tesseract-ocr-3.02\\", NULL);
 	if (getenv("TESSDATA_PREFIX") == NULL){
-		SetEnvironmentVariableA("TESSDATA_PREFIX", path);
+		SetEnvironmentVariableA(ENV_TESSDATA_PREFIX, path);
 	}
 	//
 	atom::proc proc;

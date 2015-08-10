@@ -52,15 +52,21 @@ typedef boost::shared_ptr< langs >
 
 ///
 ///
-typedef boost::tuple < atom::string_t, atom::string_t, atom::string_t, int >
-	lang_t;
-typedef std::pair < lang_t, lang_t >
+struct language_t {
+	bool enable;
+	atom::string_t name;
+	atom::string_t c2;
+	atom::string_t c3;
+	unsigned int command;
+	int img;
+};
+
+typedef std::pair < language_t, language_t >
 	langspair_t;
 
-inline bool operator==(lang_t const& l, lang_t const& r) {
-	return (l.get<0>() == r.get<0>());
+inline bool operator==(language_t const& l, language_t const& r) {
+	return (l.c2 == r.c2);
 }
-
 
 //
 //

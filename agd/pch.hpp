@@ -22,6 +22,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/locale.hpp>
+#include <boost/filesystem.hpp>
 
 //#include <boost/function.hpp>
 //#include <boost/bind.hpp>
@@ -116,16 +117,12 @@ static int const      AD_PANEL_IMAGE_PIN      = 0;
 static int const      AD_PANEL_IMAGE_SWAP     = AD_PANEL_IMAGE_PIN + 1;
 static int const      AD_PANEL_IMAGE_DELETE   = AD_PANEL_IMAGE_SWAP + 1;
 static int const      AD_PANEL_IMAGE_LANG_FIRST = AD_PANEL_IMAGE_DELETE + 1;
-static int const      AD_PANEL_IMAGE_LANG_EN    = AD_PANEL_IMAGE_LANG_FIRST;
-static int const      AD_PANEL_IMAGE_LANG_UA    = AD_PANEL_IMAGE_LANG_EN + 1;
-static int const      AD_PANEL_IMAGE_LANG_RU    = AD_PANEL_IMAGE_LANG_UA + 1;
-static int const      AD_PANEL_IMAGE_LANG_LAST  = AD_PANEL_IMAGE_LANG_RU;
-static int const      AD_PANEL_IMAGE_LANG_COUNT = AD_PANEL_IMAGE_LANG_LAST - AD_PANEL_IMAGE_LANG_FIRST + 1;
-
 
 typedef unsigned int
   frame_id_t;
 
+
+static char const * const ENV_TESSDATA_PREFIX = "TESSDATA_PREFIX";
 
 static std::string CONFIG_TIMEOUT = "timeout";
 static std::string CONFIG_ALIGNMENT = "alignment";
@@ -139,6 +136,7 @@ static std::string CONFIG_SHOW_HELP_ON_STARTUP = "show-help";
 static std::string CONFIG_MODE = "mode.";
 static std::string CONFIG_BK_COLOR = "background-color";
 static std::string CONFIG_AD_TRANSLATE = "translate";
+static std::string CONFIG_AD_LANGUAGE = "language";
 static std::string CONFIG_AD_LANGUAGE_FROM = "languare-from";
 static std::string CONFIG_AD_LANGUAGE_TO = "languare-to";
 static std::string CONFIG_AD_LANGUAGE_NAME = "name";
