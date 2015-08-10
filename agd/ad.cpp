@@ -5,6 +5,7 @@
 #include "./pref.hpp"
 #include "./panel.hpp"
 #include "./window.hpp"
+#include "./langs.hpp"
 #include "./ad.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -16,7 +17,9 @@ ad::ad(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_pt
 	,	translationOutputFile( "tr.json" )
 	,	ctrl()
 	,	adPanel()
+	,	adLangs()
 {
+	this->adLangs = langs::create(this->config.get_child(CONFIG_AD_TRANSLATE), this->getLogger());
 }
 
 ad::~ad() {
@@ -25,7 +28,7 @@ ad::~ad() {
 void ad::activate( bool const state ) {
 	mode::activate(state);
 	if ( !adPanel ) {
-		adPanel = panel::create( this->getLogger(), this->getPref() );
+		adPanel = panel::create(this->getLogger(), this->getPref(), boost::dynamic_pointer_cast<ad, mode>(this->shared_from_this()), this->adLangs);
 		adPanel->init( this->getWindow()->getHWND() );
 	}
 	this->adPanel->show(state);
@@ -173,18 +176,20 @@ void ad::paint(paint_param_t& paintParam, RECT const& rect) {
 }
 
 void ad::clear() {
+	this->adLangs->clear();
+	this->adPanel->clear();
 	base_t::clear();
 }
 
 atom::string_t ad::getOCRUrl() {
-	pref::langspair_t const lngs = getPref()->langGetPair();
+	langspair_t const lngs = this->adLangs->getPair();
 	atom::stringstream_t ss;
 	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.get<0>() << _T( " " ) << this->ocrOutputFile;
 	return ss.str();
 }
 
 atom::string_t ad::getTranslateUrl( atom::string_t const& encoded ) {
-	pref::langspair_t const lngs = getPref()->langGetPair();
+	langspair_t const lngs = this->adLangs->getPair();
 	atom::stringstream_t ss;
 	ss << _T( "curl -k -o " ) << this->translationOutputFileW << _T(" \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.get<1>() << _T("&target=") << lngs.second.get<1>() << _T("&q=" ) << encoded << _T( "\"" );
 	return ss.str();

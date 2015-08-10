@@ -91,20 +91,6 @@ public:
 			}
 		}
 	}
-	///
-	///
-	typedef boost::tuple< atom::string_t, atom::string_t, atom::string_t, int >
-		lang_t;
-	typedef std::pair< lang_t, lang_t >
-		langspair_t;
-	//
-	void langSetPair( langspair_t const& lngs );
-	//
-	langspair_t langGetPair() const;
-	//
-	void langSetLang( bool const from, size_t const ind );
-	//
-	void langEnum( boost::function< bool( lang_t const& ) > func ) const;
 
 protected:
 	LOGGER_ACCESSOR( pref2logger )
@@ -118,13 +104,4 @@ private:
 	//
 	atom::accel
 		accel;
-	///
-	typedef std::vector< lang_t >
-		langs_t;
-	langspair_t langsPair;
-	langs_t langs;
 };
-
-inline bool operator==( pref::lang_t const& l, pref::lang_t const& r ) {
-	return ( l.get<0>() == r.get<0>() );
-}

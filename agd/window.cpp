@@ -281,10 +281,10 @@ bool window::init(HINSTANCE hInst) {
 	pref_ptr	p = get_slot< window2pref >().item(); 
 	window_ptr	w = this->shared_from_this();
 #ifdef CONSOLE_STATE
-	this->modes.push_back(boost::make_tuple(_T("Console"), mode::create<shell>(p->getModeConfig("ad"), l, p, w)));
+	this->modes.push_back(boost::make_tuple(_T("Console"), mode::create<shell>(p->getModeConfig("console"), l, p, w)));
 #endif
 #ifdef AUGMENTED_DESKTOP_STATE
-	this->modes.push_back(boost::make_tuple(_T("Augmented desktop"), mode::create<ad>(p->getModeConfig("console"), l, p, w)));
+	this->modes.push_back(boost::make_tuple(_T("Augmented desktop"), mode::create<ad>(p->getModeConfig("ad"), l, p, w)));
 #endif
 	//this->modes.push_back(boost::make_tuple(_T("Atlas"), mode::create<atlas>(l, p, w)));
 	//this->modes.push_back( boost::make_tuple( _T( "Augmented manuals" ), mode::create<am>( l, p, w ) ) );
@@ -366,28 +366,8 @@ bool window::init(HINSTANCE hInst) {
 		this->qlBadge = badge::create(l, p, w);
 		this->qlBadge->init(this->getHWND());
 		this->qlBadge->show(this->getPref()->get< bool >(CONFIG_BADGE));
-
 		//
-		//HINSTANCE hInst = (HINSTANCE)GetModuleHandle(NULL);
-		//HWND hStatic = CreateWindowEx(
-		//	0,
-		//	_T("STATIC"),
-		//	NULL,
-		//	WS_OVERLAPPED | WS_VISIBLE | SS_BITMAP,
-		//	0, 0, 256, 128,
-		//	this->getHWND(),
-		//	NULL,
-		//	hInst,
-		//	NULL
-		//	);
-
-		//HBITMAP mybitmap = LoadBitmap(hInst, MAKEINTRESOURCE(IDR_IMAGES));
-		//SendMessage(hStatic, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)mybitmap);
-		//SetWindowLong(hStatic, GWL_STYLE, WS_OVERLAPPED | WS_VISIBLE | SS_BITMAP);
-		//SetWindowPos(hStatic, 0, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
-		//sc.sub(hStatic, WindowProc);
-
-		//return true;
+		return true;
 	}
 	return false;
 }

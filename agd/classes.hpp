@@ -20,6 +20,10 @@ typedef boost::shared_ptr< area >
 class mode;
 typedef boost::shared_ptr< mode >
 	mode_ptr;
+
+class ad;
+typedef boost::shared_ptr < ad >
+	ad_ptr;
 //
 class frame;
 typedef boost::shared_ptr< frame >
@@ -41,6 +45,23 @@ typedef boost::shared_ptr< appl >
 class badge;
 typedef boost::shared_ptr< badge >
 	badge_ptr;
+//
+class langs;
+typedef boost::shared_ptr< langs >
+	langs_ptr;
+
+///
+///
+typedef boost::tuple < atom::string_t, atom::string_t, atom::string_t, int >
+	lang_t;
+typedef std::pair < lang_t, lang_t >
+	langspair_t;
+
+inline bool operator==(lang_t const& l, lang_t const& r) {
+	return (l.get<0>() == r.get<0>());
+}
+
+
 //
 //
 struct bridgeMsg {

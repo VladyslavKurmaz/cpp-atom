@@ -34,6 +34,7 @@
 + add toolbar (languages, toogled, delete, picture)
 + set TESSDATA_PREFIX environment variable, if it doesn't
 
+- install\uninstall languages
 - show translation direction at panel caption
 - delete/restore button/ select items
 - test PrintWindows for image recognition

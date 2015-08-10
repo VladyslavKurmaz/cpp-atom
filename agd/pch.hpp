@@ -138,6 +138,12 @@ static std::string CONFIG_SHOW_HELP_ON_STARTUP = "show-help";
 
 static std::string CONFIG_MODE = "mode.";
 static std::string CONFIG_BK_COLOR = "background-color";
+static std::string CONFIG_AD_TRANSLATE = "translate";
+static std::string CONFIG_AD_LANGUAGE_FROM = "languare-from";
+static std::string CONFIG_AD_LANGUAGE_TO = "languare-to";
+static std::string CONFIG_AD_LANGUAGE_NAME = "name";
+static std::string CONFIG_AD_LANGUAGE_CODE2 = "c2";
+static std::string CONFIG_AD_LANGUAGE_CODE3 = "c3";
 
 
 static struct command_t {

@@ -8,8 +8,6 @@ pref::pref( logger_ptr l ) :
 		base_t()
 	,	config()
 	,	accel()
-	,	langsPair()
-	,	langs()
 {
 	atom::mount<pref2logger>( this, l );
 	//
@@ -26,17 +24,7 @@ pref::pref( logger_ptr l ) :
 		ss << data;
 	}
 	boost::property_tree::read_json(ss, this->config);
-	//
-	// configure available languages
-	lang_t const en = boost::make_tuple( _T("eng"), _T("en"), _T("English"), AD_PANEL_IMAGE_LANG_EN );
-	lang_t const ua = boost::make_tuple( _T("ukr"), _T("uk"), _T("Український"), AD_PANEL_IMAGE_LANG_UA );
-	lang_t const ru = boost::make_tuple( _T("rus"), _T("ru"), _T("Русский"), AD_PANEL_IMAGE_LANG_RU );
 
-	this->langs.push_back( en );
-	this->langs.push_back( ua );
-	this->langs.push_back( ru );
-	//
-	this->langSetPair( std::make_pair( en, ru ) );
 }
 
 pref::~pref() {
@@ -246,33 +234,6 @@ bool pref::translateAccel(HWND hWnd, MSG* msg){
 	return this->accel.translate(hWnd, msg);
 }
 
-
-void pref::langSetPair( langspair_t const& lngs ) {
-	this->langsPair = lngs;
-}
-
-pref::langspair_t pref::langGetPair() const {
-	return this->langsPair;
-}
-
-void pref::langSetLang( bool const from, size_t const ind ) {
-	if ( ( 0 <= ind ) && ( ind < this->langs.size() ) ) {
-		lang_t l = this->langs[ind];
-		if ( from ) {
-			this->langsPair.first = l;
-		} else {
-			this->langsPair.second = l;
-		}
-	}
-}
-
-void pref::langEnum( boost::function< bool( lang_t const& ) > func ) const {
-	BOOST_FOREACH( lang_t const& l, langs ) {
-		if ( !func( l ) ) {
-			break;
-		}
-	}
-}
 
 
 

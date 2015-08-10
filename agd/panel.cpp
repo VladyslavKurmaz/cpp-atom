@@ -6,9 +6,10 @@
 #include "./window.hpp"
 #include "./shell.hpp"
 #include "./ad.hpp"
+#include "./langs.hpp"
 #include "./panel.hpp"
 
-panel::panel( logger_ptr l, pref_ptr p ) :
+panel::panel(logger_ptr l, pref_ptr p, ad_ptr a, langs_ptr lg) :
 		wwindow( *this, INITLIST_4( &panel::onPaint, &panel::onSize, &panel::onNotify, &panel::onCommand ) )
 		, adActive(false)
 		, adVisible(false)
@@ -17,7 +18,9 @@ panel::panel( logger_ptr l, pref_ptr p ) :
 		, toolbar() {
 		//
 		atom::mount<panel2logger>( this, l );
-		atom::mount<panel2pref>( this, p );
+		atom::mount<panel2pref>(this, p);
+		atom::mount<panel2ad>(this, a);
+		atom::mount<panel2langs>(this, lg);
 }
 
 panel::~panel() {
@@ -25,6 +28,7 @@ panel::~panel() {
 
 bool panel::init( HWND hParent ) {
 	assert(hParent);
+	//this->getAD()->
 	//
 	logger_ptr	l = get_slot< panel2logger >().item();
 	pref_ptr	p = get_slot< panel2pref >().item(); 
@@ -80,7 +84,7 @@ bool panel::init( HWND hParent ) {
 			show();
 		//
 		// create toolbar
-		pref::langspair_t const langs = this->getPref()->langGetPair();
+		langspair_t const langs = this->getLangs()->getPair();
 		RECT tbrt;
 		SetRect( &tbrt, 0, 0, 0, 40 );
 		this->toolbar.
@@ -192,9 +196,9 @@ void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 		}
 	case AD_PANEL_TB_LANG_SWAP:
 		{
-			pref::langspair_t langs = this->getPref()->langGetPair();
+			langspair_t langs = this->getLangs()->getPair();
 			std::swap( langs.first, langs.second );
-			this->getPref()->langSetPair( langs );
+			this->getLangs()->setPair(langs);
 			this->updateLangsImages();
 			break;
 		}
@@ -228,7 +232,7 @@ void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 				}
 			}
 			if ( update ) {
-				this->getPref()->langSetLang( from, (size_t)ind );
+				this->getLangs()->setLang(from, (size_t)ind);
 				this->updateLangsImages();
 			}
 			break;
@@ -241,8 +245,8 @@ bool panel::isLocked() const {
 }
 
 void panel::popupLangMenu( int const id ) {
-	pref::langspair_t langs = this->getPref()->langGetPair();
-	pref::lang_t clang = langs.first;
+	langspair_t langs = this->getLangs()->getPair();
+	lang_t clang = langs.first;
 	unsigned int langId = AD_PANEL_TB_LANGUAGE;
 
 	if ( id == AD_PANEL_TB_LANG_TO ) {
@@ -260,7 +264,7 @@ void panel::popupLangMenu( int const id ) {
 	menu.create();
 	//
 	struct _{
-		static bool __( pref::lang_t const& lang, pref::lang_t const& clang, unsigned int& id, atom::wmenu& mn ) {
+		static bool __( lang_t const& lang, lang_t const& clang, unsigned int& id, atom::wmenu& mn ) {
 			atom::stringstream_t ss;
 			ss << _T("[") << lang.get<1>() << _T("] ") << lang.get<2>();
 				mn.appendItem( MF_ENABLED | MF_STRING | MFT_RADIOCHECK | (( lang == clang )?( MF_CHECKED ):( 0 )), id, ss.str() );
@@ -268,12 +272,12 @@ void panel::popupLangMenu( int const id ) {
 			return true;
 		}
 	};
-	this->getPref()->langEnum( boost::bind( &_::__, _1, boost::ref( clang ), boost::ref( langId ), boost::ref( menu ) ) );
+	this->getLangs()->foreach( boost::bind( &_::__, _1, boost::ref( clang ), boost::ref( langId ), boost::ref( menu ) ) );
 	menu.popup( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_VERTICAL, rc.left, rc.bottom, *this, rc );
 }
 
 void panel::updateLangsImages() {
-	pref::langspair_t const langs = this->getPref()->langGetPair();
+	langspair_t const langs = this->getLangs()->getPair();
 	//
 	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_FROM, langs.first.get<3>() );
 	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_TO, langs.second.get<3>() );
