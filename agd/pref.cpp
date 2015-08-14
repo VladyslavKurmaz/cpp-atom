@@ -6,28 +6,37 @@
 
 pref::pref( logger_ptr l ) :
 		base_t()
+	,	configFileName()
 	,	config()
 	,	accel()
 {
 	atom::mount<pref2logger>( this, l );
 	//
 	// load config json user config or from resource
-	// check local file
-	// ????????????
-	std::stringstream ss;
-	{
-		HMODULE handle = ::GetModuleHandle(NULL);
-		HRSRC rc = ::FindResource(handle, MAKEINTRESOURCE(IDR_CONFIG),MAKEINTRESOURCE(TEXTFILE));
-		HGLOBAL rcData = ::LoadResource(handle, rc);
-		DWORD size = ::SizeofResource(handle, rc);
-		char const* data = static_cast<const char*>(::LockResource(rcData));
-		ss << data;
+	char localAppData[MAX_PATH] = { 0 };
+	GetEnvironmentVariableA(ENV_LOCALAPPDATA, localAppData, MAX_PATH);
+	configFileName = boost::filesystem::path(localAppData) / boost::filesystem::path("agd.conf");
+	//
+	if (boost::filesystem::exists(configFileName)){
+		// check local file
+		boost::property_tree::read_json(this->configFileName.string(), this->config);
 	}
-	boost::property_tree::read_json(ss, this->config);
-
+	else{
+		std::stringstream ss;
+		{
+			HMODULE handle = ::GetModuleHandle(NULL);
+			HRSRC rc = ::FindResource(handle, MAKEINTRESOURCE(IDR_CONFIG), MAKEINTRESOURCE(TEXTFILE));
+			HGLOBAL rcData = ::LoadResource(handle, rc);
+			DWORD size = ::SizeofResource(handle, rc);
+			char const* data = static_cast<const char*>(::LockResource(rcData));
+			ss << data;
+		}
+		boost::property_tree::read_json(ss, this->config);
+	}
 }
 
 pref::~pref() {
+	boost::property_tree::write_json(this->configFileName.string(), this->config);
 }
 
 bool pref::init( int argc, char const * const argv[] ) {

@@ -20,9 +20,29 @@ public:
 	///
 	bool init( int argc, char const * const argv[] );
 	///
+	template <typename T>
+	struct conv{
+		T get(boost::property_tree::ptree const& c, std::string const& key){
+			return boost::lexical_cast<T>(c.get_child(key).data());
+		}
+	};
+	template <>
+	struct conv<bool>{
+		bool get(boost::property_tree::ptree const& c, std::string const& key){
+			std::string s = c.get_child(key).data();
+			if ((s == "true") || (s == "1")){
+				return true;
+			}
+			return false;
+		}
+	};
 	template <typename T >
-	T get( std::string const& key ) {
-		return boost::lexical_cast<T>(this->config.get_child(key).data());
+	T get(std::string const& key) {
+		return conv<T>().get(this->config, key);
+	}
+	template <typename T >
+	void put(std::string const& key, T const& v) {
+		this->config.put(key, v);
 	}
 	//
 	boost::property_tree::ptree const& getModeConfig(std::string const& key);
@@ -99,6 +119,8 @@ private:
 	///
 	pref( logger_ptr l );
 	///
+	boost::filesystem::path
+		configFileName;
 	boost::property_tree::ptree
 		config;
 	//

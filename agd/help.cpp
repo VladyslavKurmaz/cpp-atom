@@ -133,5 +133,5 @@ INT_PTR CALLBACK helpDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 void showHelpDialog(HINSTANCE hInst, HWND hParent, pref_ptr p){
 	showHelpDialogOnStartup = p->get< bool >(CONFIG_SHOW_HELP_ON_STARTUP);
 	DialogBox(hInst, MAKEINTRESOURCE(IDD_HELP), hParent, helpDlgProc);
-	//?????? back showHelpDialogOnStartup to pref
+	p->put(CONFIG_SHOW_HELP_ON_STARTUP, showHelpDialogOnStartup);
 }

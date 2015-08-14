@@ -14,3 +14,16 @@ v-0.1.2 02.08.2015
  ** vertical and horizontal ratio
  ** slide timeout
  ** hide/maximize/restore augmented panel
+
+v-0.1.3 14.08.2015
+* help screen
+* list of supported languages was extended.
+  now, you can use:
+    Afrikaans, Albanian, Arabic, Azerbaijani, Belarusian, Bengali,
+    Bulgarian, Catalan, Croatian, Czech, Danish, Dutch, English,
+    Esperanto, Estonian, Finnish, French, Galician, German, Greek,
+    Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian,
+    Japanese, Kannada, Korean, Latvian, Lithuanian, Macedonian,
+    Malay, Maltese, Norwegian, Polish, Portuguese, Romanian,
+    Russian, Serbian, Slovak, Slovenian, Spanish, Swahili,
+    Swedish, Tamil, Telugu, Thai, Turkish, Ukrainian, Vietnamese

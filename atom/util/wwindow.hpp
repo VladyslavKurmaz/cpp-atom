@@ -395,10 +395,16 @@ namespace atom {
 			  SetLayeredWindowAttributes( this->getHWND(), RGB( 0, 0, 0 ), alpha, LWA_ALPHA );
 			  return (*this); }
 		  ///
-		  wwindow const& getAlpha( BYTE& alpha ) const {
+		  wwindow const& getAlpha(BYTE& alpha) const {
 			  DWORD flags = LWA_ALPHA;
-			  GetLayeredWindowAttributes( this->getHWND(), 0, &alpha, &flags );
-			  return (*this); }
+			  GetLayeredWindowAttributes(this->getHWND(), 0, &alpha, &flags);
+			  return (*this);
+		  }
+		  ///
+		  wwindow const& setTitle(string_t const& title) const {
+			  SetWindowText(this->getHWND(), title.c_str());
+			  return (*this);
+		  }
 		  ///
 		  wwindow const& sysMenuInsert( UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, string_t const & lpNewItem ) const {
 			  InsertMenu( GetSystemMenu( this->getHWND(), FALSE ), uPosition, uFlags, uIDNewItem, lpNewItem.c_str() );

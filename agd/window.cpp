@@ -139,12 +139,10 @@ void buildMenu(atom::wpopupmenu& menu, menuItem<T>(&items)[N], WORD const firstI
 					menu.appendSubmenu(item.id, *(item.submenu));
 				}
 			}
-		}
-		else{
+		} else{
 			if (item.command){
 				//
-			}
-			else{
+			} else{
 				// separator
 				menu.appendSeparator();
 			}
@@ -169,6 +167,8 @@ static menuItem<int> topItems[] = {
 	{ _T("Maximize"), CMDID_MAXIMIZE, HBMMENU_POPUP_MAXIMIZE, NULL, 0 },
 	{ _T("Restore"), CMDID_RESTORE, HBMMENU_MBAR_RESTORE, NULL, 0 },
 	{ _T(""), 0, NULL, NULL, 0 },
+	{ _T("Mode"), CMDID_MODE, NULL, NULL, 0 },
+	{ _T(""), 0, NULL, NULL, 0 },
 	{ _T("Transparency"), 0, NULL, NULL, 0 },
 	{ _T("Background color"), CMDID_BACKGROUND_COLOR, NULL, NULL, 0 },
 	{ _T("Exclude startup toolbar"), CMDID_WORK_AREA, NULL, NULL, 0 },
@@ -185,6 +185,7 @@ static menuItem<int> topItems[] = {
 };
 //
 static menuItem<unsigned int> transpItems[] = {
+	{ _T("95%"), 0, NULL, NULL, 242 },
 	{ _T("90%"), 0, NULL, NULL, 230 },
 	{ _T("80%"), 0, NULL, NULL, 204 },
 	{ _T("70%"), 0, NULL, NULL, 179 },
@@ -194,6 +195,7 @@ static menuItem<unsigned int> transpItems[] = {
 	{ _T("30%"), 0, NULL, NULL, 77 },
 	{ _T("20%"), 0, NULL, NULL, 51 },
 	{ _T("10%"), 0, NULL, NULL, 26 },
+	{ _T("5%"), 0, NULL, NULL, 13 },
 	{ _T("0%"), 0, NULL, NULL, 0 }
 };
 //
@@ -337,13 +339,6 @@ bool window::init(HINSTANCE hInst) {
 		if (p->get< bool >(CONFIG_SHOW_HELP_ON_STARTUP)){
 			showHelpDialog(hInst, this->getHWND(), p);
 		}
-		//
-		UINT pos = 0;
-		BOOST_FOREACH(mode_item_t& m, modes) {
-			this->sysMenuInsert(pos, MF_BYPOSITION | MF_STRING, SC_MODE_CMD + (pos << 4), m.get<0>());
-			pos++;
-		}
-		this->sysMenuInsert(pos, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
 		this->modeSwitch(0);
 		//
 		hotkey new_hk;
@@ -509,59 +504,58 @@ void window::onCommand(int id, HWND hwndCtl, UINT codeNotify) {
 		unsigned int slide = 0;
 		if (mapMenuCommand<unsigned int>(id, transpItems, alpha)){
 			this->currentMode->setAlpha(255 - alpha);
-		}
-		else if (mapMenuCommand<alignment_t::type>(id, alignmentItems, aligment)){
+		}else if (mapMenuCommand<alignment_t::type>(id, alignmentItems, aligment)){
 			this->updatePlacement(this->windowPlacement.visible, this->windowPlacement.fullScreen, this->windowPlacement.clip, this->windowPlacement.timeout, this->windowPlacement.width, this->windowPlacement.height, aligment);
 			this->slideBegin();
-		}
-		else if (mapMenuCommand<unsigned int>(id, vrationItems, height)){
+		}else if (mapMenuCommand<unsigned int>(id, vrationItems, height)){
 			this->updatePlacement(this->windowPlacement.visible, this->windowPlacement.fullScreen, this->windowPlacement.clip, this->windowPlacement.timeout, this->windowPlacement.width, height, this->windowPlacement.alignment);
 			this->slideBegin();
-		}
-		else if (mapMenuCommand<unsigned int>(id, hrationItems, width)){
+		}else if (mapMenuCommand<unsigned int>(id, hrationItems, width)){
 			this->updatePlacement(this->windowPlacement.visible, this->windowPlacement.fullScreen, this->windowPlacement.clip, this->windowPlacement.timeout, width, this->windowPlacement.height, this->windowPlacement.alignment);
 			this->slideBegin();
-		}
-		else if (mapMenuCommand<unsigned int>(id, slideItems, slide)){
+		}else if (mapMenuCommand<unsigned int>(id, slideItems, slide)){
 			this->windowPlacement.timeout = slide;
 		}
-		//
-		switch (id) {
-		case CMDID_FULLSCREEN:
-		case CMDID_MAXIMIZE:
-		case CMDID_RESTORE:
-			this->toggleFullScreen();
-			break;
-		case CMDID_EXIT:
-			this->exit();
-			break;
-		case CMDID_HIDE:
-			this->toggleVisibility();
-			break;
-		case CMDID_BACKGROUND_COLOR:
-			cc.lStructSize = sizeof(cc);
-			cc.hwndOwner = this->getHWND();
-			cc.hInstance;
-			cc.rgbResult = this->currentMode->getBkColor();
-			cc.lpCustColors = ccs;
-			cc.Flags = CC_RGBINIT;
-			cc.lCustData;
-			cc.lpfnHook;
-			cc.lpTemplateName;
-			if (ChooseColor(&cc)){
-				this->currentMode->setBkColor(cc.rgbResult);
-				this->invalidate();
+		else if ((CMDID_MODE <= id) && (id < CMDID_MODE + this->modes.size())){
+			this->modeSwitch(id - CMDID_MODE);
+		}else{
+			switch (id) {
+			case CMDID_FULLSCREEN:
+			case CMDID_MAXIMIZE:
+			case CMDID_RESTORE:
+				this->toggleFullScreen();
+				break;
+			case CMDID_EXIT:
+				this->exit();
+				break;
+			case CMDID_HIDE:
+				this->toggleVisibility();
+				break;
+			case CMDID_BACKGROUND_COLOR:
+				cc.lStructSize = sizeof(cc);
+				cc.hwndOwner = this->getHWND();
+				cc.hInstance;
+				cc.rgbResult = this->currentMode->getBkColor();
+				cc.lpCustColors = ccs;
+				cc.Flags = CC_RGBINIT;
+				cc.lCustData;
+				cc.lpfnHook;
+				cc.lpTemplateName;
+				if (ChooseColor(&cc)){
+					this->currentMode->setBkColor(cc.rgbResult);
+					this->invalidate();
+				}
+				break;
+			case CMDID_WORK_AREA:
+				this->toggleClip();
+				break;
+			case CMDID_WORK_BADGE:
+				this->qlBadge->show(!this->qlBadge->isVisible());
+				break;
+			case CMDID_HELP:
+				showHelpDialog(reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL)), this->getHWND(), this->getPref());
+				break;
 			}
-			break;
-		case CMDID_WORK_AREA:
-			this->toggleClip();
-			break;
-		case CMDID_WORK_BADGE:
-			this->qlBadge->show(!this->qlBadge->isVisible());
-			break;
-		case CMDID_HELP:
-			showHelpDialog(reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL)), this->getHWND(), this->getPref());
-			break;
 		}
 	}
 	this->invalidate();
@@ -595,7 +589,7 @@ void constructMenu(atom::wpopupmenu& menu, WORD const firstId, WORD const start,
 
 void window::onRBDown(HWND, BOOL, int x, int y, UINT){
 	struct _{
-		static menuItemProcessType processTopItems(menuItem<int> const& item, window_ptr w){
+		static menuItemProcessType processTopItems(menuItem<int> const& item, window_ptr w, atom::wpopupmenu& menu){
 			if ((w->windowPlacement.fullScreen && (item.command == CMDID_MAXIMIZE)) || (!w->windowPlacement.fullScreen && (item.command == CMDID_RESTORE))){
 				return miptSkipItem;
 			}
@@ -604,6 +598,20 @@ void window::onRBDown(HWND, BOOL, int x, int y, UINT){
 			}
 			if (item.command == CMDID_WORK_BADGE){
 				return ((w->qlBadge->isVisible()) ? (miptCheckboxChecked) : (miptCheckboxClear));
+			}
+			if (item.command == CMDID_MODE){
+				//
+				UINT id = CMDID_MODE;
+				BOOST_FOREACH(mode_item_t& m, w->modes) {
+					if (w->currentMode = m.get<1>()) {
+						menu.appendRadioButton(m.get<0>(), id);
+					}
+					else{
+						menu.appendItem(m.get<0>(), id, NULL);
+					}
+					id++;
+				}
+				return miptSkipItem;
 			}
 			return miptProcess;
 		}
@@ -648,34 +656,36 @@ void window::onRBDown(HWND, BOOL, int x, int y, UINT){
 	atom::wpopupmenu transpMenu;
 	bool foundTransp = false;
 	buildMenu<unsigned int>(transpMenu, transpItems, CMDID_TRANSPARENT_FIRST_ID, boost::bind(_::processTranspItems, _1, this->shared_from_this(), 255 - this->currentMode->getAlpha(), boost::ref(foundTransp)));
-	topItems[4].submenu = &transpMenu;
+	topItems[6].submenu = &transpMenu;
 	//
 	atom::wpopupmenu alignmentMenu;
 	bool foundAlignment = false;
 	buildMenu<alignment_t::type>(alignmentMenu, alignmentItems, CMDID_ALIGNMENT_FIRST_ID, boost::bind(_::processAlignmentItems, _1, this->shared_from_this(), this->windowPlacement.alignment, boost::ref(foundAlignment)));
-	topItems[8].submenu = &alignmentMenu;
+	topItems[10].submenu = &alignmentMenu;
 	//
 	atom::wpopupmenu vratio;
 	bool foundVratio = false;
 	buildMenu<unsigned int>(vratio, vrationItems, CMDID_VRATION_FIRST_ID, boost::bind(_::processVratioItems, _1, this->shared_from_this(), this->windowPlacement.height, boost::ref(foundVratio)));
-	topItems[9].submenu = &vratio;
+	topItems[11].submenu = &vratio;
 	//
 	atom::wpopupmenu hratio;
 	bool foundHratio = false;
 	buildMenu<unsigned int>(hratio, hrationItems, CMDID_HRATION_FIRST_ID, boost::bind(_::processHratioItems, _1, this->shared_from_this(), this->windowPlacement.width, boost::ref(foundHratio)));
-	topItems[10].submenu = &hratio;
+	topItems[12].submenu = &hratio;
 	//
 	atom::wpopupmenu slide;
 	bool foundSlide = false;
 	buildMenu<unsigned int>(slide, slideItems, CMDID_SLIDE_FIRST_ID, boost::bind(_::processSlideItems, _1, this->shared_from_this(), this->windowPlacement.timeout, boost::ref(foundSlide)));
-	topItems[11].submenu = &slide;
+	topItems[13].submenu = &slide;
 	//
 	atom::wpopupmenu menu;
-	buildMenu<int>(menu, topItems, 0, boost::bind(_::processTopItems, _1, this->shared_from_this()));
+	buildMenu<int>(menu, topItems, 0, boost::bind(_::processTopItems, _1, this->shared_from_this(), boost::ref(menu)));
 	POINT pt;
 	pt.x = x;
 	pt.y = y;
 	MapWindowPoints(this->getHWND(), NULL, &pt, 1);
+	//
+
 	menu.popup(this->getHWND(), pt.x, pt.y);
 }
 
@@ -812,6 +822,7 @@ void window::slideUpdate() {
 }
 
 void window::modeSwitch(size_t const mode) {
+	// skip if we want to switch to the mode which id already current
 	if (this->currentMode) {
 		this->currentMode->activate(false);
 	}
@@ -819,7 +830,6 @@ void window::modeSwitch(size_t const mode) {
 	size_t const sz = this->modes.size();
 	if ((0 <= mode) && (mode < sz)) {
 		this->currentMode = this->modes[mode].get<1>();
-		this->sysMenuCheckRadioItem(0, sz - 1, mode, true);
 		this->currentMode->activate(true);
 	}
 }

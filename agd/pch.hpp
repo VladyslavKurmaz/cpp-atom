@@ -50,8 +50,8 @@
 
 
 //#define STANDALONE
-
 //#define CONSOLE_STATE
+
 #define AUGMENTED_DESKTOP_STATE
 
 
@@ -91,6 +91,8 @@ static WORD const CMDID_CTRL_BREAK = CMDID_PREV + 1;
 static WORD const CMDID_CTRL_C = CMDID_CTRL_BREAK + 1;
 static WORD const CMDID_CLOSE = CMDID_CTRL_C + 1;
 
+static WORD const CMDID_MODE = CMDID_CLOSE + 1;
+
 static WORD const CMDID_TTY1 = CMDID_CLOSE + 1;
 static WORD const CMDID_TTY2 = CMDID_TTY1 + 1;
 static WORD const CMDID_TTY3 = CMDID_TTY2 + 1;
@@ -123,6 +125,7 @@ typedef unsigned int
 
 
 static char const * const ENV_TESSDATA_PREFIX = "TESSDATA_PREFIX";
+static char const * const ENV_LOCALAPPDATA = "LOCALAPPDATA";
 
 static std::string CONFIG_TIMEOUT = "timeout";
 static std::string CONFIG_ALIGNMENT = "alignment";

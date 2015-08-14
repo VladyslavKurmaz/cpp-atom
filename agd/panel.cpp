@@ -91,19 +91,26 @@ bool panel::init( HWND hParent ) {
 		//
 		SetRect(&rt, 0, 0, btnSz, btnSz);
 		OffsetRect(&rt, btnSz * 3, 0);
+		//
+		atom::stringstream_t ss;
 		struct _{
-			static bool __(language_t const& lang, dcb_t& dcb, RECT&rt, size_t const sz) {
+			static bool __(language_t const& lang, dcb_t& dcb, RECT&rt, size_t const sz, atom::stringstream_t& ss) {
 				atom::string_t c2 = lang.c2;
 				boost::to_upper(c2);
 				DrawText(dcb.dc, c2.c_str(), c2.length(), &rt, DT_SINGLELINE | DT_VCENTER | DT_CENTER);
 				OffsetRect(&rt, sz, 0);
+				//
+				ss << lang.name << _T(", ");
 				return true;
 			}
 		};
-		this->getLangs()->foreach(boost::bind(&_::__, _1, boost::ref(dcb), boost::ref(rt), btnSz));
+		this->getLangs()->foreach(boost::bind(&_::__, _1, boost::ref(dcb), boost::ref(rt), btnSz, boost::ref(ss)));
 		//int index = -1;
 		//this->imageList.append(dcb.bitmap, maskColor, index);
-		bitmapSave(_T("lang.bmp"), dcb.dc, dcb.bitmap);
+		//bitmapSave(_T("lang.bmp"), dcb.dc, dcb.bitmap);
+		std::wofstream outFile;
+		outFile.open(_T("lang.txt"));
+		outFile << ss.str();
 #endif
 
 		//
@@ -130,6 +137,7 @@ bool panel::init( HWND hParent ) {
 			addButton( AD_PANEL_IMAGE_DELETE, AD_PANEL_TB_DELETE, TBSTATE_ENABLED | TBSTATE_WRAP, BTNS_BUTTON | BTNS_AUTOSIZE, NULL, atom::string_t() ).
 			build().
 			show();
+		this->updateLangsImages();
 		//
 		this->onSize( this->getHWND(), 0, lvrt.right, lvrt.bottom );
 		//
@@ -270,7 +278,7 @@ void panel::popupLangMenu( int const id ) {
 		static bool __(language_t const& lang, language_t const& clang, atom::wmenu& mn) {
 			if (lang.enable){
 				atom::stringstream_t ss;
-				ss << _T("[") << lang.c2 << _T("] ") << lang.name;
+				ss << lang.name;
 				mn.appendItem(MF_ENABLED | MF_STRING | MFT_RADIOCHECK | ((lang == clang) ? (MF_CHECKED) : (0)), lang.command, ss.str());
 			}
 			return true;
@@ -287,6 +295,10 @@ void panel::popupLangMenu( int const id ) {
 void panel::updateLangsImages() {
 	langspair_t const langs = this->getLangs()->getPair();
 	//
+	atom::stringstream_t ss;
+	ss << langs.first.name << _T(" > ") << langs.second.name;
+	this->setTitle(ss.str());
+
 	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_FROM, langs.first.img );
 	this->toolbar.updateButtonImage( AD_PANEL_TB_LANG_TO, langs.second.img );
 	this->toolbar.invalidate();

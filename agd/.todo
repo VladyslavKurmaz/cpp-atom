@@ -9,23 +9,22 @@
 + UI options menu
 + Small window with AD logo to quick app access, like dropbox
 + add email, facebook, website links at help dialog
++ move language pref from root to mode json section, list of available languages
++ help dialog
++ mode mode selection from system menu to the popup menu + hotkeys
 
+- oauth2 facebook/twitter
 - save preferences to json and read it at startup
-- move language pref from root to mode json section, list of available languages
 - check if new version is available, call php script on startup to check number of users, block startup from RU region
 - template class which allows to create shared ptr to the subset of fields
-- mode mode selection from system menu to the popup menu
 - translate mouse wheel to the underlying window
-- ALt+Enter when focus is on the panel
-- Alt+F4 exit from both window and panel and from panel close button 
-- help dialog
+- ALt+Enter when focus is on the panel, Alt+F4 exit from both window and panel and from panel close button 
 
 :shell
 - correct console buffer mapping
 - hide console window on start
 - set kbrd focus
 - mstack, implements FSM
-- rb popup menu and hotkeys to select mode (scan|console|atlas|...)
 
 :augmented desktop
 + region selection, lbm+move+space
@@ -33,9 +32,12 @@
 + use curl for google translate api access
 + add toolbar (languages, toogled, delete, picture)
 + set TESSDATA_PREFIX environment variable, if it doesn't
++ show translation direction at panel caption
 
+- draw selection on Desktop with XOR
+- flags for different languages
+- share image via facebook/twitter
 - install\uninstall languages
-- show translation direction at panel caption
 - delete/restore button/ select items
 - test PrintWindows for image recognition
 - rotate region selection with image rotate after selection

@@ -19,9 +19,9 @@
 #define IDC_BUTTON_GOTIT                1002
 #define IDC_CHECK_SHOW_HELP_ONSTARTUP   1003
 #define IDC_BUTTON_DONATE               1004
-#define IDC_STATIC_FACEBOOK             1007
-#define IDC_STATIC_WWW                  1008
-#define IDC_STATIC_EMAIL                1009
+#define IDC_STATIC_FACEBOOK             1005
+#define IDC_STATIC_WWW                  1006
+#define IDC_STATIC_EMAIL                1007
 
 #define IDD_HELP                        101
 #define IDD_DIALOG_HELP_TOPICS          102

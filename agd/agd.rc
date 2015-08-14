@@ -15,7 +15,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 IDR_IMAGES              BITMAP                  "img\\images.bmp"
 IDR_IMG_BADGE           BITMAP                  "img\\badge.bmp"
-IDR_IMG_DONATE          BITMAP                  "img\\donate.bmp"
 IDR_IMG_HELP_PAGE_01    BITMAP                  "img\\help-page-01.bmp"
 IDR_IMG_HELP_PAGE_02    BITMAP                  "img\\help-page-02.bmp"
 IDR_IMG_HELP_PAGE_03    BITMAP                  "img\\help-page-03.bmp"
@@ -28,7 +27,7 @@ IDR_IMG_EMAIL           BITMAP                  "img\\email.bmp"
 // 256
 //
 
-IDR_CONFIG              256                     "config.json"
+IDR_CONFIG              256                     "agd.conf"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -68,11 +67,11 @@ BEGIN
     PUSHBUTTON      "Got it",IDC_BUTTON_GOTIT,168,100,35,14
     CONTROL         "Display help on startup",IDC_CHECK_SHOW_HELP_ONSTARTUP,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,47,102,85,10
-    PUSHBUTTON      "Donate",IDC_BUTTON_DONATE,4,100,35,14
+    PUSHBUTTON      "Donate",IDC_BUTTON_DONATE,4,100,35,14,WS_DISABLED
     CONTROL         IDR_IMG_BADGE,IDC_STATIC,"Static",SS_BITMAP,1,1,21,19
-    CONTROL         IDR_IMG_FACEBOOK,IDC_STATIC_FACEBOOK,"Static",SS_BITMAP | SS_NOTIFY,199,4,14,13
-    CONTROL         IDR_IMG_WWW,IDC_STATIC_WWW,"Static",SS_BITMAP | SS_NOTIFY,215,4,14,13
-    CONTROL         IDR_IMG_EMAIL,IDC_STATIC_EMAIL,"Static",SS_BITMAP | SS_NOTIFY,231,4,14,13
+    CONTROL         IDR_IMG_FACEBOOK,IDC_STATIC_FACEBOOK,"Static",SS_BITMAP | SS_NOTIFY,201,1,14,13
+    CONTROL         IDR_IMG_WWW,IDC_STATIC_WWW,"Static",SS_BITMAP | SS_NOTIFY,217,1,14,13
+    CONTROL         IDR_IMG_EMAIL,IDC_STATIC_EMAIL,"Static",SS_BITMAP | SS_NOTIFY,233,1,14,13
 END
 
 IDD_DIALOG_HELP_TOPICS DIALOGEX 0, 0, 480, 52
