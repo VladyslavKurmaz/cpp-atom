@@ -14,6 +14,15 @@
 #define IDR_IMG_FACEBOOK                1007
 #define IDR_IMG_WWW                     1008
 #define IDR_IMG_EMAIL                   1009
+#define IDR_IMG_TRANSPARENCY            1010
+#define IDR_IMG_BKCOLOR                 1011
+#define IDR_IMG_ALIGNMENT               1012
+#define IDR_IMG_VRATIO                  1013
+#define IDR_IMG_HRATIO                  1014
+#define IDR_IMG_SLIDE_TIMEOUT           1015
+#define IDR_IMG_HELP                    1016
+
+#define IDR_IMG_ALIGNMENT_TOP_LEFT      1020
 
 #define IDC_BUTTON_NEXT                 1001
 #define IDC_BUTTON_GOTIT                1002

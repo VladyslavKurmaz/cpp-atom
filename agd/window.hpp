@@ -102,6 +102,11 @@ private:
 	///
 	window( logger_ptr l, pref_ptr p );
 	//
+	typedef std::vector < HBITMAP >
+		menuBitmaps_t;
+	menuBitmaps_t
+		menuBitmaps;
+	//
 	badge_ptr
 		qlBadge;
 	//
@@ -122,5 +127,7 @@ private:
 		modes;
 	mode_ptr
 		currentMode;
+	//
+	HBITMAP loadMenuBitmap(UINT resId);
 };
 

@@ -1,4 +1,5 @@
 #include "./pch.hpp"
+#include "./resource.h"
 #include "./cmds.hpp"
 #include "./log.hpp"
 #include "./pref.hpp"
@@ -50,10 +51,14 @@ namespace atom {
 			insert(mi);
 		}
 		///
-		void appendSubmenu(atom::string_t const& caption, wpopupmenu& submenu) const {
+		void appendSubmenu(atom::string_t const& caption, wpopupmenu& submenu, HBITMAP icon) const {
 			MENUITEMINFO mi; init(mi);
 			mi.fMask = MIIM_SUBMENU;
 			mi.hSubMenu = submenu.menu;
+			if (icon){
+				mi.fMask |= MIIM_BITMAP;
+				mi.hbmpItem = icon;
+			}
 			append(caption, 0, mi);
 		}
 		///
@@ -136,7 +141,7 @@ void buildMenu(atom::wpopupmenu& menu, menuItem<T>(&items)[N], WORD const firstI
 			else{
 				// submenu
 				if (item.submenu){
-					menu.appendSubmenu(item.id, *(item.submenu));
+					menu.appendSubmenu(item.id, *(item.submenu), item.icon);
 				}
 			}
 		} else{
@@ -246,13 +251,14 @@ static menuItem<unsigned int> slideItems[] {
 #define SC_MODE_CMD         0x0010
 
 window::window(logger_ptr l, pref_ptr p) :
-wwindow(*this, INITLIST_15(&window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand, &window::onLBDown, &window::onLBUp, &window::onRBDown, &window::onMouseMove, &window::onCaptureChanged, &window::onSysCommand))
-, qlBadge()
-, appearHotKey()
-, windowPlacement()
-, paintParam()
-, modes()
-, currentMode() {
+		wwindow(*this, INITLIST_15(&window::onKey, &window::onKey, &window::onChar, &window::onHotkey, &window::onPaint, &window::onClose, &window::onSettingChange, &window::onTimer, &window::onCommand, &window::onLBDown, &window::onLBUp, &window::onRBDown, &window::onMouseMove, &window::onCaptureChanged, &window::onSysCommand))
+	,	menuBitmaps()
+	,	qlBadge()
+	,	appearHotKey()
+	,	windowPlacement()
+	,	paintParam()
+	,	modes()
+	,	currentMode() {
 	//
 	atom::mount<window2logger>(this, l);
 	atom::mount<window2pref>(this, p);
@@ -336,6 +342,27 @@ bool window::init(HINSTANCE hInst) {
 	if (base_window_t::init(boost::bind(_::__, _1, _2, boost::ref(this->windowPlacement.destination), style, ex_style), true)) {
 		this->setStyles(WS_OVERLAPPED | WS_SYSMENU, WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED);
 		//
+		// load popupmenu bitmaps;
+		topItems[6].icon = this->loadMenuBitmap(IDR_IMG_TRANSPARENCY);
+		topItems[7].icon = this->loadMenuBitmap(IDR_IMG_BKCOLOR);
+		topItems[10].icon = this->loadMenuBitmap(IDR_IMG_ALIGNMENT);
+		topItems[11].icon = this->loadMenuBitmap(IDR_IMG_VRATIO);
+		topItems[12].icon = this->loadMenuBitmap(IDR_IMG_HRATIO);
+		topItems[13].icon = this->loadMenuBitmap(IDR_IMG_SLIDE_TIMEOUT);
+
+		topItems[17].icon = this->loadMenuBitmap(IDR_IMG_HELP);
+
+		//alignmentItems[0].icon = this->loadMenuBitmap(IDR_IMG_ALIGNMENT_TOP_LEFT);
+
+
+		//WORD aid = CMDID_ALIGNMENT_FIRST_ID;
+		//BOOST_FOREACH(menuItem<alignment_t::type> const& mi, alignmentItems){
+		//	HBITMAP helpBitmap = LoadBitmap((HINSTANCE)GetModuleHandle(NULL), MAKEINTRESOURCE(IDR_IMG_HELP));
+		//	aid
+		//	topItems[17].icon = makeBitmapTransparent(helpBitmap, RGB(255, 255, 255));
+		//	DeleteObject(helpBitmap);
+		//}
+		//
 		if (p->get< bool >(CONFIG_SHOW_HELP_ON_STARTUP)){
 			showHelpDialog(hInst, this->getHWND(), p);
 		}
@@ -383,6 +410,10 @@ void window::clear() {
 		m.get<1>()->clear();
 	}
 	this->qlBadge->clear();
+	//
+	BOOST_FOREACH(menuBitmaps_t::value_type v, this->menuBitmaps){
+		DeleteObject(v);
+	}
 	base_node_t::clear();
 }
 
@@ -836,4 +867,41 @@ void window::modeSwitch(size_t const mode) {
 
 void window::exit(){
 	PostQuitMessage(0);
+}
+
+HBITMAP makeBitmapTransparent(HBITMAP hbmSrc, COLORREF clrTP)
+{
+	HDC hdcSrc, hdcDst;
+	HBITMAP hbmOld, hbmNew;
+	BITMAP bm;
+	COLORREF clrBK;
+	if ((hdcSrc = CreateCompatibleDC(NULL)) != NULL) {
+		if ((hdcDst = CreateCompatibleDC(NULL)) != NULL) {
+			int nRow, nCol;
+			GetObject(hbmSrc, sizeof(bm), &bm);
+			hbmOld = (HBITMAP)SelectObject(hdcSrc, hbmSrc);
+			hbmNew = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);
+			SelectObject(hdcDst, hbmNew);
+			BitBlt(hdcDst, 0, 0, bm.bmWidth, bm.bmHeight, hdcSrc, 0, 0, SRCCOPY);
+			//clrTP = GetPixel(hdcDst, 0, 0);// Get color of first pixel at 0,0
+			clrBK = GetSysColor(COLOR_MENU);// Get the current background color of the menu
+			for (nRow = 0; nRow < bm.bmHeight; nRow++)// work our way through all the pixels changing their color
+				for (nCol = 0; nCol < bm.bmWidth; nCol++)// when we hit our set transparency color.
+					if (GetPixel(hdcDst, nCol, nRow) == clrTP)
+						SetPixel(hdcDst, nCol, nRow, clrBK);
+
+			DeleteDC(hdcDst);
+		}
+		DeleteDC(hdcSrc);
+
+	}
+	return hbmNew;// return our transformed bitmap.
+}
+
+HBITMAP  window::loadMenuBitmap(UINT resId){
+	HBITMAP helpBitmap = LoadBitmap((HINSTANCE)GetModuleHandle(NULL), MAKEINTRESOURCE(resId));
+	HBITMAP result = makeBitmapTransparent(helpBitmap, RGB(255, 255, 255));
+	this->menuBitmaps.push_back(result);
+	DeleteObject(helpBitmap);
+	return result;
 }

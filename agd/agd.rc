@@ -21,6 +21,17 @@ IDR_IMG_HELP_PAGE_03    BITMAP                  "img\\help-page-03.bmp"
 IDR_IMG_FACEBOOK        BITMAP                  "img\\facebook.bmp"
 IDR_IMG_WWW             BITMAP                  "img\\www.bmp"
 IDR_IMG_EMAIL           BITMAP                  "img\\email.bmp"
+IDR_IMG_TRANSPARENCY    BITMAP                  "img\\transparency.bmp"
+IDR_IMG_BKCOLOR         BITMAP                  "img\\bkcolor.bmp"
+IDR_IMG_ALIGNMENT       BITMAP                  "img\\alignment.bmp"
+IDR_IMG_VRATIO          BITMAP                  "img\\vratio.bmp"
+IDR_IMG_HRATIO          BITMAP                  "img\\hratio.bmp"
+IDR_IMG_SLIDE_TIMEOUT   BITMAP                  "img\\slide-timeout.bmp"
+IDR_IMG_HELP            BITMAP                  "img\\help.bmp"
+
+
+
+IDR_IMG_ALIGNMENT_TOP_LEFT BITMAP               "img\\top-left.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
