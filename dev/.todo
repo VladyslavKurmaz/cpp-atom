@@ -12,6 +12,8 @@
 + clone/pull/status git repository
 - platform command
 
+- run command to start putty for example
+- info <component> outputs environment, stages etc.
 - add attional loops for -a 32;64 -t mavc-12.0;msvc-13.0 -c debug;release;
 
 - reload command, from current component?
