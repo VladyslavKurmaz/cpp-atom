@@ -16,8 +16,8 @@ appl::appl( logger_ptr l, pref_ptr p ) {
 appl::~appl() {
 }
 
-bool appl::init() {
-	return ( this->getWindow()->init() );
+bool appl::init(HINSTANCE hInst) {
+	return (this->getWindow()->init(hInst));
 }
 
 appl& appl::run() {

@@ -1,44 +1,42 @@
 #include "./pch.hpp"
+#include "./resource.h"
 #include "./log.hpp"
 #include "./pref.hpp" 
 
 
 pref::pref( logger_ptr l ) :
 		base_t()
+	,	configFileName()
 	,	config()
 	,	accel()
-	,	langsPair()
-	,	langs()
 {
 	atom::mount<pref2logger>( this, l );
 	//
 	// load config json user config or from resource
-	// check local file
-	// ????????????
-	std::stringstream ss;
-	{
-		HMODULE handle = ::GetModuleHandle(NULL);
-		HRSRC rc = ::FindResource(handle, MAKEINTRESOURCE(IDR_CONFIG),MAKEINTRESOURCE(TEXTFILE));
-		HGLOBAL rcData = ::LoadResource(handle, rc);
-		DWORD size = ::SizeofResource(handle, rc);
-		char const* data = static_cast<const char*>(::LockResource(rcData));
-		ss << data;
+	char localAppData[MAX_PATH] = { 0 };
+	GetEnvironmentVariableA(ENV_LOCALAPPDATA, localAppData, MAX_PATH);
+	configFileName = boost::filesystem::path(localAppData) / boost::filesystem::path("agd.conf");
+	//
+	if (boost::filesystem::exists(configFileName)){
+		// check local file
+		boost::property_tree::read_json(this->configFileName.string(), this->config);
 	}
-	boost::property_tree::read_json(ss, this->config);
-	//
-	// configure available languages
-	lang_t const en = boost::make_tuple( _T("eng"), _T("en"), _T("English"), AD_PANEL_IMAGE_LANG_EN );
-	lang_t const ua = boost::make_tuple( _T("ukr"), _T("uk"), _T("Український"), AD_PANEL_IMAGE_LANG_UA );
-	lang_t const ru = boost::make_tuple( _T("rus"), _T("ru"), _T("Русский"), AD_PANEL_IMAGE_LANG_RU );
-
-	this->langs.push_back( en );
-	this->langs.push_back( ua );
-	this->langs.push_back( ru );
-	//
-	this->langSetPair( std::make_pair( en, ru ) );
+	else{
+		std::stringstream ss;
+		{
+			HMODULE handle = ::GetModuleHandle(NULL);
+			HRSRC rc = ::FindResource(handle, MAKEINTRESOURCE(IDR_CONFIG), MAKEINTRESOURCE(TEXTFILE));
+			HGLOBAL rcData = ::LoadResource(handle, rc);
+			DWORD size = ::SizeofResource(handle, rc);
+			char const* data = static_cast<const char*>(::LockResource(rcData));
+			ss << data;
+		}
+		boost::property_tree::read_json(ss, this->config);
+	}
 }
 
 pref::~pref() {
+	boost::property_tree::write_json(this->configFileName.string(), this->config);
 }
 
 bool pref::init( int argc, char const * const argv[] ) {
@@ -116,51 +114,55 @@ boost::property_tree::ptree const&  pref::getModeConfig(std::string const& key){
 	return this->config.get_child(CONFIG_MODE + key);
 }
 
-void pref::getView(RECT& r) {
+void pref::getView(bool const clip, RECT& r) {
 	SetRect(&r, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-	if (this->get< bool >(CONFIG_CLIP)) {
+	if (clip) {
 		SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
 	}
 }
 
-void pref::calculateDocks(unsigned int const alpha, placement_t& windowPlacement) {
+alignment_t::type pref::getAlignment(){
 	//
 	static atom::parse_tag< char, alignment_t::type > alignment_tags[] = {
-		{ "hcenter",	alignment_t::hcenter },
-		{ "left",		alignment_t::left },
-		{ "right",		alignment_t::right },
-		{ "hclient",	alignment_t::hclient },
-		{ "hmask",		alignment_t::hmask },
-		{ "vcenter",	alignment_t::vcenter },
-		{ "top",		alignment_t::top },
-		{ "bottom",		alignment_t::bottom },
-		{ "vclient",	alignment_t::vclient },
-		{ "vmask",		alignment_t::vmask },
-		{ "client",		alignment_t::client },
-		{ "center",		alignment_t::center }
+		{ "hcenter", alignment_t::hcenter },
+		{ "left", alignment_t::left },
+		{ "right", alignment_t::right },
+		{ "hclient", alignment_t::hclient },
+		{ "hmask", alignment_t::hmask },
+		{ "vcenter", alignment_t::vcenter },
+		{ "top", alignment_t::top },
+		{ "bottom", alignment_t::bottom },
+		{ "vclient", alignment_t::vclient },
+		{ "vmask", alignment_t::vmask },
+		{ "client", alignment_t::client },
+		{ "center", alignment_t::center }
 	};
-	static size_t alignment_tags_count = sizeof( alignment_tags ) / sizeof( alignment_tags[0] );
+	static size_t alignment_tags_count = sizeof(alignment_tags) / sizeof(alignment_tags[0]);
 	//
 	std::string const alig_str = this->get< std::string >(CONFIG_ALIGNMENT);
-
-	unsigned int const width = (windowPlacement.fullScreen) ? (100) : (this->get< unsigned int >(CONFIG_WIDTH));
-	unsigned int const height = (windowPlacement.fullScreen) ? (100) : (this->get< unsigned int >(CONFIG_HEIGHT));
-
-	windowPlacement.timeout = this->get< unsigned int>(CONFIG_TIMEOUT);
 	//
 	alignment_t::type align = alignment_t::client;
-	atom::parse_result< char, alignment_t::type > result = atom::parse_tags( alig_str, alignment_tags, alignment_tags_count, std::string("+") );
+	atom::parse_result< char, alignment_t::type > result = atom::parse_tags(alig_str, alignment_tags, alignment_tags_count, std::string("+"));
 	//
-	if ( ( result.total_found > 0 ) && ( result.unparsed.size() == 0 ) ) {
+	if ((result.total_found > 0) && (result.unparsed.size() == 0)) {
 		align = result.result;
-	} else {
+	}
+	else {
 		//*(this->getLogger()) << "Invalid alignment format " << alig_str << std::endl;
 		align = alignment_t::hcenter | alignment_t::top;
 	}
 	//
+	return align;
+}
+
+void pref::calculateDocks(unsigned int const alpha, placement_t& windowPlacement) {
+
+	unsigned int const width = (windowPlacement.fullScreen) ? (100) : (windowPlacement.width);
+	unsigned int const height = (windowPlacement.fullScreen) ? (100) : (windowPlacement.height);
+	alignment_t::type align = windowPlacement.alignment;
 
 	RECT rt;
-	this->getView( rt );
+	this->getView(windowPlacement.clip, rt);
 	//
 	alignment_t::type const h_align = align & alignment_t::hmask;
 	alignment_t::type const v_align = align & alignment_t::vmask;
@@ -241,33 +243,6 @@ bool pref::translateAccel(HWND hWnd, MSG* msg){
 	return this->accel.translate(hWnd, msg);
 }
 
-
-void pref::langSetPair( langspair_t const& lngs ) {
-	this->langsPair = lngs;
-}
-
-pref::langspair_t pref::langGetPair() const {
-	return this->langsPair;
-}
-
-void pref::langSetLang( bool const from, size_t const ind ) {
-	if ( ( 0 <= ind ) && ( ind < this->langs.size() ) ) {
-		lang_t l = this->langs[ind];
-		if ( from ) {
-			this->langsPair.first = l;
-		} else {
-			this->langsPair.second = l;
-		}
-	}
-}
-
-void pref::langEnum( boost::function< bool( lang_t const& ) > func ) const {
-	BOOST_FOREACH( lang_t const& l, langs ) {
-		if ( !func( l ) ) {
-			break;
-		}
-	}
-}
 
 
 

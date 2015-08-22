@@ -3,6 +3,8 @@
 
 typedef atom::nstorage< logger, boost::shared_ptr, atom::narray1 > pref2logger;
 
+
+
 class pref :
 	public atom::node< LOKI_TYPELIST_1( pref2logger ) >,
 	public boost::enable_shared_from_this< pref > {
@@ -18,20 +20,49 @@ public:
 	///
 	bool init( int argc, char const * const argv[] );
 	///
+	template <typename T>
+	struct conv{
+		T get(boost::property_tree::ptree const& c, std::string const& key){
+			return boost::lexical_cast<T>(c.get_child(key).data());
+		}
+	};
+	template <>
+	struct conv<bool>{
+		bool get(boost::property_tree::ptree const& c, std::string const& key){
+			std::string s = c.get_child(key).data();
+			if ((s == "true") || (s == "1")){
+				return true;
+			}
+			return false;
+		}
+	};
 	template <typename T >
-	T get( std::string const& key ) {
-		return boost::lexical_cast<T>(this->config.get_child(key).data());
+	T get(std::string const& key) {
+		return conv<T>().get(this->config, key);
+	}
+	template <typename T >
+	void put(std::string const& key, T const& v) {
+		this->config.put(key, v);
 	}
 	//
 	boost::property_tree::ptree const& getModeConfig(std::string const& key);
 	//
-	void getView( RECT& r );
+	void getView(bool const clip, RECT& r);
+	//
+	alignment_t::type getAlignment();
 	//
 	void calculateDocks(unsigned int const alpha, placement_t& windowPlacement);
 	//
 	bool parseHotkey(std::string const& id, hotkey& hk);
 	//
 	bool translateAccel(HWND hWnd, MSG* msg);
+	//
+	enum popupMenuType{
+		pmtTransparency,
+		pmtAlignment,
+		pmtVRatio,
+		pmtHRation
+	};
 	///
 	template < typename T, size_t N >
 	void parseAccel( T const (&tags)[N], atom::accel& accel ) {
@@ -80,20 +111,6 @@ public:
 			}
 		}
 	}
-	///
-	///
-	typedef boost::tuple< atom::string_t, atom::string_t, atom::string_t, int >
-		lang_t;
-	typedef std::pair< lang_t, lang_t >
-		langspair_t;
-	//
-	void langSetPair( langspair_t const& lngs );
-	//
-	langspair_t langGetPair() const;
-	//
-	void langSetLang( bool const from, size_t const ind );
-	//
-	void langEnum( boost::function< bool( lang_t const& ) > func ) const;
 
 protected:
 	LOGGER_ACCESSOR( pref2logger )
@@ -102,18 +119,11 @@ private:
 	///
 	pref( logger_ptr l );
 	///
+	boost::filesystem::path
+		configFileName;
 	boost::property_tree::ptree
 		config;
 	//
 	atom::accel
 		accel;
-	///
-	typedef std::vector< lang_t >
-		langs_t;
-	langspair_t langsPair;
-	langs_t langs;
 };
-
-inline bool operator==( pref::lang_t const& l, pref::lang_t const& r ) {
-	return ( l.get<0>() == r.get<0>() );
-}

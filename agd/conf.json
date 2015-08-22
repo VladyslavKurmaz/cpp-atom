@@ -1,0 +1,15 @@
+{
+  "var":{
+    "PARENT_HOME":"{parent-home}",
+    "AGD_VERSION":"0.1.4"
+  },
+  "stage":{
+    "pack":
+"
+set PACK_NAME=agd-%AGD_VERSION%.zip
+set OUTPUT_NAME=%TEMP%\\%PACK_NAME%
+7z.exe a %OUTPUT_NAME% \"%CURL_HOME%/bin/curl.exe\" \"%TESSERACT_HOME%\" \"%PARENT_HOME%/%TOOLSET%-%CONFIGURATION%/agd/%CONFIGURATION%/agd.exe\"
+move %OUTPUT_NAME% \"%DEV2_AUGMENTEDDESKTOP_COM_DL%/%PACK_NAME%\"
+"
+  }
+}

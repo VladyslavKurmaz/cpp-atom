@@ -48,8 +48,13 @@ namespace atom {
 			return (*this);
 		}
 */
-		wImageList& create( HINSTANCE hi, LPCTSTR lpbmp, int cx, int cGrow, COLORREF crMask ) {
-			this->imageList = ImageList_LoadBitmap( hi, lpbmp, cx, cGrow, crMask );
+		wImageList& create(HINSTANCE hi, LPCTSTR lpbmp, int cx, int cGrow, COLORREF crMask) {
+			this->imageList = ImageList_LoadBitmap(hi, lpbmp, cx, cGrow, crMask);
+			return (*this);
+		}
+		wImageList& append(HBITMAP hbmp, COLORREF crMask, int& index) {
+			ImageList_SetBkColor(this->imageList, crMask);
+			index = ImageList_AddMasked(this->imageList, hbmp, crMask);
 			return (*this);
 		}
 		//
@@ -307,18 +312,17 @@ namespace atom {
 			return (*this);
 		}
 		//
-		wmenu& popup( UINT flags, int x, int y, wctrl const& ctrl, RECT const& exclude ) {
+		UINT popup( UINT flags, int x, int y, wctrl const& ctrl, RECT const& exclude ) {
 			TPMPARAMS tpm;
 			tpm.cbSize    = sizeof(TPMPARAMS);
 			tpm.rcExclude = exclude;
 			//
-			TrackPopupMenuEx(
+			return TrackPopupMenuEx(
 				this->menu, 
 				flags, 
 				x, y,
 				ctrl.getHWND(),
 				&tpm );
-			return (*this);
 		}
 
  	protected:

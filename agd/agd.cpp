@@ -41,7 +41,7 @@ int main( int argc, char *argv[] )
 	SetEnvironmentVariableA("PATH", env.c_str());
 	_makepath_s(path, drive, dir, "tesseract-ocr-3.02\\", NULL);
 	if (getenv("TESSDATA_PREFIX") == NULL){
-		SetEnvironmentVariableA("TESSDATA_PREFIX", path);
+		SetEnvironmentVariableA(ENV_TESSDATA_PREFIX, path);
 	}
 	//
 	atom::proc proc;
@@ -67,9 +67,10 @@ int main( int argc, char *argv[] )
 			boost::thread testThread( standaloneThread );
 #endif
 			appl_ptr a = appl::create( l, p );
-			if ( a->init() ) {
-				a->run().clear();
+			if ( a->init(reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL))) ) {
+				a->run();
 			}
+			a->clear();
 #ifdef STANDALONE
 			testThread.join();
 #endif

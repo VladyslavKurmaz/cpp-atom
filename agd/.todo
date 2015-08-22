@@ -4,32 +4,54 @@
 + fix alignment
 + implements frames and remote consoles
 + switch between modes
++ hide/show panel notifications
++ move apps option from boost::po to json file
++ UI options menu
++ Small window with AD logo to quick app access, like dropbox
++ add email, facebook, website links at help dialog
++ move language pref from root to mode json section, list of available languages
++ help dialog
++ mode mode selection from system menu to the popup menu + hotkeys
+
+- hide app console at all
+- oauth2 facebook/twitter/etc.
+- save preferences to json and read it at startup
+- check if new version is available, call php script on startup to check number of users, block startup from RU region
+- template class which allows to create shared ptr to the subset of fields
 - translate mouse wheel to the underlying window
-- ALt+Enter when focus is on the panel
-- hide/show panel notifications
-- move apps option from boost::po to json file
-- UI options dialog
+- ALt+Enter when focus is on the panel, Alt+F4 exit from both window and panel and from panel close button 
 
 :shell
 - correct console buffer mapping
 - hide console window on start
 - set kbrd focus
 - mstack, implements FSM
-- rb popup menu and hotkeys to select mode (scan|console|atlas|...)
 
 :augmented desktop
 + region selection, lbm+move+space
-- test PrintWindows for image recognition
 + integrate Tesseract library
 + use curl for google translate api access
-- rotate region selection with image rotate after selection
 + add toolbar (languages, toogled, delete, picture)
-- preview selection as an image
-- delete button/ select items
-- text-like selection mode (lbd + alt), when mouse move (left-right) select rectangle with predefined height and up-down changes rectange height
 + set TESSDATA_PREFIX environment variable, if it doesn't
++ show translation direction at panel caption
++ static window with translation
++ draw selection on Desktop with XOR
+
+- highlight selection, like snipping tool
+- Consolas Bold, font to generate languages' 2-letters code
+- flags for different languages
+- share image via facebook/twitter
+- install\uninstall languages
+- delete/restore button/ select items
+- test PrintWindows for image recognition
+- rotate region selection with image rotate after selection
+- preview selection as an image
+- text-like selection mode (lbd + alt), when mouse move (left-right) select rectangle with predefined height and up-down changes rectange height
 - save last selected region and use it during translation on hotkey (subtitles)
 - add more than one translation sources
+- edit recognized text and new translation loop
+- shortcut doesn't display at netbook
+
 
 :atlas
 - dx\ogl init, render loop

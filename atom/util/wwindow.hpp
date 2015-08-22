@@ -67,8 +67,17 @@ namespace atom {
 			checkPt( this->e, r );
 		}
 		//
-		void getRect( RECT& r ) {
-			SetRect( &r, min( this->s.x,this->e.x), min(this->s.y,this->e.y), max(this->s.x,this->e.x), max(this->s.y,this->e.y) );
+		void getRect(RECT& r) {
+			SetRect(&r, min(this->s.x, this->e.x), min(this->s.y, this->e.y), max(this->s.x, this->e.x), max(this->s.y, this->e.y));
+		}
+		//
+		void draw(HWND wnd) {
+			RECT r;
+			this->getRect(r);
+			HDC dc = GetDC(wnd);
+			SetTextColor(dc, RGB(128,128,128));
+			DrawFocusRect(dc, &r);
+			ReleaseDC(wnd, dc);
 		}
 	protected:
 		//
@@ -103,8 +112,7 @@ namespace atom {
 
 	protected:
 		///
-		bool is_valid( HWND w, WNDPROC p ) const
-		{
+		bool is_valid( HWND w, WNDPROC p ) const {
 			return ( ( w != 0 ) && ( p != 0 ) );
 		}
 		///
@@ -116,30 +124,24 @@ namespace atom {
 		///
 		subclass() : 
 		  wnd( 0 )
-			  ,	proc( NULL )
-		  {
+			  ,	proc( NULL ) {
 		  }
 		  ///
-		  ~subclass()
-		  {
+		  ~subclass() {
 		  }
 		  ///
-		  WNDPROC sub( HWND w, WNDPROC p )
-		  {
+		  WNDPROC sub( HWND w, WNDPROC p ) {
 			  WNDPROC result = NULL;
-			  if ( is_valid( w, p ) )
-			  {
+			  if ( is_valid( w, p ) ) {
 				  result = unsub();
 				  this->proc = swap( ( this->wnd = w ), p );
 			  }
 			  return result;
 		  }
 		  ///
-		  WNDPROC unsub()
-		  {
+		  WNDPROC unsub() {
 			  WNDPROC result = NULL;
-			  if ( is_valid( this->wnd, this->proc ) )
-			  {
+			  if ( is_valid( this->wnd, this->proc ) ) {
 				  result = swap( this->wnd, this->proc );
 				  this->wnd		= 0;
 				  this->proc	= NULL;
@@ -147,10 +149,8 @@ namespace atom {
 			  return result;
 		  }
 		  ///
-		  LRESULT call( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
-		  {
-			  if ( this->proc != NULL )
-			  {
+		  LRESULT call( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+			  if ( this->proc != NULL ) {
 				  return ( CallWindowProc( this->proc, hWnd, uMsg, wParam, lParam ) );
 			  }
 			  return ::DefWindowProc( hWnd, uMsg, wParam, lParam );
@@ -167,8 +167,24 @@ namespace atom {
 #define	ATOM_DEF_ONNCHITTEST( c ) typedef LRESULT( c::* c ## _onnchittest_t )( HWND, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCHITTEST >::type, c ## _onnchittest_t >::type c ## _onnchittest_pair_t;
 	template < typename T, typename U >
 	struct handle_msg< WM_NCHITTEST, T, U > {
-		static LRESULT call( T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam ) {
-			return ((t.*u)((hWnd), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) ));
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+		}
+	};
+
+#define	ATOM_DEF_ONNCLBUTTONDOWN( c ) typedef void( c::* c ## _onnclbuttondown_t )( HWND, int, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCLBUTTONDOWN >::type, c ## _onnclbuttondown_t >::type c ## _onnclbuttondown_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_NCLBUTTONDOWN, T, U > {
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), (int)wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), 0L);
+		}
+	};
+
+#define	ATOM_DEF_ONNCLBUTTONUP( c ) typedef void( c::* c ## _onnclbuttonup_t )( HWND, int, int, int ); typedef boost::mpl::pair< boost::mpl::int_< WM_NCLBUTTONUP >::type, c ## _onnclbuttonup_t >::type c ## _onnclbuttonup_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_NCLBUTTONUP, T, U > {
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), (int)wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), 0L);
 		}
 	};
 
@@ -236,6 +252,15 @@ namespace atom {
 			return ((t.*u)((hWnd), (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam), (UINT)(wParam)), 0L);
 		}
 	};
+
+#define	ATOM_DEF_ONRBUTTONDOWN( c )	typedef void( c::* c ## _onrbuttondown_t )( HWND, BOOL, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_RBUTTONDOWN >::type, c ## _onrbuttondown_t >::type c ## _onrbuttondown_pair_t;
+	template < typename T, typename U >
+	struct handle_msg< WM_RBUTTONDOWN, T, U > {
+		static LRESULT call(T&t, U u, HWND hWnd, WPARAM wParam, LPARAM lParam) {
+			return ((t.*u)((hWnd), FALSE, (int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam), (UINT)(wParam)), 0L);
+		}
+	};
+
 
 #define	ATOM_DEF_ONMOUSEMOVE( c )	typedef void( c::* c ## _onmousemove_t )( HWND, int, int, UINT ); typedef boost::mpl::pair< boost::mpl::int_< WM_MOUSEMOVE >::type, c ## _onmousemove_t >::type c ## _onmousemove_pair_t;
 	template < typename T, typename U >
@@ -379,10 +404,16 @@ namespace atom {
 			  SetLayeredWindowAttributes( this->getHWND(), RGB( 0, 0, 0 ), alpha, LWA_ALPHA );
 			  return (*this); }
 		  ///
-		  wwindow const& getAlpha( BYTE& alpha ) const {
+		  wwindow const& getAlpha(BYTE& alpha) const {
 			  DWORD flags = LWA_ALPHA;
-			  GetLayeredWindowAttributes( this->getHWND(), 0, &alpha, &flags );
-			  return (*this); }
+			  GetLayeredWindowAttributes(this->getHWND(), 0, &alpha, &flags);
+			  return (*this);
+		  }
+		  ///
+		  wwindow const& setTitle(string_t const& title) const {
+			  SetWindowText(this->getHWND(), title.c_str());
+			  return (*this);
+		  }
 		  ///
 		  wwindow const& sysMenuInsert( UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, string_t const & lpNewItem ) const {
 			  InsertMenu( GetSystemMenu( this->getHWND(), FALSE ), uPosition, uFlags, uIDNewItem, lpNewItem.c_str() );

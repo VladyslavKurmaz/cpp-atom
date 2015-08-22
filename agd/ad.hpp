@@ -36,18 +36,16 @@ private:
 	atom::string_t const translationOutputFileW;
 	std::string const translationOutputFile;
 	//
-	atom::rectCtrl ctrl;
-	//
+	atom::rectCtrl
+		ctrl;
 	panel_ptr
 		adPanel;
-	//
-	typedef std::pair< atom::string_t, atom::string_t >
-		urls_t;
+	langs_ptr
+		adLangs;
 	//
 	atom::string_t getOCRUrl();
 	//
 	atom::string_t getTranslateUrl( atom::string_t const& encoded );
-
 
 	friend mode;
 };

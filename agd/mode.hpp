@@ -16,10 +16,6 @@ public:
 		return mode_ptr( new T( c, l, p, w ) );
 	}
 	///
-	unsigned int getAlpha() const {
-		return this->alpha;
-	}
-	///
 	virtual ~mode(){}
 	///
 	virtual void activate(bool const state) = 0 {
@@ -42,10 +38,29 @@ public:
 	virtual void mousemove( int x, int y, unsigned int state ) = 0;
 	///
 	virtual void paint(paint_param_t& paintParam, RECT const& rect) = 0{
-		FillRect(paintParam.dcb.dc, &rect, this->bk);
+		FillRect(paintParam.dcb.dc, &rect, this->bkBrush);
 	}
 	///
 	virtual void clear() = 0;
+	///
+	COLORREF getBkColor() const {
+		return this->bkColor;
+	}
+	///
+	void setBkColor(COLORREF const color) {
+		this->bkColor = color;
+		this->bkBrush = CreateSolidBrush(this->bkColor);
+	}
+	///
+	unsigned int getAlpha() const {
+		return this->alpha;
+	}
+	///
+	void setAlpha(unsigned int const a) {
+		this->alpha = a;
+		this->refresh();
+	}
+
 
 protected:
 	//
@@ -53,20 +68,19 @@ protected:
 	PREF_ACCESSOR( mode2pref )
 	WINDOW_ACCESSOR( mode2window )
 	///
-	mode(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w) : config(c), bk(), alpha(0) {
+	mode(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_ptr w) : config(c), bkColor(0xFFFFFF), bkBrush(), alpha(0) {
 		atom::mount<mode2logger>( this, l );
 		atom::mount<mode2pref>( this, p );
 		atom::mount<mode2window>( this, w );
 		//
 		// create background brash and read alpha level from config
 		std::string hex = this->config.get_child(CONFIG_BK_COLOR).data();
-		unsigned int color = 0;
 		std::stringstream converter(hex);
+		unsigned int color;
 		converter >> std::hex >> color;
-		//
 		unsigned char* argb = reinterpret_cast<unsigned char*>(&color);
-		this->alpha = argb[3];
-		this->bk = CreateSolidBrush(RGB(argb[2], argb[1], argb[0]));
+		this->setAlpha(argb[3]);
+		this->setBkColor(RGB(argb[2], argb[1], argb[0]));
 	}
 	///
 	void refresh(){
@@ -75,8 +89,10 @@ protected:
 	///
 	boost::property_tree::ptree const&
 		config;
+	COLORREF
+		bkColor;
 	atom::shared_gdiobj< HBRUSH >
-		bk;
+		bkBrush;
 	unsigned int
 		alpha;
 

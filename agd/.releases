@@ -1,0 +1,32 @@
+v-0.1.0 18.07.2015
+* public release
+
+v-0.1.1 24.07.2015
+* new shiny icons for in-place translator
+* locked mode for translation panel
+
+v-0.1.2 02.08.2015
+* quick access badge window
+* popup menu, which helps to control different aspects of application:
+ ** alignment
+ ** background color
+ ** transparency
+ ** vertical and horizontal ratio
+ ** slide timeout
+ ** hide/maximize/restore augmented panel
+
+v-0.1.3 14.08.2015
+* help screen
+* list of supported languages was extended.
+  now, you can use:
+    Afrikaans, Albanian, Arabic, Azerbaijani, Belarusian, Bengali,
+    Bulgarian, Catalan, Croatian, Czech, Danish, Dutch, English,
+    Esperanto, Estonian, Finnish, French, Galician, German, Greek,
+    Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian,
+    Japanese, Kannada, Korean, Latvian, Lithuanian, Macedonian,
+    Malay, Maltese, Norwegian, Polish, Portuguese, Romanian,
+    Russian, Serbian, Slovak, Slovenian, Spanish, Swahili,
+    Swedish, Tamil, Telugu, Thai, Turkish, Ukrainian, Vietnamese
+
+v-0.1.4 22.08.2015
+* popup window with translation near to point of interest

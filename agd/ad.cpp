@@ -5,6 +5,7 @@
 #include "./pref.hpp"
 #include "./panel.hpp"
 #include "./window.hpp"
+#include "./langs.hpp"
 #include "./ad.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -16,7 +17,9 @@ ad::ad(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, window_pt
 	,	translationOutputFile( "tr.json" )
 	,	ctrl()
 	,	adPanel()
+	,	adLangs()
 {
+	this->adLangs = langs::create(this->config.get_child(CONFIG_AD_TRANSLATE), this->getLogger());
 }
 
 ad::~ad() {
@@ -25,14 +28,11 @@ ad::~ad() {
 void ad::activate( bool const state ) {
 	mode::activate(state);
 	if ( !adPanel ) {
-		adPanel = panel::create( this->getLogger(), this->getPref() );
+		adPanel = panel::create(this->getLogger(), this->getPref(), boost::dynamic_pointer_cast<ad, mode>(this->shared_from_this()), this->adLangs);
 		adPanel->init( this->getWindow()->getHWND() );
 	}
 	this->adPanel->show(state);
 	this->adPanel->setADState(state);
-	//if (state){
-	//	this->adPanel->activate();
-	//}
 }
 
 void ad::show( bool const state ) {
@@ -40,9 +40,6 @@ void ad::show( bool const state ) {
 	this->adPanel->setADVisible(state);
 	bool const s = state || this->adPanel->isLocked();
 	this->adPanel->show(s);
-	//if (s){
-	//	this->adPanel->activate();
-	//}
 }
 
 bool ad::command( int const id ) {
@@ -55,10 +52,12 @@ void ad::key( KEY_EVENT_RECORD const& k ) {
 void ad::mouselbdown( bool dblclick, int x, int y, unsigned int state ) {
 	window_ptr w = this->getWindow();
 	if ( !dblclick ) {
-		ctrl.start( x, y );
+		ctrl.start(x, y);
+		ctrl.draw(w->getHWND());
 		w->inputCapture( window::keyboard );
 		w->inputCapture( window::mouse );
-		w->invalidate();
+		this->adPanel->beginCapture();
+		//w->invalidate();
 	}
 }
 
@@ -97,9 +96,11 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 	window_ptr w = this->getWindow();
 	RECT r;
 	if (w->inputIsCaptured(window::mouse)) {
+		ctrl.draw(w->getHWND());
 		ctrl.getRect(r);
+		MapWindowPoints(w->getHWND(), NULL, (LPPOINT)&r, 2);
 		//bitmapSave( "desktop.bmp", this->paintPadam.dcb.dc, this->paintPadam.dcb.bitmap );
-		HDC dc = GetDC(NULL);
+		atom::shared_dc dc((HWND)NULL);
 		size_t const cx = RECT_WIDTH(r);
 		size_t const cy = RECT_HEIGHT(r);
 		if ((cx > 8) && (cy > 8)) {
@@ -115,7 +116,6 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 				r.top,
 				SRCCOPY);
 			bitmapSave(_T("desktop.bmp"), dcb.dc, dcb.bitmap);
-			ReleaseDC(NULL, dc);
 			//
 			atom::string_t src(_T("?"));
 			atom::string_t dest(_T("?"));
@@ -151,11 +151,11 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 				catch (std::exception&) {
 				}
 			}
-			this->adPanel->addRecord(src, dest);
+			this->adPanel->endCapture(src, dest, r);
 		}
 	}
 	w->inputRelease(window::mouse);
-	w->invalidate();
+	//w->invalidate();
 }
 
 void ad::mousemove(int x, int y, unsigned int state){
@@ -163,8 +163,10 @@ void ad::mousemove(int x, int y, unsigned int state){
 	if (w->inputIsCaptured(window::mouse)) {
 		RECT r;
 		GetClientRect(w->getHWND(), &r);
+		ctrl.draw(w->getHWND());
 		ctrl.update(x, y, (GetKeyState(VK_SPACE) & 0x80) > 0, r);
-		w->invalidate();
+		ctrl.draw(w->getHWND());
+		//w->invalidate();
 	}
 }
 
@@ -172,27 +174,29 @@ void ad::paint(paint_param_t& paintParam, RECT const& rect) {
 	window_ptr w = this->getWindow();
 	mode::paint(paintParam, rect);
 	if (w->inputIsCaptured(window::mouse)) {
-		RECT rt;
-		ctrl.getRect(rt);
-		FrameRect(paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject(WHITE_BRUSH));
+		//RECT rt;
+		//ctrl.getRect(rt);
+		//FrameRect(paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject(WHITE_BRUSH));
 	}
 }
 
 void ad::clear() {
+	this->adLangs->clear();
+	this->adPanel->clear();
 	base_t::clear();
 }
 
 atom::string_t ad::getOCRUrl() {
-	pref::langspair_t const lngs = getPref()->langGetPair();
+	langspair_t const lngs = this->adLangs->getPair();
 	atom::stringstream_t ss;
-	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.get<0>() << _T( " " ) << this->ocrOutputFile;
+	ss << _T( "tesseract desktop.bmp -l " ) << lngs.first.c3 << _T( " " ) << this->ocrOutputFile;
 	return ss.str();
 }
 
 atom::string_t ad::getTranslateUrl( atom::string_t const& encoded ) {
-	pref::langspair_t const lngs = getPref()->langGetPair();
+	langspair_t const lngs = this->adLangs->getPair();
 	atom::stringstream_t ss;
-	ss << _T( "curl -k -o " ) << this->translationOutputFileW << _T(" \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.get<1>() << _T("&target=") << lngs.second.get<1>() << _T("&q=" ) << encoded << _T( "\"" );
+	ss << _T( "curl -k -o " ) << this->translationOutputFileW << _T(" \"" ) << _T( "https://www.googleapis.com/language/translate/v2?key=AIzaSyDawRGDyX-pevX3A22AODuXCPANs_JJm14&source=") << lngs.first.c2 << _T("&target=") << lngs.second.c2 << _T("&q=" ) << encoded << _T( "\"" );
 	return ss.str();
 }
 

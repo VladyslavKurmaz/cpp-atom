@@ -18,8 +18,8 @@ shell::shell(boost::property_tree::ptree const& c, logger_ptr l, pref_ptr p, win
 	//
 	this->consoleSize.X = 120;
 	this->consoleSize.Y = 512;
-	SMALL_RECT view;
 #ifdef STANDALONE
+	SMALL_RECT view;
 	getConsoleSize(consoleSize, view);
 #endif
 }
@@ -68,7 +68,7 @@ bool shell::command( int const id ) {
 	case CMDID_CLOSE:
 		this->currentFrame = this->headArea->find( this->currentFrame )->close();
 		if ( !this->currentFrame ) {
-			PostQuitMessage( 0 );
+			this->getWindow()->exit();
 		}
 		return true;
 	case CMDID_TTY1:

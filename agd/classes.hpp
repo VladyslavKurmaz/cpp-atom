@@ -20,6 +20,10 @@ typedef boost::shared_ptr< area >
 class mode;
 typedef boost::shared_ptr< mode >
 	mode_ptr;
+
+class ad;
+typedef boost::shared_ptr < ad >
+	ad_ptr;
 //
 class frame;
 typedef boost::shared_ptr< frame >
@@ -37,6 +41,33 @@ typedef boost::shared_ptr< panel >
 class appl;
 typedef boost::shared_ptr< appl >
 	appl_ptr;
+//
+class badge;
+typedef boost::shared_ptr< badge >
+	badge_ptr;
+//
+class langs;
+typedef boost::shared_ptr< langs >
+	langs_ptr;
+
+///
+///
+struct language_t {
+	bool enable;
+	atom::string_t name;
+	atom::string_t c2;
+	atom::string_t c3;
+	unsigned int command;
+	int img;
+};
+
+typedef std::pair < language_t, language_t >
+	langspair_t;
+
+inline bool operator==(language_t const& l, language_t const& r) {
+	return (l.c2 == r.c2);
+}
+
 //
 //
 struct bridgeMsg {
@@ -162,6 +193,15 @@ struct dcb_t {
 			SelectObject( this->dc, this->bitmap );
 		}
 		ReleaseDC( NULL, dc );
+	}
+	void loadBitmap(HINSTANCE hInst, UINT const resId){
+		HDC dc = GetDC(NULL);
+		{
+			this->dc = CreateCompatibleDC(dc);
+			this->bitmap = reinterpret_cast<HBITMAP>(LoadImage(hInst, MAKEINTRESOURCE(resId), IMAGE_BITMAP, 0, 0, 0));
+			SelectObject(this->dc, this->bitmap);
+		}
+		ReleaseDC(NULL, dc);
 	}
 };
 
