@@ -52,10 +52,12 @@ void ad::key( KEY_EVENT_RECORD const& k ) {
 void ad::mouselbdown( bool dblclick, int x, int y, unsigned int state ) {
 	window_ptr w = this->getWindow();
 	if ( !dblclick ) {
-		ctrl.start( x, y );
+		ctrl.start(x, y);
+		ctrl.draw(w->getHWND());
 		w->inputCapture( window::keyboard );
 		w->inputCapture( window::mouse );
-		w->invalidate();
+		this->adPanel->beginCapture();
+		//w->invalidate();
 	}
 }
 
@@ -94,9 +96,11 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 	window_ptr w = this->getWindow();
 	RECT r;
 	if (w->inputIsCaptured(window::mouse)) {
+		ctrl.draw(w->getHWND());
 		ctrl.getRect(r);
+		MapWindowPoints(w->getHWND(), NULL, (LPPOINT)&r, 2);
 		//bitmapSave( "desktop.bmp", this->paintPadam.dcb.dc, this->paintPadam.dcb.bitmap );
-		HDC dc = GetDC(NULL);
+		atom::shared_dc dc((HWND)NULL);
 		size_t const cx = RECT_WIDTH(r);
 		size_t const cy = RECT_HEIGHT(r);
 		if ((cx > 8) && (cy > 8)) {
@@ -112,7 +116,6 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 				r.top,
 				SRCCOPY);
 			bitmapSave(_T("desktop.bmp"), dcb.dc, dcb.bitmap);
-			ReleaseDC(NULL, dc);
 			//
 			atom::string_t src(_T("?"));
 			atom::string_t dest(_T("?"));
@@ -148,11 +151,11 @@ void ad::mouselbup(int x, int y, unsigned int state) {
 				catch (std::exception&) {
 				}
 			}
-			this->adPanel->addRecord(src, dest);
+			this->adPanel->endCapture(src, dest, r);
 		}
 	}
 	w->inputRelease(window::mouse);
-	w->invalidate();
+	//w->invalidate();
 }
 
 void ad::mousemove(int x, int y, unsigned int state){
@@ -160,8 +163,10 @@ void ad::mousemove(int x, int y, unsigned int state){
 	if (w->inputIsCaptured(window::mouse)) {
 		RECT r;
 		GetClientRect(w->getHWND(), &r);
+		ctrl.draw(w->getHWND());
 		ctrl.update(x, y, (GetKeyState(VK_SPACE) & 0x80) > 0, r);
-		w->invalidate();
+		ctrl.draw(w->getHWND());
+		//w->invalidate();
 	}
 }
 
@@ -169,9 +174,9 @@ void ad::paint(paint_param_t& paintParam, RECT const& rect) {
 	window_ptr w = this->getWindow();
 	mode::paint(paintParam, rect);
 	if (w->inputIsCaptured(window::mouse)) {
-		RECT rt;
-		ctrl.getRect(rt);
-		FrameRect(paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject(WHITE_BRUSH));
+		//RECT rt;
+		//ctrl.getRect(rt);
+		//FrameRect(paintParam.dcb.dc, &rt, (HBRUSH)GetStockObject(WHITE_BRUSH));
 	}
 }
 

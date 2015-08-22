@@ -146,8 +146,8 @@ void bridge::proxy() {
 						//
 						COORD	sz = this->consoleSize;
 						//
-						SHORT cx = min(sz.X, rsize.X) - 1;
-						SHORT cy = min(sz.Y, rsize.Y);
+						SHORT cx = std::min(sz.X, rsize.X) - 1;
+						SHORT cy = std::min(sz.Y, rsize.Y);
 						SMALL_RECT src = { 0, 0, cx, 0 };
 						COORD	lt = { 0 };
 						//

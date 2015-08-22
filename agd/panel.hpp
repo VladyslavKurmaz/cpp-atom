@@ -34,7 +34,9 @@ public:
 	///
 	void clear();
 	//
-	void addRecord( atom::string_t const& s, atom::string_t const& d );
+	void beginCapture();
+	//
+	void endCapture(atom::string_t const& s, atom::string_t const& d, RECT const& rect);
 	///
 	///
 	void onPaint( HWND hWnd );
@@ -47,13 +49,9 @@ public:
 	///
 	bool isLocked() const;
 	///
-	void setADState(bool const a) {
-		this->adActive = a;
-	};
+	void setADState(bool const a);
 	///
-	void setADVisible(bool const v) {
-		this->adVisible = v;
-	};
+	void setADVisible(bool const v);
 
 protected:
 	LOGGER_ACCESSOR( panel2logger )
@@ -79,6 +77,11 @@ private:
 	///
 	atom::wctrlToolbar
 		toolbar;
+	///
+	HWND
+		gloss;
+	HGDIOBJ
+		glossFont;
 	///
 	panel(logger_ptr l, pref_ptr p, ad_ptr a, langs_ptr lg);
 };

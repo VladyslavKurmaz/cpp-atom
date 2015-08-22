@@ -452,7 +452,7 @@ void window::onKey(HWND hWnd, UINT vk, BOOL down, int repeat, UINT flags) {
 
 	//this->getLogger() << vk << ((down)?(" down"):(" up")) << std::endl;
 	this->currentMode->key(key);
-	this->invalidate();
+	//this->invalidate();
 }
 
 void window::onChar(HWND hWnd, TCHAR ch, int cRepeat) {
@@ -527,7 +527,7 @@ void window::onTimer(HWND hWnd, UINT id){
 void window::onCommand(int id, HWND hwndCtl, UINT codeNotify) {
 	static COLORREF ccs[16] = { 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF };
 	CHOOSECOLOR cc = { 0 };
-	if (!currentMode->command(id)) {
+	if (!hwndCtl && !currentMode->command(id)) {
 		unsigned int alpha = this->currentMode->getAlpha();
 		alignment_t::type aligment = 0;
 		unsigned int width = 0;

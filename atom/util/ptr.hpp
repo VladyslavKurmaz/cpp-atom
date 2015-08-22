@@ -26,20 +26,28 @@
 
 namespace atom {
 	
-	class shared_dc : public boost::shared_ptr< void >
+	class shared_dc : public boost::shared_ptr < void >
 	{
 	public:
 		///
 		shared_dc() : shared_ptr() {}
 		///
-		shared_dc( HDC dc ) : shared_ptr( dc, release_dc ) {}
+		shared_dc(HDC dc) : shared_ptr(dc, delete_dc) {}
+		///
+		shared_dc(HWND wnd) : shared_ptr(GetDC(wnd), boost::bind(&shared_dc::release_dc, _1, wnd)) {}
+		///
+		shared_dc(HWND wnd, int) : shared_ptr(GetWindowDC(wnd), boost::bind(&shared_dc::release_dc, _1, wnd)) {}
 		///
 		operator HDC() {
-			return reinterpret_cast< HDC >( this->get() );
+			return reinterpret_cast<HDC>(this->get());
 		}
 		///
-		static void release_dc( HDC dc ) {
-			if ( dc != 0 ) DeleteDC( dc );
+		static void delete_dc(HDC dc) {
+			if (dc != 0) DeleteDC(dc);
+		}
+		///
+		static void release_dc(HDC dc, HWND wnd) {
+			if (dc != 0) ReleaseDC(wnd, dc);
 		}
 	};
 

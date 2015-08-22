@@ -13,7 +13,8 @@
 + help dialog
 + mode mode selection from system menu to the popup menu + hotkeys
 
-- oauth2 facebook/twitter
+- hide app console at all
+- oauth2 facebook/twitter/etc.
 - save preferences to json and read it at startup
 - check if new version is available, call php script on startup to check number of users, block startup from RU region
 - template class which allows to create shared ptr to the subset of fields
@@ -33,8 +34,11 @@
 + add toolbar (languages, toogled, delete, picture)
 + set TESSDATA_PREFIX environment variable, if it doesn't
 + show translation direction at panel caption
++ static window with translation
++ draw selection on Desktop with XOR
 
-- draw selection on Desktop with XOR
+- highlight selection, like snipping tool
+- Consolas Bold, font to generate languages' 2-letters code
 - flags for different languages
 - share image via facebook/twitter
 - install\uninstall languages
@@ -46,6 +50,8 @@
 - save last selected region and use it during translation on hotkey (subtitles)
 - add more than one translation sources
 - edit recognized text and new translation loop
+- shortcut doesn't display at netbook
+
 
 :atlas
 - dx\ogl init, render loop

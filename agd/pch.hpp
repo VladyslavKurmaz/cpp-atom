@@ -45,6 +45,7 @@
 
 
 #undef max
+#undef min
 
 
 

@@ -15,7 +15,10 @@ panel::panel(logger_ptr l, pref_ptr p, ad_ptr a, langs_ptr lg) :
 		, adVisible(false)
 		, imageList()
 		, listView()
-		, toolbar() {
+		, toolbar()
+		, gloss(NULL)
+		, glossFont(GetStockObject(DEFAULT_GUI_FONT))
+{
 		//
 		atom::mount<panel2logger>( this, l );
 		atom::mount<panel2pref>(this, p);
@@ -141,19 +144,41 @@ bool panel::init( HWND hParent ) {
 		//
 		this->onSize( this->getHWND(), 0, lvrt.right, lvrt.bottom );
 		//
+		this->gloss = CreateWindowEx(WS_EX_TOPMOST, _T("STATIC"), NULL, WS_OVERLAPPED | WS_BORDER | SS_EDITCONTROL, 0, 0, 1, 1, hParent, NULL, NULL, NULL);
+		SendMessage(this->gloss, WM_SETFONT, (WPARAM)this->glossFont, TRUE);
+		DWORD err = GetLastError();
+		SetWindowLongPtr(this->gloss, GWL_STYLE, GetWindowLongPtr(this->gloss, GWL_STYLE) & ~WS_CAPTION);
+		SetWindowPos(this->gloss, 0, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 		return true;
 	}
 	return false;
 }
 
 void panel::clear() {
+	DestroyWindow(this->gloss); this->gloss = NULL;
 	base_node_t::clear();
 }
 
-void panel::addRecord( atom::string_t const& s, atom::string_t const& d ) {
+void panel::beginCapture(){
+	ShowWindow(this->gloss, SW_HIDE);
+}
+
+void panel::endCapture(atom::string_t const& s, atom::string_t const& d, RECT const& rect){
 	int const icnt = 0;//this->listView.getItemCount();
-	this->listView.insertItem( icnt, 0, s );
-	this->listView.setItem( icnt, 1, d );
+	this->listView.insertItem(icnt, 0, s);
+	this->listView.setItem(icnt, 1, d);
+	//
+	SIZE textSize;
+	atom::shared_dc dc(this->gloss);
+	HGDIOBJ prefFont = SelectObject(dc, this->glossFont);
+	{
+		GetTextExtentPoint32(dc, d.c_str(), d.length(), &textSize);
+	}
+	SelectObject(dc, prefFont);
+	//ReleaseDC(hStatic, dc);
+	MoveWindow(this->gloss, std::max(rect.left, rect.right), std::max(rect.top, rect.bottom), textSize.cx, textSize.cy, TRUE);
+	SetWindowText(this->gloss, d.c_str());
+	ShowWindow(this->gloss, SW_SHOW);
 }
 
 void panel::onPaint( HWND hWnd ) {
@@ -256,6 +281,15 @@ void  panel::onCommand( int id, HWND hwndCtl, UINT codeNotify ) {
 bool panel::isLocked() const {
 	return this->toolbar.isBottonChecked(AD_PANEL_TB_PIN);
 }
+
+void panel::setADState(bool const a) {
+	this->adActive = a;
+};
+///
+void panel::setADVisible(bool const v) {
+	this->adVisible = v;
+	ShowWindow(this->gloss, SW_HIDE);
+};
 
 void panel::popupLangMenu( int const id ) {
 	langspair_t langs = this->getLangs()->getPair();

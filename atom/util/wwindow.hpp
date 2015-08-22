@@ -67,8 +67,17 @@ namespace atom {
 			checkPt( this->e, r );
 		}
 		//
-		void getRect( RECT& r ) {
-			SetRect( &r, min( this->s.x,this->e.x), min(this->s.y,this->e.y), max(this->s.x,this->e.x), max(this->s.y,this->e.y) );
+		void getRect(RECT& r) {
+			SetRect(&r, min(this->s.x, this->e.x), min(this->s.y, this->e.y), max(this->s.x, this->e.x), max(this->s.y, this->e.y));
+		}
+		//
+		void draw(HWND wnd) {
+			RECT r;
+			this->getRect(r);
+			HDC dc = GetDC(wnd);
+			SetTextColor(dc, RGB(128,128,128));
+			DrawFocusRect(dc, &r);
+			ReleaseDC(wnd, dc);
 		}
 	protected:
 		//
