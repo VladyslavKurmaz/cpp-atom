@@ -10,6 +10,10 @@
 + output component caption before script execution
 + skip empty stages
 + clone/pull/status git repository
++ add {id} variable 
+
+- Tab autocomplete
+- address component with path bmc/hrcm
 - platform command
 
 - run command to start putty for example

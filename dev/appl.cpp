@@ -159,7 +159,13 @@ namespace dev {
 	void appl::printError(atom::po::options_description_t const& desc, std::exception& exc) {
 		std::stringstream ss;
 		desc.print(ss);
-		*(this->getLogger()) << boost::lexical_cast<dev::string_t>(ss.str()) << std::endl;
+		std::string s(exc.what());
+
+		*(this->getLogger()) <<
+			boost::lexical_cast<dev::string_t>(s) <<
+			std::endl <<
+			boost::lexical_cast<dev::string_t>(ss.str()) << 
+			std::endl;
 	}
 
 	bool appl::processCommand(std::ostream& os) {
